@@ -15,6 +15,13 @@
       "when": 1734110049503,
       "tag": "0001_bitter_wind_dancer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1734111252459,
+      "tag": "0002_polite_jamie_braddock",
+      "breakpoints": true
     }
   ]
 }
