@@ -10,8 +10,8 @@ export function isValidSolanaAddress(address: string): boolean {
   try {
     new PublicKey(address);
     return true;
-  } catch (error) {
-    console.error(error);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_error) {
     return false;
   }
 }

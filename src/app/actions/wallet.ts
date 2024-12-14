@@ -9,4 +9,5 @@ export async function createWallet(address: string) {
     throw new Error("Invalid Solana address");
   }
   await db.insert(walletTable).values({ address });
+  return "Wallet added successfully";
 }
