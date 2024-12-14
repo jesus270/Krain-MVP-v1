@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Red_Hat_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import Footer from "@/components/Footer";
 
 const redHatMono = Red_Hat_Mono({
   variable: "--font-red-hat-mono",
@@ -28,8 +29,11 @@ export default function RootLayout({
       <body
         className={`${redHatMono.variable} ${manrope.variable} antialiased`}
       >
-        {children}
-        <Toaster richColors />
+        <div className="flex flex-col min-h-screen min-w-screen overflow-hidden">
+          <div className="flex-grow">{children}</div>
+          <Toaster richColors />
+          <Footer />
+        </div>
       </body>
     </html>
   );

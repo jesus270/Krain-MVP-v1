@@ -40,6 +40,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - blocked (already blocked page)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|blocked).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|blocked|terms).*)",
   ],
 };

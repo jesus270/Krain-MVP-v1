@@ -55,7 +55,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col items-center h-screen w-screen p-4 max-w-md mx-auto">
+    <div className="flex flex-col items-center p-4 max-w-md mx-auto">
       <Image width={300} height={150} src="/logo.png" alt="logo" />
       <h1 className="text-4xl font-bold pb-4">$KRAIN Airdrop List</h1>
       <p className="text-muted-foreground pb-4 text-center">
