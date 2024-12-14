@@ -4,12 +4,17 @@ import { geolocation } from "@vercel/functions";
 export async function middleware(request: NextRequest) {
   const geo = geolocation(request);
 
-  // If the country is US, block access by redirecting
-  if (geo?.country === "US") {
+  // Add logging to debug geolocation data
+  console.log("Geolocation data:", geo);
+
+  // More robust check for US traffic
+  if (geo?.country === "US" || geo?.country === "USA") {
+    console.log("Blocking US traffic");
     return NextResponse.redirect(new URL("/blocked", request.url));
   }
 
-  // Allow the request to proceed if not from the US
+  // Log when allowing traffic through
+  console.log("Allowing traffic from:", geo?.country);
   return NextResponse.next();
 }
 
