@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
-import { createWallet } from "./actions/wallet";
+import { createWallet } from "@/actions/wallet";
 import { isValidSolanaAddress } from "@/lib/utils";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -39,18 +39,11 @@ export default function Home() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const result = await createWallet(values.walletAddress);
-      toast.success(result);
+      toast.success(result.message);
       form.reset();
     } catch (e) {
       const error = e as Error;
-      if (
-        error.message ===
-        'duplicate key value violates unique constraint "wallet_address_unique"'
-      ) {
-        toast.error("Wallet already exists");
-      } else {
-        toast.error(error.message);
-      }
+      toast.error(error.message);
     }
   }
 
