@@ -15,7 +15,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "$KRAIN Airdrop List",
+  title: "$KRAIN Airdrop",
   description: "Add your wallet to the $KRAIN airdrop list",
 };
 

@@ -94,7 +94,7 @@ export default function CreateWalletForm({
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmitCreateWallet)}
-                className="flex flex-col gap-4"
+                className="flex flex-col gap-2"
               >
                 <div className="flex flex-col gap-2">
                   <FormField
