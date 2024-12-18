@@ -1,0 +1,19 @@
+{
+  "name": "config",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "eslint.config.js",
+    "tsconfig.json"
+  ],
+  "scripts": {
+    "clean": "rm -rf .turbo && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.0",
+    "typescript": "^5"
+  }
+}
