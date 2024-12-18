@@ -37,7 +37,7 @@ export const referralTable = pgTable("referral", {
     .unique(),
 });
 
-export type ReferralCode = typeof referralTable.$inferSelect;
+export type Referral = typeof referralTable.$inferSelect;
 
 export const referralRelations = relations(referralTable, ({ one }) => ({
   referredByWallet: one(walletTable, {
