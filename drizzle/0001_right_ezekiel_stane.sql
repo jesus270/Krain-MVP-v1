@@ -1,0 +1,1 @@
+ALTER TABLE "wallet" ALTER COLUMN "createdAt" SET NOT NULL;
