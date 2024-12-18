@@ -1,11 +1,11 @@
 {
-  "id": "832b764d-9a63-4420-82a6-cc17133af67f",
-  "prevId": "5c8a44c1-382c-448c-9c1b-ef198ad6cfd9",
+  "id": "d3e05504-48fa-4959-b232-86ad2ab5d809",
+  "prevId": "7605181e-79a8-40f7-9000-40559933b7d6",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.wallets": {
-      "name": "wallets",
+    "public.referral": {
+      "name": "referral",
       "schema": "",
       "columns": {
         "id": {
@@ -14,24 +14,84 @@
           "primaryKey": true,
           "notNull": true
         },
-        "address": {
-          "name": "address",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
+        "createdAt": {
+          "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "referredByCode": {
+          "name": "referredByCode",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "referredWalletAddress": {
+          "name": "referredWalletAddress",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "referral_referredWalletAddress_unique": {
+          "name": "referral_referredWalletAddress_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "referredWalletAddress"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.wallet": {
+      "name": "wallet",
+      "schema": "",
+      "columns": {
+        "address": {
+          "name": "address",
+          "type": "varchar(255)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "referralCode": {
+          "name": "referralCode",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "wallet_address_unique": {
+          "name": "wallet_address_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "address"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
