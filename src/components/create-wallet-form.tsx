@@ -78,7 +78,7 @@ export default function CreateWalletForm({
   }
 
   return (
-    <div className="flex flex-col items-center p-4 max-w-md mx-auto">
+    <div className="flex flex-col items-center p-4 max-w-md mx-auto flex-grow">
       <Image width={300} height={150} src="/logo.png" alt="logo" />
       <div className="flex flex-col gap-4 w-full items-center">
         <h2 className="text-2xl font-bold">$KRAIN Airdrop List</h2>
