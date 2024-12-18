@@ -122,7 +122,9 @@ export default function CreateWalletForm({
           <CardContent className="flex flex-col gap-2">
             <Input
               value={
-                yourReferralCode ? `https://krain.ai/${yourReferralCode}` : ""
+                yourReferralCode
+                  ? `https://airdrop.krain.ai/${yourReferralCode}`
+                  : ""
               }
               placeholder="Add Wallet Address Above"
               readOnly
