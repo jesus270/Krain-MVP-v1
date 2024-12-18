@@ -90,7 +90,7 @@ export async function handleSubmitWallet({
   address,
   referredByCode,
 }: HandleSubmitWalletRequest): Promise<HandleSubmitWalletResponse> {
-  console.log("handleSubmitWallet received", { address, referredByCode });
+  console.info("handleSubmitWallet received", { address, referredByCode });
   try {
     if (!isValidSolanaAddress(address)) {
       return {
@@ -99,11 +99,11 @@ export async function handleSubmitWallet({
         data: undefined,
       };
     }
-    console.log("handleSubmitWallet isValidSolanaAddress true");
+    console.info("handleSubmitWallet isValidSolanaAddress true");
 
     const existingWallet = await getWallet({ address });
     if (existingWallet) {
-      console.log("handleSubmitWallet existingWallet", existingWallet);
+      console.info("handleSubmitWallet existingWallet", existingWallet);
 
       if (existingWallet?.referredBy?.referredByCode) {
         const response: HandleSubmitWalletResponse = {
@@ -111,7 +111,7 @@ export async function handleSubmitWallet({
           message: "Wallet already exists and Referral already exists",
           data: existingWallet,
         };
-        console.log("handleSubmitWallet response", response);
+        console.info("handleSubmitWallet response", response);
         return response;
       } else if (
         referredByCode &&
@@ -128,10 +128,10 @@ export async function handleSubmitWallet({
             message: "Referral code not found",
             data: undefined,
           };
-          console.log("handleSubmitWallet response", response);
+          console.info("handleSubmitWallet response", response);
           return response;
         } else {
-          console.log(
+          console.info(
             "handleSubmitWallet existingReferredByWallet",
             existingReferredByWallet
           );
@@ -142,7 +142,7 @@ export async function handleSubmitWallet({
               message: "Referral code was created after the wallet",
               data: existingWallet,
             };
-            console.log("handleSubmitWallet response", response);
+            console.info("handleSubmitWallet response", response);
             return response;
           } else {
             const updatedWallet = await updateWalletReferredByCode(
@@ -154,7 +154,7 @@ export async function handleSubmitWallet({
               message: "Wallet referred by code updated successfully",
               data: updatedWallet,
             };
-            console.log("handleSubmitWallet response", response);
+            console.info("handleSubmitWallet response", response);
             return response;
           }
         }
@@ -164,7 +164,7 @@ export async function handleSubmitWallet({
           message: "Wallet already exists",
           data: existingWallet,
         };
-        console.log("handleSubmitWallet response", response);
+        console.info("handleSubmitWallet response", response);
         return response;
       }
     } else {
@@ -179,7 +179,7 @@ export async function handleSubmitWallet({
             message: "Referral code not found",
             data: undefined,
           };
-          console.log("handleSubmitWallet response", response);
+          console.info("handleSubmitWallet response", response);
           return response;
         }
         await createReferral({
@@ -193,7 +193,7 @@ export async function handleSubmitWallet({
         message: "Wallet added successfully",
         data: newWalletWithReferrals,
       };
-      console.log("handleSubmitWallet response", response);
+      console.info("handleSubmitWallet response", response);
       return response;
     }
   } catch (e) {
@@ -204,7 +204,7 @@ export async function handleSubmitWallet({
       message: error.message,
       data: undefined,
     };
-    console.log("handleSubmitWallet response", response);
+    console.info("handleSubmitWallet response", response);
     return response;
   }
 }

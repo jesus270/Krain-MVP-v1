@@ -11,11 +11,11 @@ export async function middleware(request: NextRequest) {
     }
 
     if (geo.country === "US") {
-      console.log("Blocking US traffic from:", geo.country);
+      console.info("Blocking US traffic from:", geo.country);
       return NextResponse.redirect(new URL("/blocked", request.url));
     }
 
-    console.log("Allowing traffic from:", geo.country);
+    console.info("Allowing traffic from:", geo.country);
     return NextResponse.next();
   } catch (error) {
     console.error("Middleware error:", error);

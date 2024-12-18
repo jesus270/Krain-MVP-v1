@@ -8,7 +8,6 @@ export default async function Home({
   const resolvedParams = await params;
 
   const referredByCode = resolvedParams.referredByCode?.[0];
-  console.log("Home referredByCode", referredByCode);
 
   return <CreateWalletForm referredByCode={referredByCode} />;
 }
