@@ -43,6 +43,7 @@ export default function CreateWalletForm({
   referredByCode?: string;
 }) {
   const [yourReferralCode, setYourReferralCode] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,6 +57,7 @@ export default function CreateWalletForm({
     walletAddress,
   }: z.infer<typeof formSchema>) {
     try {
+      setIsLoading(true);
       const { data, message, status } = await handleSubmitWallet({
         address: walletAddress,
         referredByCode,
@@ -70,6 +72,8 @@ export default function CreateWalletForm({
     } catch (e) {
       const error = e as Error;
       toast.error(error.message);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -106,7 +110,9 @@ export default function CreateWalletForm({
                     )}
                   />
                 </div>
-                <Button type="submit">Add</Button>
+                <Button type="submit" disabled={isLoading}>
+                  Add
+                </Button>
               </form>
             </Form>
           </CardContent>
