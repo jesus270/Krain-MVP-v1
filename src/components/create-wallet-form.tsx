@@ -133,7 +133,7 @@ export default function CreateWalletForm({
               onClick={() => {
                 if (yourReferralCode) {
                   navigator.clipboard.writeText(
-                    `https://krain.ai/${yourReferralCode}`
+                    `https://airdrop.krain.ai/${yourReferralCode}`
                   );
                   toast.success("Referral link copied to clipboard");
                 }
