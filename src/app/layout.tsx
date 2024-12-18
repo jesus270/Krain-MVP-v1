@@ -30,7 +30,7 @@ export default function RootLayout({
         className={`${redHatMono.variable} ${manrope.variable} antialiased`}
       >
         <div className="flex flex-col min-h-screen min-w-screen overflow-hidden">
-          <div className="flex-grow">{children}</div>
+          {children}
           <Toaster richColors />
           <Footer />
         </div>
