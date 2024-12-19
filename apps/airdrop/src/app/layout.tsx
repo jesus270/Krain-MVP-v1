@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Red_Hat_Mono, Manrope } from "next/font/google";
-import "./globals.css";
+import "ui/globals.css";
 import { Toaster } from "ui/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 import Footer from "@/components/Footer";
