@@ -5,6 +5,7 @@ import { Toaster } from "ui/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 import Footer from "@/components/Footer";
 import LeftNavBar from "@/components/left-nav-bar";
+import { SidebarInset, SidebarProvider } from "ui/components/ui/sidebar";
 
 const redHatMono = Red_Hat_Mono({
   variable: "--font-red-hat-mono",
@@ -37,12 +38,14 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <div className="flex flex-col min-h-screen min-w-screen overflow-hidden">
+          <SidebarProvider>
             <LeftNavBar />
-            {children}
-            <Toaster richColors />
-            <Footer />
-          </div>
+            <SidebarInset>
+              {children}
+              <Toaster richColors />
+              <Footer />
+            </SidebarInset>
+          </SidebarProvider>
         </ThemeProvider>
       </body>
     </html>
