@@ -5,7 +5,8 @@
     "paths": {
       "@/*": ["./*"],
       "utils": ["../packages/utils/src"],
-      "database": ["../packages/database/src"]
+      "database": ["../packages/database/src"],
+      "ui": ["@/components/ui"]
     }
   },
   "include": ["."],

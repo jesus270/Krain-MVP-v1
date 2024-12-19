@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Krain Monorepo
+
+This monorepo contains all the applications and shared packages for the Krain project. It uses [pnpm](https://pnpm.io/) for package management and [Turborepo](https://turbo.build/) for build system orchestration.
+
+## Repository Structure
+
+```
+krain/
+├── apps/               # Application projects
+│   └── airdrop/       # Airdrop application
+├── packages/          # Shared packages
+│   ├── config/       # Shared configuration
+│   ├── database/     # Database utilities and models
+│   ├── ui/          # Shared UI components (shadcn/ui)
+│   └── utils/       # Common utilities
+```
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or later recommended)
+- [pnpm](https://pnpm.io/) (v8 or later)
 
 ## Getting Started
 
-First, run the development server:
+1. Install dependencies:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+   ```bash
+   pnpm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Run development servers:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   ```bash
+   # Run all applications
+   pnpm dev
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   # Run a specific application
+   pnpm dev --filter airdrop
+   ```
 
-## Learn More
+3. Build:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   # Build all packages and applications
+   pnpm build
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   # Build a specific package or application
+   pnpm build --filter <package-name>
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Development Workflow
 
-## Deploy on Vercel
+### Package Management
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Add a dependency to a specific package/app:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+  ```bash
+  pnpm add <package> --filter <workspace-name>
+  ```
+
+- Add a dependency to all packages:
+  ```bash
+  pnpm add -w <package>
+  ```
+
+### Using Shared Packages
+
+Packages in the `packages/` directory are automatically available to all applications. Import them using their package name as defined in their respective `package.json` files.
+
+### UI Components with shadcn/ui
+
+We use [shadcn/ui](https://ui.shadcn.com/) for our component library, which is maintained in the `packages/ui` directory. These components are available to all applications in the monorepo.
+
+#### Adding New Components
+
+To add a new shadcn component to the shared UI package:
+
+1. Navigate to the UI package directory:
+
+   ```bash
+   cd packages/ui
+   ```
+
+2. Add the component using npx (since we're using pnpm):
+
+   ```bash
+   pnpm dlx shadcn@latest add <component-name>
+   ```
+
+   For example: `pnpm dlx shadcn@latest add button`
+
+   Note: Make sure you're in the `packages/ui` directory when running this command, as it needs to access the local `components.json` configuration.
+
+3. The component will be added to `packages/ui/components/` and can be imported in any application:
+   ```typescript
+   import { Button } from "ui/components/ui/button";
+   ```
+
+#### Customizing Components
+
+- All shadcn components are customizable through the `components.json` file in the UI package
+- Tailwind CSS configurations are shared across the monorepo
+- Component styles can be modified in their respective files in `packages/ui/components/ui`
+
+### Turborepo Features
+
+This monorepo uses Turborepo for efficient build caching and task running:
+
+- Cached builds for faster development
+- Parallel task execution
+- Dependency-aware task scheduling
+- Shared configuration via `turbo.json`
+
+## Available Scripts
+
+- `pnpm dev` - Start development servers
+- `pnpm build` - Build all packages and applications
+- `pnpm lint` - Run linting across the monorepo
+- `pnpm test` - Run tests across the monorepo
+- `pnpm clean` - Clean build artifacts
+
+## Contributing
+
+1. Create a new branch for your feature/fix
+2. Make your changes
+3. Run tests and linting
+4. Submit a pull request

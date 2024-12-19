@@ -2,16 +2,28 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Button } from "ui";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "ui";
-import { Input } from "ui";
+import { Button } from "ui/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "ui/components/ui/form";
+import { Input } from "ui/components/ui/input";
 import { z } from "zod";
 import { handleSubmitWallet } from "@/actions/wallet";
 import { isValidSolanaAddress } from "utils";
 import { toast } from "sonner";
 import Image from "next/image";
 import { useState } from "react";
-import { Card, CardContent, CardTitle, CardHeader, CardDescription } from "ui";
+import {
+  Card,
+  CardContent,
+  CardTitle,
+  CardHeader,
+  CardDescription,
+} from "ui/components/ui/card";
 
 const formSchema = z.object({
   walletAddress: z.string().refine(
