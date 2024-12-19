@@ -3,7 +3,7 @@
 import { db, Referral, Wallet, walletTable } from "database";
 import { isValidSolanaAddress } from "utils";
 import { eq } from "drizzle-orm";
-import { createReferral } from "./referral";
+import { createReferral, getReferralsCount } from "./referral";
 
 export const createWallet = async ({ address }: { address: string }) => {
   if (!isValidSolanaAddress(address)) {
@@ -17,38 +17,70 @@ export const createWallet = async ({ address }: { address: string }) => {
   return wallet;
 };
 
-export interface WalletWithReferrals extends Wallet {
-  referredBy: Referral;
-  referrals: Referral[];
-}
-
-export const getWallet = async ({
-  address,
-  referralCode,
-}: {
+export interface GetWalletOptions {
   address?: string;
   referralCode?: string;
-}): Promise<WalletWithReferrals | undefined> => {
+  with?: {
+    referredBy?: boolean;
+    referrals?: boolean;
+    referralsCount?: boolean;
+  };
+}
+
+type WalletWithIncludes<T extends GetWalletOptions["with"]> = Omit<
+  Wallet,
+  "referralsCount"
+> & {
+  referredBy: T extends { referredBy: true } ? Referral : undefined;
+  referrals: T extends { referrals: true } ? Referral[] : undefined;
+} & (T extends { referralsCount: true }
+    ? { referralsCount: number }
+    : { referralsCount?: never });
+
+export const getWallet = async <T extends GetWalletOptions["with"]>({
+  address,
+  referralCode,
+  with: includes,
+}: Omit<GetWalletOptions, "with"> & { with?: T }): Promise<
+  WalletWithIncludes<T> | undefined
+> => {
   const where = address
     ? eq(walletTable.address, address)
     : referralCode
       ? eq(walletTable.referralCode, referralCode)
       : undefined;
+
   const wallet = await db.query.walletTable.findFirst({
     where,
     with: {
-      referredBy: true,
-      referrals: true,
+      ...(includes?.referredBy ? { referredBy: true } : {}),
+      ...(includes?.referrals ? { referrals: true } : {}),
     },
   });
-  return wallet;
+
+  if (!wallet) {
+    return undefined;
+  }
+
+  const result = {
+    ...wallet,
+    referredBy: includes?.referredBy ? wallet.referredBy : undefined,
+    referrals: includes?.referrals ? wallet.referrals : undefined,
+  } as unknown as WalletWithIncludes<T>;
+
+  if (includes?.referralsCount) {
+    const referralsCount = await getReferralsCount(wallet.referralCode);
+    result.referralsCount = referralsCount;
+  }
+
+  return result;
 };
 
 export const updateWalletReferredByCode = async (
   address: string,
   referredByCode: string
-): Promise<WalletWithReferrals | undefined> => {
-  const wallet = await getWallet({ address });
+): Promise<WalletWithIncludes<{ referredBy: true }> | undefined> => {
+  const wallet = await getWallet({ address, with: { referredBy: true } });
   if (!wallet) {
     throw new Error("Wallet not found");
   }
@@ -70,8 +102,11 @@ export const updateWalletReferredByCode = async (
     referredWalletAddress: address,
   });
 
-  const walletWithReferrals = await getWallet({ address });
-  return walletWithReferrals;
+  const updatedWallet = await getWallet({
+    address,
+    with: { referredBy: true },
+  });
+  return updatedWallet;
 };
 
 export interface HandleSubmitWalletRequest {
@@ -82,7 +117,7 @@ export interface HandleSubmitWalletRequest {
 export interface HandleSubmitWalletResponse {
   status: "success" | "error";
   message: string;
-  data: WalletWithReferrals | undefined;
+  data: WalletWithIncludes<{ referredBy: true }> | undefined;
 }
 
 export async function handleSubmitWallet({
@@ -100,7 +135,10 @@ export async function handleSubmitWallet({
     }
     console.info("handleSubmitWallet isValidSolanaAddress true");
 
-    const existingWallet = await getWallet({ address });
+    const existingWallet = await getWallet({
+      address,
+      with: { referredBy: true },
+    });
     if (existingWallet) {
       console.info("handleSubmitWallet existingWallet", existingWallet);
 
@@ -186,11 +224,14 @@ export async function handleSubmitWallet({
           referredWalletAddress: address,
         });
       }
-      const newWalletWithReferrals = await getWallet({ address });
+      const newWallet = await getWallet({
+        address,
+        with: { referredBy: true },
+      });
       const response: HandleSubmitWalletResponse = {
         status: "success",
         message: "Wallet added successfully",
-        data: newWalletWithReferrals,
+        data: newWallet,
       };
       console.info("handleSubmitWallet response", response);
       return response;

@@ -3,9 +3,10 @@ import { Red_Hat_Mono, Manrope } from "next/font/google";
 import "ui/globals.css";
 import { Toaster } from "ui/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
-import Footer from "@/components/Footer";
+import Footer from "@/components/footer";
 import LeftNavBar from "@/components/left-nav-bar";
 import { SidebarInset, SidebarProvider } from "ui/components/ui/sidebar";
+import Header from "@/components/header";
 
 const redHatMono = Red_Hat_Mono({
   variable: "--font-red-hat-mono",
@@ -41,8 +42,11 @@ export default function RootLayout({
           <SidebarProvider>
             <LeftNavBar />
             <SidebarInset>
-              {children}
-              <Toaster richColors />
+              <Header />
+              <div className="flex flex-grow flex-col p-4">
+                {children}
+                <Toaster richColors />
+              </div>
               <Footer />
             </SidebarInset>
           </SidebarProvider>

@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, PieChart, User } from "lucide-react";
+import { LayoutDashboard, PieChart, Rocket, User } from "lucide-react";
 
 import {
   Sidebar,
@@ -14,20 +14,25 @@ import {
 
 const routes = [
   {
+    name: "Airdrop",
+    url: "/",
+    icon: Rocket,
+  },
+  {
     name: "Dashboard",
     url: "/dashboard",
     icon: LayoutDashboard,
   },
-  {
-    name: "Tasks",
-    url: "/tasks",
-    icon: PieChart,
-  },
-  {
-    name: "Profile",
-    url: "/profile",
-    icon: User,
-  },
+  // {
+  //   name: "Tasks",
+  //   url: "/tasks",
+  //   icon: PieChart,
+  // },
+  // {
+  //   name: "Profile",
+  //   url: "/profile",
+  //   icon: User,
+  // },
 ];
 
 export default function LeftNavBar() {
