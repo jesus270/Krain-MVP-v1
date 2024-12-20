@@ -1,14 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["./*"],
-      "utils": ["../packages/utils/src"],
-      "database": ["../packages/database/src"],
-      "ui": ["@/components/ui"]
+      "@/*": ["./*"]
     }
   },
-  "include": ["."],
-  "exclude": ["dist", "build", "node_modules"]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

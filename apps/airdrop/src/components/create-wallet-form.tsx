@@ -2,15 +2,15 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Button } from "ui/components/ui/button";
+import { Button } from "ui/src/components/ui/button";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "ui/components/ui/form";
-import { Input } from "ui/components/ui/input";
+} from "ui/src/components/ui/form";
+import { Input } from "ui/src/components/ui/input";
 import { z } from "zod";
 import { handleSubmitWallet } from "@/actions/wallet";
 import { isValidSolanaAddress } from "utils";
@@ -23,7 +23,7 @@ import {
   CardTitle,
   CardHeader,
   CardDescription,
-} from "ui/components/ui/card";
+} from "ui/src/components/ui/card";
 
 const formSchema = z.object({
   walletAddress: z.string().refine(
