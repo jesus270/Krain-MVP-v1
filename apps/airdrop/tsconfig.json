@@ -20,6 +20,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
+      "@/lib/utils": ["../../packages/ui/src/lib/utils"],
       "utils": ["../../packages/utils/src"],
       "ui": ["../../packages/ui"],
       "database": ["../../packages/database/src"]
