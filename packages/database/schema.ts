@@ -1,5 +1,5 @@
 import { pgTable, varchar, timestamp, serial } from "drizzle-orm/pg-core";
-import { generateReferralCode } from "utils";
+import { generateReferralCode } from "@repo/utils";
 import { relations } from "drizzle-orm";
 
 export const walletTable = pgTable("wallet", {

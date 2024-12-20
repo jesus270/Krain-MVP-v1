@@ -2,18 +2,18 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Button } from "ui/src/components/ui/button";
+import { Button } from "@repo/ui/components/ui/button";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "ui/src/components/ui/form";
-import { Input } from "ui/src/components/ui/input";
+} from "@repo/ui/components/ui/form";
+import { Input } from "@repo/ui/components/ui/input";
 import { z } from "zod";
 import { handleSubmitWallet } from "@/actions/wallet";
-import { isValidSolanaAddress } from "utils";
+import { isValidSolanaAddress } from "@repo/utils";
 import { toast } from "sonner";
 import Image from "next/image";
 import { useState } from "react";
@@ -23,7 +23,7 @@ import {
   CardTitle,
   CardHeader,
   CardDescription,
-} from "ui/src/components/ui/card";
+} from "@repo/ui/components/ui/card";
 
 const formSchema = z.object({
   walletAddress: z.string().refine(
@@ -32,7 +32,7 @@ const formSchema = z.object({
     },
     {
       message: "Invalid Solana address",
-    }
+    },
   ),
   referredByCode: z.string().optional(),
 });
@@ -139,7 +139,7 @@ export default function CreateWalletForm({
               onClick={() => {
                 if (yourReferralCode) {
                   navigator.clipboard.writeText(
-                    `https://airdrop.krain.ai/${yourReferralCode}`
+                    `https://airdrop.krain.ai/${yourReferralCode}`,
                   );
                   toast.success("Referral link copied to clipboard");
                 }

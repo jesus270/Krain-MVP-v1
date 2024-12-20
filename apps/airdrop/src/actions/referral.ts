@@ -1,4 +1,4 @@
-import { db, referralTable } from "database";
+import { db, referralTable } from "@repo/database";
 import { count, eq } from "drizzle-orm";
 
 export async function createReferral({

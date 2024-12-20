@@ -1,14 +1,14 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { capitalizeEachWord } from "utils";
+import { capitalizeEachWord } from "@repo/utils";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbSeparator,
-} from "ui/components/ui/breadcrumb";
+} from "@repo/ui/components/ui/breadcrumb";
 import { Fragment } from "react";
 import Link from "next/link";
 export default function HeaderBreadcrumb() {
@@ -33,7 +33,7 @@ export default function HeaderBreadcrumb() {
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </Fragment>
-          )
+          ),
         )}
       </BreadcrumbList>
     </Breadcrumb>

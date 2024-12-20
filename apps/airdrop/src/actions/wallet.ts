@@ -1,7 +1,7 @@
 "use server";
 
-import { db, Referral, Wallet, walletTable } from "database";
-import { isValidSolanaAddress } from "utils";
+import { db, Referral, Wallet, walletTable } from "@repo/database";
+import { isValidSolanaAddress } from "@repo/utils";
 import { eq } from "drizzle-orm";
 import { createReferral, getReferralsCount } from "./referral";
 
@@ -78,7 +78,7 @@ export const getWallet = async <T extends GetWalletOptions["with"]>({
 
 export const updateWalletReferredByCode = async (
   address: string,
-  referredByCode: string
+  referredByCode: string,
 ): Promise<WalletWithIncludes<{ referredBy: true }> | undefined> => {
   const wallet = await getWallet({ address, with: { referredBy: true } });
   if (!wallet) {
@@ -170,7 +170,7 @@ export async function handleSubmitWallet({
         } else {
           console.info(
             "handleSubmitWallet existingReferredByWallet",
-            existingReferredByWallet
+            existingReferredByWallet,
           );
           // check if the referredByWallet was created after the existingWallet
           if (existingReferredByWallet.createdAt > existingWallet.createdAt) {
@@ -184,7 +184,7 @@ export async function handleSubmitWallet({
           } else {
             const updatedWallet = await updateWalletReferredByCode(
               address,
-              referredByCode
+              referredByCode,
             );
             const response: HandleSubmitWalletResponse = {
               status: "success",

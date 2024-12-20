@@ -1,10 +1,12 @@
 {
-  "name": "ui",
+  "name": "@repo/ui",
   "version": "0.0.0",
   "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "lint": "eslint .",
-    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.4",
@@ -17,7 +19,6 @@
     "@solana/web3.js": "^1.95.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "database": "workspace:*",
     "lucide-react": "^0.468.0",
     "next-themes": "^0.4.4",
     "react-hook-form": "^7.54.1",
@@ -26,11 +27,12 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "react": "^19.0.0",
-    "tsup": "^8.0.2",
     "typescript": "^5"
   },
   "peerDependencies": {
@@ -40,5 +42,16 @@
     "react-hook-form": "^7.54.1",
     "sonner": "^1.7.1",
     "tailwindcss": "^3.0.0"
+  },
+  "exports": {
+    "./globals.css": "./src/globals.css",
+    "./postcss.config": "./postcss.config.mjs",
+    "./tailwind.config": "./tailwind.config.ts",
+    "./lib/*": "./src/lib/*.ts",
+    "./hooks/*": [
+      "./src/hooks/*.ts",
+      "./src/hooks/*.tsx"
+    ],
+    "./components/*": "./src/components/*.tsx"
   }
 }

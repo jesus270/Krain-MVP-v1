@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, PieChart, Rocket, User } from "lucide-react";
+import { LayoutDashboard, Rocket } from "lucide-react";
 
 import {
   Sidebar,
@@ -10,7 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "ui/components/ui/sidebar";
+} from "@repo/ui/components/ui/sidebar";
 
 const routes = [
   {

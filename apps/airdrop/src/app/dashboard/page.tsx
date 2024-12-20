@@ -9,9 +9,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "ui/components/ui/card";
-import { Input } from "ui/components/ui/input";
-import { Button } from "ui/components/ui/button";
+} from "@repo/ui/components/ui/card";
+import { Input } from "@repo/ui/components/ui/input";
+import { Button } from "@repo/ui/components/ui/button";
 
 function SubmitButton({ isSubmitted }: { isSubmitted: boolean }) {
   const { pending } = useFormStatus();
@@ -60,7 +60,7 @@ export default function Dashboard() {
         };
       }
     },
-    { address: "", referralsCount: 0 }
+    { address: "", referralsCount: 0 },
   );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
