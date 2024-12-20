@@ -1,8 +1,7 @@
 "use client";
 
 import { getWallet } from "@/actions/wallet";
-import React, { useActionState } from "react";
-import { useFormStatus } from "react-dom";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -12,81 +11,72 @@ import {
 } from "@repo/ui/components/ui/card";
 import { Input } from "@repo/ui/components/ui/input";
 import { Button } from "@repo/ui/components/ui/button";
-import { formatNumber, useLocale } from "@repo/utils";
+import { formatNumber, useLocale, isValidSolanaAddress } from "@repo/utils";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@repo/ui/components/ui/form";
+import { toast } from "sonner";
 
-function SubmitButton({ isSubmitted }: { isSubmitted: boolean }) {
-  const { pending } = useFormStatus();
+const formSchema = z.object({
+  address: z.string().refine((value) => isValidSolanaAddress(value), {
+    message: "Invalid Solana address",
+  }),
+});
 
-  return (
-    <Button type="submit" disabled={pending || isSubmitted} className="w-full">
-      {pending ? "Checking..." : "Check Airdrop Status"}
-    </Button>
-  );
-}
-
-type State =
-  | {
-      address: string;
-      referralsCount: number;
-    }
-  | { error: string };
+type WalletState = {
+  address: string;
+  referralsCount: number;
+} | null;
 
 export default function Dashboard() {
-  const [isSubmitted, setIsSubmitted] = React.useState(false);
-  const [state, formAction] = useActionState<State, FormData>(
-    async (prevState: State, formData: FormData) => {
-      const address = formData.get("address") as string;
-
-      try {
-        if (!address) {
-          throw new Error("Please enter a wallet address");
-        }
-
-        const wallet = await getWallet({
-          address,
-          with: { referralsCount: true },
-        });
-
-        if (!wallet) {
-          throw new Error(`No wallet found for address: ${address}`);
-        }
-
-        return {
-          address,
-          referralsCount: wallet.referralsCount,
-        };
-      } catch (error) {
-        return {
-          error: error instanceof Error ? error.message : "An error occurred",
-        };
-      }
-    },
-    { address: "", referralsCount: 0 },
-  );
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    setIsSubmitted(true);
-    React.startTransition(() => {
-      formAction(formData);
-    });
-  };
-
-  const handleInputChange = () => {
-    setIsSubmitted(false);
-  };
-
-  const totalPoints =
-    state && !("error" in state) && state.referralsCount > 0
-      ? state.referralsCount * 1000 + 1000
-      : 0;
-
-  const referralsCount =
-    state && !("error" in state) ? state.referralsCount : 0;
-
+  const [isLoading, setIsLoading] = useState(false);
+  const [walletState, setWalletState] = useState<WalletState>(null);
+  const [submitted, setSubmitted] = useState(false);
   const locale = useLocale();
-  console.log(locale);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      address: "",
+    },
+  });
+
+  async function onSubmit({ address }: z.infer<typeof formSchema>) {
+    try {
+      setIsLoading(true);
+      const wallet = await getWallet({
+        address,
+        with: { referralsCount: true },
+      });
+      console.log("wallet", wallet);
+      if (!wallet) {
+        toast.error(`No wallet found for address: ${address}`);
+        return;
+      }
+
+      setWalletState({
+        address,
+        referralsCount: wallet.referralsCount,
+      });
+      setSubmitted(true);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const totalPoints = walletState?.referralsCount
+    ? walletState.referralsCount * 1000 + 1000
+    : 0;
+  const referralsCount = walletState?.referralsCount ?? 0;
 
   const formattedTotalPoints = formatNumber(totalPoints, locale);
   const formattedReferralsCount = formatNumber(referralsCount, locale);
@@ -102,31 +92,45 @@ export default function Dashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="w-full space-y-4">
-            <div>
-              <Input
-                id="address"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
                 name="address"
-                type="text"
-                required
-                placeholder="Enter your wallet address"
-                onChange={handleInputChange}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter your wallet address"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <SubmitButton isSubmitted={isSubmitted} />
-          </form>
+              <Button type="submit" disabled={isLoading} className="w-full">
+                {isLoading ? "Checking..." : "Check Airdrop Status"}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Airdrop Status</CardTitle>
+          <CardDescription>
+            More points verification and additions to the dashboard coming soon
+          </CardDescription>
         </CardHeader>
         <CardContent className="w-full max-w-md">
           <p>Referrals: {formattedReferralsCount}</p>
           <p>Points: {formattedTotalPoints}</p>
-          <p className="text-sm text-muted-foreground mt-4">
-            More points verification and additions to the dashboard coming soon
-          </p>
+          {submitted && Number(formattedReferralsCount) === 0 && (
+            <p className="text-sm text-destructive mt-4">
+              You have no referrals. Please refer friends to earn points.
+            </p>
+          )}
         </CardContent>
       </Card>
     </main>
