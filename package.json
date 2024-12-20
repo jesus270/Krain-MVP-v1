@@ -2,7 +2,7 @@
   "name": "krain",
   "private": true,
   "scripts": {
-    "build": "pnpm --filter './packages/*' build && pnpm --filter './apps/*' build",
+    "build": "turbo build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "clean": "turbo run clean",

@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Red_Hat_Mono, Manrope } from "next/font/google";
-import "ui/src/globals.css";
-import { Toaster } from "ui/src/components/ui/sonner";
+import "@repo/ui/globals.css";
+import { Toaster } from "@repo/ui/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
-import Footer from "@/components/Footer";
+import Footer from "@/components/footer";
+import LeftNavBar from "@/components/left-nav-bar";
+import { SidebarInset, SidebarProvider } from "@repo/ui/components/ui/sidebar";
+import Header from "@/components/header";
 
 const redHatMono = Red_Hat_Mono({
   variable: "--font-red-hat-mono",
@@ -36,11 +39,17 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <div className="flex flex-col min-h-screen min-w-screen overflow-hidden">
-            {children}
-            <Toaster richColors />
-            <Footer />
-          </div>
+          <SidebarProvider>
+            <LeftNavBar />
+            <SidebarInset>
+              <Header />
+              <div className="flex flex-grow flex-col p-4">
+                {children}
+                <Toaster richColors />
+              </div>
+              <Footer />
+            </SidebarInset>
+          </SidebarProvider>
         </ThemeProvider>
       </body>
     </html>

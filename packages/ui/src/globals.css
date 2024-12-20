@@ -24,6 +24,14 @@
     --card: 245 80% 24%;
     --ring: 242 53% 52%;
     --radius: 0.5rem;
+    --sidebar-background: 245 80% 23%;
+    --sidebar-foreground: 60 30% 96%;
+    --sidebar-primary: 242 53% 52%;
+    --sidebar-primary-foreground: 60 30% 96%;
+    --sidebar-accent: 242 40% 60%;
+    --sidebar-accent-foreground: 60 30% 96%;
+    --sidebar-border: 245 80% 68%;
+    --sidebar-ring: 242 53% 52%;
   }
 }
 
