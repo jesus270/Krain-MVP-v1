@@ -1,4 +1,5 @@
 export { isValidSolanaAddress } from "./solana";
 export { generateReferralCode } from "./referral";
 export { capitalize, capitalizeEachWord } from "./string";
-export { useMediaQuery } from "./hooks";
+export { useMediaQuery, useLocale } from "./hooks";
+export { formatNumber } from "./number";

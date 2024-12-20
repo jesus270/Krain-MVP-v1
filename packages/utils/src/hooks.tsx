@@ -16,3 +16,13 @@ export function useMediaQuery(query: string) {
 
   return matches;
 }
+
+export function useLocale() {
+  const [locale, setLocale] = React.useState("en-US");
+
+  React.useEffect(() => {
+    setLocale(navigator.language);
+  }, []);
+
+  return locale;
+}

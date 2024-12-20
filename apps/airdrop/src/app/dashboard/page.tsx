@@ -12,6 +12,7 @@ import {
 } from "@repo/ui/components/ui/card";
 import { Input } from "@repo/ui/components/ui/input";
 import { Button } from "@repo/ui/components/ui/button";
+import { formatNumber, useLocale } from "@repo/utils";
 
 function SubmitButton({ isSubmitted }: { isSubmitted: boolean }) {
   const { pending } = useFormStatus();
@@ -76,6 +77,20 @@ export default function Dashboard() {
     setIsSubmitted(false);
   };
 
+  const totalPoints =
+    state && !("error" in state) && state.referralsCount > 0
+      ? state.referralsCount * 1000 + 1000
+      : 0;
+
+  const referralsCount =
+    state && !("error" in state) ? state.referralsCount : 0;
+
+  const locale = useLocale();
+  console.log(locale);
+
+  const formattedTotalPoints = formatNumber(totalPoints, locale);
+  const formattedReferralsCount = formatNumber(referralsCount, locale);
+
   return (
     <main className="flex min-h-screen flex-col items-center gap-4">
       <Card className="w-full max-w-md">
@@ -104,12 +119,13 @@ export default function Dashboard() {
       </Card>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Referrals</CardTitle>
+          <CardTitle>Airdrop Status</CardTitle>
         </CardHeader>
         <CardContent className="w-full max-w-md">
-          <p>
-            Total Referrals:{" "}
-            {state && !("error" in state) && state.referralsCount}
+          <p>Referrals: {formattedReferralsCount}</p>
+          <p>Points: {formattedTotalPoints}</p>
+          <p className="text-sm text-muted-foreground mt-4">
+            More points verification and additions to the dashboard coming soon
           </p>
         </CardContent>
       </Card>
