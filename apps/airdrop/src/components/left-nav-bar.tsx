@@ -37,7 +37,7 @@ const routes = [
 
 export default function LeftNavBar() {
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader />
       <SidebarContent>
         <SidebarGroup>
