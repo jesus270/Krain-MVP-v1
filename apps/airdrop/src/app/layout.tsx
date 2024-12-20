@@ -1,3 +1,5 @@
+"use client";
+
 import type { Metadata } from "next";
 import { Red_Hat_Mono, Manrope } from "next/font/google";
 import "@repo/ui/globals.css";
@@ -7,7 +9,7 @@ import Footer from "@/components/footer";
 import LeftNavBar from "@/components/left-nav-bar";
 import { SidebarInset, SidebarProvider } from "@repo/ui/components/ui/sidebar";
 import Header from "@/components/header";
-
+import { PrivyProviderWrapper as PrivyProvider } from "@/components/privy-provider-wrapper";
 const redHatMono = Red_Hat_Mono({
   variable: "--font-red-hat-mono",
   subsets: ["latin"],
@@ -18,16 +20,20 @@ const manrope = Manrope({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "$KRAIN Airdrop",
-  description: "Add your wallet to the $KRAIN airdrop list",
-};
+// export const metadata: Metadata = {
+//   title: "$KRAIN Airdrop",
+//   description: "Add your wallet to the $KRAIN airdrop list",
+// };
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  if (!process.env.NEXT_PUBLIC_PRIVY_APP_ID) {
+    throw new Error("NEXT_PUBLIC_PRIVY_APP_ID is not set");
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -39,17 +45,19 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <SidebarProvider>
-            <LeftNavBar />
-            <SidebarInset>
-              <Header />
-              <div className="flex flex-grow flex-col p-4">
-                {children}
-                <Toaster richColors />
-              </div>
-              <Footer />
-            </SidebarInset>
-          </SidebarProvider>
+          <PrivyProvider>
+            <SidebarProvider>
+              <LeftNavBar />
+              <SidebarInset>
+                <Header />
+                <div className="flex flex-grow flex-col p-4">
+                  {children}
+                  <Toaster richColors />
+                </div>
+                <Footer />
+              </SidebarInset>
+            </SidebarProvider>
+          </PrivyProvider>
         </ThemeProvider>
       </body>
     </html>
