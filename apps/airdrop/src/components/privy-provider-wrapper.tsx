@@ -1,6 +1,12 @@
 "use client";
 
 import { PrivyProvider } from "@privy-io/react-auth";
+import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
+
+const solanaConnectors = toSolanaWalletConnectors({
+  // By default, shouldAutoConnect is enabled
+  shouldAutoConnect: true,
+});
 
 const chain = {
   id: 101,
@@ -34,12 +40,17 @@ export function PrivyProviderWrapper({
         appearance: {
           accentColor: "#4c4fc6",
           theme: "#1a1b4d",
-          showWalletLoginFirst: true,
+          showWalletLoginFirst: false,
           logo: "logo.png",
+          walletChainType: "solana-only",
           walletList: ["detected_solana_wallets", "phantom"],
         },
-        loginMethods: ["wallet", "email", "twitter"],
-        supportedChains: [chain],
+        externalWallets: {
+          solana: {
+            connectors: solanaConnectors,
+          },
+        },
+        loginMethods: ["wallet"],
         fundingMethodConfig: {
           moonpay: {
             useSandbox: true,
