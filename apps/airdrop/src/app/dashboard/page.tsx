@@ -55,7 +55,7 @@ export default function Dashboard() {
         address,
         with: { referralsCount: true },
       });
-      console.log("wallet", wallet);
+
       if (!wallet) {
         toast.error(`No wallet found for address: ${address}`);
         return;

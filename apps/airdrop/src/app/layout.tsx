@@ -6,10 +6,12 @@ import "@repo/ui/globals.css";
 import { Toaster } from "@repo/ui/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 import Footer from "@/components/footer";
-import LeftNavBar from "@/components/left-nav-bar";
+import { SidebarNav } from "@/components/sidebar-nav";
 import { SidebarInset, SidebarProvider } from "@repo/ui/components/ui/sidebar";
 import Header from "@/components/header";
-import { PrivyProviderWrapper as PrivyProvider } from "@/components/privy-provider-wrapper";
+import { PrivyProvider } from "@privy-io/react-auth";
+import { PrivyProviderWrapper } from "@/components/privy-provider-wrapper";
+
 const redHatMono = Red_Hat_Mono({
   variable: "--font-red-hat-mono",
   subsets: ["latin"],
@@ -45,9 +47,31 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <PrivyProvider>
+          {/* <PrivyProvider
+            appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
+            config={{
+              loginMethods: ["email", "wallet"],
+              appearance: {
+                theme: "light",
+                accentColor: "#676FFF",
+                walletList: [
+                  "metamask",
+                  "phantom",
+                  "rainbow",
+                  "coinbase_wallet",
+                ],
+              },
+              embeddedWallets: {
+                createOnLogin: "off",
+                noPromptOnSignature: false,
+              },
+              defaultChain: "solana",
+              supportedChains: ["solana"],
+            }}
+          > */}
+          <PrivyProviderWrapper>
             <SidebarProvider>
-              <LeftNavBar />
+              <SidebarNav />
               <SidebarInset>
                 <Header />
                 <div className="flex flex-grow flex-col p-4">
@@ -57,7 +81,8 @@ export default function RootLayout({
                 <Footer />
               </SidebarInset>
             </SidebarProvider>
-          </PrivyProvider>
+          </PrivyProviderWrapper>
+          {/* </PrivyProvider> */}
         </ThemeProvider>
       </body>
     </html>

@@ -18,8 +18,9 @@ export default function HeaderBreadcrumb() {
   return (
     <Breadcrumb>
       <BreadcrumbList>
+        <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink href="/">Krain Airdrop</BreadcrumbLink>
+          <BreadcrumbLink href="/">Airdrop</BreadcrumbLink>
         </BreadcrumbItem>
         {paths.map((path, index) =>
           path === "" ? null : (

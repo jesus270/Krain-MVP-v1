@@ -1,17 +1,18 @@
-"use client";
-
-import { LayoutDashboard, Rocket } from "lucide-react";
-
+import { LayoutDashboard, Rocket, User } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "@repo/ui/components/ui/sidebar";
-
+import { NavUser } from "./nav-user";
+import Image from "next/image";
+import Link from "next/link";
 const routes = [
   {
     name: "Airdrop",
@@ -28,33 +29,41 @@ const routes = [
   //   url: "/tasks",
   //   icon: PieChart,
   // },
-  // {
-  //   name: "Profile",
-  //   url: "/profile",
-  //   icon: User,
-  // },
+  {
+    name: "Profile",
+    url: "/profile",
+    icon: User,
+  },
 ];
 
-export default function LeftNavBar() {
+export function SidebarNav() {
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader />
+      <SidebarHeader className="mt-3">
+        <Link href="/">
+          <Image src="/logo.png" alt="Logo" width={100} height={100} />
+        </Link>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
             {routes.map((item) => (
               <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton asChild>
-                  <a href={item.url}>
+                  <Link href={item.url}>
                     <item.icon />
                     <span>{item.name}</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser />
+      </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }

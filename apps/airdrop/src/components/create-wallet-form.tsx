@@ -78,78 +78,74 @@ export default function CreateWalletForm({
   }
 
   return (
-    <div className="flex flex-col items-center max-w-md mx-auto">
-      <Image width={300} height={150} src="/logo.png" alt="logo" />
-      <div className="flex flex-col gap-4 w-full items-center">
-        <h2 className="text-2xl font-bold">$KRAIN Airdrop List</h2>
-        <Card>
-          <CardHeader>
-            <CardTitle>Add Your Solana Wallet Address</CardTitle>
-            <CardDescription>
-              Paste in your Solana wallet address below to be added to the
-              $KRAIN Airdrop List and receive your referral link.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmitCreateWallet)}
-                className="flex flex-col gap-2"
-              >
-                <div className="flex flex-col gap-2">
-                  <FormField
-                    control={form.control}
-                    name="walletAddress"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input placeholder="Wallet Address" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <Button type="submit" disabled={isLoading}>
-                  Add
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Get Your Referral Link</CardTitle>
-            <CardDescription>
-              Add your wallet address above to see your referral link. Share
-              this code with your friends to earn $KRAIN.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            <Input
-              value={
-                yourReferralCode
-                  ? `https://airdrop.krain.ai/${yourReferralCode}`
-                  : ""
-              }
-              placeholder="Add Wallet Address Above"
-              readOnly
-            />
-            <Button
-              onClick={() => {
-                if (yourReferralCode) {
-                  navigator.clipboard.writeText(
-                    `https://airdrop.krain.ai/${yourReferralCode}`,
-                  );
-                  toast.success("Referral link copied to clipboard");
-                }
-              }}
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Add Your Solana Wallet Address</CardTitle>
+          <CardDescription>
+            Paste in your Solana wallet address below to be added to the $KRAIN
+            Airdrop List and receive your referral link.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmitCreateWallet)}
+              className="flex flex-col gap-2"
             >
-              Copy
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+              <div className="flex flex-col gap-2">
+                <FormField
+                  control={form.control}
+                  name="walletAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input placeholder="Wallet Address" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <Button type="submit" disabled={isLoading}>
+                Add
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Get Your Referral Link</CardTitle>
+          <CardDescription>
+            Add your wallet address above to see your referral link. Share this
+            code with your friends to earn $KRAIN.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2">
+          <Input
+            value={
+              yourReferralCode
+                ? `https://airdrop.krain.ai/${yourReferralCode}`
+                : ""
+            }
+            placeholder="Add Wallet Address Above"
+            readOnly
+          />
+          <Button
+            onClick={() => {
+              if (yourReferralCode) {
+                navigator.clipboard.writeText(
+                  `https://airdrop.krain.ai/${yourReferralCode}`,
+                );
+                toast.success("Referral link copied to clipboard");
+              }
+            }}
+          >
+            Copy
+          </Button>
+        </CardContent>
+      </Card>
+    </>
   );
 }

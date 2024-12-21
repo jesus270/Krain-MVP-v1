@@ -2,6 +2,22 @@
 
 import { PrivyProvider } from "@privy-io/react-auth";
 
+const chain = {
+  id: 101,
+  name: "Solana",
+  type: "solana",
+  rpcUrls: {
+    default: {
+      http: ["https://api.mainnet-beta.solana.com"],
+    },
+  },
+  nativeCurrency: {
+    decimals: 9,
+    name: "SOL",
+    symbol: "SOL",
+  },
+};
+
 export function PrivyProviderWrapper({
   children,
 }: {
@@ -15,15 +31,26 @@ export function PrivyProviderWrapper({
     <PrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
       config={{
-        // Customize Privy's appearance in your app
         appearance: {
-          theme: "dark",
-          accentColor: "#4C4FC6",
-          logo: "logo-avatar.png",
+          accentColor: "#4c4fc6",
+          theme: "#1a1b4d",
+          showWalletLoginFirst: true,
+          logo: "logo.png",
+          walletList: ["detected_solana_wallets", "phantom"],
         },
-        // Create embedded wallets for users who don't have a wallet
+        loginMethods: ["wallet", "email", "twitter"],
+        supportedChains: [chain],
+        fundingMethodConfig: {
+          moonpay: {
+            useSandbox: true,
+          },
+        },
         embeddedWallets: {
-          createOnLogin: "users-without-wallets",
+          createOnLogin: "off",
+          requireUserPasswordOnCreate: false,
+        },
+        mfa: {
+          noPromptOnMfaRequired: false,
         },
       }}
     >
