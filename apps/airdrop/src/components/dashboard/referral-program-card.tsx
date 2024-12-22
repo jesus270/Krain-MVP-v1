@@ -106,12 +106,12 @@ export function ReferralProgramCard({
               disabled={isLoadingWallet || !referralUrl}
             >
               {copied ? (
-                <div key="copied" className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4" />
                   <span>Copied</span>
                 </div>
               ) : (
-                <div key="copy" className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <Copy className="h-4 w-4" />
                   <span>Copy</span>
                 </div>
