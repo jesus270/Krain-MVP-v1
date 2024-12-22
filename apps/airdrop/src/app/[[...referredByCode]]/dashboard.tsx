@@ -18,8 +18,8 @@ export function Dashboard({
   const { user, ready, authenticated } = usePrivy();
   const [wallet, setWallet] = useState<Wallet | undefined>(undefined);
   const [referralsCount, setReferralsCount] = useState<number>(0);
-  const [isLoadingWallet, setIsLoadingWallet] = useState(false);
-  const [isLoadingReferrals, setIsLoadingReferrals] = useState(false);
+  const [isLoadingWallet, setIsLoadingWallet] = useState(true);
+  const [isLoadingReferrals, setIsLoadingReferrals] = useState(true);
   const locale = useLocale();
 
   const userEmailAddress = user?.email?.address ?? undefined;
@@ -27,8 +27,14 @@ export function Dashboard({
   const userTwitterUsername = user?.twitter?.username ?? undefined;
 
   useEffect(() => {
-    if (!userWalletAddress) return;
+    if (!userWalletAddress) {
+      setIsLoadingWallet(false);
+      setIsLoadingReferrals(false);
+      return;
+    }
+
     setIsLoadingWallet(true);
+    setIsLoadingReferrals(true);
 
     // Fetch wallet and submit in parallel
     Promise.all([
@@ -39,7 +45,6 @@ export function Dashboard({
         if (walletResult) {
           setWallet(walletResult);
           if (walletResult.referralCode) {
-            setIsLoadingReferrals(true);
             getReferralsCount(walletResult.referralCode)
               .then((count) => {
                 if (typeof count === "number") {
@@ -52,6 +57,8 @@ export function Dashboard({
               .finally(() => {
                 setIsLoadingReferrals(false);
               });
+          } else {
+            setIsLoadingReferrals(false);
           }
         }
         if (submitResult.status === "error") {
