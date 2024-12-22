@@ -23,6 +23,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { XLogo } from "@repo/ui/components/icons/XLogo";
+import { redirect } from "next/navigation";
 export default function Profile() {
   const {
     ready,
@@ -41,7 +42,9 @@ export default function Profile() {
     linkDiscord,
     unlinkDiscord,
   } = usePrivy();
-
+  if (ready && !authenticated) {
+    return redirect("/");
+  }
   const { wallets: solanaWallets } = useSolanaWallets();
 
   const handleConnectWallet = async () => {

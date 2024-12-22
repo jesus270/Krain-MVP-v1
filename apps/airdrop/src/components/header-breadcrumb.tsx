@@ -21,7 +21,7 @@ export default function HeaderBreadcrumb() {
         {paths.map((path, index) => {
           console.log(path, index);
           return index === 0 ? null : (
-            <Fragment key={path}>
+            <Fragment key={`${path}-${index}`}>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>

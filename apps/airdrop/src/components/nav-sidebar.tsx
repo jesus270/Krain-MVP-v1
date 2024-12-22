@@ -48,7 +48,7 @@ export function SidebarNav() {
         <SidebarGroup>
           <SidebarMenu>
             {routes.map((item) => (
-              <SidebarMenuItem key={item.name}>
+              <SidebarMenuItem key={item.url}>
                 <SidebarMenuButton asChild>
                   <Link href={item.url} onClick={handleClick}>
                     <item.icon />
