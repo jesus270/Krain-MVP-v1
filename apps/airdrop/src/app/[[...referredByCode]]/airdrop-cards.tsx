@@ -81,7 +81,7 @@ export function AirdropCards({
   if (ready && (!authenticated || !userWalletAddress)) {
     return (
       <main className="container mx-auto p-4">
-        <Card className="border-2">
+        <Card className="border-2 max-w-2xl mx-auto">
           <CardHeader className="space-y-4">
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-yellow-500" />
