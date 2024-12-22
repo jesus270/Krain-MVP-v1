@@ -91,7 +91,8 @@ export function NavUser() {
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     {/* <span className="truncate font-semibold">{user.name}</span> */}
                     <span className="truncate text-xs">
-                      {user?.email?.address}
+                      {user?.email?.address ??
+                        `${user?.wallet?.address?.slice(0, 6)}...${user?.wallet?.address?.slice(-4)}`}
                     </span>
                   </div>
                 </div>
