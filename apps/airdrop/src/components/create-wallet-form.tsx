@@ -58,16 +58,16 @@ export default function CreateWalletForm({
   }: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      const { data, message, status } = await handleSubmitWallet({
+      const wallet = await handleSubmitWallet({
         address: walletAddress,
         referredByCode,
       });
-      if (status === "error" || !data?.referralCode) {
-        toast.error(message);
-        return;
-      } else if (status === "success") {
-        setYourReferralCode(data.referralCode);
-        toast.success(message);
+
+      if (wallet?.referralCode) {
+        setYourReferralCode(wallet.referralCode);
+        toast.success("Wallet successfully added!");
+      } else {
+        toast.error("Failed to get referral code");
       }
     } catch (e) {
       const error = e as Error;
