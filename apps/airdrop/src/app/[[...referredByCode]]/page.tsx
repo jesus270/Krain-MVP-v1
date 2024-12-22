@@ -1,4 +1,4 @@
-import CreateWalletForm from "@/components/create-wallet-form";
+import { Dashboard } from "./dashboard";
 
 export default async function Home({
   params,
@@ -9,5 +9,5 @@ export default async function Home({
 
   const referredByCode = resolvedParams.referredByCode?.[0];
 
-  return <CreateWalletForm referredByCode={referredByCode} />;
+  return <Dashboard referredByCode={referredByCode} />;
 }

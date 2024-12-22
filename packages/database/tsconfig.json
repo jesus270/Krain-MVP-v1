@@ -3,9 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@repo/database/*": ["./src/*"]
+      "@repo/database/*": ["./*"]
     }
   },
-  "include": ["src"],
+  "include": ["index.ts"],
   "exclude": ["node_modules"]
 }

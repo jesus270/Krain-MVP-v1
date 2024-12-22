@@ -12,8 +12,13 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@neondatabase/serverless": "^0.10.4",
+    "@privy-io": "link:@types/@privy-io",
+    "@privy-io/react-auth": "^1.98.4",
     "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.1",
+    "@repo/database": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:*",
     "@solana/web3.js": "^1.95.8",
     "@vercel/functions": "^1.5.2",
     "@vercel/postgres": "^0.10.0",
@@ -30,15 +35,12 @@
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.1",
-    "@repo/ui": "workspace:*",
-    "@repo/database": "workspace:*",
-    "@repo/utils": "workspace:*"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
