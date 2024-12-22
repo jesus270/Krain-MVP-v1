@@ -40,6 +40,7 @@ import {
   User,
   Share2,
 } from "lucide-react";
+import { XLogo } from "@repo/ui/components/icons/XLogo";
 
 type WalletState = {
   address: string;
@@ -295,8 +296,8 @@ export function AirdropCards({
                 <div className="rounded-lg border bg-card/50 p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Twitter className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium">Twitter</span>
+                      <XLogo className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium">X.com</span>
                     </div>
                     <Badge
                       variant={userTwitterUsername ? "secondary" : "outline"}
@@ -307,7 +308,7 @@ export function AirdropCards({
                   </div>
                   {!userTwitterUsername && (
                     <p className="text-xs text-muted-foreground mt-1.5">
-                      Connect Twitter to earn 2,000 points
+                      Connect X.com to earn 2,000 points
                     </p>
                   )}
                 </div>
