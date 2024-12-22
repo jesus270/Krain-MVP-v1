@@ -31,6 +31,7 @@ interface PointsStatusCardProps {
   twitterPoints: number;
   emailPoints: number;
   locale: string;
+  isLoadingReferrals: boolean;
 }
 
 export function PointsStatusCard({
@@ -45,6 +46,7 @@ export function PointsStatusCard({
   twitterPoints,
   emailPoints,
   locale,
+  isLoadingReferrals,
 }: PointsStatusCardProps) {
   return (
     <Card className="border-2">
@@ -55,9 +57,11 @@ export function PointsStatusCard({
           </CardTitle>
           <Badge
             variant={totalPoints > 0 ? "secondary" : "outline"}
-            className="text-lg px-4 py-2 text-center"
+            className={`text-lg px-4 py-2 text-center ${isLoadingReferrals ? "animate-pulse" : ""}`}
           >
-            {formatNumber(totalPoints, locale)} Points
+            {isLoadingReferrals
+              ? "Calculating points..."
+              : `${formatNumber(totalPoints, locale)} Points`}
           </Badge>
         </div>
         <CardDescription>
@@ -80,6 +84,7 @@ export function PointsStatusCard({
           referralsCount={referralsCount}
           referralPoints={referralPoints}
           locale={locale}
+          isLoading={isLoadingReferrals}
         />
         <ProfilePointsSection
           userTwitterUsername={userTwitterUsername}

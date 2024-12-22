@@ -18,6 +18,8 @@ export function Dashboard({
   const { user, ready, authenticated } = usePrivy();
   const [wallet, setWallet] = useState<Wallet | undefined>(undefined);
   const [referralsCount, setReferralsCount] = useState<number>(0);
+  const [isLoadingWallet, setIsLoadingWallet] = useState(false);
+  const [isLoadingReferrals, setIsLoadingReferrals] = useState(false);
   const locale = useLocale();
 
   const userEmailAddress = user?.email?.address ?? undefined;
@@ -26,6 +28,7 @@ export function Dashboard({
 
   useEffect(() => {
     if (!userWalletAddress) return;
+    setIsLoadingWallet(true);
 
     // Fetch wallet and submit in parallel
     Promise.all([
@@ -36,6 +39,7 @@ export function Dashboard({
         if (walletResult) {
           setWallet(walletResult);
           if (walletResult.referralCode) {
+            setIsLoadingReferrals(true);
             getReferralsCount(walletResult.referralCode)
               .then((count) => {
                 if (typeof count === "number") {
@@ -44,6 +48,9 @@ export function Dashboard({
               })
               .catch((error) => {
                 console.error("Error getting referrals count:", error);
+              })
+              .finally(() => {
+                setIsLoadingReferrals(false);
               });
           }
         }
@@ -53,6 +60,9 @@ export function Dashboard({
       })
       .catch((error) => {
         console.error("Error fetching wallet data:", error);
+      })
+      .finally(() => {
+        setIsLoadingWallet(false);
       });
   }, [referredByCode, userWalletAddress]);
 
@@ -92,11 +102,14 @@ export function Dashboard({
           twitterPoints={twitterPoints}
           emailPoints={emailPoints}
           locale={locale}
+          isLoadingReferrals={isLoadingReferrals}
         />
         <ReferralProgramCard
           referralsCount={referralsCount}
           referralUrl={referralUrl}
           locale={locale}
+          isLoadingWallet={isLoadingWallet}
+          isLoadingReferrals={isLoadingReferrals}
         />
       </div>
     </main>

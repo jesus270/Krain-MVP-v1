@@ -10,27 +10,24 @@ import {
 import { isValidSolanaAddress } from "@repo/utils";
 import { eq } from "drizzle-orm";
 import { createReferral, getReferralsCount } from "./referral";
-import { db } from "../lib/db";
+import { db, executeWithRetry } from "../lib/db";
 
 export const createWallet = async ({ address }: { address: string }) => {
-  console.log("Creating wallet for address:", address);
   if (!isValidSolanaAddress(address)) {
-    console.log("Invalid Solana address:", address);
     throw new Error("Invalid Solana address");
   }
 
   try {
-    const wallet = await db
-      .insert(walletTable)
-      .values({
-        address,
-      })
-      .returning();
-
-    console.log("Created wallet:", wallet);
+    const wallet = await executeWithRetry(() =>
+      db
+        .insert(walletTable)
+        .values({
+          address,
+        })
+        .returning(),
+    );
 
     if (!wallet || wallet.length === 0) {
-      console.error("Failed to create wallet - no wallet returned");
       throw new Error("Failed to create wallet");
     }
 
@@ -102,7 +99,9 @@ export const getWallet = async <T extends GetWalletOptions["with"]>({
       );
     }
 
-    const result = await query.limit(1).then((rows) => rows[0]);
+    const result = await executeWithRetry(() =>
+      query.limit(1).then((rows) => rows[0]),
+    );
 
     if (!result) {
       return undefined;
@@ -133,7 +132,9 @@ export const getWallet = async <T extends GetWalletOptions["with"]>({
     } as unknown as WalletWithIncludes<T>;
 
     if (includes?.referralsCount) {
-      const referralsCount = await getReferralsCount(wallet.referralCode);
+      const referralsCount = await executeWithRetry(() =>
+        getReferralsCount(wallet.referralCode),
+      );
       finalResult.referralsCount = referralsCount;
     }
 
