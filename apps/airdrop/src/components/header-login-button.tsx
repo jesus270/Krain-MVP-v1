@@ -14,6 +14,7 @@ import {
 } from "@repo/ui/components/ui/dropdown-menu";
 import { useSidebar } from "@repo/ui/components/ui/sidebar";
 import { Skeleton } from "@repo/ui/components/ui/skeleton";
+import { capitalize } from "@repo/utils";
 import { User, LogOut, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -43,12 +44,19 @@ export function HeaderLoginButton() {
               <Avatar className="h-8 w-8 rounded-lg">
                 {/* <AvatarImage src={user.avatar} alt={user.name} /> */}
                 <AvatarFallback className="rounded-lg">
-                  {user?.email?.address?.charAt(0)}
+                  {user?.email?.address?.charAt(0) ? (
+                    capitalize(user?.email?.address?.charAt(0) ?? "")
+                  ) : (
+                    <User />
+                  )}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 {/* <span className="truncate font-semibold">{user.name}</span> */}
-                <span className="truncate text-xs">{user?.email?.address}</span>
+                <span className="truncate text-xs">
+                  {user?.email?.address ??
+                    `${user?.wallet?.address?.slice(0, 6)}...${user?.wallet?.address?.slice(-4)}`}
+                </span>
               </div>
             </div>
           </DropdownMenuLabel>

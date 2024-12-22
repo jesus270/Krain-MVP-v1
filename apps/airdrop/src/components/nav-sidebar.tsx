@@ -9,26 +9,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@repo/ui/components/ui/sidebar";
 import { NavUser } from "./nav-user";
 import Image from "next/image";
 import Link from "next/link";
+
 const routes = [
   {
-    name: "Airdrop",
-    url: "/",
-    icon: Rocket,
-  },
-  {
     name: "Dashboard",
-    url: "/dashboard",
+    url: "/",
     icon: LayoutDashboard,
   },
-  // {
-  //   name: "Tasks",
-  //   url: "/tasks",
-  //   icon: PieChart,
-  // },
   {
     name: "Profile",
     url: "/profile",
@@ -37,10 +29,18 @@ const routes = [
 ];
 
 export function SidebarNav() {
+  const { setOpenMobile, isMobile } = useSidebar();
+
+  const handleClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="mt-3">
-        <Link href="/">
+        <Link href="/" onClick={handleClick}>
           <Image src="/logo.png" alt="Logo" width={100} height={100} />
         </Link>
       </SidebarHeader>
@@ -50,7 +50,7 @@ export function SidebarNav() {
             {routes.map((item) => (
               <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton asChild>
-                  <Link href={item.url}>
+                  <Link href={item.url} onClick={handleClick}>
                     <item.icon />
                     <span>{item.name}</span>
                   </Link>

@@ -53,13 +53,18 @@ export function NavUser() {
                 <Avatar className="h-8 w-8 rounded-lg">
                   {/* <AvatarImage src={user.avatar} alt={user.name} /> */}
                   <AvatarFallback className="rounded-lg">
-                    {capitalize(user?.email?.address?.charAt(0) ?? "")}
+                    {user?.email?.address ? (
+                      capitalize(user?.email?.address?.charAt(0) ?? "")
+                    ) : (
+                      <User />
+                    )}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   {/* <span className="truncate font-semibold">{user.name}</span> */}
                   <span className="truncate text-xs">
-                    {user?.email?.address}
+                    {user?.email?.address ??
+                      `${user?.wallet?.address?.slice(0, 6)}...${user?.wallet?.address?.slice(-4)}`}
                   </span>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
@@ -76,7 +81,11 @@ export function NavUser() {
                   <Avatar className="h-8 w-8 rounded-lg">
                     {/* <AvatarImage src={user.avatar} alt={user.name} /> */}
                     <AvatarFallback className="rounded-lg">
-                      {capitalize(user?.email?.address?.charAt(0) ?? "")}
+                      {user?.email?.address ? (
+                        capitalize(user?.email?.address?.charAt(0) ?? "")
+                      ) : (
+                        <User />
+                      )}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">

@@ -7,9 +7,20 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@repo/ui/components/ui/card";
 import { Button } from "@repo/ui/components/ui/button";
 import { Skeleton } from "@repo/ui/components/ui/skeleton";
+import { Badge } from "@repo/ui/components/ui/badge";
+import { Separator } from "@repo/ui/components/ui/separator";
+import {
+  Wallet,
+  Twitter,
+  Mail,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 
 export default function Profile() {
   const {
@@ -37,7 +48,6 @@ export default function Profile() {
       await connectWallet({
         walletList: ["phantom", "detected_solana_wallets"],
       });
-      // After connection, use loginOrLink on the most recently connected wallet
       if (solanaWallets[0]) {
         await solanaWallets[0].loginOrLink();
       }
@@ -48,106 +58,169 @@ export default function Profile() {
 
   if (!ready) {
     return (
-      <main className="flex flex-grow flex-col items-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col gap-2">
-            <Skeleton className="h-8 w-full mb-2 bg-foreground/10" />
+      <main className="container mx-auto py-8 px-4">
+        <Card className="w-full max-w-2xl mx-auto">
+          <CardHeader className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-full" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-16 w-full" />
+              </div>
+            ))}
           </CardContent>
         </Card>
       </main>
     );
   }
 
-  console.log("user", user);
-
   const numAccounts = user?.linkedAccounts?.length || 0;
   const canRemoveAccount = numAccounts > 1;
 
   const email = user?.email;
   const wallet = user?.wallet;
-
   const twitterSubject = user?.twitter?.subject || null;
 
+  const totalPoints =
+    (wallet ? 6000 : 0) + (twitterSubject ? 2000 : 0) + (email ? 3000 : 0);
+
   return (
-    <main className="flex flex-grow flex-col items-center">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>
-            <h1 className="text-2xl">Account Integrations</h1>
-          </CardTitle>
+    <main className="container mx-auto p-4">
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader className="space-y-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-3xl font-bold">
+              Account Integrations
+            </CardTitle>
+            <Badge variant="secondary" className="text-lg px-4 py-2">
+              {totalPoints.toLocaleString()} Points
+            </Badge>
+          </div>
+          <CardDescription>
+            Connect your accounts to earn points and unlock features
+          </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          {ready ? (
-            <>
-              <p>
-                <span className="font-semibold">Email:</span>{" "}
-                <span className="mr-2">
-                  {user?.email?.address ?? "Not connected"}
-                </span>
-                {email ? (
-                  <Button
-                    onClick={() => {
-                      unlinkEmail(email.address);
-                    }}
-                    disabled={!canRemoveAccount}
-                  >
-                    Unlink email
-                  </Button>
-                ) : (
-                  <Button onClick={linkEmail}>Connect email</Button>
-                )}
-              </p>
-              <p>
-                <span className="font-semibold">Wallet:</span>{" "}
-                <span className="mr-2">
-                  {user?.wallet?.address ?? "Not connected"}
-                </span>
+        <CardContent className="space-y-6">
+          <div className="rounded-lg border bg-card p-6 space-y-6">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5" />
+                  <h3 className="font-semibold">Wallet</h3>
+                </div>
+                <p className="text-sm text-muted-foreground font-mono">
+                  {wallet?.address ? (
+                    <>
+                      {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
+                    </>
+                  ) : (
+                    "Not connected"
+                  )}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
                 {wallet ? (
-                  <Button
-                    onClick={() => {
-                      unlinkWallet(wallet.address);
-                    }}
-                    disabled={!canRemoveAccount}
-                  >
-                    Unlink wallet
-                  </Button>
+                  <>
+                    <Badge variant="secondary">+6,000 points</Badge>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => unlinkWallet(wallet.address)}
+                      disabled={!canRemoveAccount}
+                    >
+                      <XCircle className="h-4 w-4" />
+                      Unlink
+                    </Button>
+                  </>
                 ) : (
-                  <Button onClick={handleConnectWallet}>Connect wallet</Button>
+                  <Button size="sm" onClick={handleConnectWallet}>
+                    <CheckCircle2 className="h-4 w-4" />
+                    Connect
+                  </Button>
                 )}
-              </p>
-              <p>
-                <span className="font-semibold">Twitter:</span>{" "}
-                <span className="mr-2">
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Twitter className="h-5 w-5" />
+                  <h3 className="font-semibold">Twitter</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
                   {user?.twitter?.username ?? "Not connected"}
-                </span>
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
                 {twitterSubject ? (
-                  <Button
-                    onClick={() => {
-                      unlinkTwitter(twitterSubject);
-                    }}
-                    disabled={!canRemoveAccount}
-                  >
-                    Unlink Twitter
-                  </Button>
+                  <>
+                    <Badge variant="secondary">+2,000 points</Badge>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => unlinkTwitter(twitterSubject)}
+                      disabled={!canRemoveAccount}
+                    >
+                      <XCircle className="h-4 w-4" />
+                      Unlink
+                    </Button>
+                  </>
                 ) : (
-                  <Button
-                    onClick={() => {
-                      linkTwitter();
-                    }}
-                  >
-                    Connect Twitter
+                  <Button size="sm" onClick={linkTwitter}>
+                    <CheckCircle2 className="h-4 w-4" />
+                    Connect
                   </Button>
                 )}
-              </p>
-            </>
-          ) : (
-            <>
-              <Skeleton className="h-8 w-full mb-2 bg-foreground/10" />
-              <Skeleton className="h-8 w-full mb-2 bg-foreground/10" />
-              <Skeleton className="h-8 w-full mb-2 bg-foreground/10" />
-              <Skeleton className="h-8 w-full mb-2 bg-foreground/10" />
-            </>
-          )}
+              </div>
+            </div>
+
+            <Separator />
+            <div className="flex flex-col gap-2">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-5 w-5" />
+                    <h3 className="font-semibold">Email</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {user?.email?.address ?? "Not connected"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {email ? (
+                    <>
+                      <Badge variant="secondary">+3,000 points</Badge>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => unlinkEmail(email.address)}
+                        disabled={!canRemoveAccount}
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Unlink
+                      </Button>
+                    </>
+                  ) : (
+                    <Button size="sm" onClick={linkEmail}>
+                      <CheckCircle2 className="h-4 w-4" />
+                      Connect
+                    </Button>
+                  )}
+                </div>
+              </div>
+              {!email && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <AlertCircle className="h-3 w-3" />
+                  By connecting email, you agree to receive updates from us
+                </p>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
     </main>

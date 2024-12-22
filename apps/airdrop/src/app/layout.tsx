@@ -6,11 +6,12 @@ import "@repo/ui/globals.css";
 import { Toaster } from "@repo/ui/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 import Footer from "@/components/footer";
-import { SidebarNav } from "@/components/sidebar-nav";
+import { SidebarNav } from "@/components/nav-sidebar";
 import { SidebarInset, SidebarProvider } from "@repo/ui/components/ui/sidebar";
 import Header from "@/components/header";
 import { PrivyProvider } from "@privy-io/react-auth";
 import { PrivyProviderWrapper } from "@/components/privy-provider-wrapper";
+import { usePrivy } from "@privy-io/react-auth";
 
 const redHatMono = Red_Hat_Mono({
   variable: "--font-red-hat-mono",
@@ -47,44 +48,37 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          {/* <PrivyProvider
-            appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
-            config={{
-              loginMethods: ["email", "wallet"],
-              appearance: {
-                theme: "light",
-                accentColor: "#676FFF",
-                walletList: [
-                  "metamask",
-                  "phantom",
-                  "rainbow",
-                  "coinbase_wallet",
-                ],
-              },
-              embeddedWallets: {
-                createOnLogin: "off",
-                noPromptOnSignature: false,
-              },
-              defaultChain: "solana",
-              supportedChains: ["solana"],
-            }}
-          > */}
           <PrivyProviderWrapper>
             <SidebarProvider>
-              <SidebarNav />
-              <SidebarInset>
-                <Header />
-                <div className="flex flex-grow flex-col p-4">
-                  {children}
-                  <Toaster richColors />
-                </div>
-                <Footer />
-              </SidebarInset>
+              <AuthWrapper>
+                {(authenticated) => (
+                  <>
+                    {authenticated && <SidebarNav />}
+                    <SidebarInset>
+                      {authenticated && <Header />}
+                      <div className="flex flex-grow flex-col">
+                        {children}
+                        <Toaster richColors />
+                      </div>
+                      <Footer />
+                    </SidebarInset>
+                  </>
+                )}
+              </AuthWrapper>
             </SidebarProvider>
           </PrivyProviderWrapper>
-          {/* </PrivyProvider> */}
         </ThemeProvider>
       </body>
     </html>
   );
+}
+
+function AuthWrapper({
+  children,
+}: {
+  children: (authenticated: boolean) => React.ReactNode;
+}) {
+  const { authenticated, ready } = usePrivy();
+  if (!ready) return null;
+  return <>{children(authenticated)}</>;
 }

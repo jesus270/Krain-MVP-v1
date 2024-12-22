@@ -14,28 +14,25 @@ import Link from "next/link";
 export default function HeaderBreadcrumb() {
   const pathname = usePathname();
   const paths = pathname.split("/");
-
+  console.log(paths);
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbLink href="/">Airdrop</BreadcrumbLink>
-        </BreadcrumbItem>
-        {paths.map((path, index) =>
-          path === "" ? null : (
+        {paths.map((path, index) => {
+          console.log(path, index);
+          return index === 0 ? null : (
             <Fragment key={path}>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href={paths.slice(0, index + 1).join("/")}>
-                    {capitalizeEachWord(path)}
+                  <Link href={`/${path}`}>
+                    {capitalizeEachWord(path === "" ? "Dashboard" : path)}
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </Fragment>
-          ),
-        )}
+          );
+        })}
       </BreadcrumbList>
     </Breadcrumb>
   );
