@@ -90,7 +90,30 @@ export default function CreateWalletForm({
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(onSubmitCreateWallet)}
+              action={async (formData) => {
+                const walletAddress = formData.get("walletAddress") as string;
+                if (!walletAddress) return;
+
+                try {
+                  setIsLoading(true);
+                  const wallet = await handleSubmitWallet({
+                    address: walletAddress,
+                    referredByCode,
+                  });
+
+                  if (wallet?.referralCode) {
+                    setYourReferralCode(wallet.referralCode);
+                    toast.success("Wallet successfully added!");
+                  } else {
+                    toast.error("Failed to get referral code");
+                  }
+                } catch (e) {
+                  const error = e as Error;
+                  toast.error(error.message);
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
               className="flex flex-col gap-2"
             >
               <div className="flex flex-col gap-2">

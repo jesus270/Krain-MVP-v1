@@ -6,11 +6,11 @@ import { eq } from "drizzle-orm";
 import { createReferral } from "./referral";
 import { db, executeWithRetry } from "../lib/db";
 
-export const createWallet = async ({
+export async function createWallet({
   address,
 }: {
   address: string;
-}): Promise<Wallet> => {
+}): Promise<Wallet> {
   if (!isValidSolanaAddress(address)) {
     console.error("[SERVER] Invalid Solana address:", address);
     throw new Error("Invalid Solana address");
@@ -43,9 +43,9 @@ export const createWallet = async ({
     });
     throw error;
   }
-};
+}
 
-export const getWallet = async ({
+export async function getWallet({
   address,
   with: { referredBy } = {},
 }: {
@@ -53,7 +53,7 @@ export const getWallet = async ({
   with?: {
     referredBy?: boolean;
   };
-}): Promise<Wallet | undefined> => {
+}): Promise<Wallet | undefined> {
   if (!isValidSolanaAddress(address)) {
     console.error("[SERVER] Invalid Solana address in getWallet:", address);
     throw new Error("Invalid Solana address");
@@ -75,15 +75,16 @@ export const getWallet = async ({
     });
     throw error;
   }
-};
+}
 
-export const handleSubmitWallet = async ({
-  address,
-  referredByCode,
-}: {
+export async function handleSubmitWallet(formData: {
   address: string;
   referredByCode: string | undefined;
-}): Promise<Wallet> => {
+}): Promise<Wallet> {
+  "use server";
+
+  const { address, referredByCode } = formData;
+
   if (!isValidSolanaAddress(address)) {
     console.error(
       "[SERVER] Invalid Solana address in handleSubmitWallet:",
@@ -146,7 +147,7 @@ export const handleSubmitWallet = async ({
     });
     throw error;
   }
-};
+}
 
 function generateReferralCode() {
   return Math.random().toString(36).substring(2, 8);
