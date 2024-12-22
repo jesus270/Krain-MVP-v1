@@ -20,8 +20,9 @@ import {
   AlertCircle,
   CheckCircle2,
   XCircle,
+  XIcon,
 } from "lucide-react";
-
+import { XLogo } from "@repo/ui/components/icons/XLogo";
 export default function Profile() {
   const {
     ready,
@@ -66,7 +67,7 @@ export default function Profile() {
           </CardHeader>
           <CardContent className="space-y-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="space-y-2">
+              <div key={`skeleton-${i}`} className="space-y-2">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-16 w-full" />
               </div>
@@ -149,8 +150,8 @@ export default function Profile() {
             <div className="flex items-start justify-between">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <Twitter className="h-5 w-5" />
-                  <h3 className="font-semibold">Twitter</h3>
+                  <XLogo className="h-5 w-5" />
+                  <h3 className="font-semibold">X.com</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {user?.twitter?.username ?? "Not connected"}
