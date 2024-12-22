@@ -12,7 +12,13 @@ export default function Header() {
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
         <Link href="/">
-          <Image src="/logo-avatar.png" alt="Logo" width={40} height={40} />
+          <Image
+            src="/logo-avatar.png"
+            alt="Logo"
+            width={40}
+            height={40}
+            style={{ width: 40, height: 40 }}
+          />
         </Link>
         <HeaderBreadcrumb />
       </div>

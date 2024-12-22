@@ -3,7 +3,7 @@
 import { db as baseDb, referralTable } from "@repo/database";
 import { eq } from "drizzle-orm";
 import { count } from "drizzle-orm";
-import { db } from "../lib/db";
+import { db, executeWithRetry } from "../lib/db";
 
 export const createReferral = async ({
   referredByCode,
@@ -13,13 +13,15 @@ export const createReferral = async ({
   referredWalletAddress: string;
 }) => {
   try {
-    const referral = await db
-      .insert(referralTable)
-      .values({
-        referredByCode,
-        referredWalletAddress,
-      })
-      .returning();
+    const referral = await executeWithRetry(() =>
+      db
+        .insert(referralTable)
+        .values({
+          referredByCode,
+          referredWalletAddress,
+        })
+        .returning(),
+    );
 
     return referral[0];
   } catch (error) {
@@ -37,7 +39,8 @@ export const getReferralsCount = async (
     const query = db
       .select({ value: count() })
       .from(referralTable)
-      .where(eq(referralTable.referredByCode, referralCode));
+      .where(eq(referralTable.referredByCode, referralCode))
+      .limit(1);
 
     console.log("[SERVER] SQL Query:", {
       sql: query.toSQL().sql,
@@ -45,7 +48,7 @@ export const getReferralsCount = async (
     });
 
     console.log("[SERVER] Executing count query");
-    const result = await query;
+    const result = await executeWithRetry(() => query, 5, 2000);
     console.log("[SERVER] Count query result:", result);
 
     const finalCount = result[0]?.value ?? 0;
@@ -60,7 +63,16 @@ export const getReferralsCount = async (
         stack: error.stack,
         name: error.name,
       });
+
+      if (error.message.includes("timeout")) {
+        throw new Error("Operation timed out. Please try again.");
+      }
+      if (error.message.includes("connection")) {
+        throw new Error(
+          "Database connection issue. Please try again in a moment.",
+        );
+      }
     }
-    throw error;
+    throw new Error("Failed to get referrals count. Please try again.");
   }
 };
