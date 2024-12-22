@@ -28,8 +28,10 @@ export function ReferralProgramCard({
   locale,
 }: ReferralProgramCardProps) {
   const [copied, setCopied] = useState(false);
+  const isLoading = !referralUrl;
 
   const handleCopyReferralLink = () => {
+    if (!referralUrl) return;
     navigator.clipboard.writeText(referralUrl);
     setCopied(true);
     toast.success("Referral link copied to clipboard");
@@ -64,14 +66,19 @@ export function ReferralProgramCard({
           <div className="flex gap-2">
             <Input
               value={referralUrl}
-              placeholder="Loading..."
+              placeholder={
+                isLoading
+                  ? "Loading your referral link..."
+                  : "No referral link available"
+              }
               readOnly
-              className="font-mono text-sm"
+              className={`font-mono text-sm ${isLoading ? "animate-pulse" : ""}`}
             />
             <Button
               variant="secondary"
               onClick={handleCopyReferralLink}
               className="min-w-[100px]"
+              disabled={isLoading}
             >
               {copied ? (
                 <div key="copied" className="flex items-center gap-2">

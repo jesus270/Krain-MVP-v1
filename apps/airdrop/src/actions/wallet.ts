@@ -1,20 +1,44 @@
 "use server";
 
-import { db, Referral, Wallet, walletTable } from "@repo/database";
+import {
+  db as baseDb,
+  Referral,
+  Wallet,
+  walletTable,
+  referralTable,
+} from "@repo/database";
 import { isValidSolanaAddress } from "@repo/utils";
 import { eq } from "drizzle-orm";
 import { createReferral, getReferralsCount } from "./referral";
+import { db } from "../lib/db";
 
 export const createWallet = async ({ address }: { address: string }) => {
+  console.log("Creating wallet for address:", address);
   if (!isValidSolanaAddress(address)) {
+    console.log("Invalid Solana address:", address);
     throw new Error("Invalid Solana address");
   }
 
-  const wallet = await db.insert(walletTable).values({
-    address,
-  });
+  try {
+    const wallet = await db
+      .insert(walletTable)
+      .values({
+        address,
+      })
+      .returning();
 
-  return wallet;
+    console.log("Created wallet:", wallet);
+
+    if (!wallet || wallet.length === 0) {
+      console.error("Failed to create wallet - no wallet returned");
+      throw new Error("Failed to create wallet");
+    }
+
+    return wallet[0];
+  } catch (error) {
+    console.error("Error creating wallet:", error);
+    throw error;
+  }
 };
 
 export interface GetWalletOptions {
@@ -44,36 +68,80 @@ export const getWallet = async <T extends GetWalletOptions["with"]>({
 }: Omit<GetWalletOptions, "with"> & { with?: T }): Promise<
   WalletWithIncludes<T> | undefined
 > => {
-  const where = address
-    ? eq(walletTable.address, address)
-    : referralCode
-      ? eq(walletTable.referralCode, referralCode)
-      : undefined;
+  try {
+    const where = address
+      ? eq(walletTable.address, address)
+      : referralCode
+        ? eq(walletTable.referralCode, referralCode)
+        : undefined;
 
-  const wallet = await db.query.walletTable.findFirst({
-    where,
-    with: {
-      ...(includes?.referredBy ? { referredBy: true } : {}),
-      ...(includes?.referrals ? { referrals: true } : {}),
-    },
-  });
+    // Get wallet and referral in a single query if needed
+    const query = db
+      .select({
+        address: walletTable.address,
+        createdAt: walletTable.createdAt,
+        referralCode: walletTable.referralCode,
+        ...(includes?.referredBy
+          ? {
+              referralId: referralTable.id,
+              referralCreatedAt: referralTable.createdAt,
+              referralUpdatedAt: referralTable.updatedAt,
+              referredByCode: referralTable.referredByCode,
+              referredWalletAddress: referralTable.referredWalletAddress,
+            }
+          : {}),
+      })
+      .from(walletTable)
+      .where(where || undefined);
 
-  if (!wallet) {
-    return undefined;
+    // Add left join for referral if needed
+    if (includes?.referredBy) {
+      query.leftJoin(
+        referralTable,
+        eq(referralTable.referredWalletAddress, walletTable.address),
+      );
+    }
+
+    const result = await query.limit(1).then((rows) => rows[0]);
+
+    if (!result) {
+      return undefined;
+    }
+
+    // Extract referral data if it exists
+    let referredBy: Referral | undefined;
+    if (includes?.referredBy && result.referralId) {
+      referredBy = {
+        id: result.referralId,
+        createdAt: result.referralCreatedAt ?? new Date(),
+        updatedAt: result.referralUpdatedAt ?? new Date(),
+        referredByCode: result.referredByCode ?? "",
+        referredWalletAddress: result.referredWalletAddress ?? "",
+      };
+    }
+
+    const wallet = {
+      address: result.address,
+      createdAt: result.createdAt,
+      referralCode: result.referralCode,
+    };
+
+    const finalResult = {
+      ...wallet,
+      referredBy: includes?.referredBy ? referredBy : undefined,
+      referrals: includes?.referrals ? [] : undefined,
+    } as unknown as WalletWithIncludes<T>;
+
+    if (includes?.referralsCount) {
+      const referralsCount = await getReferralsCount(wallet.referralCode);
+      finalResult.referralsCount = referralsCount;
+    }
+
+    return finalResult;
+  } catch (error) {
+    console.error("Error in getWallet:", error);
+    throw error;
   }
-
-  const result = {
-    ...wallet,
-    referredBy: includes?.referredBy ? wallet.referredBy : undefined,
-    referrals: includes?.referrals ? wallet.referrals : undefined,
-  } as unknown as WalletWithIncludes<T>;
-
-  if (includes?.referralsCount) {
-    const referralsCount = await getReferralsCount(wallet.referralCode);
-    result.referralsCount = referralsCount;
-  }
-
-  return result;
 };
 
 export const updateWalletReferredByCode = async (
@@ -124,7 +192,6 @@ export async function handleSubmitWallet({
   address,
   referredByCode,
 }: HandleSubmitWalletRequest): Promise<HandleSubmitWalletResponse> {
-  console.info("handleSubmitWallet received", { address, referredByCode });
   try {
     if (!isValidSolanaAddress(address)) {
       return {
@@ -133,118 +200,109 @@ export async function handleSubmitWallet({
         data: undefined,
       };
     }
-    console.info("handleSubmitWallet isValidSolanaAddress true");
 
-    const existingWallet = await getWallet({
-      address,
-      with: { referredBy: true },
-    });
+    // Get both wallets in parallel if needed
+    const [existingWallet, referredByWallet] = await Promise.all([
+      getWallet({ address, with: { referredBy: true } }),
+      referredByCode
+        ? getWallet({ referralCode: referredByCode })
+        : Promise.resolve(undefined),
+    ]);
+
+    // Handle existing wallet case
     if (existingWallet) {
-      console.info("handleSubmitWallet existingWallet", existingWallet);
-
+      // Already has a referral
       if (existingWallet?.referredBy?.referredByCode) {
-        const response: HandleSubmitWalletResponse = {
+        return {
           status: "success",
           message: "Wallet already exists and Referral already exists",
           data: existingWallet,
         };
-        console.info("handleSubmitWallet response", response);
-        return response;
-      } else if (
-        referredByCode &&
-        !existingWallet?.referredBy?.referredByCode &&
-        referredByCode !== existingWallet?.referralCode
-      ) {
-        const existingReferredByWallet = await getWallet({
-          referralCode: referredByCode,
-        });
+      }
 
-        if (!existingReferredByWallet) {
-          const response: HandleSubmitWalletResponse = {
-            status: "error",
-            message: "Referral code not found",
-            data: undefined,
-          };
-          console.info("handleSubmitWallet response", response);
-          return response;
-        } else {
-          console.info(
-            "handleSubmitWallet existingReferredByWallet",
-            existingReferredByWallet,
-          );
-          // check if the referredByWallet was created after the existingWallet
-          if (existingReferredByWallet.createdAt > existingWallet.createdAt) {
-            const response: HandleSubmitWalletResponse = {
-              status: "error",
-              message: "Referral code was created after the wallet",
-              data: existingWallet,
-            };
-            console.info("handleSubmitWallet response", response);
-            return response;
-          } else {
-            const updatedWallet = await updateWalletReferredByCode(
-              address,
-              referredByCode,
-            );
-            const response: HandleSubmitWalletResponse = {
-              status: "success",
-              message: "Wallet referred by code updated successfully",
-              data: updatedWallet,
-            };
-            console.info("handleSubmitWallet response", response);
-            return response;
-          }
-        }
-      } else {
-        const response: HandleSubmitWalletResponse = {
+      // No referral code provided or same as existing
+      if (!referredByCode || referredByCode === existingWallet?.referralCode) {
+        return {
           status: "success",
           message: "Wallet already exists",
           data: existingWallet,
         };
-        console.info("handleSubmitWallet response", response);
-        return response;
       }
-    } else {
-      await createWallet({ address });
-      if (referredByCode) {
-        const existingReferredByWallet = await getWallet({
-          referralCode: referredByCode,
-        });
-        if (!existingReferredByWallet) {
-          const response: HandleSubmitWalletResponse = {
-            status: "error",
-            message: "Referral code not found",
-            data: undefined,
-          };
-          console.info("handleSubmitWallet response", response);
-          return response;
-        }
-        await createReferral({
-          referredByCode,
-          referredWalletAddress: address,
-        });
+
+      // Invalid referral code
+      if (!referredByWallet) {
+        return {
+          status: "error",
+          message: "Referral code not found",
+          data: undefined,
+        };
       }
-      const newWallet = await getWallet({
+
+      // Referral code created after wallet
+      if (referredByWallet.createdAt > existingWallet.createdAt) {
+        return {
+          status: "error",
+          message: "Referral code was created after the wallet",
+          data: existingWallet,
+        };
+      }
+
+      // Create referral and get updated wallet
+      await createReferral({
+        referredByCode,
+        referredWalletAddress: address,
+      });
+
+      const updatedWallet = await getWallet({
         address,
         with: { referredBy: true },
       });
-      const response: HandleSubmitWalletResponse = {
+
+      return {
         status: "success",
-        message: "Wallet added successfully",
-        data: newWallet,
+        message: "Wallet referred by code updated successfully",
+        data: updatedWallet,
       };
-      console.info("handleSubmitWallet response", response);
-      return response;
     }
+
+    // Handle new wallet case
+    if (referredByCode && !referredByWallet) {
+      return {
+        status: "error",
+        message: "Referral code not found",
+        data: undefined,
+      };
+    }
+
+    // Create new wallet and referral in parallel if needed
+    const [newWallet] = await Promise.all([
+      createWallet({ address }),
+      referredByCode
+        ? createReferral({
+            referredByCode,
+            referredWalletAddress: address,
+          })
+        : Promise.resolve(undefined),
+    ]);
+
+    // Get the final wallet state with referral
+    const finalWallet = await getWallet({
+      address,
+      with: { referredBy: true },
+    });
+
+    return {
+      status: "success",
+      message: "Wallet added successfully",
+      data: finalWallet,
+    };
   } catch (e) {
     const error = e as Error;
     console.error(error);
-    const response: HandleSubmitWalletResponse = {
+    return {
       status: "error",
       message: error.message,
       data: undefined,
     };
-    console.info("handleSubmitWallet response", response);
-    return response;
   }
 }

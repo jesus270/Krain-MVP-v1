@@ -26,18 +26,35 @@ export function Dashboard({
 
   useEffect(() => {
     if (!userWalletAddress) return;
-    handleSubmitWallet({ address: userWalletAddress, referredByCode });
+
+    // Fetch wallet and submit in parallel
+    Promise.all([
+      getWallet({ address: userWalletAddress, with: { referredBy: true } }),
+      handleSubmitWallet({ address: userWalletAddress, referredByCode }),
+    ])
+      .then(([walletResult, submitResult]) => {
+        if (walletResult) {
+          setWallet(walletResult);
+          if (walletResult.referralCode) {
+            getReferralsCount(walletResult.referralCode)
+              .then((count) => {
+                if (typeof count === "number") {
+                  setReferralsCount(count);
+                }
+              })
+              .catch((error) => {
+                console.error("Error getting referrals count:", error);
+              });
+          }
+        }
+        if (submitResult.status === "error") {
+          console.error("Error submitting wallet:", submitResult.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching wallet data:", error);
+      });
   }, [referredByCode, userWalletAddress]);
-
-  useEffect(() => {
-    if (!userWalletAddress) return;
-    getWallet({ address: userWalletAddress }).then(setWallet);
-  }, [userWalletAddress]);
-
-  useEffect(() => {
-    if (!wallet?.referralCode) return;
-    getReferralsCount(wallet.referralCode).then(setReferralsCount);
-  }, [wallet?.referralCode]);
 
   if (!ready) return null;
   if (ready && (!authenticated || !userWalletAddress)) {
