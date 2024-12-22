@@ -130,7 +130,7 @@ export default function Profile() {
                   <>
                     <Badge variant="secondary">+6,000 points</Badge>
                     <Button
-                      variant="destructive"
+                      variant="outline"
                       size="sm"
                       onClick={() => unlinkWallet(wallet.address)}
                       disabled={!canRemoveAccount}
@@ -165,7 +165,7 @@ export default function Profile() {
                   <>
                     <Badge variant="secondary">+2,000 points</Badge>
                     <Button
-                      variant="destructive"
+                      variant="outline"
                       size="sm"
                       onClick={() => unlinkTwitter(twitterSubject)}
                       disabled={!canRemoveAccount}
@@ -200,7 +200,7 @@ export default function Profile() {
                     <>
                       <Badge variant="secondary">+3,000 points</Badge>
                       <Button
-                        variant="destructive"
+                        variant="outline"
                         size="sm"
                         onClick={() => unlinkEmail(email.address)}
                         disabled={!canRemoveAccount}
