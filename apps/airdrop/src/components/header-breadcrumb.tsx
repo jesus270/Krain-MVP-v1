@@ -11,28 +11,31 @@ import {
 } from "@repo/ui/components/ui/breadcrumb";
 import { Fragment } from "react";
 import Link from "next/link";
+
 export default function HeaderBreadcrumb() {
   const pathname = usePathname();
-  const paths = pathname.split("/");
-  console.log(paths);
+  const paths = pathname.split("/").filter(Boolean);
+
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {paths.map((path, index) => {
-          console.log(path, index);
-          return index === 0 ? null : (
-            <Fragment key={`${path}-${index}`}>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href={`/${path}`}>
-                    {capitalizeEachWord(path === "" ? "Dashboard" : path)}
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            </Fragment>
-          );
-        })}
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link href="/">Dashboard</Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        {paths.map((path, index) => (
+          <Fragment key={`${path}-${index}`}>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href={`/${paths.slice(0, index + 1).join("/")}`}>
+                  {capitalizeEachWord(path)}
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          </Fragment>
+        ))}
       </BreadcrumbList>
     </Breadcrumb>
   );
