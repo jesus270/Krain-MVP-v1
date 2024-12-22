@@ -35,9 +35,9 @@ export function Dashboard({
   }, [userWalletAddress]);
 
   useEffect(() => {
-    if (!userWalletAddress) return;
-    getReferralsCount(userWalletAddress).then(setReferralsCount);
-  }, [userWalletAddress]);
+    if (!wallet?.referralCode) return;
+    getReferralsCount(wallet.referralCode).then(setReferralsCount);
+  }, [wallet?.referralCode]);
 
   if (!ready) return null;
   if (ready && (!authenticated || !userWalletAddress)) {
