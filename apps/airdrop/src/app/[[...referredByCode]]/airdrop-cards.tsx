@@ -39,6 +39,7 @@ import {
   Wallet as WalletIcon,
   User,
   Share2,
+  Construction,
 } from "lucide-react";
 import { XLogo } from "@repo/ui/components/icons/XLogo";
 
@@ -47,6 +48,39 @@ type WalletState = {
   referralsCount: number;
   referralCode: string;
 } | null;
+
+const ProfileCompletionMessage = ({ show }: { show: boolean }) => {
+  if (!show) return null;
+  return (
+    <div className="flex items-start gap-2 text-muted-foreground">
+      <AlertCircle className="h-5 w-5 shrink-0 text-yellow-500" />
+      <p>
+        Complete your{" "}
+        <Link
+          href="/profile"
+          className="text-blue-300 hover:underline font-medium"
+        >
+          Profile
+        </Link>{" "}
+        to be eligible for more points!
+      </p>
+    </div>
+  );
+};
+
+const AdditionalPointsMessage = () => {
+  return (
+    <div className="flex flex-col items-start gap-2 text-muted-foreground">
+      <div className="flex items-center gap-2">
+        <Construction className="h-5 w-5 shrink-0 text-yellow-500" />
+        <p className="text-muted-foreground">
+          Additional points opportunities will be added to the dashboard soon
+          for X Engagement Actions.
+        </p>
+      </div>
+    </div>
+  );
+};
 
 export function AirdropCards({
   referredByCode,
@@ -130,11 +164,7 @@ export function AirdropCards({
   const message = () => {
     if (ready && authenticated && (!userEmailAddress || !userTwitterUsername)) {
       return (
-        <div className="flex items-start gap-2 text-muted-foreground">
-          <CheckCircle2 className="h-5 w-5 shrink-0 text-green-500" />
-          <p className="font-medium">
-            Your wallet is connected and ready for the Airdrop!
-          </p>
+        <div className="flex flex-col items-start gap-2 text-muted-foreground">
           <AlertCircle className="h-5 w-5 shrink-0 text-yellow-500" />
           <p>
             Complete your{" "}
@@ -152,20 +182,14 @@ export function AirdropCards({
 
     if (userEmailAddress && userTwitterUsername) {
       return (
-        <div className="flex items-start gap-2 text-muted-foreground">
-          <CheckCircle2 className="h-5 w-5 shrink-0 text-green-500" />
-          <p>Your wallet is connected and ready for the Airdrop</p>
-          <CheckCircle2 className="h-5 w-5 shrink-0 text-green-500" />
-          <p>
-            Your{" "}
-            <Link
-              href="/profile"
-              className="text-blue-300 hover:underline font-medium"
-            >
-              Profile
-            </Link>{" "}
-            is complete!
-          </p>
+        <div className="flex flex-col items-start gap-2 text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Construction className="h-5 w-5 shrink-0 text-yellow-500" />
+            <p className="text-muted-foreground">
+              Additional points opportunities will be added to the dashboard
+              soon for X Engagement Actions.
+            </p>
+          </div>
         </div>
       );
     }
@@ -213,7 +237,18 @@ export function AirdropCards({
                 {formattedTotalPoints} Points
               </Badge>
             </div>
-            <CardDescription>{message()}</CardDescription>
+            <CardDescription>
+              <div className="space-y-4">
+                <ProfileCompletionMessage
+                  show={
+                    ready &&
+                    authenticated &&
+                    (!userEmailAddress || !userTwitterUsername)
+                  }
+                />
+                <AdditionalPointsMessage />
+              </div>
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
@@ -235,9 +270,23 @@ export function AirdropCards({
                       {formatNumber(walletConnectionPoints, locale)} pts
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1.5">
-                    Earned by adding your wallet
-                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    {userWalletAddress ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <p className="text-xs text-muted-foreground">
+                          Wallet successfully connected
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="h-4 w-4 text-yellow-500" />
+                        <p className="text-xs text-muted-foreground">
+                          Connect your wallet to earn points
+                        </p>
+                      </>
+                    )}
+                  </div>
                 </div>
                 <div className="rounded-lg border bg-card/50 p-3">
                   <div className="flex items-center justify-between">
@@ -279,11 +328,24 @@ export function AirdropCards({
                     {formatNumber(referralPoints, locale)} pts
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1.5">
-                  {referralsCount > 0
-                    ? `Earned from ${formatNumber(referralsCount, locale)} referral${referralsCount === 1 ? "" : "s"}`
-                    : "Earn 1,000 points for each friend you refer"}
-                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  {referralsCount > 0 ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <p className="text-xs text-muted-foreground">
+                        You've referred {formatNumber(referralsCount, locale)}{" "}
+                        friend{referralsCount === 1 ? "" : "s"}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="h-4 w-4 text-yellow-500" />
+                      <p className="text-xs text-muted-foreground">
+                        Invite friends to earn points
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -306,11 +368,23 @@ export function AirdropCards({
                       {formatNumber(twitterPoints, locale)} pts
                     </Badge>
                   </div>
-                  {!userTwitterUsername && (
-                    <p className="text-xs text-muted-foreground mt-1.5">
-                      Connect X.com to earn 2,000 points
-                    </p>
-                  )}
+                  <div className="flex items-center gap-2 mt-2">
+                    {userTwitterUsername ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <p className="text-xs text-muted-foreground">
+                          X.com account connected
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="h-4 w-4 text-yellow-500" />
+                        <p className="text-xs text-muted-foreground">
+                          Connect X.com to earn 2,000 points
+                        </p>
+                      </>
+                    )}
+                  </div>
                 </div>
                 <div className="rounded-lg border bg-card/50 p-3">
                   <div className="flex items-center justify-between">
@@ -325,11 +399,23 @@ export function AirdropCards({
                       {formatNumber(emailPoints, locale)} pts
                     </Badge>
                   </div>
-                  {!userEmailAddress && (
-                    <p className="text-xs text-muted-foreground mt-1.5">
-                      Connect Email to earn 3,000 points
-                    </p>
-                  )}
+                  <div className="flex items-center gap-2 mt-2">
+                    {userEmailAddress ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <p className="text-xs text-muted-foreground">
+                          Email address connected
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="h-4 w-4 text-yellow-500" />
+                        <p className="text-xs text-muted-foreground">
+                          Connect Email to earn 3,000 points
+                        </p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
