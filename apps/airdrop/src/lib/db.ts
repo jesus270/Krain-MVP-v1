@@ -5,10 +5,10 @@ import * as schema from "@repo/database";
 // Create a single shared connection pool with optimized settings
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  max: 3, // Reduce max connections further
-  connectionTimeoutMillis: 10000, // Increase connection timeout
-  idleTimeoutMillis: 30000, // Increase idle timeout
-  maxUses: 1000, // Reduce max uses to prevent connection issues
+  max: 10, // Increase max connections
+  connectionTimeoutMillis: 5000, // Reduce connection timeout
+  idleTimeoutMillis: 10000, // Reduce idle timeout
+  maxUses: 7500, // Increase max uses
   allowExitOnIdle: true,
 });
 
@@ -22,7 +22,7 @@ export { pool };
 export async function executeWithRetry<T>(
   operation: () => Promise<T>,
   maxRetries = 3,
-  delay = 1000,
+  delay = 500,
 ): Promise<T> {
   let lastError;
   for (let i = 0; i < maxRetries; i++) {
@@ -32,12 +32,16 @@ export async function executeWithRetry<T>(
       lastError = error;
       if (
         error instanceof Error &&
-        error.message.includes("too many connections")
+        (error.message.includes("too many connections") ||
+          error.message.includes("server login has been failing"))
       ) {
         console.warn(
           `Database connection attempt ${i + 1} failed, retrying...`,
+          error.message,
         );
-        await new Promise((resolve) => setTimeout(resolve, delay * (i + 1)));
+        await new Promise((resolve) =>
+          setTimeout(resolve, delay * Math.pow(2, i)),
+        );
         continue;
       }
       throw error;

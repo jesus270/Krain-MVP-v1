@@ -20,6 +20,7 @@ export function Dashboard({
   const [referralsCount, setReferralsCount] = useState<number>(0);
   const [isLoadingWallet, setIsLoadingWallet] = useState(true);
   const [isLoadingReferrals, setIsLoadingReferrals] = useState(true);
+  const [error, setError] = useState<string | undefined>(undefined);
   const locale = useLocale();
 
   const userEmailAddress = user?.email?.address ?? undefined;
@@ -35,41 +36,43 @@ export function Dashboard({
 
     setIsLoadingWallet(true);
     setIsLoadingReferrals(true);
+    setError(undefined);
 
-    // Fetch wallet and submit in parallel
-    Promise.all([
-      getWallet({ address: userWalletAddress, with: { referredBy: true } }),
-      handleSubmitWallet({ address: userWalletAddress, referredByCode }),
-    ])
-      .then(([walletResult, submitResult]) => {
+    // First get the wallet
+    getWallet({ address: userWalletAddress, with: { referredBy: true } })
+      .then((walletResult) => {
         if (walletResult) {
           setWallet(walletResult);
-          if (walletResult.referralCode) {
-            getReferralsCount(walletResult.referralCode)
-              .then((count) => {
-                if (typeof count === "number") {
-                  setReferralsCount(count);
-                }
-              })
-              .catch((error) => {
-                console.error("Error getting referrals count:", error);
-              })
-              .finally(() => {
-                setIsLoadingReferrals(false);
-              });
-          } else {
-            setIsLoadingReferrals(false);
-          }
+          // Then submit wallet if needed
+          return handleSubmitWallet({
+            address: userWalletAddress,
+            referredByCode,
+          }).then(() => walletResult);
         }
-        if (submitResult.status === "error") {
-          console.error("Error submitting wallet:", submitResult.message);
+        return undefined;
+      })
+      .then((walletResult) => {
+        if (walletResult?.referralCode) {
+          // Finally get referrals count
+          return getReferralsCount(walletResult.referralCode)
+            .then((count) => {
+              if (typeof count === "number") {
+                setReferralsCount(count);
+              }
+            })
+            .catch((error) => {
+              console.error("Error getting referrals count:", error);
+              setError("Failed to load referrals. Please try again.");
+            });
         }
       })
       .catch((error) => {
         console.error("Error fetching wallet data:", error);
+        setError("Failed to load wallet data. Please try again.");
       })
       .finally(() => {
         setIsLoadingWallet(false);
+        setIsLoadingReferrals(false);
       });
   }, [referredByCode, userWalletAddress]);
 
@@ -97,6 +100,11 @@ export function Dashboard({
   return (
     <main className="container mx-auto p-4">
       <div className="max-w-2xl mx-auto space-y-6">
+        {error && (
+          <div className="bg-destructive/15 text-destructive px-4 py-3 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
         <PointsStatusCard
           totalPoints={totalPoints}
           userWalletAddress={userWalletAddress}

@@ -24,9 +24,6 @@ export function ReferralPointsSection({
   locale,
   isLoading,
 }: ReferralPointsSectionProps) {
-  const showLoading =
-    isLoading || (referralsCount === 0 && referralPoints === 0);
-
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -44,17 +41,19 @@ export function ReferralPointsSection({
               variant={referralsCount > 0 ? "secondary" : "outline"}
               className="text-center"
             >
-              {showLoading
-                ? "Loading..."
-                : `${formatNumber(referralPoints, locale)} pts`}
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Loading...
+                </span>
+              ) : (
+                `${formatNumber(referralPoints, locale)} pts`
+              )}
             </Badge>
-            {showLoading && (
-              <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
-            )}
           </div>
         </div>
         <div className="flex items-center gap-2 mt-2">
-          {showLoading ? (
+          {isLoading ? (
             <>
               <AlertCircle className="h-4 w-4 text-yellow-500" />
               <p className="text-xs text-muted-foreground">

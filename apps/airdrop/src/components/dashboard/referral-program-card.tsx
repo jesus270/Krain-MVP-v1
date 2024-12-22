@@ -66,11 +66,15 @@ export function ReferralProgramCard({
                 variant={isLoadingReferrals ? "outline" : "secondary"}
                 className="px-4 py-2"
               >
-                {formatNumber(referralsCount, locale)} Referrals
+                {isLoadingReferrals ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Loading...
+                  </span>
+                ) : (
+                  `${formatNumber(referralsCount, locale)} Referrals`
+                )}
               </Badge>
-              {isLoadingReferrals && (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              )}
             </div>
           )}
         </div>

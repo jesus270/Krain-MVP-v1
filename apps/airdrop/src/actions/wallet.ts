@@ -125,18 +125,45 @@ export const getWallet = async <T extends GetWalletOptions["with"]>({
       referralCode: result.referralCode,
     };
 
+    // Prepare all additional data fetches in parallel
+    const additionalDataPromises: Promise<any>[] = [];
+
+    if (includes?.referralsCount) {
+      additionalDataPromises.push(
+        executeWithRetry(() => getReferralsCount(wallet.referralCode)).catch(
+          (error) => {
+            console.error("Error getting referrals count:", error);
+            return 0;
+          },
+        ),
+      );
+    }
+
+    if (includes?.referrals) {
+      additionalDataPromises.push(
+        executeWithRetry(() =>
+          db
+            .select()
+            .from(referralTable)
+            .where(eq(referralTable.referredByCode, wallet.referralCode)),
+        ).catch((error) => {
+          console.error("Error getting referrals:", error);
+          return [];
+        }),
+      );
+    }
+
+    // Wait for all additional data
+    const [referralsCount, referrals] = await Promise.all(
+      additionalDataPromises,
+    );
+
     const finalResult = {
       ...wallet,
       referredBy: includes?.referredBy ? referredBy : undefined,
-      referrals: includes?.referrals ? [] : undefined,
+      referrals: includes?.referrals ? referrals : undefined,
+      ...(includes?.referralsCount ? { referralsCount } : {}),
     } as unknown as WalletWithIncludes<T>;
-
-    if (includes?.referralsCount) {
-      const referralsCount = await executeWithRetry(() =>
-        getReferralsCount(wallet.referralCode),
-      );
-      finalResult.referralsCount = referralsCount;
-    }
 
     return finalResult;
   } catch (error) {
@@ -204,9 +231,9 @@ export async function handleSubmitWallet({
 
     // Get both wallets in parallel if needed
     const [existingWallet, referredByWallet] = await Promise.all([
-      getWallet({ address, with: { referredBy: true } }),
+      getWallet({ address, with: { referredBy: true } }).catch(() => undefined),
       referredByCode
-        ? getWallet({ referralCode: referredByCode })
+        ? getWallet({ referralCode: referredByCode }).catch(() => undefined)
         : Promise.resolve(undefined),
     ]);
 
@@ -248,16 +275,28 @@ export async function handleSubmitWallet({
         };
       }
 
-      // Create referral and get updated wallet
-      await createReferral({
-        referredByCode,
-        referredWalletAddress: address,
-      });
+      // Create referral and get updated wallet in parallel
+      const [, updatedWallet] = await Promise.all([
+        createReferral({
+          referredByCode,
+          referredWalletAddress: address,
+        }).catch((error) => {
+          console.error("Error creating referral:", error);
+          return undefined;
+        }),
+        getWallet({
+          address,
+          with: { referredBy: true },
+        }).catch(() => undefined),
+      ]);
 
-      const updatedWallet = await getWallet({
-        address,
-        with: { referredBy: true },
-      });
+      if (!updatedWallet) {
+        return {
+          status: "error",
+          message: "Failed to update wallet with referral",
+          data: existingWallet,
+        };
+      }
 
       return {
         status: "success",
@@ -276,21 +315,37 @@ export async function handleSubmitWallet({
     }
 
     // Create new wallet and referral in parallel if needed
-    const [newWallet] = await Promise.all([
-      createWallet({ address }),
+    const [newWallet, referral] = await Promise.all([
+      createWallet({ address }).catch(() => undefined),
       referredByCode
         ? createReferral({
             referredByCode,
             referredWalletAddress: address,
-          })
+          }).catch(() => undefined)
         : Promise.resolve(undefined),
     ]);
+
+    if (!newWallet) {
+      return {
+        status: "error",
+        message: "Failed to create wallet",
+        data: undefined,
+      };
+    }
 
     // Get the final wallet state with referral
     const finalWallet = await getWallet({
       address,
       with: { referredBy: true },
-    });
+    }).catch(() => undefined);
+
+    if (!finalWallet) {
+      return {
+        status: "error",
+        message: "Failed to get updated wallet",
+        data: undefined,
+      };
+    }
 
     return {
       status: "success",
@@ -299,7 +354,7 @@ export async function handleSubmitWallet({
     };
   } catch (e) {
     const error = e as Error;
-    console.error(error);
+    console.error("Error in handleSubmitWallet:", error);
     return {
       status: "error",
       message: error.message,
