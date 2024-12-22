@@ -84,9 +84,12 @@ export function AirdropCards({
         <Card className="border-2 max-w-2xl mx-auto">
           <CardHeader className="space-y-4">
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-yellow-500" />
-              <CardTitle className="text-2xl">
-                $KRAIN Airdrop Public Registration Closed
+              <CardTitle className="space-y-2 flex flex-col items-center w-full">
+                <h1 className="text-2xl font-bold">$KRAIN Airdrop</h1>
+                <h2 className="text-lg font-medium flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-yellow-500" />
+                  Login Required for Registration
+                </h2>
               </CardTitle>
             </div>
             <CardDescription className="space-y-4 text-base">
