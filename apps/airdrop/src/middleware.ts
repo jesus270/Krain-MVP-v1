@@ -1,7 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getIronSession, IronSession } from "iron-session";
+import { getIronSession, IronSession, SessionOptions } from "iron-session";
 import { RequestCookies } from "next/dist/server/web/spec-extension/cookies";
-import { CookieSerializeOptions } from "cookie";
 
 interface PrivyUser {
   id: string;
@@ -25,29 +24,6 @@ interface CookieStore {
   set(name: string, value: string, cookie?: Partial<ResponseCookie>): void;
   set(options: ResponseCookie): void;
 }
-
-const PROTECTED_PATHS = ["/api/wallet", "/api/referral"];
-const PUBLIC_PATHS = [
-  "/api/auth",
-  "/_next",
-  "/static",
-  "/favicon.ico",
-  "/blocked",
-  "/terms",
-];
-
-const sessionOptions = {
-  cookieName: "privy_session",
-  password:
-    process.env.SESSION_SECRET ||
-    "complex_password_at_least_32_characters_long",
-  cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-    sameSite: "lax" as const,
-    path: "/",
-  },
-};
 
 // Create a wrapper to adapt RequestCookies to CookieStore interface
 class CookieAdapter implements CookieStore {
@@ -75,6 +51,29 @@ class CookieAdapter implements CookieStore {
     }
   }
 }
+
+const PROTECTED_PATHS = ["/api/wallet", "/api/referral"];
+const PUBLIC_PATHS = [
+  "/api/auth",
+  "/_next",
+  "/static",
+  "/favicon.ico",
+  "/blocked",
+  "/terms",
+];
+
+const sessionOptions = {
+  cookieName: "privy_session",
+  password:
+    process.env.SESSION_SECRET ||
+    "complex_password_at_least_32_characters_long",
+  cookieOptions: {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: "lax" as const,
+    path: "/",
+  },
+};
 
 // Sanitize and validate request headers
 function sanitizeRequest(request: NextRequest): boolean {
@@ -124,13 +123,13 @@ export async function middleware(request: NextRequest) {
   const requestCookies = request.cookies;
   const responseCookies = new Map<
     string,
-    { name: string; value: string; options?: CookieSerializeOptions }
+    { name: string; value: string; options?: SessionOptions["cookieOptions"] }
   >();
 
   const setCookie = (
     name: string,
     value: string,
-    options?: CookieSerializeOptions,
+    options?: SessionOptions["cookieOptions"],
   ) => {
     responseCookies.set(name, { name, value, options });
   };
@@ -139,7 +138,10 @@ export async function middleware(request: NextRequest) {
     return requestCookies.get(name);
   };
 
-  const deleteCookie = (name: string, options?: CookieSerializeOptions) => {
+  const deleteCookie = (
+    name: string,
+    options?: SessionOptions["cookieOptions"],
+  ) => {
     setCookie(name, "", { ...options, maxAge: 0 });
   };
 
