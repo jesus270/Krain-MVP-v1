@@ -77,3 +77,13 @@ export async function simulateServerAction<T>(
     };
   }
 }
+
+export function enableConsoleError() {
+  const originalConsoleError = console.error;
+  beforeEach(() => {
+    console.error = originalConsoleError;
+  });
+  afterEach(() => {
+    console.error = jest.fn();
+  });
+}

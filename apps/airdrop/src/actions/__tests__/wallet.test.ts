@@ -6,6 +6,16 @@ jest.mock("../../lib/auth", () => ({
   })),
 }));
 
+// Mock console.error before tests
+const originalConsoleError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+
+afterAll(() => {
+  console.error = originalConsoleError;
+});
+
 import { createWallet, getWallet } from "../wallet";
 import { simulateServerAction } from "../../lib/test-utils";
 import { mockWallet } from "../../lib/__mocks__/database";

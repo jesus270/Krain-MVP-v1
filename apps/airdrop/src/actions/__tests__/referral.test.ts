@@ -11,6 +11,19 @@ jest.mock("../../lib/auth", () => ({
   })),
 }));
 
+// Mock console.error and console.log before tests
+const originalConsoleError = console.error;
+const originalConsoleLog = console.log;
+beforeAll(() => {
+  console.error = jest.fn();
+  console.log = jest.fn();
+});
+
+afterAll(() => {
+  console.error = originalConsoleError;
+  console.log = originalConsoleLog;
+});
+
 import { createReferral, getReferralsCount } from "../referral";
 import { simulateServerAction } from "../../lib/test-utils";
 import { mockReferral } from "../../lib/__mocks__/database";

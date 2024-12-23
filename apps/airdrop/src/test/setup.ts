@@ -217,3 +217,13 @@ delete (global as any).window;
 
 // Mock fetch
 global.fetch = jest.fn();
+
+// Mock console.error to suppress expected error messages during tests
+const originalConsoleError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+
+afterAll(() => {
+  console.error = originalConsoleError;
+});
