@@ -36,13 +36,14 @@ export const createReferral = async (input: {
       .values({
         referredByCode: parsed.referredByCode,
         referredWalletAddress: parsed.referredWalletAddress,
-        createdAt: new Date(),
       })
       .returning();
 
-    // Revalidate related pages
-    revalidatePath("/");
-    revalidatePath("/profile");
+    // Only revalidate paths in non-test environments
+    if (process.env.NODE_ENV !== "test") {
+      revalidatePath("/");
+      revalidatePath("/profile");
+    }
 
     return referral[0];
   } catch (error) {
@@ -88,12 +89,6 @@ export const getReferralsCount = async (
       .where(eq(referralTable.referredByCode, referralCode));
 
     const referralCount = result[0]?.count ?? 0;
-
-    console.log("[SERVER] Referral count results:", {
-      referralCode,
-      referralCount,
-      result,
-    });
 
     return referralCount;
   } catch (error) {

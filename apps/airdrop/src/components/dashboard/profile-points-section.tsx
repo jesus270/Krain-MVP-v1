@@ -32,7 +32,7 @@ export function ProfilePointsSection({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <XLogo className="h-4 w-4 text-primary" key="twitter-icon" />
-              <span className="text-sm font-medium">Twitter</span>
+              <span className="text-sm font-medium">X Account</span>
             </div>
             <Badge
               variant={userTwitterUsername ? "secondary" : "outline"}
@@ -49,7 +49,7 @@ export function ProfilePointsSection({
                   key="twitter-check"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Twitter account connected
+                  X account connected
                 </p>
               </div>
             ) : (
@@ -62,7 +62,7 @@ export function ProfilePointsSection({
                   key="twitter-alert"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Connect Twitter to earn 3,000 points
+                  Connect X to earn 2,000 points
                 </p>
               </div>
             )}

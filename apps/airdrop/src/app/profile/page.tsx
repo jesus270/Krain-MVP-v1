@@ -202,7 +202,7 @@ export default function Profile() {
               <div className="flex items-center gap-2">
                 <XLogo className="h-5 w-5" key="twitter-icon" />
                 <div>
-                  <h3 className="font-semibold">X.com</h3>
+                  <h3 className="font-semibold">X Account</h3>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">
                       {user?.twitter?.username || "Not connected"}

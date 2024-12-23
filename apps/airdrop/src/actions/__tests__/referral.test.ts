@@ -1,5 +1,18 @@
-import { simulateServerAction } from "../../lib/test-utils";
+// Add TextEncoder polyfill
+const { TextEncoder, TextDecoder } = require("util");
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
+// Mock auth module first
+jest.mock("../../lib/auth", () => ({
+  getPrivyUser: jest.fn().mockImplementation(async () => ({
+    id: "test-user",
+    wallet: { address: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b" },
+  })),
+}));
+
 import { createReferral, getReferralsCount } from "../referral";
+import { simulateServerAction } from "../../lib/test-utils";
 
 describe("Referral Actions Security", () => {
   const mockUser = {
@@ -7,11 +20,12 @@ describe("Referral Actions Security", () => {
     wallet: { address: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b" },
   };
 
-  const mockReferral = {
+  const expectedReferral = {
     id: 1,
     referredByCode: "TEST12",
     referredWalletAddress: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
-    createdAt: expect.any(Date),
+    createdAt: new Date("2024-01-01T00:00:00.000Z"),
+    updatedAt: new Date("2024-01-01T00:00:00.000Z"),
   };
 
   describe("createReferral", () => {
@@ -27,8 +41,8 @@ describe("Referral Actions Security", () => {
         ],
         { authenticated: false },
       );
-      expect(error?.message).toContain("Unauthorized");
-    }, 30000);
+      expect(error?.message).toContain("Please log in first");
+    });
 
     it("should reject referrals for other wallets", async () => {
       const { error } = await simulateServerAction(
@@ -45,7 +59,7 @@ describe("Referral Actions Security", () => {
       expect(error?.message).toContain(
         "can only create referrals for your own wallet",
       );
-    }, 30000);
+    });
 
     it("should validate referral code format", async () => {
       const { error } = await simulateServerAction(
@@ -62,7 +76,7 @@ describe("Referral Actions Security", () => {
       expect(error?.message).toContain(
         "String must contain at least 6 character(s)",
       );
-    }, 30000);
+    });
 
     it("should create a referral successfully with valid data", async () => {
       const { data, error } = await simulateServerAction(
@@ -78,8 +92,8 @@ describe("Referral Actions Security", () => {
       );
 
       expect(error).toBeUndefined();
-      expect(data).toEqual(mockReferral);
-    }, 30000);
+      expect(data).toEqual(expectedReferral);
+    });
   });
 
   describe("getReferralsCount", () => {
@@ -89,8 +103,8 @@ describe("Referral Actions Security", () => {
         ["TEST12"],
         { authenticated: false },
       );
-      expect(error?.message).toContain("Unauthorized");
-    }, 30000);
+      expect(error?.message).toContain("Please log in first");
+    });
 
     it("should reject invalid referral codes", async () => {
       const { error } = await simulateServerAction(
@@ -99,9 +113,23 @@ describe("Referral Actions Security", () => {
         { mockUser },
       );
       expect(error?.message).toContain("Invalid referral code");
-    }, 30000);
+    });
 
     it("should return referral count for valid requests", async () => {
+      // First create a referral
+      await simulateServerAction(
+        createReferral,
+        [
+          {
+            referredByCode: "TEST12",
+            referredWalletAddress:
+              "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
+          },
+        ],
+        { mockUser },
+      );
+
+      // Then check the count
       const { data, error } = await simulateServerAction(
         getReferralsCount,
         ["TEST12"],
@@ -110,6 +138,6 @@ describe("Referral Actions Security", () => {
 
       expect(error).toBeUndefined();
       expect(data).toBe(1);
-    }, 30000);
+    });
   });
 });

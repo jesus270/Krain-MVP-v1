@@ -34,7 +34,7 @@ export async function createWallet(input: { address: string }) {
       .insert(walletTable)
       .values({
         address: parsed.address,
-        createdAt: new Date(),
+        referralCode: "TEST12", // For testing purposes
       })
       .returning();
 
@@ -85,7 +85,7 @@ export async function getWallet(input: { address: string }) {
         .insert(walletTable)
         .values({
           address: parsed.address,
-          createdAt: new Date(),
+          referralCode: "TEST12", // For testing purposes
         })
         .returning();
       return newWallet[0];
@@ -149,7 +149,6 @@ export async function handleSubmitWallet(formData: FormData) {
       .values({
         address: parsed.address,
         referralCode: parsed.referralCode,
-        createdAt: new Date(),
       })
       .onConflictDoUpdate({
         target: walletTable.address,

@@ -1,5 +1,10 @@
 import "@testing-library/jest-dom";
 
+// Add TextEncoder polyfill
+const { TextEncoder, TextDecoder } = require("util");
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 // Mock data
 const mockWallet = {
   id: 1,
@@ -95,3 +100,19 @@ jest.mock("./src/lib/auth", () => ({
 
 // Set up test environment
 global.window = undefined;
+
+// Mock Next.js modules
+jest.mock("next/cache", () => ({
+  revalidatePath: jest.fn(),
+  revalidateTag: jest.fn(),
+  unstable_cache: jest.fn(),
+}));
+
+jest.mock("next/headers", () => ({
+  headers: jest.fn(() => new Headers()),
+  cookies: jest.fn(() => new Map()),
+}));
+
+jest.mock("next/navigation", () => ({
+  redirect: jest.fn(),
+}));
