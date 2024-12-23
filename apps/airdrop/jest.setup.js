@@ -48,7 +48,7 @@ jest.mock("@repo/database", () => {
   const selectMock = jest.fn().mockReturnValue({
     from: jest.fn().mockReturnValue({
       where: jest.fn().mockReturnValue({
-        get: jest.fn().mockResolvedValue([mockWallet]),
+        limit: jest.fn().mockResolvedValue([mockWallet]),
       }),
     }),
   });
@@ -82,6 +82,20 @@ jest.mock("@repo/database", () => {
       delete: jest.fn().mockResolvedValue([]),
       update: jest.fn().mockResolvedValue([mockWallet]),
     },
+    walletTable: {
+      id: { serial: "serial" },
+      address: { text: "text" },
+      referralCode: { text: "text" },
+      createdAt: { timestamp: "timestamp" },
+    },
+    referralTable: {
+      id: { serial: "serial" },
+      referredByCode: { text: "text" },
+      referredWalletAddress: { text: "text" },
+      createdAt: { timestamp: "timestamp" },
+    },
+    eq: jest.fn((a, b) => ({ operator: "=", left: a, right: b })),
+    count: jest.fn(() => ({ value: 1 })),
   };
 });
 

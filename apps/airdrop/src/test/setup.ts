@@ -86,6 +86,14 @@ jest.mock("@repo/database", () => {
       return {
         from: jest.fn().mockImplementation((table) => ({
           where: jest.fn().mockImplementation(() => {
+            if (
+              fields &&
+              typeof fields === "object" &&
+              "count" in fields &&
+              table === mockReferralTable
+            ) {
+              return Promise.resolve([{ count: 1 }]);
+            }
             if (table === mockWalletTable) {
               return {
                 limit: jest.fn().mockResolvedValue([
@@ -99,20 +107,21 @@ jest.mock("@repo/database", () => {
               };
             }
             if (table === mockReferralTable) {
-              if (fields?.count) {
-                return Promise.resolve([{ count: 1n }]);
-              }
-              return Promise.resolve([
-                {
-                  id: 1,
-                  referredByCode: "TEST12",
-                  referredWalletAddress:
-                    "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
-                  createdAt: new Date(),
-                },
-              ]);
+              return {
+                limit: jest.fn().mockResolvedValue([
+                  {
+                    id: 1,
+                    referredByCode: "TEST12",
+                    referredWalletAddress:
+                      "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
+                    createdAt: new Date(),
+                  },
+                ]),
+              };
             }
-            return Promise.resolve([]);
+            return {
+              limit: jest.fn().mockResolvedValue([]),
+            };
           }),
         })),
       };
