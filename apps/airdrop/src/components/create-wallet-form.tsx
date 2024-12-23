@@ -59,7 +59,7 @@ export default function CreateWalletForm({
     try {
       setIsLoading(true);
       const wallet = await handleSubmitWallet({
-        address: walletAddress,
+        walletAddress,
         referredByCode,
       });
 
@@ -90,14 +90,14 @@ export default function CreateWalletForm({
         <CardContent>
           <Form {...form}>
             <form
-              action={async (formData) => {
+              action={async (formData: FormData) => {
                 const walletAddress = formData.get("walletAddress") as string;
                 if (!walletAddress) return;
 
                 try {
                   setIsLoading(true);
                   const wallet = await handleSubmitWallet({
-                    address: walletAddress,
+                    walletAddress,
                     referredByCode,
                   });
 

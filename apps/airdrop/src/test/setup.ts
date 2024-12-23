@@ -1,6 +1,10 @@
 import "@testing-library/jest-dom";
 import { TextEncoder, TextDecoder } from "node:util";
 
+declare global {
+  var globalThis: typeof global;
+}
+
 // Mock web APIs
 global.Request = class MockRequest {
   constructor(input: string | Request, init?: RequestInit) {}

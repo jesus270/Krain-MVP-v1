@@ -114,7 +114,10 @@ export function Dashboard({
               const formData = new FormData();
               formData.append("address", userWalletAddress);
               formData.append("referredByCode", referredByCode);
-              const updatedWallet = await handleSubmitWallet(formData);
+              const updatedWallet = await handleSubmitWallet({
+                walletAddress: userWalletAddress,
+                referredByCode,
+              });
               if (isMounted && updatedWallet) {
                 setWallet(updatedWallet);
                 walletResult = updatedWallet;

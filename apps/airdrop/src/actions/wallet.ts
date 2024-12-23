@@ -109,7 +109,10 @@ export async function getWallet(input: { address: string }) {
   }
 }
 
-export async function handleSubmitWallet(formData: FormData) {
+export async function handleSubmitWallet(input: {
+  walletAddress: string;
+  referredByCode?: string;
+}) {
   try {
     // Check authentication first
     const user = await getPrivyUser();
@@ -117,14 +120,11 @@ export async function handleSubmitWallet(formData: FormData) {
       throw new Error("Unauthorized: Please log in first");
     }
 
-    // Parse form data
-    const input = {
-      address: formData.get("address") as string,
-      referralCode: formData.get("referredByCode") as string,
-    };
-
-    // Validate input
-    const parsed = walletSchema.parse(input);
+    // Parse input
+    const parsed = walletSchema.parse({
+      address: input.walletAddress,
+      referralCode: input.referredByCode,
+    });
 
     // Verify user can only submit their own wallet
     if (parsed.address !== user.wallet.address) {
@@ -162,7 +162,7 @@ export async function handleSubmitWallet(formData: FormData) {
   } catch (error) {
     console.error("[SERVER] Error handling wallet submission:", {
       error,
-      formData: Object.fromEntries(formData),
+      input,
       stack: error instanceof Error ? error.stack : undefined,
     });
 
