@@ -1,18 +1,27 @@
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
-  root: true,
   extends: ["@repo/eslint-config/next.js"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    project: true,
+    project: ["./tsconfig.json", "./tsconfig.test.json"],
   },
   env: {
     jest: true,
     node: true,
   },
+  rules: {
+    "no-unused-vars": [
+      "warn",
+      { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+    ],
+  },
   overrides: [
     {
-      files: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
+      files: [
+        "**/__tests__/**/*.[jt]s?(x)",
+        "**/?(*.)+(spec|test).[jt]s?(x)",
+        "**/__mocks__/**/*.[jt]s?(x)",
+      ],
       extends: ["plugin:testing-library/react"],
       env: {
         jest: true,

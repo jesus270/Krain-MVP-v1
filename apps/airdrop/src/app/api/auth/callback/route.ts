@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { setPrivyUser } from "@/lib/auth";
+import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,13 +36,24 @@ export async function POST(request: NextRequest) {
 
     console.log("[SERVER] User session set successfully");
 
-    // Return the response with the session cookie
+    // Create response with session cookie
     const response = NextResponse.json({ success: true });
 
-    // Log the response headers and cookies
+    // Log all cookies after session is set
+    console.log("[SERVER] Cookies after session set:", {
+      all: Object.fromEntries(
+        Object.entries(await cookies()).filter(
+          ([key]) => key !== "get" && key !== "has",
+        ),
+      ),
+      sessionCookie: (await cookies()).get("privy_session"),
+    });
+
+    // Log the response details
     console.log("[SERVER] Auth callback response:", {
       headers: Object.fromEntries(response.headers.entries()),
       cookies: response.cookies.getAll(),
+      status: response.status,
     });
 
     return response;

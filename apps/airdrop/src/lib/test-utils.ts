@@ -1,48 +1,19 @@
-import { type Wallet, type Referral } from "@repo/database";
-import { mockDatabase, mockWallet, mockReferral } from "./__mocks__/database";
+import { mockDatabase } from "./__mocks__/database";
 
-// Add TextEncoder polyfill
-const { TextEncoder, TextDecoder } = require("util");
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder;
-
-// Track mock database state
-let mockDbState = {
-  wallets: [mockWallet],
-  referrals: [mockReferral],
-};
-
-// Reset mock database state before each test
-beforeEach(() => {
-  mockDbState = {
-    wallets: [mockWallet],
-    referrals: [mockReferral],
-  };
-});
-
-// Mock database operations
-jest.mock("@repo/database", () => mockDatabase);
-
-// Also mock the local db module to prevent actual database connections
 jest.mock("./db", () => ({
   db: mockDatabase.db,
-  executeWithRetry: jest.fn((fn) => fn()),
-  executeWithTimeout: jest.fn((fn) => fn),
+  executeWithRetry: jest.fn((_fn) => _fn()),
+  executeWithTimeout: jest.fn((_fn) => _fn),
 }));
-
-export type SimulateServerActionResult<T> = {
-  error?: Error;
-  data?: T;
-};
 
 export async function simulateServerAction<T>(
   action: (...args: any[]) => Promise<T>,
-  args: any[] = [],
+  _args: any[] = [],
   options: {
     authenticated?: boolean;
     mockUser?: any;
   } = {},
-): Promise<SimulateServerActionResult<T>> {
+): Promise<{ data?: T; error?: Error }> {
   try {
     // Handle auth mocking
     const { authenticated = true, mockUser } = options;
@@ -60,30 +31,14 @@ export async function simulateServerAction<T>(
     });
 
     try {
-      const result = await action(...args);
+      const result = await action(..._args);
       return { data: result };
     } catch (error) {
-      if (error instanceof Error) {
-        return { error };
-      }
-      return { error: new Error(String(error)) };
+      return { error: error as Error };
     }
-  } catch (error) {
-    if (error instanceof Error) {
-      return { error };
-    }
-    return {
-      error: new Error(String(error)),
-    };
+  } finally {
+    // Reset auth mock
+    const { getPrivyUser } = require("./auth");
+    getPrivyUser.mockReset();
   }
-}
-
-export function enableConsoleError() {
-  const originalConsoleError = console.error;
-  beforeEach(() => {
-    console.error = originalConsoleError;
-  });
-  afterEach(() => {
-    console.error = jest.fn();
-  });
 }

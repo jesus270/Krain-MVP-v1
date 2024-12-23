@@ -1,7 +1,7 @@
 "use client";
 
 import { usePrivy } from "@privy-io/react-auth";
-import { useWallets, useSolanaWallets } from "@privy-io/react-auth";
+import { useSolanaWallets } from "@privy-io/react-auth";
 import {
   Card,
   CardContent,
@@ -15,12 +15,10 @@ import { Badge } from "@repo/ui/components/ui/badge";
 import { Separator } from "@repo/ui/components/ui/separator";
 import {
   Wallet,
-  Twitter,
   Mail,
   AlertCircle,
   CheckCircle2,
   XCircle,
-  XIcon,
   User,
 } from "lucide-react";
 import { XLogo } from "@repo/ui/components/icons/XLogo";
@@ -32,23 +30,18 @@ export default function Profile() {
     ready,
     authenticated,
     user,
-    logout,
     linkEmail,
     connectWallet,
     unlinkEmail,
-    unlinkPhone,
     unlinkWallet,
-    linkGoogle,
-    unlinkGoogle,
     linkTwitter,
     unlinkTwitter,
-    linkDiscord,
-    unlinkDiscord,
   } = usePrivy();
 
   if (ready && !authenticated) {
     return redirect("/");
   }
+
   const { wallets: solanaWallets } = useSolanaWallets();
 
   const handleConnectWallet = async () => {
@@ -85,6 +78,10 @@ export default function Profile() {
         </Card>
       </main>
     );
+  }
+
+  if (ready && !authenticated) {
+    return redirect("/");
   }
 
   const numAccounts = user?.linkedAccounts?.length || 0;

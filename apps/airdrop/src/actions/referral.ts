@@ -1,9 +1,8 @@
 "use server";
 
-import { db as baseDb, referralTable, walletTable } from "@repo/database";
-import { eq } from "drizzle-orm";
-import { count } from "drizzle-orm";
-import { db, executeWithRetry } from "../lib/db";
+import { referralTable } from "@repo/database";
+import { eq, count } from "drizzle-orm";
+import { db } from "../lib/db";
 import { getPrivyUser } from "../lib/auth";
 import { referralSchema } from "../lib/validations";
 import { revalidatePath } from "next/cache";

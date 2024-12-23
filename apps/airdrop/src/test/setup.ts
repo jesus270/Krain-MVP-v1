@@ -1,9 +1,18 @@
+/// <reference types="node" />
+
 import "@testing-library/jest-dom";
 import { TextEncoder, TextDecoder } from "node:util";
 
-declare global {
-  var globalThis: typeof global;
-}
+// Mock fetch and related APIs
+const mockFetch = jest.fn();
+const mockRequest = jest.fn();
+const mockResponse = jest.fn();
+const mockHeaders = jest.fn();
+
+global.fetch = mockFetch;
+global.Request = mockRequest as unknown as typeof Request;
+global.Response = mockResponse as unknown as typeof Response;
+global.Headers = mockHeaders as unknown as typeof Headers;
 
 // Mock web APIs
 global.Request = class MockRequest {
@@ -183,18 +192,18 @@ jest.mock("@repo/database", () => {
   };
 });
 
-// Mock environment variables
+// Environment variable setup
 process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";
 process.env.DATABASE_URL = "mock://database-url";
 process.env.SESSION_SECRET = "test_session_secret_at_least_32_characters";
 
-// Add missing globals
+// Global polyfills
 Object.defineProperties(globalThis, {
   TextDecoder: { value: TextDecoder },
   TextEncoder: { value: TextEncoder },
 });
 
-// Mock FormData if not available
+// FormData mock
 if (typeof FormData === "undefined") {
   (global as any).FormData = class FormData {
     private data: Map<string, any> = new Map();

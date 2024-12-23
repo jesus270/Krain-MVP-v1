@@ -12,7 +12,7 @@ export class PublicKey {
   equals(other: any) {
     return this.key === other?.key;
   }
-  static isOnCurve(key: string) {
+  static isOnCurve(_key: string) {
     return true;
   }
 }

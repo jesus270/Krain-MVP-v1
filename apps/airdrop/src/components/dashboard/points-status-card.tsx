@@ -49,7 +49,7 @@ export function PointsStatusCard({
   isLoadingReferrals,
 }: PointsStatusCardProps) {
   return (
-    <Card className="border-2">
+    <Card className="border-2 max-w-2xl mx-auto">
       <CardHeader className="space-y-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-3xl font-bold">

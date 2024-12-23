@@ -41,8 +41,13 @@ const sessionOptions: SessionOptions = {
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "lax" as const,
     path: "/",
+    maxAge: 7200, // 2 hours
+    domain:
+      process.env.NODE_ENV === "production"
+        ? process.env.NEXT_PUBLIC_APP_DOMAIN
+        : "localhost",
   },
 };
 

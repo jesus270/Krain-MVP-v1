@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { db, walletTable } from "@repo/database";
 import { getPrivyUser } from "../lib/auth";
-import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 
 const walletSchema = z.object({

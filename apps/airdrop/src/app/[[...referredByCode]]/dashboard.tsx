@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 "use client";
 
 import { usePrivy } from "@privy-io/react-auth";
@@ -12,7 +14,7 @@ import { ReferralProgramCard } from "@/components/dashboard/referral-program-car
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2 seconds
-const INITIAL_LOAD_DELAY = 1000; // 1 second
+const INITIAL_LOAD_DELAY = 2000; // Increased to 2 seconds to give more time for session setup
 
 async function fetchWithRetry(
   referralCode: string,
@@ -74,13 +76,29 @@ export function Dashboard({
     }
 
     let isMounted = true;
-    let retryTimeout: NodeJS.Timeout | undefined;
+    let _retryTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const loadData = async () => {
       try {
         setIsLoadingWallet(true);
         setIsLoadingReferrals(true);
         setError(undefined);
+
+        // First verify the session is ready
+        try {
+          const verifyResponse = await fetch("/api/auth/verify", {
+            credentials: "include",
+          });
+
+          if (!verifyResponse.ok) {
+            throw new Error("Session not ready");
+          }
+        } catch (_error) {
+          console.log("[CLIENT] Session not ready, retrying...");
+          // Retry after a delay
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          return loadData();
+        }
 
         console.log("[CLIENT] Loading wallet data for user:", {
           walletAddress: userWalletAddress,
@@ -111,9 +129,6 @@ export function Dashboard({
                 referredByCode,
               });
 
-              const formData = new FormData();
-              formData.append("address", userWalletAddress);
-              formData.append("referredByCode", referredByCode);
               const updatedWallet = await handleSubmitWallet({
                 walletAddress: userWalletAddress,
                 referredByCode,
@@ -180,8 +195,8 @@ export function Dashboard({
 
     return () => {
       isMounted = false;
-      if (retryTimeout) {
-        clearTimeout(retryTimeout);
+      if (_retryTimeout) {
+        clearTimeout(_retryTimeout);
       }
       clearTimeout(timeoutId);
     };
@@ -198,7 +213,11 @@ export function Dashboard({
 
   // Show connect wallet card if not authenticated
   if (!authenticated) {
-    return <ConnectWalletCard />;
+    return (
+      <main className="container mx-auto py-8 px-4">
+        <ConnectWalletCard />
+      </main>
+    );
   }
 
   // Show error state if any

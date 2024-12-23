@@ -52,7 +52,7 @@ export function PrivyProviderWrapper({
             connectors: solanaConnectors,
           },
         },
-        loginMethods: ["wallet", "email", "twitter"],
+        loginMethods: ["wallet"],
         embeddedWallets: {
           createOnLogin: "off",
           requireUserPasswordOnCreate: false,

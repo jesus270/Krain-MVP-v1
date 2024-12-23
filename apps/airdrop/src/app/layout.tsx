@@ -1,6 +1,6 @@
 "use client";
 
-import type { Metadata } from "next";
+// import type { Metadata } from "next";
 import { Red_Hat_Mono, Manrope } from "next/font/google";
 import "@repo/ui/globals.css";
 import { Toaster } from "@repo/ui/components/ui/sonner";
@@ -9,7 +9,6 @@ import Footer from "@/components/footer";
 import { SidebarNav } from "@/components/nav-sidebar";
 import { SidebarInset, SidebarProvider } from "@repo/ui/components/ui/sidebar";
 import Header from "@/components/header";
-import { PrivyProvider } from "@privy-io/react-auth";
 import { PrivyProviderWrapper } from "@/components/privy-provider-wrapper";
 import { usePrivy } from "@privy-io/react-auth";
 
