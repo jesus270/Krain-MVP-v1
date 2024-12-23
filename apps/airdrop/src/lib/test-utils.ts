@@ -1,14 +1,3 @@
-import type { PrivyUser } from "./auth";
-
-type SimulateOptions = {
-  authenticated?: boolean;
-  mockUser?: PrivyUser;
-  headers?: {
-    origin?: string;
-    host?: string;
-  };
-};
-
 // Mock modules
 jest.mock("next/headers", () => ({
   headers: jest.fn(() => new Headers()),
@@ -20,87 +9,126 @@ jest.mock("next/cache", () => ({
   revalidateTag: jest.fn(),
 }));
 
-jest.mock("./auth", () => ({
-  getPrivyUser: jest.fn(),
-  validateOrigin: jest.fn(),
+jest.mock("next/navigation", () => ({
+  redirect: jest.fn(),
 }));
 
-// Mock database operations
-jest.mock("./db", () => {
-  const db = {
-    insert: jest.fn().mockReturnThis(),
-    select: jest.fn().mockReturnThis(),
-    from: jest.fn().mockReturnThis(),
-    where: jest.fn().mockReturnThis(),
-    values: jest.fn().mockReturnThis(),
-    returning: jest.fn().mockImplementation(() => [
-      {
-        id: 1,
-        referredByCode: "TEST12",
-        referredWalletAddress: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
-        createdAt: new Date(),
-      },
-    ]),
+// Mock auth
+export const mockGetPrivyUser = jest.fn().mockImplementation(() =>
+  Promise.resolve({
+    id: "test-user",
+    wallet: { address: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b" },
+  }),
+);
+
+jest.mock("../lib/auth", () => {
+  return {
+    getPrivyUser: mockGetPrivyUser,
   };
-
-  // Mock count query for getReferralsCount
-  db.select.mockImplementation((args) => {
-    if (args && args.count) {
-      return {
-        from: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnValue([{ count: 1 }]),
-      };
-    }
-    return db;
-  });
-
-  return { db, executeWithRetry: jest.fn() };
 });
 
-export async function simulateServerAction<
-  T extends (...args: any[]) => Promise<any>,
->(
-  action: T,
-  args: Parameters<T>,
-  options: SimulateOptions = {},
-): Promise<{ data?: Awaited<ReturnType<T>>; error?: Error }> {
-  try {
-    // Get mocked modules
-    const { headers } = require("next/headers");
-    const { getPrivyUser, validateOrigin } = require("./auth");
+// Mock database
+const mockWallet = {
+  id: 1,
+  address: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
+  referralCode: "TEST12",
+  createdAt: new Date("2024-01-01"),
+  updatedAt: new Date("2024-01-01"),
+};
 
-    // Mock headers
-    const mockHeaders = new Headers({
-      origin: options.headers?.origin || "http://localhost:3000",
-      host: options.headers?.host || "localhost:3000",
-    });
-    headers.mockReturnValue(mockHeaders);
+const mockReferral = {
+  id: 1,
+  referredByCode: "TEST12",
+  referredWalletAddress: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
+  createdAt: new Date("2024-01-01"),
+  updatedAt: new Date("2024-01-01"),
+};
 
-    // Mock authentication
-    if (options.authenticated === false) {
-      getPrivyUser.mockResolvedValue(null);
-    } else if (options.mockUser) {
-      getPrivyUser.mockResolvedValue(options.mockUser);
-    } else {
-      getPrivyUser.mockResolvedValue({
-        id: "test-user",
-        wallet: { address: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b" },
-      });
-    }
-
-    // Mock origin validation
-    validateOrigin.mockImplementation((origin: string, host: string) => {
-      if (options.headers?.origin && options.headers?.host) {
-        return (
-          origin === options.headers.origin && host === options.headers.host
-        );
+jest.mock("@repo/database", () => {
+  const mockDb = {
+    insert: jest.fn().mockReturnValue({
+      values: jest.fn().mockReturnValue({
+        returning: jest.fn().mockResolvedValue([mockWallet]),
+      }),
+    }),
+    select: jest.fn().mockReturnValue({
+      from: jest.fn().mockReturnValue({
+        where: jest.fn().mockReturnValue({
+          get: jest.fn().mockResolvedValue([mockWallet]),
+        }),
+      }),
+    }),
+    count: jest.fn().mockReturnValue({
+      from: jest.fn().mockReturnValue({
+        where: jest.fn().mockReturnValue({
+          get: jest.fn().mockResolvedValue([{ count: 1 }]),
+        }),
+      }),
+    }),
+    query: jest.fn().mockImplementation((query) => {
+      if (query.includes("COUNT")) {
+        return Promise.resolve([{ count: 1 }]);
       }
-      return true;
-    });
+      if (query.includes("wallet")) {
+        return Promise.resolve([mockWallet]);
+      }
+      if (query.includes("referral")) {
+        return Promise.resolve([mockReferral]);
+      }
+      return Promise.resolve([]);
+    }),
+  };
+
+  return {
+    db: mockDb,
+    walletTable: {
+      id: { name: "id", table: "wallets" },
+      address: { name: "address", table: "wallets" },
+      referralCode: { name: "referralCode", table: "wallets" },
+      createdAt: { name: "createdAt", table: "wallets" },
+      updatedAt: { name: "updatedAt", table: "wallets" },
+    },
+    referralTable: {
+      id: { name: "id", table: "referrals" },
+      referredByCode: { name: "referredByCode", table: "referrals" },
+      referredWalletAddress: {
+        name: "referredWalletAddress",
+        table: "referrals",
+      },
+      createdAt: { name: "createdAt", table: "referrals" },
+      updatedAt: { name: "updatedAt", table: "referrals" },
+    },
+  };
+});
+
+export type SimulateServerActionResult<T> = {
+  error?: Error;
+  data?: T;
+};
+
+export async function simulateServerAction<T>(
+  action: (...args: any[]) => Promise<T>,
+  args: any[] = [],
+  options: {
+    authenticated?: boolean;
+    mockUser?: any;
+  } = {},
+): Promise<SimulateServerActionResult<T>> {
+  try {
+    // Handle auth mocking
+    const { authenticated = true, mockUser } = options;
+
+    if (!authenticated) {
+      mockGetPrivyUser.mockResolvedValueOnce(null);
+    } else if (mockUser) {
+      mockGetPrivyUser.mockResolvedValueOnce(mockUser);
+    }
 
     const result = await action(...args);
     return { data: result };
   } catch (error) {
-    return { error: error as Error };
+    return {
+      error: error instanceof Error ? error : new Error(String(error)),
+    };
   }
 }

@@ -8,6 +8,9 @@ module.exports = {
         "localhost",
         process.env.NEXT_PUBLIC_APP_URL,
       ].filter(Boolean),
+      // Enable CSRF protection
+      csrf: true,
+      bodySizeLimit: "2mb", // Limit request body size
     },
   },
 };

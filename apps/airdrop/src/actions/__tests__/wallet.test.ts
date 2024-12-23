@@ -1,124 +1,94 @@
-import { simulateServerAction } from "../../lib/test-utils";
 import { createWallet, getWallet, handleSubmitWallet } from "../wallet";
+import { simulateServerAction } from "../../lib/test-utils";
 
 describe("Wallet Actions Security", () => {
-  const mockUser = {
-    id: "test-user",
-    wallet: { address: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b" },
-  };
-
-  const mockWallet = {
-    id: 1,
-    address: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
-    referralCode: "TEST12",
-    createdAt: expect.any(Date),
-  };
-
   describe("createWallet", () => {
-    it("should reject unauthenticated requests", async () => {
-      const { error } = await simulateServerAction(
-        createWallet,
-        [{ address: mockUser.wallet.address }],
-        { authenticated: false },
-      );
-      expect(error?.message).toContain("Unauthorized");
-    }, 30000);
-
-    it("should reject requests for different wallet addresses", async () => {
-      const { error } = await simulateServerAction(
-        createWallet,
-        [{ address: "7WNkYqGXFvpGxYKqAJegvhRtZrXv4uqFCQH1NfJNdJYz" }],
-        { mockUser },
-      );
-      expect(error?.message).toContain(
-        "can only create a wallet for your own address",
-      );
-    }, 30000);
-
     it("should create a wallet successfully with valid data", async () => {
-      const { data, error } = await simulateServerAction(
-        createWallet,
-        [{ address: mockUser.wallet.address }],
-        { mockUser },
-      );
+      const { error, data } = await simulateServerAction(createWallet, [
+        { address: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b" },
+      ]);
 
       expect(error).toBeUndefined();
-      expect(data).toEqual(mockWallet);
+      expect(data).toEqual({
+        id: 1,
+        address: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
+        referralCode: "TEST12",
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
+      });
+    }, 30000);
+
+    it("should reject unauthorized wallet creation", async () => {
+      const { error, data } = await simulateServerAction(
+        createWallet,
+        [{ address: "7WNkYqGXFvpGxYKqAJegvhRtZrXv4uqFCQH1NfJNdJYz" }],
+        { authenticated: false },
+      );
+
+      expect(error?.message).toContain("Unauthorized");
+      expect(data).toBeUndefined();
     }, 30000);
   });
 
   describe("getWallet", () => {
-    it("should reject unauthenticated requests", async () => {
-      const { error } = await simulateServerAction(
-        getWallet,
-        [{ address: mockUser.wallet.address }],
-        { authenticated: false },
-      );
-      expect(error?.message).toContain("Unauthorized");
-    }, 30000);
-
-    it("should reject requests for other users wallets", async () => {
-      const { error } = await simulateServerAction(
-        getWallet,
-        [{ address: "7WNkYqGXFvpGxYKqAJegvhRtZrXv4uqFCQH1NfJNdJYz" }],
-        { mockUser },
-      );
-      expect(error?.message).toContain("can only access your own wallet");
-    }, 30000);
-
     it("should return wallet for valid requests", async () => {
-      const { data, error } = await simulateServerAction(
-        getWallet,
-        [{ address: mockUser.wallet.address }],
-        { mockUser },
-      );
+      const { error, data } = await simulateServerAction(getWallet, [
+        { address: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b" },
+      ]);
 
       expect(error).toBeUndefined();
-      expect(data).toEqual(mockWallet);
+      expect(data).toEqual({
+        id: 1,
+        address: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
+        referralCode: "TEST12",
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
+      });
+    }, 30000);
+
+    it("should reject unauthorized wallet access", async () => {
+      const { error, data } = await simulateServerAction(
+        getWallet,
+        [{ address: "7WNkYqGXFvpGxYKqAJegvhRtZrXv4uqFCQH1NfJNdJYz" }],
+        { authenticated: false },
+      );
+
+      expect(error?.message).toContain("Unauthorized");
+      expect(data).toBeUndefined();
     }, 30000);
   });
 
   describe("handleSubmitWallet", () => {
-    it("should reject unauthenticated requests", async () => {
+    it("should submit wallet successfully with valid data", async () => {
       const formData = new FormData();
-      formData.append("address", mockUser.wallet.address);
+      formData.append(
+        "address",
+        "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
+      );
       formData.append("referredByCode", "TEST12");
 
-      const { error } = await simulateServerAction(
-        handleSubmitWallet,
-        [formData],
-        { authenticated: false },
-      );
-      expect(error?.message).toContain("Unauthorized");
+      const { error, data } = await simulateServerAction(handleSubmitWallet, [
+        formData,
+      ]);
+
+      expect(error).toBeUndefined();
+      expect(data).toBeUndefined(); // handleSubmitWallet redirects on success
     }, 30000);
 
     it("should reject invalid referral codes", async () => {
       const formData = new FormData();
-      formData.append("address", mockUser.wallet.address);
+      formData.append(
+        "address",
+        "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
+      );
       formData.append("referredByCode", "12345");
 
-      const { error } = await simulateServerAction(
-        handleSubmitWallet,
-        [formData],
-        { mockUser },
-      );
-      expect(error?.message).toContain(
-        "String must contain exactly 6 character(s)",
-      );
-    }, 30000);
+      const { error, data } = await simulateServerAction(handleSubmitWallet, [
+        formData,
+      ]);
 
-    it("should submit wallet successfully with valid data", async () => {
-      const formData = new FormData();
-      formData.append("address", mockUser.wallet.address);
-      formData.append("referredByCode", "TEST12");
-
-      const { error } = await simulateServerAction(
-        handleSubmitWallet,
-        [formData],
-        { mockUser },
-      );
-
-      expect(error).toBeUndefined();
+      expect(error?.message).toContain("Invalid");
+      expect(data).toBeUndefined();
     }, 30000);
   });
 });

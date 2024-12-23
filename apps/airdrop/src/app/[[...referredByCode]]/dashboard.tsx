@@ -12,6 +12,7 @@ import { ReferralProgramCard } from "@/components/dashboard/referral-program-car
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2 seconds
+const INITIAL_LOAD_DELAY = 1000; // 1 second
 
 async function fetchWithRetry(
   referralCode: string,
@@ -65,7 +66,8 @@ export function Dashboard({
   const userTwitterUsername = user?.twitter?.username ?? undefined;
 
   useEffect(() => {
-    if (!userWalletAddress) {
+    // Only proceed if authenticated and have wallet address
+    if (!authenticated || !userWalletAddress || !ready) {
       setIsLoadingWallet(false);
       setIsLoadingReferrals(false);
       return;
@@ -80,22 +82,51 @@ export function Dashboard({
         setIsLoadingReferrals(true);
         setError(undefined);
 
-        // First get the wallet
-        const walletResult = await getWallet({
-          address: userWalletAddress,
-          with: { referredBy: true },
+        console.log("[CLIENT] Loading wallet data for user:", {
+          walletAddress: userWalletAddress,
+          authenticated,
+          ready,
         });
 
-        if (!isMounted) return;
+        // First try to get the wallet
+        let walletResult;
+        try {
+          walletResult = await getWallet({
+            address: userWalletAddress,
+          });
 
-        if (walletResult) {
+          if (!isMounted || !walletResult) {
+            console.error("[CLIENT] No wallet result received");
+            return;
+          }
+
           setWallet(walletResult);
+          console.log("[CLIENT] Wallet data loaded:", walletResult);
+
           // Then submit wallet if needed
-          if (referredByCode) {
-            await handleSubmitWallet({
-              address: userWalletAddress,
-              referredByCode,
-            });
+          if (referredByCode && !walletResult.referralCode) {
+            try {
+              console.log("[CLIENT] Submitting wallet with referral code:", {
+                address: userWalletAddress,
+                referredByCode,
+              });
+
+              const formData = new FormData();
+              formData.append("address", userWalletAddress);
+              formData.append("referredByCode", referredByCode);
+              const updatedWallet = await handleSubmitWallet(formData);
+              if (isMounted && updatedWallet) {
+                setWallet(updatedWallet);
+                walletResult = updatedWallet;
+                console.log(
+                  "[CLIENT] Wallet updated with referral code:",
+                  updatedWallet,
+                );
+              }
+            } catch (error) {
+              console.error("[CLIENT] Error submitting wallet:", error);
+              // Don't throw here - continue with rest of flow
+            }
           }
 
           if (!isMounted) return;
@@ -103,9 +134,14 @@ export function Dashboard({
           // Get referrals count with retry logic
           if (walletResult.referralCode) {
             try {
+              console.log(
+                "[CLIENT] Fetching referrals count for code:",
+                walletResult.referralCode,
+              );
               const count = await fetchWithRetry(walletResult.referralCode);
               if (isMounted) {
                 setReferralsCount(count);
+                console.log("[CLIENT] Referrals count loaded:", count);
               }
             } catch (error) {
               console.error("[CLIENT] Error getting referrals count:", error);
@@ -118,19 +154,14 @@ export function Dashboard({
               }
             }
           }
-        }
-      } catch (error) {
-        console.error("[CLIENT] Error loading data:", error);
-        if (isMounted) {
-          const message =
-            error instanceof Error
-              ? error.message
-              : "Unable to load wallet data";
-          setError(`${message}. Please refresh to try again.`);
-
-          // Retry after a delay if it's a connection issue
-          if (error instanceof Error && error.message.includes("connection")) {
-            retryTimeout = setTimeout(loadData, RETRY_DELAY);
+        } catch (error) {
+          console.error("[CLIENT] Error getting wallet:", error);
+          if (isMounted) {
+            const message =
+              error instanceof Error
+                ? error.message
+                : "Unable to load wallet data";
+            setError(`${message}. Please refresh to try again.`);
           }
         }
       } finally {
@@ -141,67 +172,81 @@ export function Dashboard({
       }
     };
 
-    loadData();
+    // Add a delay to ensure Privy is fully initialized
+    const timeoutId = setTimeout(loadData, INITIAL_LOAD_DELAY);
 
     return () => {
       isMounted = false;
       if (retryTimeout) {
         clearTimeout(retryTimeout);
       }
+      clearTimeout(timeoutId);
     };
-  }, [referredByCode, userWalletAddress]);
+  }, [authenticated, userWalletAddress, referredByCode, ready]);
 
-  if (!ready) return null;
-  if (ready && (!authenticated || !userWalletAddress)) {
+  // Show loading state
+  if (!ready || isLoadingWallet) {
     return (
-      <main className="container mx-auto p-4">
-        <ConnectWalletCard />
-      </main>
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
     );
   }
 
-  const walletConnectionPoints = 1000;
-  const accountCreationPoints = 5000;
-  const basePoints = walletConnectionPoints + accountCreationPoints;
-  const referralPoints = referralsCount * 1000;
-  const twitterPoints = userTwitterUsername ? 2000 : 0;
-  const emailPoints = userEmailAddress ? 3000 : 0;
-  const totalPoints = basePoints + referralPoints + twitterPoints + emailPoints;
+  // Show connect wallet card if not authenticated
+  if (!authenticated) {
+    return <ConnectWalletCard />;
+  }
 
-  const referralUrl = wallet?.referralCode
-    ? `https://airdrop.krain.ai/${wallet?.referralCode}`
-    : "";
-
-  return (
-    <main className="container mx-auto p-4">
-      <div className="max-w-2xl mx-auto space-y-6">
-        {error && (
-          <div className="bg-destructive/15 text-destructive px-4 py-3 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
-        <PointsStatusCard
-          totalPoints={totalPoints}
-          userWalletAddress={userWalletAddress}
-          userEmailAddress={userEmailAddress}
-          userTwitterUsername={userTwitterUsername}
-          referralsCount={referralsCount}
-          walletConnectionPoints={walletConnectionPoints}
-          accountCreationPoints={accountCreationPoints}
-          referralPoints={referralPoints}
-          twitterPoints={twitterPoints}
-          emailPoints={emailPoints}
-          locale={locale}
-          isLoadingReferrals={isLoadingReferrals}
-        />
-        <ReferralProgramCard
-          referralsCount={referralsCount}
-          referralUrl={referralUrl}
-          locale={locale}
-          isLoadingWallet={isLoadingWallet}
-          isLoadingReferrals={isLoadingReferrals}
-        />
+  // Show error state if any
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <div className="text-red-500">{error}</div>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+        >
+          Retry
+        </button>
       </div>
-    </main>
+    );
+  }
+
+  // Show main dashboard content
+  return (
+    <div className="space-y-4 p-4">
+      <PointsStatusCard
+        totalPoints={
+          5000 + // Base points for having an account
+          (userWalletAddress ? 1000 : 0) + // Points for wallet connection
+          referralsCount * 1000 + // Referral points: 1000 per referral
+          (userTwitterUsername ? 2000 : 0) + // Twitter points: 2000 base
+          (userEmailAddress ? 3000 : 0) // Email points: 3000
+        }
+        userWalletAddress={userWalletAddress}
+        userEmailAddress={userEmailAddress}
+        userTwitterUsername={userTwitterUsername}
+        referralsCount={referralsCount}
+        walletConnectionPoints={1000}
+        accountCreationPoints={5000}
+        referralPoints={referralsCount * 1000}
+        twitterPoints={2000}
+        emailPoints={3000}
+        locale={locale}
+        isLoadingReferrals={isLoadingReferrals}
+      />
+      <ReferralProgramCard
+        referralsCount={referralsCount}
+        referralUrl={
+          wallet?.referralCode
+            ? `https://airdrop.krain.ai/${wallet.referralCode}`
+            : ""
+        }
+        locale={locale}
+        isLoadingWallet={isLoadingWallet}
+        isLoadingReferrals={isLoadingReferrals}
+      />
+    </div>
   );
 }

@@ -79,13 +79,23 @@ export const getReferralsCount = async (
       throw new Error("Invalid referral code");
     }
 
-    // Get referral count
+    // Get referral count with additional logging
+    console.log("[SERVER] Getting referrals count for code:", referralCode);
+
     const result = await db
       .select({ count: count() })
       .from(referralTable)
       .where(eq(referralTable.referredByCode, referralCode));
 
-    return result[0]?.count ?? 0;
+    const referralCount = result[0]?.count ?? 0;
+
+    console.log("[SERVER] Referral count results:", {
+      referralCode,
+      referralCount,
+      result,
+    });
+
+    return referralCount;
   } catch (error) {
     console.error("[SERVER] Error getting referrals count:", {
       error,

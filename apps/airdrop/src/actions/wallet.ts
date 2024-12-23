@@ -79,6 +79,18 @@ export async function getWallet(input: { address: string }) {
       .where(eq(walletTable.address, parsed.address))
       .limit(1);
 
+    // If wallet doesn't exist, create it
+    if (!wallet[0]) {
+      const newWallet = await db
+        .insert(walletTable)
+        .values({
+          address: parsed.address,
+          createdAt: new Date(),
+        })
+        .returning();
+      return newWallet[0];
+    }
+
     return wallet[0];
   } catch (error) {
     console.error("[SERVER] Error getting wallet:", {
@@ -119,17 +131,35 @@ export async function handleSubmitWallet(formData: FormData) {
       throw new Error("Unauthorized: You can only submit your own wallet");
     }
 
-    // Create wallet
-    await db
+    // Get existing wallet
+    const existingWallet = await db
+      .select()
+      .from(walletTable)
+      .where(eq(walletTable.address, parsed.address))
+      .limit(1);
+
+    // If wallet exists and has a referral code, don't update it
+    if (existingWallet[0]?.referralCode) {
+      return existingWallet[0];
+    }
+
+    // Create or update wallet
+    const wallet = await db
       .insert(walletTable)
       .values({
         address: parsed.address,
         referralCode: parsed.referralCode,
         createdAt: new Date(),
       })
+      .onConflictDoUpdate({
+        target: walletTable.address,
+        set: {
+          referralCode: parsed.referralCode,
+        },
+      })
       .returning();
 
-    redirect("/profile");
+    return wallet[0];
   } catch (error) {
     console.error("[SERVER] Error handling wallet submission:", {
       error,
