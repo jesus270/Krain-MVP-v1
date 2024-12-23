@@ -6,25 +6,46 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not set");
 }
 
-const MAX_RETRIES = 5;
-const RETRY_DELAY = 2000; // 2 seconds
-const DB_TIMEOUT = 30000; // 30 seconds
-const POOL_TIMEOUT = 45000; // 45 seconds
+// Performance tuning constants
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second base delay
+const DB_TIMEOUT = 10000; // 10 seconds
+const POOL_TIMEOUT = 30000; // 30 seconds
+const MIN_POOL_SIZE = 5;
+const MAX_POOL_SIZE = 20;
+const MAX_USES_PER_CONNECTION = 10000;
+const IDLE_TIMEOUT = 30000; // 30 seconds
 
-// Create a singleton pool instance
+// Create a singleton pool instance with optimized settings
 let pool: Pool | null = null;
 
 function getPool(): Pool {
   if (!pool) {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      max: 5, // Increased max connections
+      max: MAX_POOL_SIZE,
+      min: MIN_POOL_SIZE,
       connectionTimeoutMillis: POOL_TIMEOUT,
-      idleTimeoutMillis: 20000, // 20 seconds idle timeout
-      maxUses: 10000, // Increased max uses per connection
+      idleTimeoutMillis: IDLE_TIMEOUT,
+      maxUses: MAX_USES_PER_CONNECTION,
       allowExitOnIdle: true,
-      statement_timeout: DB_TIMEOUT, // Add statement timeout
-      query_timeout: DB_TIMEOUT, // Add query timeout
+      statement_timeout: DB_TIMEOUT,
+      query_timeout: DB_TIMEOUT,
+    });
+
+    // Add event listeners for better monitoring
+    pool.on("error", (err) => {
+      console.error("[DB Pool] Unexpected error:", err);
+      // Reset pool on critical errors
+      pool = null;
+    });
+
+    pool.on("connect", () => {
+      console.debug("[DB Pool] New connection established");
+    });
+
+    pool.on("remove", () => {
+      console.debug("[DB Pool] Connection removed from pool");
     });
   }
   return pool;
@@ -50,36 +71,54 @@ export async function executeWithTimeout<T>(
     return result;
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message.includes("timed out")) {
-        console.error("[DB] Operation timed out:", error);
+      // Enhanced error handling with specific error types
+      const errorMessage = error.message.toLowerCase();
+
+      if (errorMessage.includes("timed out")) {
+        console.error("[DB] Operation timed out:", {
+          error,
+          stack: error.stack,
+        });
         throw new Error("Database operation timed out. Please try again.");
       }
-      if (error.message.includes("server login has been failing")) {
-        console.error("[DB] Server login failing:", error);
-        // Reset pool on login failures
+
+      if (errorMessage.includes("server login has been failing")) {
+        console.error("[DB] Authentication error:", {
+          error,
+          stack: error.stack,
+        });
         pool = null;
-        throw new Error(
-          "Database connection issue. Please try again in a moment.",
-        );
+        throw new Error("Database authentication failed. Please try again.");
       }
-      if (error.message.includes("too many connections")) {
-        console.error("[DB] Too many connections:", error);
-        // Reset pool on connection limit errors
+
+      if (errorMessage.includes("too many connections")) {
+        console.error("[DB] Connection limit reached:", {
+          error,
+          stack: error.stack,
+        });
         pool = null;
-        throw new Error("Database is busy. Please try again in a moment.");
+        throw new Error("Database is under high load. Please try again.");
       }
-      if (error.message.includes("Connection terminated")) {
-        console.error("[DB] Connection terminated:", error);
-        // Reset pool on terminated connections
+
+      if (errorMessage.includes("connection terminated")) {
+        console.error("[DB] Connection terminated:", {
+          error,
+          stack: error.stack,
+        });
         pool = null;
         throw new Error("Database connection lost. Please try again.");
+      }
+
+      if (errorMessage.includes("deadlock detected")) {
+        console.error("[DB] Deadlock detected:", { error, stack: error.stack });
+        throw new Error("Database conflict detected. Please try again.");
       }
     }
     throw error;
   }
 }
 
-// Helper function to execute queries with retries
+// Helper function to execute queries with retries and exponential backoff
 export async function executeWithRetry<T>(
   operation: () => Promise<T>,
   retries: number = MAX_RETRIES,
@@ -94,36 +133,52 @@ export async function executeWithRetry<T>(
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
+      // Don't retry certain errors
+      if (
+        lastError.message.includes("authentication failed") ||
+        lastError.message.includes("permission denied")
+      ) {
+        throw lastError;
+      }
+
       if (attempt <= retries) {
         // Exponential backoff with jitter
         currentDelay =
-          Math.min(delay * Math.pow(2, attempt - 1), 10000) *
+          Math.min(delay * Math.pow(2, attempt - 1), 5000) *
           (0.75 + Math.random() * 0.5);
-        console.log(
-          `[DB] Retrying operation. Attempt ${attempt} of ${retries}. Waiting ${Math.round(currentDelay)}ms...`,
+
+        console.warn(
+          `[DB] Retrying operation. Attempt ${attempt}/${retries}. Waiting ${Math.round(currentDelay)}ms...`,
+          { error: lastError.message },
         );
+
         await new Promise((resolve) => setTimeout(resolve, currentDelay));
       }
     }
   }
 
-  console.error("[DB] All retry attempts failed:", lastError);
+  console.error("[DB] All retry attempts failed:", {
+    error: lastError?.message,
+    stack: lastError?.stack,
+  });
   throw lastError;
 }
 
-// Ensure connections are released on process exit
-process.on("SIGTERM", async () => {
-  console.log("[DB] Shutting down pool on SIGTERM");
+// Graceful shutdown handling
+async function shutdownPool(signal: string) {
+  console.log(`[DB] Shutting down pool on ${signal}`);
   if (pool) {
-    await pool.end();
-    pool = null;
+    try {
+      await pool.end();
+      console.log("[DB] Pool shutdown completed");
+    } catch (error) {
+      console.error("[DB] Error during pool shutdown:", error);
+    } finally {
+      pool = null;
+    }
   }
-});
+}
 
-process.on("SIGINT", async () => {
-  console.log("[DB] Shutting down pool on SIGINT");
-  if (pool) {
-    await pool.end();
-    pool = null;
-  }
-});
+// Ensure connections are released on process exit
+process.on("SIGTERM", () => shutdownPool("SIGTERM"));
+process.on("SIGINT", () => shutdownPool("SIGINT"));

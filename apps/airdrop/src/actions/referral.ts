@@ -1,78 +1,100 @@
 "use server";
 
-import { db as baseDb, referralTable } from "@repo/database";
+import { db as baseDb, referralTable, walletTable } from "@repo/database";
 import { eq } from "drizzle-orm";
 import { count } from "drizzle-orm";
 import { db, executeWithRetry } from "../lib/db";
+import { getPrivyUser } from "../lib/auth";
+import { referralSchema } from "../lib/validations";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
-export const createReferral = async ({
-  referredByCode,
-  referredWalletAddress,
-}: {
+export const createReferral = async (input: {
   referredByCode: string;
   referredWalletAddress: string;
 }) => {
   try {
-    const referral = await executeWithRetry(() =>
-      db
-        .insert(referralTable)
-        .values({
-          referredByCode,
-          referredWalletAddress,
-        })
-        .returning(),
-    );
+    // Check authentication first
+    const user = await getPrivyUser();
+    if (!user) {
+      throw new Error("Unauthorized: Please log in first");
+    }
+
+    // Validate input
+    const parsed = referralSchema.parse(input);
+
+    // Verify user can only create referrals for their own wallet
+    if (parsed.referredWalletAddress !== user.wallet.address) {
+      throw new Error(
+        "Unauthorized: can only create referrals for your own wallet",
+      );
+    }
+
+    // Create referral
+    const referral = await db
+      .insert(referralTable)
+      .values({
+        referredByCode: parsed.referredByCode,
+        referredWalletAddress: parsed.referredWalletAddress,
+        createdAt: new Date(),
+      })
+      .returning();
+
+    // Revalidate related pages
+    revalidatePath("/");
+    revalidatePath("/profile");
 
     return referral[0];
   } catch (error) {
-    console.error("Error creating referral:", error);
-    throw error;
+    console.error("[SERVER] Error creating referral:", {
+      error,
+      input,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+
+    if (error instanceof z.ZodError) {
+      throw new Error(
+        `Failed to create referral: ${JSON.stringify(error.errors, null, 2)}`,
+      );
+    }
+
+    throw new Error(
+      `Failed to create referral: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 };
 
 export const getReferralsCount = async (
   referralCode: string,
 ): Promise<number> => {
-  console.log("[SERVER] getReferralsCount called with code:", referralCode);
   try {
-    console.log("[SERVER] Building count query for code:", referralCode);
-    const query = db
-      .select({ value: count() })
-      .from(referralTable)
-      .where(eq(referralTable.referredByCode, referralCode))
-      .limit(1);
+    // Check authentication first
+    const user = await getPrivyUser();
+    if (!user) {
+      throw new Error("Unauthorized: Please log in first");
+    }
 
-    console.log("[SERVER] SQL Query:", {
-      sql: query.toSQL().sql,
-      params: query.toSQL().params,
+    // Validate referral code
+    if (!referralCode || referralCode.length !== 6) {
+      throw new Error("Invalid referral code");
+    }
+
+    // Get referral count
+    const result = await db
+      .select({ count: count() })
+      .from(referralTable)
+      .where(eq(referralTable.referredByCode, referralCode));
+
+    return result[0]?.count ?? 0;
+  } catch (error) {
+    console.error("[SERVER] Error getting referrals count:", {
+      error,
+      referralCode,
+      stack: error instanceof Error ? error.stack : undefined,
     });
 
-    console.log("[SERVER] Executing count query");
-    const result = await executeWithRetry(() => query, 5, 2000);
-    console.log("[SERVER] Count query result:", result);
-
-    const finalCount = result[0]?.value ?? 0;
-    console.log("[SERVER] Final count:", finalCount);
-
-    return finalCount;
-  } catch (error) {
-    console.error("[SERVER] Error in getReferralsCount:", error);
-    if (error instanceof Error) {
-      console.error("[SERVER] Error details:", {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-      });
-
-      if (error.message.includes("timeout")) {
-        throw new Error("Operation timed out. Please try again.");
-      }
-      if (error.message.includes("connection")) {
-        throw new Error(
-          "Database connection issue. Please try again in a moment.",
-        );
-      }
-    }
-    throw new Error("Failed to get referrals count. Please try again.");
+    throw new Error(
+      `Failed to get referrals count: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 };
