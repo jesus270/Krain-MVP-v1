@@ -4,7 +4,7 @@ import { referralTable } from "@repo/database";
 import { eq, count } from "drizzle-orm";
 import { db } from "../lib/db";
 import { getPrivyUser } from "../lib/auth";
-import { referralSchema } from "../lib/validations";
+import { referralSchema, referralCodeSchema } from "../lib/validations";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
