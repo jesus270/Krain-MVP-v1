@@ -7,9 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "clean": "rm -rf .next .turbo && rm -rf node_modules",
-    "test": "dotenv -e .env.test -- jest",
-    "test:security": "dotenv -e .env.test -- jest \"src/actions/__tests__/.*\\.test\\.[jt]sx?$\""
+    "clean": "rm -rf .next .turbo && rm -rf node_modules"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -45,10 +43,6 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@swc/core": "^1.4.2",
-    "@swc/jest": "^0.2.36",
-    "@testing-library/jest-dom": "^6.4.2",
-    "@testing-library/react": "^14.2.1",
-    "@types/jest": "^29.5.12",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -57,13 +51,10 @@
     "eslint": "^9",
     "eslint-config-next": "15.1.0",
     "ignore-loader": "^0.1.2",
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
     "next-router-mock": "^0.9.12",
     "postcss": "^8",
     "prettier": "^3.4.2",
     "tailwindcss": "^3.4.1",
-    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5"
