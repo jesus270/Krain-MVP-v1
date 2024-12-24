@@ -26,7 +26,7 @@ async function fetchWithRetry(
 
   for (let attempt = 1; attempt <= retries + 1; attempt++) {
     try {
-      const count = await getReferralsCount(referralCode);
+      const count = await getReferralsCount({ referralCode });
       if (typeof count === "number") {
         return count;
       }

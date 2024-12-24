@@ -57,7 +57,7 @@ export async function createWallet(input: { address: string }) {
     });
 
     if (error instanceof z.ZodError) {
-      throw new Error(`Failed to create wallet: Invalid Solana address`);
+      throw new Error("Invalid Solana address");
     }
 
     throw new Error(
@@ -78,6 +78,10 @@ export async function getWalletByReferralCode(input: { referralCode: string }) {
     const wallet = await db.query.walletTable.findFirst({
       where: eq(walletTable.referralCode, parsed.referralCode),
     });
+
+    if (!wallet) {
+      return undefined;
+    }
 
     return wallet;
   } catch (error) {
@@ -136,7 +140,7 @@ export async function getWallet(input: {
     });
 
     if (error instanceof z.ZodError) {
-      throw new Error(`Failed to get wallet: Invalid Solana address`);
+      throw new Error("Invalid Solana address");
     }
 
     throw new Error(
@@ -278,9 +282,7 @@ export async function handleSubmitWallet(input: {
     });
 
     if (error instanceof z.ZodError) {
-      throw new Error(
-        `Failed to submit wallet: ${JSON.stringify(error.errors, null, 2)}`,
-      );
+      throw new Error("Invalid Solana address");
     }
 
     throw new Error(

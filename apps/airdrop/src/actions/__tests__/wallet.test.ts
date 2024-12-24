@@ -11,6 +11,40 @@ jest.mock("@/lib/auth", () => ({
   })),
 }));
 
+// Mock validation schemas
+jest.mock("@/lib/validations", () => ({
+  walletAddressSchema: {
+    parse: jest.fn((input) => {
+      if (!input?.address?.match(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/)) {
+        const error = new Error("Invalid Solana address");
+        error.name = "ZodError";
+        throw error;
+      }
+      return input;
+    }),
+  },
+  referralCodeSchema: {
+    parse: jest.fn((input) => {
+      if (!input?.referralCode || input.referralCode.length !== 6) {
+        const error = new Error("String must contain exactly 6 character(s)");
+        error.name = "ZodError";
+        throw error;
+      }
+      return input;
+    }),
+  },
+  referredBySchema: {
+    parse: jest.fn((input) => {
+      if (!input?.referredByCode || input.referredByCode.length !== 6) {
+        const error = new Error("String must contain exactly 6 character(s)");
+        error.name = "ZodError";
+        throw error;
+      }
+      return input;
+    }),
+  },
+}));
+
 // Mock database module
 jest.mock("@repo/database", () => {
   const mockDb = jest.requireMock("@/lib/__mocks__/database").mockDatabase;

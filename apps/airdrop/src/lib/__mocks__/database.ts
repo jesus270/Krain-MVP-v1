@@ -106,6 +106,13 @@ const createMockDb = () => {
               ) {
                 throw new Error("Database connection error");
               }
+              if (
+                !values.referredWalletAddress.match(
+                  /^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
+                )
+              ) {
+                throw new Error("Invalid Solana address");
+              }
               const referral = {
                 id: 1,
                 referredByCode: values.referredByCode,
@@ -119,18 +126,22 @@ const createMockDb = () => {
               if (!values || !values.address) {
                 throw new Error("Database connection error");
               }
+              if (!values.address.match(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/)) {
+                throw new Error("Invalid Solana address");
+              }
               const wallet = {
                 id: 1,
                 address: values.address,
                 referralCode: values.referralCode || "TEST12",
                 createdAt: fixedDate,
                 updatedAt: fixedDate,
+                referredBy: null,
               };
               return Promise.resolve([wallet]);
             }
             return Promise.resolve([]);
           } catch (error) {
-            throw new Error("Database connection error");
+            throw error;
           }
         }),
       })),
@@ -161,7 +172,7 @@ const createMockDb = () => {
               ) {
                 const referralCode = where.right;
                 if (!referralCode || referralCode.length !== 6) {
-                  throw new Error("Invalid referral code");
+                  throw new Error("String must contain exactly 6 character(s)");
                 }
                 return Promise.resolve({
                   id: 2,
@@ -173,7 +184,7 @@ const createMockDb = () => {
               }
               return Promise.resolve(null);
             } catch (error) {
-              throw new Error("Database connection error");
+              throw error;
             }
           }),
       },
@@ -186,13 +197,13 @@ const createMockDb = () => {
             ) {
               const referralCode = where.right;
               if (!referralCode || referralCode.length !== 6) {
-                throw new Error("Invalid referral code");
+                throw new Error("String must contain exactly 6 character(s)");
               }
               return Promise.resolve(mockReferral);
             }
             return Promise.resolve(null);
           } catch (error) {
-            throw new Error("Database connection error");
+            throw error;
           }
         }),
       },
