@@ -1,7 +1,13 @@
-import { mockDatabase } from "./__mocks__/database";
+import { mockDatabase } from "../__mocks__/database";
 
-jest.mock("./db", () => ({
+jest.mock("@repo/database", () => ({
+  ...jest.requireActual("@repo/database"),
   db: mockDatabase.db,
+  walletTable: mockDatabase.walletTable,
+  referralTable: mockDatabase.referralTable,
+  eq: mockDatabase.eq,
+  count: mockDatabase.count,
+  sql: mockDatabase.sql,
   executeWithRetry: jest.fn((_fn) => _fn()),
   executeWithTimeout: jest.fn((_fn) => _fn),
 }));
@@ -19,7 +25,7 @@ export async function simulateServerAction<T>(
     const { authenticated = true, mockUser } = options;
 
     // Update auth mock
-    const { getPrivyUser } = require("./auth");
+    const { getPrivyUser } = require("../auth");
     getPrivyUser.mockImplementation(async () => {
       if (!authenticated) return null;
       return (
@@ -36,9 +42,7 @@ export async function simulateServerAction<T>(
     } catch (error) {
       return { error: error as Error };
     }
-  } finally {
-    // Reset auth mock
-    const { getPrivyUser } = require("./auth");
-    getPrivyUser.mockReset();
+  } catch (error) {
+    return { error: error as Error };
   }
 }

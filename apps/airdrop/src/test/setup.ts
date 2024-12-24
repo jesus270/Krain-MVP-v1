@@ -77,6 +77,8 @@ jest.mock("next/headers", () => ({
 
 // Mock database
 jest.mock("@repo/database", () => {
+  const fixedDate = new Date("2024-01-01T00:00:00.000Z");
+
   const mockWalletTable = {
     id: { serial: "serial" },
     address: { text: "text" },
@@ -114,7 +116,8 @@ jest.mock("@repo/database", () => {
                     id: 1,
                     address: "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
                     referralCode: "TEST12",
-                    createdAt: new Date(),
+                    createdAt: fixedDate,
+                    updatedAt: fixedDate,
                   },
                 ]),
               };
@@ -127,7 +130,8 @@ jest.mock("@repo/database", () => {
                     referredByCode: "TEST12",
                     referredWalletAddress:
                       "9ZNTfG4NyQgxy2SWjSiQoUyBPEvXT2xo7fKc5hPYYJ7b",
-                    createdAt: new Date(),
+                    createdAt: fixedDate,
+                    updatedAt: fixedDate,
                   },
                 ]),
               };
@@ -152,7 +156,8 @@ jest.mock("@repo/database", () => {
                     id: 1,
                     referredByCode: values.referredByCode,
                     referredWalletAddress: values.referredWalletAddress,
-                    createdAt: new Date(),
+                    createdAt: fixedDate,
+                    updatedAt: fixedDate,
                   },
                 ]
               : table === mockWalletTable
@@ -161,7 +166,8 @@ jest.mock("@repo/database", () => {
                       id: 1,
                       address: values.address,
                       referralCode: values.referralCode || "TEST12",
-                      createdAt: new Date(),
+                      createdAt: fixedDate,
+                      updatedAt: fixedDate,
                     },
                   ]
                 : [],

@@ -76,7 +76,7 @@ export function Dashboard({
     }
 
     let isMounted = true;
-    let _retryTimeout: ReturnType<typeof setTimeout> | undefined;
+    let retryTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const loadData = async () => {
       try {
@@ -106,74 +106,30 @@ export function Dashboard({
           ready,
         });
 
-        // First try to get the wallet
-        let walletResult;
+        if (!isMounted) return;
+
+        let walletResult: Wallet | undefined;
         try {
-          walletResult = await getWallet({
-            address: userWalletAddress,
+          console.log(
+            "[CLIENT] Submitting wallet address with referredByCode:",
+            {
+              address: userWalletAddress,
+              referredByCode,
+            },
+          );
+
+          const wallet = await handleSubmitWallet({
+            walletAddress: userWalletAddress,
+            referredByCode,
           });
 
-          if (!isMounted || !walletResult) {
-            console.error("[CLIENT] No wallet result received");
-            return;
-          }
-
-          setWallet(walletResult);
-          console.log("[CLIENT] Wallet data loaded:", walletResult);
-
-          // Then submit wallet if needed
-          if (referredByCode && !walletResult.referralCode) {
-            try {
-              console.log("[CLIENT] Submitting wallet with referral code:", {
-                address: userWalletAddress,
-                referredByCode,
-              });
-
-              const updatedWallet = await handleSubmitWallet({
-                walletAddress: userWalletAddress,
-                referredByCode,
-              });
-              if (isMounted && updatedWallet) {
-                setWallet(updatedWallet);
-                walletResult = updatedWallet;
-                console.log(
-                  "[CLIENT] Wallet updated with referral code:",
-                  updatedWallet,
-                );
-              }
-            } catch (error) {
-              console.error("[CLIENT] Error submitting wallet:", error);
-              // Don't throw here - continue with rest of flow
-            }
-          }
-
-          if (!isMounted) return;
-
-          // Get referrals count with retry logic
-          if (walletResult.referralCode) {
-            try {
-              console.log(
-                "[CLIENT] Fetching referrals count for code:",
-                walletResult.referralCode,
-              );
-              const count = await fetchWithRetry(walletResult.referralCode);
-              if (isMounted) {
-                setReferralsCount(count);
-                console.log("[CLIENT] Referrals count loaded:", count);
-              }
-            } catch (error) {
-              console.error("[CLIENT] Error getting referrals count:", error);
-              if (isMounted) {
-                const message =
-                  error instanceof Error
-                    ? error.message
-                    : "Unable to load referrals";
-                setError(`${message}. Please refresh to try again.`);
-              }
-            }
+          if (isMounted && wallet) {
+            setWallet(wallet);
+            walletResult = wallet;
+            console.log("[CLIENT] Wallet submitted:", wallet);
           }
         } catch (error) {
-          console.error("[CLIENT] Error getting wallet:", error);
+          console.error("[CLIENT] Error submitting wallet:", error);
           if (isMounted) {
             const message =
               error instanceof Error
@@ -181,6 +137,52 @@ export function Dashboard({
                 : "Unable to load wallet data";
             setError(`${message}. Please refresh to try again.`);
           }
+        }
+
+        if (!isMounted) return;
+
+        // Get referrals count with retry logic
+        if (walletResult?.referralCode) {
+          try {
+            console.log(
+              "[CLIENT] Fetching referrals count for code:",
+              walletResult.referralCode,
+            );
+
+            const count = await fetchWithRetry(walletResult.referralCode);
+
+            if (isMounted) {
+              setReferralsCount(count);
+              console.log("[CLIENT] Referrals count loaded:", count);
+            } else {
+              console.error("[CLIENT] Referrals count not loaded:", count);
+              setReferralsCount(0);
+            }
+          } catch (error) {
+            console.error("[CLIENT] Error getting referrals count:", error);
+            if (isMounted) {
+              const message =
+                error instanceof Error
+                  ? error.message
+                  : "Unable to load referrals";
+              setError(`${message}. Please refresh to try again.`);
+            }
+          }
+        } else {
+          console.error("[CLIENT] Error getting wallet:", error);
+          if (isMounted) {
+            const message = "Unable to load wallet data";
+            setError(`${message}. Please refresh to try again.`);
+          }
+        }
+      } catch (error) {
+        console.error("[CLIENT] Error getting wallet:", error);
+        if (isMounted) {
+          const message =
+            error instanceof Error
+              ? error.message
+              : "Unable to load wallet data";
+          setError(`${message}. Please refresh to try again.`);
         }
       } finally {
         if (isMounted) {
@@ -195,8 +197,8 @@ export function Dashboard({
 
     return () => {
       isMounted = false;
-      if (_retryTimeout) {
-        clearTimeout(_retryTimeout);
+      if (retryTimeout) {
+        clearTimeout(retryTimeout);
       }
       clearTimeout(timeoutId);
     };

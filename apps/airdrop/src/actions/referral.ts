@@ -30,7 +30,7 @@ export const createReferral = async (input: {
     }
 
     // Create referral
-    const referral = await db
+    const [referral] = await db
       .insert(referralTable)
       .values({
         referredByCode: parsed.referredByCode,
@@ -38,13 +38,19 @@ export const createReferral = async (input: {
       })
       .returning();
 
+    if (!referral) {
+      throw new Error(
+        "Failed to create referral: No referral returned from database",
+      );
+    }
+
     // Only revalidate paths in non-test environments
     if (process.env.NODE_ENV !== "test") {
       revalidatePath("/");
       revalidatePath("/profile");
     }
 
-    return referral[0];
+    return referral;
   } catch (error) {
     console.error("[SERVER] Error creating referral:", {
       error,
@@ -54,8 +60,15 @@ export const createReferral = async (input: {
 
     if (error instanceof z.ZodError) {
       throw new Error(
-        `Failed to create referral: ${JSON.stringify(error.errors, null, 2)}`,
+        `Failed to create referral: ${error.errors[0]?.message || JSON.stringify(error.errors)}`,
       );
+    }
+
+    if (
+      error instanceof Error &&
+      error.message.includes("Database connection error")
+    ) {
+      throw new Error("Failed to create referral: Database connection error");
     }
 
     throw new Error(
@@ -64,9 +77,7 @@ export const createReferral = async (input: {
   }
 };
 
-export const getReferralsCount = async (
-  referralCode: string,
-): Promise<number> => {
+export const getReferralsCount = async (input: { referralCode: string }) => {
   try {
     // Check authentication first
     const user = await getPrivyUser();
@@ -74,28 +85,37 @@ export const getReferralsCount = async (
       throw new Error("Unauthorized: Please log in first");
     }
 
-    // Validate referral code
-    if (!referralCode || referralCode.length !== 6) {
-      throw new Error("Invalid referral code");
-    }
+    // Validate input
+    const parsed = referralCodeSchema.parse(input);
 
-    // Get referral count with additional logging
-    console.log("[SERVER] Getting referrals count for code:", referralCode);
-
-    const result = await db
+    // Get referrals count
+    const [result] = await db
       .select({ count: count() })
       .from(referralTable)
-      .where(eq(referralTable.referredByCode, referralCode));
+      .where(eq(referralTable.referredByCode, parsed.referralCode));
 
-    const referralCount = result[0]?.count ?? 0;
-
-    return referralCount;
+    return Number(result?.count || 0);
   } catch (error) {
     console.error("[SERVER] Error getting referrals count:", {
       error,
-      referralCode,
+      input,
       stack: error instanceof Error ? error.stack : undefined,
     });
+
+    if (error instanceof z.ZodError) {
+      throw new Error(
+        `Failed to get referrals count: ${error.errors[0]?.message || JSON.stringify(error.errors)}`,
+      );
+    }
+
+    if (
+      error instanceof Error &&
+      error.message.includes("Database connection error")
+    ) {
+      throw new Error(
+        "Failed to get referrals count: Database connection error",
+      );
+    }
 
     throw new Error(
       `Failed to get referrals count: ${error instanceof Error ? error.message : String(error)}`,
