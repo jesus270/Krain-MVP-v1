@@ -159,17 +159,18 @@ export async function getPrivyUser(): Promise<PrivyUser | null> {
         user: session.user,
       });
       await session.destroy();
+      userSessionCache.delete(session.id);
       return null;
     }
 
-    // Cache the validated user data
+    // Cache the validated user data with a shorter TTL during validation phase
     console.log("[SERVER] Setting user in cache:", {
       userId: session.user.id,
       walletAddress: session.user.wallet.address,
       sessionId: session.id,
     });
 
-    userSessionCache.set(session.id, session.user);
+    userSessionCache.set(session.id, session.user, { ttl: 60000 }); // 1 minute TTL for initial validation
     return session.user;
   } catch (error) {
     console.error("[SERVER] Error getting Privy user:", {
@@ -204,7 +205,7 @@ export async function setPrivyUser(user: PrivyUser): Promise<void> {
     session.user = user;
 
     // Update cache with validated data
-    userSessionCache.set(session.id, user);
+    userSessionCache.set(session.id, user, { ttl: 60000 }); // 1 minute TTL initially
 
     console.log("[SERVER] Setting user session:", {
       userId: user.id,
@@ -219,7 +220,17 @@ export async function setPrivyUser(user: PrivyUser): Promise<void> {
 
     // Save session
     await session.save();
-    console.log("[SERVER] User session saved successfully");
+
+    // Verify the session was saved
+    const verifySession = await getSession();
+    if (!verifySession.user || !verifySession.user.id) {
+      throw new Error("Failed to verify session after save");
+    }
+
+    // If verification succeeds, extend cache TTL
+    userSessionCache.set(session.id, user, { ttl: 300000 }); // 5 minutes TTL after verification
+
+    console.log("[SERVER] User session saved and verified successfully");
   } catch (error) {
     console.error("[SERVER] Error setting Privy user:", {
       error,
@@ -254,6 +265,12 @@ export async function clearPrivyUser(): Promise<void> {
     });
 
     await session.destroy();
+
+    // Verify session was destroyed
+    const verifySession = await getSession();
+    if (verifySession.user) {
+      throw new Error("Failed to destroy session");
+    }
 
     console.log("[SERVER] User session cleared successfully");
   } catch (error) {

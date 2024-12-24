@@ -23,8 +23,9 @@ const chain = {
   },
 };
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
+const MAX_RETRIES = 5;
+const RETRY_DELAY = 2000;
+const INITIAL_DELAY = 1000;
 
 export function PrivyProviderWrapper({
   children,
@@ -68,9 +69,13 @@ export function PrivyProviderWrapper({
             wallet: user.wallet,
           });
 
+          // Add initial delay to ensure Privy state is settled
+          await new Promise((resolve) => setTimeout(resolve, INITIAL_DELAY));
+
           // Try to set the session with retries
           let retries = MAX_RETRIES;
           let success = false;
+          let lastError = null;
 
           while (retries > 0 && !success) {
             try {
@@ -80,13 +85,16 @@ export function PrivyProviderWrapper({
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ user }),
-                credentials: "include", // Important: include credentials for cookies
+                credentials: "include",
               });
 
               if (!response.ok) {
                 const data = await response.json();
                 throw new Error(data.error || "Failed to set user session");
               }
+
+              // Wait a bit before verifying to ensure cookie is set
+              await new Promise((resolve) => setTimeout(resolve, 500));
 
               // Verify the session was set by making a test request
               const testResponse = await fetch("/api/auth/verify", {
@@ -97,9 +105,11 @@ export function PrivyProviderWrapper({
                 success = true;
                 console.log("[CLIENT] User session verified successfully");
               } else {
-                throw new Error("Session verification failed");
+                const data = await testResponse.json();
+                throw new Error(data.error || "Session verification failed");
               }
             } catch (error) {
+              lastError = error;
               console.error(
                 `[CLIENT] Attempt ${MAX_RETRIES - retries + 1} failed:`,
                 error,
@@ -107,7 +117,7 @@ export function PrivyProviderWrapper({
               retries--;
               if (retries > 0) {
                 await new Promise((resolve) =>
-                  setTimeout(resolve, RETRY_DELAY),
+                  setTimeout(resolve, RETRY_DELAY * (MAX_RETRIES - retries)),
                 );
               }
             }
@@ -116,10 +126,15 @@ export function PrivyProviderWrapper({
           if (!success) {
             console.error(
               "[CLIENT] Failed to set and verify user session after all retries",
+              lastError,
             );
+            // Optionally show an error to the user here
+            throw new Error("Failed to establish secure session");
           }
         } catch (error) {
           console.error("[CLIENT] Error in auth callback:", error);
+          // Re-throw to trigger error boundary if needed
+          throw error;
         }
       }}
     >
