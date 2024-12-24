@@ -8,29 +8,42 @@ export async function GET(request: NextRequest) {
       cookies: request.cookies.getAll(),
     });
 
+    // Check for required cookies
+    const privySession = request.cookies.get("privy_session");
+    if (!privySession) {
+      console.error(
+        "[SERVER] Session verification failed: Missing privy_session cookie",
+      );
+      return NextResponse.json(
+        { error: "Session cookie not found" },
+        { status: 401 },
+      );
+    }
+
     const user = await getPrivyUser();
     if (!user) {
       console.error("[SERVER] Session verification failed: No user found", {
         headers: Object.fromEntries(request.headers.entries()),
         cookies: request.cookies.getAll(),
       });
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "User session not found or invalid" },
+        { status: 401 },
+      );
     }
 
     console.log("[SERVER] Session verified successfully for user:", {
       userId: user.id,
       walletAddress: user.wallet.address,
-      headers: Object.fromEntries(request.headers.entries()),
-      cookies: request.cookies.getAll(),
     });
 
-    // Return the response with the session cookie
-    const response = NextResponse.json({ success: true });
-
-    // Log the response headers and cookies
-    console.log("[SERVER] Session verification response:", {
-      headers: Object.fromEntries(response.headers.entries()),
-      cookies: response.cookies.getAll(),
+    // Return the response with user data (excluding sensitive information)
+    const response = NextResponse.json({
+      success: true,
+      user: {
+        id: user.id,
+        walletAddress: user.wallet.address,
+      },
     });
 
     return response;
@@ -41,8 +54,12 @@ export async function GET(request: NextRequest) {
       headers: Object.fromEntries(request.headers.entries()),
       cookies: request.cookies.getAll(),
     });
+
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: "Internal server error",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 },
     );
   }

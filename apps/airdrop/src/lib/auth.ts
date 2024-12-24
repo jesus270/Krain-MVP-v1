@@ -98,12 +98,11 @@ async function getSession() {
 
 export async function getPrivyUser(): Promise<PrivyUser | null> {
   try {
-    const session = await getSession();
     const cookieStore = cookies();
+    const session = await getSession();
 
-    // Generate a session ID if not present
+    // Ensure we have a session ID
     if (!session.id) {
-      console.log("[SERVER] Generating new session ID");
       session.id = generateSessionId();
       await session.save();
     }
@@ -118,21 +117,20 @@ export async function getPrivyUser(): Promise<PrivyUser | null> {
       ),
     });
 
-    // Check cache first
+    // Check cache first with validation
     const cachedUser = userSessionCache.get(session.id);
     if (cachedUser) {
-      // Validate cached user data
-      if (!cachedUser.id || !cachedUser.wallet?.address) {
+      if (cachedUser.id && cachedUser.wallet?.address) {
+        console.log("[SERVER] Using cached user data:", {
+          userId: cachedUser.id,
+          walletAddress: cachedUser.wallet.address,
+          sessionId: session.id,
+        });
+        return cachedUser;
+      } else {
         console.log("[SERVER] Invalid cached user data, clearing cache");
         userSessionCache.delete(session.id);
-        return null;
       }
-      console.log("[SERVER] Using cached user data:", {
-        userId: cachedUser.id,
-        walletAddress: cachedUser.wallet.address,
-        sessionId: session.id,
-      });
-      return cachedUser;
     }
 
     // Check rate limit
@@ -141,7 +139,7 @@ export async function getPrivyUser(): Promise<PrivyUser | null> {
       throw new Error("Too many requests. Please try again later.");
     }
 
-    // Get user from session
+    // Get user from session with validation
     if (!session.user) {
       console.log("[SERVER] No user in session:", {
         sessionId: session.id,
@@ -154,7 +152,7 @@ export async function getPrivyUser(): Promise<PrivyUser | null> {
       return null;
     }
 
-    // Validate user data
+    // Validate user data thoroughly
     if (!session.user.id || !session.user.wallet?.address) {
       console.error("[SERVER] Invalid user data in session:", {
         sessionId: session.id,
@@ -164,15 +162,14 @@ export async function getPrivyUser(): Promise<PrivyUser | null> {
       return null;
     }
 
+    // Cache the validated user data
     console.log("[SERVER] Setting user in cache:", {
       userId: session.user.id,
       walletAddress: session.user.wallet.address,
       sessionId: session.id,
     });
 
-    // Cache the result
     userSessionCache.set(session.id, session.user);
-
     return session.user;
   } catch (error) {
     console.error("[SERVER] Error getting Privy user:", {
@@ -190,7 +187,7 @@ export async function getPrivyUser(): Promise<PrivyUser | null> {
 
 export async function setPrivyUser(user: PrivyUser): Promise<void> {
   try {
-    // Validate user data
+    // Validate user data thoroughly
     if (!user.id || !user.wallet?.address) {
       throw new Error("Invalid user data");
     }
@@ -198,14 +195,15 @@ export async function setPrivyUser(user: PrivyUser): Promise<void> {
     const session = await getSession();
     const cookieStore = cookies();
 
-    // Generate a session ID if not present
+    // Ensure we have a session ID
     if (!session.id) {
       session.id = generateSessionId();
     }
 
+    // Set user in session
     session.user = user;
 
-    // Update cache
+    // Update cache with validated data
     userSessionCache.set(session.id, user);
 
     console.log("[SERVER] Setting user session:", {
@@ -219,8 +217,8 @@ export async function setPrivyUser(user: PrivyUser): Promise<void> {
       ),
     });
 
+    // Save session
     await session.save();
-
     console.log("[SERVER] User session saved successfully");
   } catch (error) {
     console.error("[SERVER] Error setting Privy user:", {

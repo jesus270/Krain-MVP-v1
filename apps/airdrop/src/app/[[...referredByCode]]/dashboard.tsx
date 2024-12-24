@@ -14,7 +14,33 @@ import { ReferralProgramCard } from "@/components/dashboard/referral-program-car
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2 seconds
-const INITIAL_LOAD_DELAY = 2000; // Increased to 2 seconds to give more time for session setup
+const INITIAL_LOAD_DELAY = 3000; // Increased to 3 seconds to give more time for session setup
+const SESSION_VERIFY_MAX_RETRIES = 3;
+
+async function verifySession(attempt = 1): Promise<boolean> {
+  try {
+    const verifyResponse = await fetch("/api/auth/verify", {
+      credentials: "include",
+    });
+
+    if (verifyResponse.ok) {
+      console.log("[CLIENT] Session verified successfully");
+      return true;
+    }
+
+    if (attempt >= SESSION_VERIFY_MAX_RETRIES) {
+      console.error("[CLIENT] Session verification failed after all retries");
+      return false;
+    }
+
+    console.log(`[CLIENT] Session not ready (attempt ${attempt}), retrying...`);
+    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+    return verifySession(attempt + 1);
+  } catch (error) {
+    console.error("[CLIENT] Session verification error:", error);
+    return false;
+  }
+}
 
 async function fetchWithRetry(
   referralCode: string,
@@ -84,20 +110,10 @@ export function Dashboard({
         setIsLoadingReferrals(true);
         setError(undefined);
 
-        // First verify the session is ready
-        try {
-          const verifyResponse = await fetch("/api/auth/verify", {
-            credentials: "include",
-          });
-
-          if (!verifyResponse.ok) {
-            throw new Error("Session not ready");
-          }
-        } catch (_error) {
-          console.log("[CLIENT] Session not ready, retrying...");
-          // Retry after a delay
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          return loadData();
+        // First verify the session is ready with improved retry logic
+        const sessionVerified = await verifySession();
+        if (!sessionVerified) {
+          throw new Error("Unable to verify session. Please try again.");
         }
 
         console.log("[CLIENT] Loading wallet data for user:", {
