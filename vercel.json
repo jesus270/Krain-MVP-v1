@@ -2,6 +2,5 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "buildCommand": "pnpm turbo build",
-  "installCommand": "pnpm install",
-  "workspaceRoot": "."
+  "installCommand": "pnpm install"
 }
