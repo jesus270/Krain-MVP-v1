@@ -38,7 +38,7 @@ export function BasePointsSection({
               <span className="text-sm font-medium">Add Wallet</span>
             </div>
             <Badge
-              variant={userWalletAddress ? "secondary" : "outline"}
+              variant={walletConnectionPoints ? "secondary" : "outline"}
               className="text-center"
             >
               {formatNumber(walletConnectionPoints, locale)} pts
@@ -78,7 +78,7 @@ export function BasePointsSection({
               <span className="text-sm font-medium">Create Account</span>
             </div>
             <Badge
-              variant={userWalletAddress ? "secondary" : "outline"}
+              variant={accountCreationPoints ? "secondary" : "outline"}
               className="text-center"
             >
               {formatNumber(accountCreationPoints, locale)} pts

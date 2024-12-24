@@ -56,11 +56,15 @@ export function PointsStatusCard({
             <h2>$KRAIN Airdrop Status</h2>
           </CardTitle>
           <Badge
-            variant={totalPoints > 0 ? "secondary" : "outline"}
-            className={`text-lg px-4 py-2 text-center ${isLoadingReferrals ? "animate-pulse" : ""}`}
+            variant={
+              totalPoints < 0 || isLoadingReferrals ? "outline" : "secondary"
+            }
+            className={`text-lg px-4 py-2 text-center ${
+              isLoadingReferrals ? "animate-pulse bg-muted" : ""
+            }`}
           >
             {isLoadingReferrals
-              ? "Calculating points..."
+              ? "Loading..."
               : `${formatNumber(totalPoints, locale)} Points`}
           </Badge>
         </div>

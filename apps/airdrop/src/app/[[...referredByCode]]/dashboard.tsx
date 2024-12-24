@@ -11,10 +11,17 @@ import { getReferralsCount } from "@/actions/referral";
 import { ConnectWalletCard } from "@/components/dashboard/connect-wallet-card";
 import { PointsStatusCard } from "@/components/dashboard/points-status-card";
 import { ReferralProgramCard } from "@/components/dashboard/referral-program-card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
+import { Button } from "@repo/ui/components/ui/button";
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2 seconds
-const INITIAL_LOAD_DELAY = 3000; // Increased to 3 seconds to give more time for session setup
 const SESSION_VERIFY_MAX_RETRIES = 3;
 
 async function verifySession(attempt = 1): Promise<boolean> {
@@ -87,6 +94,7 @@ export function Dashboard({
   const [isLoadingWallet, setIsLoadingWallet] = useState(true);
   const [isLoadingReferrals, setIsLoadingReferrals] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [isSessionValid, setIsSessionValid] = useState(false);
   const locale = useLocale();
 
   const userEmailAddress = user?.email?.address ?? undefined;
@@ -110,11 +118,15 @@ export function Dashboard({
         setIsLoadingReferrals(true);
         setError(undefined);
 
-        // First verify the session is ready with improved retry logic
-        const sessionVerified = await verifySession();
-        if (!sessionVerified) {
-          throw new Error("Unable to verify session. Please try again.");
-        }
+        // Start session verification in parallel with initial UI render
+        verifySession().then((verified) => {
+          if (isMounted) {
+            setIsSessionValid(verified);
+            if (!verified) {
+              setError("Unable to verify session. Please try again.");
+            }
+          }
+        });
 
         console.log("[CLIENT] Loading wallet data for user:", {
           walletAddress: userWalletAddress,
@@ -141,6 +153,7 @@ export function Dashboard({
 
           if (isMounted && wallet) {
             setWallet(wallet);
+            setIsLoadingWallet(false);
             walletResult = wallet;
             console.log("[CLIENT] Wallet submitted:", wallet);
           }
@@ -170,9 +183,6 @@ export function Dashboard({
             if (isMounted) {
               setReferralsCount(count);
               console.log("[CLIENT] Referrals count loaded:", count);
-            } else {
-              console.error("[CLIENT] Referrals count not loaded:", count);
-              setReferralsCount(0);
             }
           } catch (error) {
             console.error("[CLIENT] Error getting referrals count:", error);
@@ -183,12 +193,6 @@ export function Dashboard({
                   : "Unable to load referrals";
               setError(`${message}. Please refresh to try again.`);
             }
-          }
-        } else {
-          console.error("[CLIENT] Error getting wallet:", error);
-          if (isMounted) {
-            const message = "Unable to load wallet data";
-            setError(`${message}. Please refresh to try again.`);
           }
         }
       } catch (error) {
@@ -208,29 +212,19 @@ export function Dashboard({
       }
     };
 
-    // Add a delay to ensure Privy is fully initialized
-    const timeoutId = setTimeout(loadData, INITIAL_LOAD_DELAY);
+    // Start loading immediately
+    loadData();
 
     return () => {
       isMounted = false;
       if (retryTimeout) {
         clearTimeout(retryTimeout);
       }
-      clearTimeout(timeoutId);
     };
   }, [authenticated, userWalletAddress, referredByCode, ready]);
 
-  // Show loading state
-  if (!ready || isLoadingWallet) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
-  }
-
   // Show connect wallet card if not authenticated
-  if (!authenticated) {
+  if (ready && !authenticated) {
     return (
       <main className="container mx-auto py-8 px-4">
         <ConnectWalletCard />
@@ -242,18 +236,22 @@ export function Dashboard({
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <div className="text-red-500">{error}</div>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
-        >
-          Retry
-        </button>
+        <Card>
+          <CardHeader>
+            <CardTitle>Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-red-500">{error}</div>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
+          </CardFooter>
+        </Card>
       </div>
     );
   }
 
-  // Show main dashboard content
+  // Show main dashboard content with progressive loading
   return (
     <div className="space-y-4 p-4">
       <PointsStatusCard

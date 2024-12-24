@@ -35,7 +35,7 @@ export function ProfilePointsSection({
               <span className="text-sm font-medium">X Account</span>
             </div>
             <Badge
-              variant={userTwitterUsername ? "secondary" : "outline"}
+              variant={twitterPoints ? "secondary" : "outline"}
               className="text-center"
             >
               {formatNumber(twitterPoints, locale)} pts
@@ -75,7 +75,7 @@ export function ProfilePointsSection({
               <span className="text-sm font-medium">Email</span>
             </div>
             <Badge
-              variant={userEmailAddress ? "secondary" : "outline"}
+              variant={emailPoints ? "secondary" : "outline"}
               className="text-center"
             >
               {formatNumber(emailPoints, locale)} pts

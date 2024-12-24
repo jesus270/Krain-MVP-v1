@@ -32,13 +32,20 @@ export function ReferralPointsSection({
           </div>
           <Badge
             variant={referralsCount > 0 ? "secondary" : "outline"}
-            className={`text-center ${isLoading ? "animate-pulse" : ""}`}
+            className={`text-center ${isLoading ? "animate-pulse bg-muted" : ""}`}
           >
-            {formatNumber(referralPoints, locale)} pts
+            {isLoading
+              ? "Loading..."
+              : `${formatNumber(referralPoints, locale)} pts`}
           </Badge>
         </div>
         <div className="flex items-center gap-2 mt-2">
-          {referralsCount > 0 ? (
+          {isLoading ? (
+            <div key="referrals-exist" className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
+              <p className="text-xs text-muted-foreground">Loading...</p>
+            </div>
+          ) : referralsCount > 0 ? (
             <div key="referrals-exist" className="flex items-center gap-2">
               <CheckCircle2
                 className="h-4 w-4 text-green-500"

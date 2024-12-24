@@ -15,10 +15,10 @@ const ipRateLimitCache = new LRUCache<string, number[]>({
   ttl: 60000, // 1 minute
 });
 
-// Cache for user sessions
+// Cache for user sessions with longer TTL
 const userSessionCache = new LRUCache<string, PrivyUser>({
   max: 100,
-  ttl: 300000, // 5 minutes
+  ttl: 24 * 60 * 60 * 1000, // 24 hours
 });
 
 export type PrivyUser = {
@@ -43,7 +43,7 @@ const sessionOptions: SessionOptions = {
     httpOnly: true,
     sameSite: "lax" as const,
     path: "/",
-    maxAge: 7200, // 2 hours
+    maxAge: 24 * 60 * 60, // 24 hours
     domain:
       process.env.NODE_ENV === "production"
         ? process.env.NEXT_PUBLIC_APP_DOMAIN
@@ -204,8 +204,8 @@ export async function setPrivyUser(user: PrivyUser): Promise<void> {
     // Set user in session
     session.user = user;
 
-    // Update cache with validated data
-    userSessionCache.set(session.id, user, { ttl: 60000 }); // 1 minute TTL initially
+    // Update cache with validated data - use longer TTL
+    userSessionCache.set(session.id, user, { ttl: 24 * 60 * 60 * 1000 }); // 24 hours TTL
 
     console.log("[SERVER] Setting user session:", {
       userId: user.id,
@@ -226,9 +226,6 @@ export async function setPrivyUser(user: PrivyUser): Promise<void> {
     if (!verifySession.user || !verifySession.user.id) {
       throw new Error("Failed to verify session after save");
     }
-
-    // If verification succeeds, extend cache TTL
-    userSessionCache.set(session.id, user, { ttl: 300000 }); // 5 minutes TTL after verification
 
     console.log("[SERVER] User session saved and verified successfully");
   } catch (error) {

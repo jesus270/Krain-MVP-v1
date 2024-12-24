@@ -33,85 +33,84 @@ export function ReferralProgramCard({
 }: ReferralProgramCardProps) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopyReferralLink = async () => {
-    if (!referralUrl) return;
-
+  const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(referralUrl);
       setCopied(true);
-      toast.success("Referral link copied to clipboard");
+      toast.success("Referral link copied to clipboard!");
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error("Failed to copy referral link:", error);
+      console.error("[CLIENT] Error copying to clipboard:", error);
       toast.error("Failed to copy referral link");
     }
   };
 
   return (
-    <Card className="border-2 max-w-2xl mx-auto">
+    <Card
+      className={`border-2 max-w-2xl mx-auto ${isLoadingWallet || isLoadingReferrals ? "opacity-80" : ""}`}
+    >
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>
-            <h2>Referral Program</h2>
-          </CardTitle>
-          <Badge
-            variant={referralsCount > 0 ? "secondary" : "outline"}
-            className={`text-lg px-4 py-2 text-center ${isLoadingReferrals ? "animate-pulse" : ""}`}
-          >
-            {isLoadingReferrals
-              ? "Loading..."
-              : `${formatNumber(referralsCount, locale)} Referrals`}
-          </Badge>
-        </div>
+        <CardTitle className="text-2xl font-bold">Referral Program</CardTitle>
         <CardDescription>
-          Share your referral link with friends to earn more points. Each
-          referral earns you 1,000 points.
+          Share your referral link to earn more points! You'll earn 1,000 points
+          for each successful referral.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="rounded-lg border bg-card p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <LinkIcon
-              className="h-5 w-5 text-primary"
-              key="referral-link-icon"
-            />
-            <Label className="font-medium">Your Referral Link</Label>
-            {isLoadingWallet && (
-              <Loader2
-                className="h-4 w-4 animate-spin ml-auto"
-                key="loading-icon"
-              />
-            )}
+      <CardContent className="space-y-6">
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <Label>Your Referral Link</Label>
+            <Badge
+              variant={referralsCount > 0 ? "secondary" : "outline"}
+              className={isLoadingReferrals ? "animate-pulse bg-muted" : ""}
+            >
+              {isLoadingReferrals
+                ? "Loading..."
+                : `${formatNumber(referralsCount, locale)} ${
+                    referralsCount === 1 ? "Referral" : "Referrals"
+                  }`}
+            </Badge>
           </div>
           <div className="flex gap-2">
             <Input
               value={referralUrl}
+              readOnly
               placeholder={
                 isLoadingWallet
-                  ? "Loading your referral link..."
-                  : "No referral link available"
+                  ? "Loading..."
+                  : "Connect wallet to get your referral link"
               }
-              readOnly
-              className="font-mono text-sm"
+              className={isLoadingWallet ? "animate-pulse bg-muted" : ""}
             />
             <Button
-              variant="secondary"
-              onClick={handleCopyReferralLink}
-              className="min-w-[100px]"
-              disabled={isLoadingWallet || !referralUrl}
+              variant="outline"
+              size="icon"
+              onClick={handleCopy}
+              disabled={!referralUrl || isLoadingWallet}
             >
               {copied ? (
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4" key="copy-success-icon" />
-                  <span>Copied</span>
-                </div>
+                <CheckCircle2 className="h-4 w-4" />
+              ) : isLoadingWallet ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <div className="flex items-center gap-2">
-                  <Copy className="h-4 w-4" key="copy-icon" />
-                  <span>Copy</span>
-                </div>
+                <Copy className="h-4 w-4" />
               )}
             </Button>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <LinkIcon className="h-5 w-5 text-primary" />
+            <Label>How It Works</Label>
+          </div>
+          <div className="grid gap-4">
+            <div className="rounded-lg border bg-card/50 p-3">
+              <p className="text-sm">
+                Share your unique referral link with friends. When they connect
+                their wallet and create an account using your link, you'll earn
+                1,000 points for each successful referral.
+              </p>
+            </div>
           </div>
         </div>
       </CardContent>

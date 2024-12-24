@@ -11,6 +11,13 @@ import { SidebarInset, SidebarProvider } from "@repo/ui/components/ui/sidebar";
 import Header from "@/components/header";
 import { PrivyProviderWrapper } from "@/components/privy-provider-wrapper";
 import { usePrivy } from "@privy-io/react-auth";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
 
 const redHatMono = Red_Hat_Mono({
   variable: "--font-red-hat-mono",
@@ -78,6 +85,19 @@ function AuthWrapper({
   children: (authenticated: boolean) => React.ReactNode;
 }) {
   const { authenticated, ready } = usePrivy();
-  if (!ready) return null;
+  console.log("ready", ready);
+  if (!ready)
+    return (
+      <main className="flex flex-grow justify-center items-center min-h-[400px]">
+        <Card className="max-w-2xl mx-auto animate-pulse">
+          <CardHeader>
+            <CardTitle>Welcome to the $KRAIN Airdrop</CardTitle>
+            <CardDescription>
+              Please wait while we validate your session...
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </main>
+    );
   return <>{children(authenticated)}</>;
 }
