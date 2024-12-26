@@ -53,6 +53,11 @@ function logClientError(error: unknown, context: Record<string, unknown> = {}) {
 
 async function verifySession(attempt = 1): Promise<boolean> {
   try {
+    // Add delay for first attempt to allow session to propagate
+    if (attempt === 1) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
     const verifyResponse = await fetch("/api/auth/verify", {
       credentials: "include",
       headers: {
@@ -62,27 +67,35 @@ async function verifySession(attempt = 1): Promise<boolean> {
     });
 
     if (verifyResponse.ok) {
+      console.info("[AUTH] Session verification successful", {
+        operation: "verify_session",
+        status: "success",
+        attempt,
+      });
       return true;
     }
 
-    // If unauthorized, try to revalidate the session
+    // If unauthorized and not max retries, retry with exponential backoff
     if (verifyResponse.status === 401 && attempt < SESSION_VERIFY_MAX_RETRIES) {
+      const backoffMs = Math.min(RETRY_DELAY * Math.pow(2, attempt - 1), 10000);
       console.info("[AUTH] Session verification failed, retrying", {
         operation: "verify_session",
         status: "retry",
         attempt,
-        nextAttemptMs: RETRY_DELAY,
+        nextAttemptMs: backoffMs,
+        responseStatus: verifyResponse.status,
       });
 
-      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+      await new Promise((resolve) => setTimeout(resolve, backoffMs));
       return verifySession(attempt + 1);
     }
 
     if (attempt >= SESSION_VERIFY_MAX_RETRIES) {
-      console.error("[AUTH] Session verification failed", {
+      console.error("[AUTH] Session verification failed after max retries", {
         operation: "verify_session",
         status: "error",
         attempts: attempt,
+        responseStatus: verifyResponse.status,
       });
       return false;
     }
@@ -98,7 +111,8 @@ async function verifySession(attempt = 1): Promise<boolean> {
     });
 
     if (attempt < SESSION_VERIFY_MAX_RETRIES) {
-      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+      const backoffMs = Math.min(RETRY_DELAY * Math.pow(2, attempt - 1), 10000);
+      await new Promise((resolve) => setTimeout(resolve, backoffMs));
       return verifySession(attempt + 1);
     }
 
@@ -186,10 +200,34 @@ export function Dashboard({
         setIsLoadingReferrals(true);
         setError(undefined);
 
-        // Verify session first
+        // Wait for wallet to be available first
+        let walletAttempts = 0;
+        while (!userWalletAddress && walletAttempts < 5) {
+          console.info("[CLIENT] Waiting for wallet address", {
+            operation: "load_data",
+            status: "waiting",
+            attempt: walletAttempts + 1,
+          });
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          walletAttempts++;
+        }
+
+        if (!userWalletAddress) {
+          console.error(
+            "[CLIENT] Wallet address not available after max attempts",
+            {
+              operation: "load_data",
+              status: "error",
+            },
+          );
+          setError("Unable to get wallet address. Please try again.");
+          return;
+        }
+
+        // Verify session with retries
         const verified = await verifySession();
         if (!verified) {
-          setError("Unable to verify session. Please try again.");
+          setError("Unable to verify session. Please refresh and try again.");
           return;
         }
 
@@ -213,6 +251,41 @@ export function Dashboard({
               operation: "load_wallet",
               walletAddress: userWalletAddress,
             });
+
+            // If it's an unauthorized error, try verifying session again
+            if (clientError.message.includes("Unauthorized")) {
+              console.info(
+                "[CLIENT] Unauthorized error, retrying session verification",
+                {
+                  operation: "load_wallet",
+                  status: "retry",
+                },
+              );
+              const reVerified = await verifySession();
+              if (reVerified) {
+                // Retry wallet submission
+                try {
+                  const wallet = await handleSubmitWallet({
+                    walletAddress: userWalletAddress,
+                    referredByCode,
+                  });
+                  if (isMounted && wallet) {
+                    setWallet(wallet);
+                    setIsLoadingWallet(false);
+                    walletResult = wallet;
+                  }
+                } catch (retryError) {
+                  setError(
+                    `${retryError instanceof Error ? retryError.message : String(retryError)}. Please refresh to try again.`,
+                  );
+                }
+              } else {
+                setError(
+                  "Session verification failed. Please refresh to try again.",
+                );
+              }
+              return;
+            }
 
             setError(`${clientError.message}. Please refresh to try again.`);
 
