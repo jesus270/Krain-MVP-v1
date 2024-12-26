@@ -6,7 +6,8 @@
     "DATABASE_URL",
     "SESSION_SECRET",
     "NEXT_PUBLIC_PRIVY_APP_ID",
-    "MONITORING_ORIGINS"
+    "MONITORING_ORIGINS",
+    "DOMAIN"
   ],
   "pipeline": {
     "build": {
