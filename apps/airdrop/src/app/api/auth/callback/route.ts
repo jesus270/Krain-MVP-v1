@@ -8,6 +8,7 @@ import { IronSessionCookieStore } from "@/lib/cookie-store";
 
 export async function POST(request: NextRequest) {
   try {
+    console.info("[SERVER] Processing auth callback");
     const data = await request.json();
 
     // Validate user ID
@@ -42,6 +43,11 @@ export async function POST(request: NextRequest) {
       walletAddress: walletAddress,
     };
 
+    console.info("[SERVER] Creating session for user", {
+      userId: user.id,
+      walletAddress: walletAddress,
+    });
+
     // Create a new cookie store and session
     const cookieStore = new IronSessionCookieStore(await cookies());
     const session = await getIronSession<SessionData>(
@@ -52,18 +58,22 @@ export async function POST(request: NextRequest) {
     // Set session data
     session.user = user;
     session.isLoggedIn = true;
+    session.lastActivity = Date.now();
     await session.save();
 
+    console.info("[SERVER] Session created successfully", {
+      userId: user.id,
+      timestamp: new Date().toISOString(),
+    });
+
     // Create response with session cookie
-    const response = NextResponse.json({ success: true, user });
+    const response = NextResponse.json({ success: true });
 
     // Add all cookie headers from the store
     const cookieHeaders = cookieStore.getCookieHeaders();
     for (const header of cookieHeaders) {
       response.headers.append("Set-Cookie", header);
     }
-
-    console.log("[SERVER] Session created for user ID:", user.id);
 
     return response;
   } catch (error) {

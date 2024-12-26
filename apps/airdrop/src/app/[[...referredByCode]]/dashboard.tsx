@@ -53,55 +53,63 @@ function logClientError(error: unknown, context: Record<string, unknown> = {}) {
 
 async function verifySession(attempt = 1): Promise<boolean> {
   try {
-    // Add delay for first attempt to allow session to propagate
-    if (attempt === 1) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Maximum time to wait for session (15 seconds)
+    const SESSION_TIMEOUT = 15000;
+    const POLL_INTERVAL = 500;
+    const startTime = Date.now();
+
+    while (Date.now() - startTime < SESSION_TIMEOUT) {
+      console.info("[AUTH] Polling session verification", {
+        operation: "verify_session",
+        attempt,
+        elapsedMs: Date.now() - startTime,
+        timestamp: new Date().toISOString(),
+      });
+
+      const verifyResponse = await fetch("/api/auth/verify", {
+        credentials: "include",
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+      });
+
+      if (verifyResponse.ok) {
+        console.info("[AUTH] Session verification successful", {
+          operation: "verify_session",
+          status: "success",
+          attempt,
+          elapsedMs: Date.now() - startTime,
+          responseStatus: verifyResponse.status,
+        });
+        return true;
+      }
+
+      // If we get a non-401 error, something else is wrong
+      if (verifyResponse.status !== 401) {
+        console.error(
+          "[AUTH] Session verification failed with unexpected status",
+          {
+            operation: "verify_session",
+            status: "error",
+            responseStatus: verifyResponse.status,
+            attempt,
+          },
+        );
+        return false;
+      }
+
+      // Wait before next poll
+      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
     }
 
-    const verifyResponse = await fetch("/api/auth/verify", {
-      credentials: "include",
-      headers: {
-        "Cache-Control": "no-cache",
-        Pragma: "no-cache",
-      },
+    console.error("[AUTH] Session verification timed out", {
+      operation: "verify_session",
+      status: "timeout",
+      timeoutMs: SESSION_TIMEOUT,
+      attempts: attempt,
     });
-
-    if (verifyResponse.ok) {
-      console.info("[AUTH] Session verification successful", {
-        operation: "verify_session",
-        status: "success",
-        attempt,
-      });
-      return true;
-    }
-
-    // If unauthorized and not max retries, retry with exponential backoff
-    if (verifyResponse.status === 401 && attempt < SESSION_VERIFY_MAX_RETRIES) {
-      const backoffMs = Math.min(RETRY_DELAY * Math.pow(2, attempt - 1), 10000);
-      console.info("[AUTH] Session verification failed, retrying", {
-        operation: "verify_session",
-        status: "retry",
-        attempt,
-        nextAttemptMs: backoffMs,
-        responseStatus: verifyResponse.status,
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, backoffMs));
-      return verifySession(attempt + 1);
-    }
-
-    if (attempt >= SESSION_VERIFY_MAX_RETRIES) {
-      console.error("[AUTH] Session verification failed after max retries", {
-        operation: "verify_session",
-        status: "error",
-        attempts: attempt,
-        responseStatus: verifyResponse.status,
-      });
-      return false;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
-    return verifySession(attempt + 1);
+    return false;
   } catch (error) {
     console.error("[AUTH] Session verification error", {
       operation: "verify_session",
@@ -109,13 +117,6 @@ async function verifySession(attempt = 1): Promise<boolean> {
       errorMessage: error instanceof Error ? error.message : String(error),
       attempt,
     });
-
-    if (attempt < SESSION_VERIFY_MAX_RETRIES) {
-      const backoffMs = Math.min(RETRY_DELAY * Math.pow(2, attempt - 1), 10000);
-      await new Promise((resolve) => setTimeout(resolve, backoffMs));
-      return verifySession(attempt + 1);
-    }
-
     return false;
   }
 }
