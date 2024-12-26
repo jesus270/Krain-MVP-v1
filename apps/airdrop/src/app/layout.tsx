@@ -21,6 +21,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import { usePathname } from "next/navigation";
+import Intercom from "@intercom/messenger-js-sdk";
 
 const redHatMono = Red_Hat_Mono({
   variable: "--font-red-hat-mono",
@@ -97,7 +98,15 @@ function AuthWrapper({
 }: {
   children: (authenticated: boolean) => React.ReactNode;
 }) {
-  const { authenticated, ready } = usePrivy();
+  const { authenticated, ready, user } = usePrivy();
+
+  Intercom({
+    app_id: "jys4yu7r",
+    email: user?.email?.address,
+    created_at: user?.createdAt ? user.createdAt.getTime() / 1000 : undefined,
+    name: user?.email?.address,
+    user_id: user?.id,
+  });
 
   if (!ready)
     return (
