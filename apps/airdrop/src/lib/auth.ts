@@ -40,11 +40,10 @@ export const sessionOptions = {
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    sameSite: "strict" as const,
+    sameSite: "lax" as const,
     path: "/",
     maxAge: 4 * 60 * 60, // 4 hours
-    domain:
-      process.env.NODE_ENV === "production" ? process.env.DOMAIN : undefined,
+    domain: undefined,
   },
 };
 
