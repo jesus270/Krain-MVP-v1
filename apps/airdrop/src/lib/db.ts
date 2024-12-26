@@ -41,11 +41,12 @@ function getPool(): Pool {
     });
 
     pool.on("connect", () => {
-      console.debug("[DB Pool] New connection established");
-    });
-
-    pool.on("remove", () => {
-      console.debug("[DB Pool] Connection removed from pool");
+      const totalCount = pool?.totalCount ?? 0;
+      const idleCount = pool?.idleCount ?? 0;
+      console.debug("[DB Pool] Status:", {
+        total: totalCount,
+        active: totalCount - idleCount,
+      });
     });
   }
   return pool;
@@ -59,6 +60,7 @@ export async function executeWithTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number = DB_TIMEOUT,
 ): Promise<T> {
+  const start = Date.now();
   const timeoutPromise = new Promise<never>((_, reject) => {
     const timeoutId = setTimeout(() => {
       clearTimeout(timeoutId);
@@ -68,6 +70,10 @@ export async function executeWithTimeout<T>(
 
   try {
     const result = await Promise.race([promise, timeoutPromise]);
+    const duration = Date.now() - start;
+    if (duration > 1000) {
+      console.warn("[DB] Slow operation:", { durationMs: duration });
+    }
     return result;
   } catch (error) {
     if (error instanceof Error) {
@@ -166,13 +172,15 @@ export async function executeWithRetry<T>(
 
 // Graceful shutdown handling
 async function shutdownPool(signal: string) {
-  console.log(`[DB] Shutting down pool on ${signal}`);
+  console.log("[DB] Shutting down pool");
   if (pool) {
     try {
       await pool.end();
-      console.log("[DB] Pool shutdown completed");
     } catch (error) {
-      console.error("[DB] Error during pool shutdown:", error);
+      console.error(
+        "[DB] Shutdown error:",
+        error instanceof Error ? error.message : error,
+      );
     } finally {
       pool = null;
     }

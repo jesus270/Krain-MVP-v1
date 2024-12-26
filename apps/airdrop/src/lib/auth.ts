@@ -1,301 +1,73 @@
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
-import { LRUCache } from "lru-cache";
-import { SessionOptions } from "iron-session";
+import { IronSessionCookieStore } from "./cookie-store";
+import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
-// Cache for rate limiting
-const rateLimitCache = new LRUCache<string, number[]>({
-  max: 500,
-  ttl: 60000, // 1 minute
-});
-
-// Cache for IP-based rate limiting
-const ipRateLimitCache = new LRUCache<string, number[]>({
-  max: 1000,
-  ttl: 60000, // 1 minute
-});
-
-// Cache for user sessions with longer TTL
-const userSessionCache = new LRUCache<string, PrivyUser>({
-  max: 100,
-  ttl: 24 * 60 * 60 * 1000, // 24 hours
-});
-
-export type PrivyUser = {
+// Simple user type with required fields
+export type User = {
   id: string;
-  wallet: {
-    address: string;
-  };
+  walletAddress: string;
 };
 
-export interface PrivySession {
-  user?: PrivyUser;
-  id: string;
+// Define session data structure
+export interface SessionData {
+  user?: User;
+  isLoggedIn: boolean;
 }
 
-const sessionOptions: SessionOptions = {
-  cookieName: "privy_session",
+// Extend iron-session types
+declare module "iron-session" {
+  interface IronSessionData extends SessionData {}
+}
+
+// Session configuration
+export const sessionOptions = {
   password:
     process.env.SESSION_SECRET ||
-    "complex_password_at_least_32_characters_long",
+    (process.env.NODE_ENV === "development"
+      ? "complex_password_at_least_32_characters_long_dev_only"
+      : (() => {
+          throw new Error("SESSION_SECRET must be set in production");
+        })()),
+  cookieName: "user-session",
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     sameSite: "lax" as const,
     path: "/",
     maxAge: 24 * 60 * 60, // 24 hours
-    domain:
-      process.env.NODE_ENV === "production"
-        ? process.env.NEXT_PUBLIC_APP_DOMAIN
-        : "localhost",
   },
 };
 
-// Rate limiting function
-function checkRateLimit(key: string, ip?: string): boolean {
-  const now = Date.now();
-  const requests = rateLimitCache.get(key) || [];
-  const ipRequests = ip ? ipRateLimitCache.get(ip) || [] : [];
-  const windowMs = 60000; // 1 minute window
-
-  // Remove old requests
-  const recentRequests = requests.filter((time) => now - time < windowMs);
-  const recentIpRequests = ipRequests.filter((time) => now - time < windowMs);
-
-  // Check if under session limit (50 requests per minute)
-  if (recentRequests.length >= 50) {
-    console.error("[SERVER] Session rate limit exceeded:", key);
-    return false;
-  }
-
-  // Check if under IP limit (100 requests per minute)
-  if (ip && recentIpRequests.length >= 100) {
-    console.error("[SERVER] IP rate limit exceeded:", ip);
-    return false;
-  }
-
-  // Add current request
-  recentRequests.push(now);
-  rateLimitCache.set(key, recentRequests);
-
-  if (ip) {
-    recentIpRequests.push(now);
-    ipRateLimitCache.set(ip, recentIpRequests);
-  }
-
-  return true;
+// Get the current session
+export async function getSession(cookieStore?: ReadonlyRequestCookies) {
+  const store = new IronSessionCookieStore(cookieStore || (await cookies()));
+  return getIronSession<SessionData>(store, sessionOptions);
 }
 
-function generateSessionId(): string {
-  return Math.random().toString(36).substring(2);
+// Get the current user
+export async function getCurrentUser(
+  cookieStore?: ReadonlyRequestCookies,
+): Promise<User | null> {
+  const session = await getSession(cookieStore);
+  return session.user || null;
 }
 
-async function getSession() {
-  const cookieStore = await cookies();
-  // @ts-ignore - Next.js cookies() is compatible with iron-session
-  return getIronSession<PrivySession>(cookieStore, sessionOptions);
+// Set user session
+export async function setUserSession(
+  user: User,
+  cookieStore?: ReadonlyRequestCookies,
+): Promise<void> {
+  const session = await getSession(cookieStore);
+  session.user = user;
+  session.isLoggedIn = true;
+  await session.save();
 }
 
-export async function getPrivyUser(): Promise<PrivyUser | null> {
-  try {
-    const cookieStore = cookies();
-    const session = await getSession();
-
-    // Ensure we have a session ID
-    if (!session.id) {
-      session.id = generateSessionId();
-      await session.save();
-    }
-
-    console.log("[SERVER] Session state:", {
-      id: session.id,
-      hasUser: !!session.user,
-      cookies: Object.fromEntries(
-        Object.entries(cookieStore).filter(
-          ([key]) => key !== "get" && key !== "has",
-        ),
-      ),
-    });
-
-    // Check cache first with validation
-    const cachedUser = userSessionCache.get(session.id);
-    if (cachedUser) {
-      if (cachedUser.id && cachedUser.wallet?.address) {
-        console.log("[SERVER] Using cached user data:", {
-          userId: cachedUser.id,
-          walletAddress: cachedUser.wallet.address,
-          sessionId: session.id,
-        });
-        return cachedUser;
-      } else {
-        console.log("[SERVER] Invalid cached user data, clearing cache");
-        userSessionCache.delete(session.id);
-      }
-    }
-
-    // Check rate limit
-    if (!checkRateLimit(session.id)) {
-      console.error("[SERVER] Rate limit exceeded for session:", session.id);
-      throw new Error("Too many requests. Please try again later.");
-    }
-
-    // Get user from session with validation
-    if (!session.user) {
-      console.log("[SERVER] No user in session:", {
-        sessionId: session.id,
-        cookies: Object.fromEntries(
-          Object.entries(cookieStore).filter(
-            ([key]) => key !== "get" && key !== "has",
-          ),
-        ),
-      });
-      return null;
-    }
-
-    // Validate user data thoroughly
-    if (!session.user.id || !session.user.wallet?.address) {
-      console.error("[SERVER] Invalid user data in session:", {
-        sessionId: session.id,
-        user: session.user,
-      });
-      await session.destroy();
-      userSessionCache.delete(session.id);
-      return null;
-    }
-
-    // Cache the validated user data with a shorter TTL during validation phase
-    console.log("[SERVER] Setting user in cache:", {
-      userId: session.user.id,
-      walletAddress: session.user.wallet.address,
-      sessionId: session.id,
-    });
-
-    userSessionCache.set(session.id, session.user, { ttl: 60000 }); // 1 minute TTL for initial validation
-    return session.user;
-  } catch (error) {
-    console.error("[SERVER] Error getting Privy user:", {
-      error,
-      stack: error instanceof Error ? error.stack : undefined,
-      cookies: Object.fromEntries(
-        Object.entries(cookies()).filter(
-          ([key]) => key !== "get" && key !== "has",
-        ),
-      ),
-    });
-    return null;
-  }
-}
-
-export async function setPrivyUser(user: PrivyUser): Promise<void> {
-  try {
-    // Validate user data thoroughly
-    if (!user.id || !user.wallet?.address) {
-      throw new Error("Invalid user data");
-    }
-
-    const session = await getSession();
-    const cookieStore = cookies();
-
-    // Ensure we have a session ID
-    if (!session.id) {
-      session.id = generateSessionId();
-    }
-
-    // Set user in session
-    session.user = user;
-
-    // Update cache with validated data - use longer TTL
-    userSessionCache.set(session.id, user, { ttl: 24 * 60 * 60 * 1000 }); // 24 hours TTL
-
-    console.log("[SERVER] Setting user session:", {
-      userId: user.id,
-      walletAddress: user.wallet.address,
-      sessionId: session.id,
-      cookies: Object.fromEntries(
-        Object.entries(cookieStore).filter(
-          ([key]) => key !== "get" && key !== "has",
-        ),
-      ),
-    });
-
-    // Save session
-    await session.save();
-
-    // Verify the session was saved
-    const verifySession = await getSession();
-    if (!verifySession.user || !verifySession.user.id) {
-      throw new Error("Failed to verify session after save");
-    }
-
-    console.log("[SERVER] User session saved and verified successfully");
-  } catch (error) {
-    console.error("[SERVER] Error setting Privy user:", {
-      error,
-      stack: error instanceof Error ? error.stack : undefined,
-      cookies: Object.fromEntries(
-        Object.entries(cookies()).filter(
-          ([key]) => key !== "get" && key !== "has",
-        ),
-      ),
-    });
-    throw error;
-  }
-}
-
-export async function clearPrivyUser(): Promise<void> {
-  try {
-    const session = await getSession();
-    const cookieStore = cookies();
-
-    if (session.id) {
-      // Clear cache
-      userSessionCache.delete(session.id);
-    }
-
-    console.log("[SERVER] Clearing user session:", {
-      sessionId: session.id,
-      cookies: Object.fromEntries(
-        Object.entries(cookieStore).filter(
-          ([key]) => key !== "get" && key !== "has",
-        ),
-      ),
-    });
-
-    await session.destroy();
-
-    // Verify session was destroyed
-    const verifySession = await getSession();
-    if (verifySession.user) {
-      throw new Error("Failed to destroy session");
-    }
-
-    console.log("[SERVER] User session cleared successfully");
-  } catch (error) {
-    console.error("[SERVER] Error clearing Privy user:", {
-      error,
-      stack: error instanceof Error ? error.stack : undefined,
-      cookies: Object.fromEntries(
-        Object.entries(cookies()).filter(
-          ([key]) => key !== "get" && key !== "has",
-        ),
-      ),
-    });
-    throw error;
-  }
-}
-
-export function validateOrigin(
-  origin: string | null,
-  host: string | null,
-): boolean {
-  if (!origin || !host) return false;
-
-  const allowedOrigins = [
-    "http://localhost:3000",
-    "http://localhost",
-    process.env.NEXT_PUBLIC_APP_URL,
-  ].filter(Boolean);
-
-  const originHost = new URL(origin).host;
-  return allowedOrigins.includes(origin) && originHost === host;
+// Clear user session
+export async function clearUserSession(
+  cookieStore?: ReadonlyRequestCookies,
+): Promise<void> {
+  const session = await getSession(cookieStore);
+  session.destroy();
 }

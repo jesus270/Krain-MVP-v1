@@ -1,69 +1,86 @@
 import { NextRequest, NextResponse } from "next/server";
-import { setPrivyUser } from "@/lib/auth";
+import { User, setUserSession, SessionData } from "@/lib/auth";
+import { isValidSolanaAddress } from "@repo/utils";
 import { cookies } from "next/headers";
+import { getIronSession } from "iron-session";
+import { sessionOptions } from "@/lib/auth";
+import { IronSessionCookieStore } from "@/lib/cookie-store";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("[SERVER] Received auth callback request:", {
-      headers: Object.fromEntries(request.headers.entries()),
-      cookies: request.cookies.getAll(),
+    const data = await request.json();
+    console.log("[SERVER] Full user object:", {
+      user: data.user,
+      linkedAccounts: data.user?.linkedAccounts,
+      wallet: data.user?.wallet,
+      wallets: data.user?.wallets,
+      embeddedWallets: data.user?.embeddedWallets,
+      connectedWallets: data.user?.connectedWallets,
     });
 
-    const data = await request.json();
-    const { user } = data;
-
-    if (!user || !user.id || !user.wallet?.address) {
-      console.error("[SERVER] Invalid user data in auth callback:", {
-        user,
-        headers: Object.fromEntries(request.headers.entries()),
-        cookies: request.cookies.getAll(),
-      });
-      return NextResponse.json({ error: "Invalid user data" }, { status: 400 });
+    // Validate user ID
+    if (!data.user?.id) {
+      console.error("[SERVER] Missing user ID:", { data });
+      return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
     }
 
-    console.log("[SERVER] Setting user session for:", {
-      userId: user.id,
-      walletAddress: user.wallet.address,
-    });
+    // Get wallet address directly from the request
+    const walletAddress = data.user?.wallet?.address;
 
-    // Set the user in the session
-    await setPrivyUser({
-      id: user.id,
-      wallet: {
-        address: user.wallet.address,
-      },
-    });
+    if (!walletAddress) {
+      console.error("[SERVER] No wallet address found:", {
+        wallet: data.user?.wallet,
+      });
+      return NextResponse.json(
+        { error: "No wallet connected" },
+        { status: 400 },
+      );
+    }
 
-    console.log("[SERVER] User session set successfully");
+    // Validate wallet address
+    if (!isValidSolanaAddress(walletAddress)) {
+      console.error("[SERVER] Invalid Solana address:", { walletAddress });
+      return NextResponse.json(
+        { error: "Invalid Solana address" },
+        { status: 400 },
+      );
+    }
+
+    // Create user session
+    const user: User = {
+      id: data.user.id,
+      walletAddress: walletAddress,
+    };
+
+    // Create a new cookie store and session
+    const cookieStore = new IronSessionCookieStore(await cookies());
+    const session = await getIronSession<SessionData>(
+      cookieStore,
+      sessionOptions,
+    );
+
+    // Set session data
+    session.user = user;
+    session.isLoggedIn = true;
+    await session.save();
 
     // Create response with session cookie
-    const response = NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true, user });
 
-    // Log all cookies after session is set
-    console.log("[SERVER] Cookies after session set:", {
-      all: Object.fromEntries(
-        Object.entries(await cookies()).filter(
-          ([key]) => key !== "get" && key !== "has",
-        ),
-      ),
-      sessionCookie: (await cookies()).get("privy_session"),
-    });
+    // Add all cookie headers from the store
+    const cookieHeaders = cookieStore.getCookieHeaders();
+    for (const header of cookieHeaders) {
+      response.headers.append("Set-Cookie", header);
+    }
 
-    // Log the response details
-    console.log("[SERVER] Auth callback response:", {
-      headers: Object.fromEntries(response.headers.entries()),
-      cookies: response.cookies.getAll(),
-      status: response.status,
+    console.log("[SERVER] Session created for user:", {
+      id: user.id,
+      walletAddress: user.walletAddress,
     });
 
     return response;
   } catch (error) {
-    console.error("[SERVER] Error in auth callback:", {
-      error,
-      stack: error instanceof Error ? error.stack : undefined,
-      headers: Object.fromEntries(request.headers.entries()),
-      cookies: request.cookies.getAll(),
-    });
+    console.error("[SERVER] Auth callback error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

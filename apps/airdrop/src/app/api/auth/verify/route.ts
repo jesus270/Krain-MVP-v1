@@ -1,65 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPrivyUser } from "@/lib/auth";
+import { getIronSession } from "iron-session";
+import { SessionData, sessionOptions } from "@/lib/auth";
+import { cookies } from "next/headers";
+import { IronSessionCookieStore } from "@/lib/cookie-store";
 
 export async function GET(request: NextRequest) {
   try {
-    console.log("[SERVER] Received session verification request:", {
-      headers: Object.fromEntries(request.headers.entries()),
-      cookies: request.cookies.getAll(),
-    });
+    const cookieStore = new IronSessionCookieStore(await cookies());
+    const session = await getIronSession<SessionData>(
+      cookieStore,
+      sessionOptions,
+    );
 
-    // Check for required cookies
-    const privySession = request.cookies.get("privy_session");
-    if (!privySession) {
-      console.error(
-        "[SERVER] Session verification failed: Missing privy_session cookie",
-      );
+    // If no session or not logged in, return 401
+    if (!session.isLoggedIn || !session.user) {
       return NextResponse.json(
-        { error: "Session cookie not found" },
+        {
+          error: "No active session",
+          isLoggedIn: false,
+          user: null,
+        },
         { status: 401 },
       );
     }
 
-    const user = await getPrivyUser();
-    if (!user) {
-      console.error("[SERVER] Session verification failed: No user found", {
-        headers: Object.fromEntries(request.headers.entries()),
-        cookies: request.cookies.getAll(),
-      });
-      return NextResponse.json(
-        { error: "User session not found or invalid" },
-        { status: 401 },
-      );
-    }
-
-    console.log("[SERVER] Session verified successfully for user:", {
-      userId: user.id,
-      walletAddress: user.wallet.address,
-    });
-
-    // Return the response with user data (excluding sensitive information)
+    // Create response with session cookie
     const response = NextResponse.json({
-      success: true,
-      user: {
-        id: user.id,
-        walletAddress: user.wallet.address,
-      },
+      isLoggedIn: true,
+      user: session.user,
     });
+
+    // Add all cookie headers from the store
+    const cookieHeaders = cookieStore.getCookieHeaders();
+    for (const header of cookieHeaders) {
+      response.headers.append("Set-Cookie", header);
+    }
 
     return response;
   } catch (error) {
-    console.error("[SERVER] Error verifying session:", {
-      error,
-      stack: error instanceof Error ? error.stack : undefined,
-      headers: Object.fromEntries(request.headers.entries()),
-      cookies: request.cookies.getAll(),
-    });
-
+    console.error("[SERVER] Session verification error:", error);
     return NextResponse.json(
-      {
-        error: "Internal server error",
-        message: error instanceof Error ? error.message : "Unknown error",
-      },
+      { error: "Internal server error" },
       { status: 500 },
     );
   }

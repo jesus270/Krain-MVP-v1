@@ -2,10 +2,11 @@
 
 import { z } from "zod";
 import { db, referralTable, Wallet, walletTable } from "@repo/database";
-import { getPrivyUser } from "../lib/auth";
+import { getCurrentUser } from "../lib/auth";
 import { eq } from "drizzle-orm";
 import { generateReferralCode, isValidSolanaAddress } from "@repo/utils";
 import { createReferral } from "./referral";
+import { cookies } from "next/headers";
 
 const walletAddressSchema = z.object({
   address: z.string().refine((address) => isValidSolanaAddress(address), {
@@ -24,7 +25,7 @@ const referredBySchema = z.object({
 export async function createWallet(input: { address: string }) {
   try {
     // Check authentication first
-    const user = await getPrivyUser();
+    const user = await getCurrentUser(await cookies());
     if (!user) {
       throw new Error("Unauthorized: Please log in first");
     }
@@ -33,7 +34,7 @@ export async function createWallet(input: { address: string }) {
     const parsed = walletAddressSchema.parse(input);
 
     // Verify user can only create wallet for their own address
-    if (parsed.address !== user.wallet.address) {
+    if (parsed.address !== user.walletAddress) {
       throw new Error(
         "Unauthorized: You can only create a wallet for your own address",
       );
@@ -68,7 +69,7 @@ export async function createWallet(input: { address: string }) {
 
 export async function getWalletByReferralCode(input: { referralCode: string }) {
   try {
-    const user = await getPrivyUser();
+    const user = await getCurrentUser(await cookies());
     if (!user) {
       throw new Error("Unauthorized: Please log in first");
     }
@@ -110,7 +111,7 @@ export async function getWallet(input: {
 }): Promise<WalletWithReferredBy | undefined> {
   try {
     // Check authentication first
-    const user = await getPrivyUser();
+    const user = await getCurrentUser(await cookies());
     if (!user) {
       throw new Error("Unauthorized: Please log in first");
     }
@@ -119,7 +120,7 @@ export async function getWallet(input: {
     const parsed = walletAddressSchema.parse(input);
 
     // Verify user can only access their own wallet
-    if (parsed.address !== user.wallet.address) {
+    if (parsed.address !== user.walletAddress) {
       throw new Error("Unauthorized: You can only access your own wallet");
     }
 
@@ -153,12 +154,12 @@ export async function isValidReferralCode(input: {
   referredByCode: string;
   referredWallet: WalletWithReferredBy;
 }) {
-  const user = await getPrivyUser();
+  const user = await getCurrentUser(await cookies());
   if (!user) {
     throw new Error("Unauthorized: Please log in first");
   }
 
-  if (input.referredWallet.address !== user.wallet.address) {
+  if (input.referredWallet.address !== user.walletAddress) {
     throw new Error("Unauthorized: You can only check your own referral code");
   }
 
@@ -197,7 +198,7 @@ export async function handleSubmitWallet(input: {
 }) {
   try {
     // Check authentication first
-    const user = await getPrivyUser();
+    const user = await getCurrentUser(await cookies());
     if (!user) {
       throw new Error("Unauthorized: Please log in first");
     }

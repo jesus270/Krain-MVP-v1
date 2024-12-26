@@ -1,46 +1,36 @@
 "use client";
 
 import { PrivyProvider, usePrivy, useLogin } from "@privy-io/react-auth";
-import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
+import {
+  toSolanaWalletConnectors,
+  useSolanaWallets,
+} from "@privy-io/react-auth/solana";
 import { useEffect } from "react";
 
 const solanaConnectors = toSolanaWalletConnectors({
   shouldAutoConnect: true,
 });
 
-const chain = {
-  id: 101,
-  name: "Solana",
-  type: "solana",
-  rpcUrls: {
-    default: {
-      http: ["https://api.mainnet-beta.solana.com"],
-    },
-  },
-  nativeCurrency: {
-    decimals: 9,
-    name: "SOL",
-    symbol: "SOL",
-  },
-};
-
-const MAX_RETRIES = 5;
-const RETRY_DELAY = 2000;
-
 function SessionRevalidator({
   children,
   revalidateSession,
 }: {
   children: React.ReactNode;
-  revalidateSession: (user: any) => Promise<void>;
+  revalidateSession: (user: any, walletAddress: string) => Promise<void>;
 }) {
   const { user } = usePrivy();
+  const { wallets: solanaWallets } = useSolanaWallets();
   const { login } = useLogin({
     onComplete: async (user) => {
       try {
-        await revalidateSession(user);
+        const walletAddress = solanaWallets[0]?.address;
+        if (walletAddress) {
+          await revalidateSession(user, walletAddress);
+        } else {
+          console.error("[CLIENT] No Solana wallet address found after login");
+        }
       } catch (error) {
-        console.error("[CLIENT] Error in auth callback:", error);
+        console.error("[CLIENT] Auth callback failed");
       }
     },
   });
@@ -55,11 +45,17 @@ function SessionRevalidator({
         });
 
         if (!response.ok) {
-          console.log("[CLIENT] Session expired, attempting to revalidate");
-          await revalidateSession(user);
+          const walletAddress = solanaWallets[0]?.address;
+          if (walletAddress) {
+            await revalidateSession(user, walletAddress);
+          } else {
+            console.error(
+              "[CLIENT] No Solana wallet address found during session check",
+            );
+          }
         }
       } catch (error) {
-        console.error("[CLIENT] Error checking session:", error);
+        console.error("[CLIENT] Session check failed");
       }
     };
 
@@ -70,7 +66,7 @@ function SessionRevalidator({
     const interval = setInterval(checkSession, 5 * 60 * 1000); // Check every 5 minutes
 
     return () => clearInterval(interval);
-  }, [user, revalidateSession]);
+  }, [user, revalidateSession, solanaWallets]);
 
   return <>{children}</>;
 }
@@ -84,70 +80,41 @@ export function PrivyProviderWrapper({
     throw new Error("NEXT_PUBLIC_PRIVY_APP_ID is not set");
   }
 
-  const revalidateSession = async (user: any) => {
+  const revalidateSession = async (user: any, walletAddress: string) => {
     try {
-      console.log("[CLIENT] Revalidating user session:", {
-        id: user.id,
-        wallet: user.wallet,
+      // Try to establish a new session
+      const response = await fetch("/api/auth/callback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user: {
+            id: user.id,
+            wallet: {
+              address: walletAddress,
+            },
+          },
+        }),
+        credentials: "include",
       });
 
-      // Try to set the session with retries
-      let retries = MAX_RETRIES;
-      let success = false;
-      let lastError = null;
-
-      while (retries > 0 && !success) {
-        try {
-          const response = await fetch("/api/auth/callback", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ user }),
-            credentials: "include",
-          });
-
-          if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || "Failed to set user session");
-          }
-
-          // Verify the session was set by making a test request
-          const testResponse = await fetch("/api/auth/verify", {
-            credentials: "include",
-          });
-
-          if (testResponse.ok) {
-            success = true;
-            console.log("[CLIENT] User session revalidated successfully");
-          } else {
-            const data = await testResponse.json();
-            throw new Error(data.error || "Session verification failed");
-          }
-        } catch (error) {
-          lastError = error;
-          console.error(
-            `[CLIENT] Revalidation attempt ${MAX_RETRIES - retries + 1} failed:`,
-            error,
-          );
-          retries--;
-          if (retries > 0) {
-            await new Promise((resolve) =>
-              setTimeout(resolve, RETRY_DELAY * (MAX_RETRIES - retries)),
-            );
-          }
-        }
+      if (!response.ok) {
+        const data = await response.json();
+        console.error("[CLIENT] Session error:", data);
+        throw new Error(data.error || "Failed to set user session");
       }
 
-      if (!success) {
-        console.error(
-          "[CLIENT] Failed to revalidate session after all retries",
-          lastError,
-        );
-        throw new Error("Failed to reestablish secure session");
+      // Verify the session was set
+      const verifyResponse = await fetch("/api/auth/verify", {
+        credentials: "include",
+      });
+
+      if (!verifyResponse.ok) {
+        throw new Error("Failed to verify session");
       }
     } catch (error) {
-      console.error("[CLIENT] Error in session revalidation:", error);
+      console.error("[CLIENT] Session revalidation error:", error);
       throw error;
     }
   };

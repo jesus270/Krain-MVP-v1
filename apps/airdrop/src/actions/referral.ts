@@ -3,7 +3,7 @@
 import { referralTable } from "@repo/database";
 import { eq, count } from "drizzle-orm";
 import { db } from "../lib/db";
-import { getPrivyUser } from "../lib/auth";
+import { getCurrentUser } from "../lib/auth";
 import { referralSchema, referralCodeSchema } from "../lib/validations";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -12,9 +12,13 @@ export const createReferral = async (input: {
   referredByCode: string;
   referredWalletAddress: string;
 }) => {
+  const start = Date.now();
   try {
+    console.log("[SERVER] Starting referral creation", {
+      input,
+    });
     // Check authentication first
-    const user = await getPrivyUser();
+    const user = await getCurrentUser();
     if (!user) {
       throw new Error("Unauthorized: Please log in first");
     }
@@ -23,7 +27,7 @@ export const createReferral = async (input: {
     const parsed = referralSchema.parse(input);
 
     // Verify user can only create referrals for their own wallet
-    if (parsed.referredWalletAddress !== user.wallet.address) {
+    if (parsed.referredWalletAddress !== user.walletAddress) {
       throw new Error(
         "Unauthorized: can only create referrals for your own wallet",
       );
@@ -44,6 +48,13 @@ export const createReferral = async (input: {
       );
     }
 
+    const duration = Date.now() - start;
+    console.log("[SERVER] Referral created successfully", {
+      input,
+      durationMs: duration,
+      referredByCode: parsed.referredByCode,
+    });
+
     // Only revalidate paths in non-test environments
     if (process.env.NODE_ENV !== "test") {
       revalidatePath("/");
@@ -52,9 +63,11 @@ export const createReferral = async (input: {
 
     return referral;
   } catch (error) {
+    const duration = Date.now() - start;
     console.error("[SERVER] Error creating referral:", {
       error,
       input,
+      durationMs: duration,
       stack: error instanceof Error ? error.stack : undefined,
     });
 
@@ -80,7 +93,7 @@ export const createReferral = async (input: {
 export const getReferralsCount = async (input: { referralCode: string }) => {
   try {
     // Check authentication first
-    const user = await getPrivyUser();
+    const user = await getCurrentUser();
     if (!user) {
       throw new Error("Unauthorized: Please log in first");
     }

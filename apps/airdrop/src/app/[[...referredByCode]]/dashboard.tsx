@@ -31,20 +31,21 @@ async function verifySession(attempt = 1): Promise<boolean> {
     });
 
     if (verifyResponse.ok) {
-      console.log("[CLIENT] Session verified successfully");
       return true;
     }
 
     if (attempt >= SESSION_VERIFY_MAX_RETRIES) {
-      console.error("[CLIENT] Session verification failed after all retries");
+      console.error("[CLIENT] Session verification failed");
       return false;
     }
 
-    console.log(`[CLIENT] Session not ready (attempt ${attempt}), retrying...`);
     await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
     return verifySession(attempt + 1);
   } catch (error) {
-    console.error("[CLIENT] Session verification error:", error);
+    console.error(
+      "[CLIENT] Session verification error:",
+      error instanceof Error ? error.message : error,
+    );
     return false;
   }
 }
@@ -128,24 +129,10 @@ export function Dashboard({
           }
         });
 
-        console.log("[CLIENT] Loading wallet data for user:", {
-          walletAddress: userWalletAddress,
-          authenticated,
-          ready,
-        });
-
         if (!isMounted) return;
 
         let walletResult: Wallet | undefined;
         try {
-          console.log(
-            "[CLIENT] Submitting wallet address with referredByCode:",
-            {
-              address: userWalletAddress,
-              referredByCode,
-            },
-          );
-
           const wallet = await handleSubmitWallet({
             walletAddress: userWalletAddress,
             referredByCode,
@@ -155,10 +142,8 @@ export function Dashboard({
             setWallet(wallet);
             setIsLoadingWallet(false);
             walletResult = wallet;
-            console.log("[CLIENT] Wallet submitted:", wallet);
           }
         } catch (error) {
-          console.error("[CLIENT] Error submitting wallet:", error);
           if (isMounted) {
             const message =
               error instanceof Error
@@ -173,19 +158,11 @@ export function Dashboard({
         // Get referrals count with retry logic
         if (walletResult?.referralCode) {
           try {
-            console.log(
-              "[CLIENT] Fetching referrals count for code:",
-              walletResult.referralCode,
-            );
-
             const count = await fetchWithRetry(walletResult.referralCode);
-
             if (isMounted) {
               setReferralsCount(count);
-              console.log("[CLIENT] Referrals count loaded:", count);
             }
           } catch (error) {
-            console.error("[CLIENT] Error getting referrals count:", error);
             if (isMounted) {
               const message =
                 error instanceof Error
@@ -196,7 +173,6 @@ export function Dashboard({
           }
         }
       } catch (error) {
-        console.error("[CLIENT] Error getting wallet:", error);
         if (isMounted) {
           const message =
             error instanceof Error
