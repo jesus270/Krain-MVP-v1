@@ -9,28 +9,18 @@ import { IronSessionCookieStore } from "@/lib/cookie-store";
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
-    console.log("[SERVER] Full user object:", {
-      user: data.user,
-      linkedAccounts: data.user?.linkedAccounts,
-      wallet: data.user?.wallet,
-      wallets: data.user?.wallets,
-      embeddedWallets: data.user?.embeddedWallets,
-      connectedWallets: data.user?.connectedWallets,
-    });
 
     // Validate user ID
     if (!data.user?.id) {
-      console.error("[SERVER] Missing user ID:", { data });
+      console.error("[SERVER] Missing user ID");
       return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
     }
 
-    // Get wallet address directly from the request
-    const walletAddress = data.user?.wallet?.address;
+    // Get wallet address from either format
+    const walletAddress = data.walletAddress || data.user?.wallet?.address;
 
     if (!walletAddress) {
-      console.error("[SERVER] No wallet address found:", {
-        wallet: data.user?.wallet,
-      });
+      console.error("[SERVER] No wallet address found");
       return NextResponse.json(
         { error: "No wallet connected" },
         { status: 400 },
@@ -39,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     // Validate wallet address
     if (!isValidSolanaAddress(walletAddress)) {
-      console.error("[SERVER] Invalid Solana address:", { walletAddress });
+      console.error("[SERVER] Invalid Solana address");
       return NextResponse.json(
         { error: "Invalid Solana address" },
         { status: 400 },
@@ -73,10 +63,7 @@ export async function POST(request: NextRequest) {
       response.headers.append("Set-Cookie", header);
     }
 
-    console.log("[SERVER] Session created for user:", {
-      id: user.id,
-      walletAddress: user.walletAddress,
-    });
+    console.log("[SERVER] Session created for user ID:", user.id);
 
     return response;
   } catch (error) {
