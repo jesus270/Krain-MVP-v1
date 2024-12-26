@@ -9,17 +9,8 @@ import { getClientIp, checkRateLimit } from "./lib/redis";
 // Protected paths that require authentication
 const PROTECTED_PATHS = ["/api/wallet", "/api/referral"];
 
-// Public paths that don't require authentication
-const PUBLIC_PATHS = [
-  "/",
-  "/api/auth",
-  "/_next",
-  "/static",
-  "/favicon.ico",
-  "/blocked",
-  "/terms",
-  "/error",
-];
+// Public paths that don't require authentication but still need geo checks
+const PUBLIC_PATHS = ["/", "/api/auth", "/terms"];
 
 export async function middleware(request: NextRequest) {
   // Add debug log at the very start
@@ -29,7 +20,23 @@ export async function middleware(request: NextRequest) {
   });
 
   try {
-    // Perform geolocation check first, before any other middleware logic
+    // First check if we're already on the blocked page to prevent redirect loops
+    if (request.nextUrl.pathname === "/blocked") {
+      return NextResponse.next();
+    }
+
+    // Then check for other public paths that should skip geolocation
+    const bypassGeoPaths = ["/_next", "/static", "/favicon.ico", "/error"];
+
+    const skipGeoCheck = bypassGeoPaths.some((path) =>
+      request.nextUrl.pathname.startsWith(path),
+    );
+
+    if (skipGeoCheck) {
+      return NextResponse.next();
+    }
+
+    // Perform geolocation check for all other paths
     const geo = geolocation(request);
 
     // Add detailed logging for geolocation debugging
