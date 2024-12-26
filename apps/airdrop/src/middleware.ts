@@ -4,6 +4,7 @@ import { getIronSession } from "iron-session";
 import { sessionOptions, SessionData } from "./lib/auth";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { IronSessionCookieStore } from "./lib/cookie-store";
+import { getClientIp, checkRateLimit } from "./lib/redis";
 
 // Protected paths that require authentication
 const PROTECTED_PATHS = ["/api/wallet", "/api/referral"];
@@ -19,39 +20,36 @@ const PUBLIC_PATHS = [
   "/terms",
 ];
 
-// Add rate limiting configuration
-const rateLimit = {
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: { error: "Too many requests, please try again later." },
-  keyGenerator: (req: NextRequest) =>
-    req.headers.get("x-forwarded-for")?.split(",")[0] || "anonymous",
-};
-
-// Rate limit tracking (in-memory for now - should use Redis in production)
-const ipRequests = new Map<string, { count: number; resetTime: number }>();
-
 export async function middleware(request: NextRequest) {
   try {
     // Rate limiting check
-    const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0] || "anonymous";
-    const now = Date.now();
-    const requestData = ipRequests.get(ip) || {
-      count: 0,
-      resetTime: now + rateLimit.windowMs,
-    };
+    const clientIp = getClientIp(request.headers);
+    const rateLimit = await checkRateLimit(clientIp);
 
-    if (now > requestData.resetTime) {
-      // Reset if window has passed
-      requestData.count = 1;
-      requestData.resetTime = now + rateLimit.windowMs;
-    } else if (requestData.count >= rateLimit.max) {
-      return NextResponse.json(rateLimit.message, { status: 429 });
-    } else {
-      requestData.count++;
+    // Create base response
+    const response = NextResponse.next();
+
+    // Add rate limit headers
+    response.headers.set("X-RateLimit-Limit", String(rateLimit.limit));
+    response.headers.set("X-RateLimit-Remaining", String(rateLimit.remaining));
+    response.headers.set("X-RateLimit-Reset", String(rateLimit.reset));
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "Too many requests, please try again later." },
+        {
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": String(rateLimit.limit),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": String(rateLimit.reset),
+            "Retry-After": String(
+              Math.ceil((rateLimit.reset - Date.now()) / 1000),
+            ),
+          },
+        },
+      );
     }
-    ipRequests.set(ip, requestData);
 
     const geo = geolocation(request);
 
@@ -64,7 +62,7 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname.startsWith(path),
     );
     if (isPublicPath) {
-      return NextResponse.next();
+      return response;
     }
 
     // List of blocked countries (using ISO country codes)
@@ -116,7 +114,6 @@ export async function middleware(request: NextRequest) {
       }
 
       // Add session cookie headers to response
-      const response = NextResponse.next();
       const cookieHeaders = cookieStore.getCookieHeaders();
       for (const header of cookieHeaders) {
         response.headers.append("Set-Cookie", header);
@@ -125,7 +122,7 @@ export async function middleware(request: NextRequest) {
     }
 
     console.info("Allowing traffic from:", geo?.country);
-    return NextResponse.next();
+    return response;
   } catch (error) {
     console.error("[SERVER] Middleware error:", error);
     return NextResponse.redirect(new URL("/error", request.url));

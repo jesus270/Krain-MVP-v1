@@ -34,7 +34,7 @@ importers:
         version: link:@types/@privy-io
       '@privy-io/react-auth':
         specifier: ^1.98.4
-        version: 1.98.4(@solana/web3.js@1.98.0(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10))(@types/react@19.0.2)(bs58@5.0.0)(bufferutil@4.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@19.0.0))(utf-8-validate@5.0.10)(zod@3.24.1)
+        version: 1.98.4(@solana/web3.js@1.98.0(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10))(@types/react@19.0.2)(@upstash/redis@1.34.3)(bs58@5.0.0)(bufferutil@4.0.8)(ioredis@5.4.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@19.0.0))(utf-8-validate@5.0.10)(zod@3.24.1)
       '@radix-ui/react-label':
         specifier: ^2.1.1
         version: 2.1.1(@types/react-dom@19.0.2(@types/react@19.0.2))(@types/react@19.0.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -53,6 +53,12 @@ importers:
       '@solana/web3.js':
         specifier: ^1.95.8
         version: 1.98.0(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)
+      '@upstash/ratelimit':
+        specifier: ^1.0.0
+        version: 1.2.1
+      '@upstash/redis':
+        specifier: ^1.28.4
+        version: 1.34.3
       '@vercel/analytics':
         specifier: ^1.4.1
         version: 1.4.1(next@15.1.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
@@ -1564,6 +1570,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@ioredis/commands@1.2.0':
+    resolution: {integrity: sha512-Sx1pU8EM64o2BrqNpEO1CNLtKQwyhuXuqyfH7oGKCk+1a33d2r5saW8zNwm3j6BTExtjrv2BxTgzzkMwts6vGg==}
+
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
     engines: {node: '>=12'}
@@ -2939,6 +2948,16 @@ packages:
     resolution: {integrity: sha512-Vj0WLm5/ZsD013YeUKn+K0y8p1M0jPpxOkKdbD1wB0ns53a5piVY02zjf072TblEweAbcYiFiPoSMF3kp+VhhQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+  '@upstash/core-analytics@0.0.9':
+    resolution: {integrity: sha512-9NXXxZ5y1/A/zqKLlVT7NsAWSggJfOjB0hG6Ffx29b4jbzHOiQVWB55h5+j2clT9Ib+mNPXn0iB5zN3aWLkICw==}
+    engines: {node: '>=16.0.0'}
+
+  '@upstash/ratelimit@1.2.1':
+    resolution: {integrity: sha512-o01lV1yFS5Fzj5KONZmNyVch/Qrlj785B2ob+kStUmxn8F6xXk7IHTQqVcHE+Ce3CmT/qQIwvMxDZftyJ5wYpQ==}
+
+  '@upstash/redis@1.34.3':
+    resolution: {integrity: sha512-VT25TyODGy/8ljl7GADnJoMmtmJ1F8d84UXfGonRRF8fWYJz7+2J6GzW+a6ETGtk4OyuRTt7FRSvFG5GvrfSdQ==}
+
   '@vercel/analytics@1.4.1':
     resolution: {integrity: sha512-ekpL4ReX2TH3LnrRZTUKjHHNpNy9S1I7QmS+g/RQXoSUQ8ienzosuX7T9djZ/s8zPhBx1mpHP/Rw5875N+zQIQ==}
     peerDependencies:
@@ -3587,6 +3606,10 @@ packages:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
 
+  cluster-key-slot@1.1.2:
+    resolution: {integrity: sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==}
+    engines: {node: '>=0.10.0'}
+
   co@4.6.0:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
     engines: {iojs: '>= 1.0.0', node: '>= 0.12.0'}
@@ -3689,6 +3712,9 @@ packages:
 
   crypt@0.0.2:
     resolution: {integrity: sha512-mCxBlsHFYh9C+HVpiEacem8FEBnMXgU9gy4zmNC+SXAZNB/1idgp/aulFJ4FgCi7GPEVbfyng092GqL2k2rmow==}
+
+  crypto-js@4.2.0:
+    resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
 
   css-color-keywords@1.0.0:
     resolution: {integrity: sha512-FyyrDHZKEjXDpNJYvVsV960FiqQyXc/LlYmsxl2BcdMb2WPx0OGRVgTg55rPSyLSNMqP52R9r8geSp7apN3Ofg==}
@@ -3833,6 +3859,10 @@ packages:
   delayed-stream@1.0.0:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
     engines: {node: '>=0.4.0'}
+
+  denque@2.1.0:
+    resolution: {integrity: sha512-HVQE3AAb/pxF8fQAoiqpvg9i3evqug3hoiwakOyZAwJm+6vZehbkYXZ0l4JxS+I3QxM97v5aaRNhj8v5oBhekw==}
+    engines: {node: '>=0.10'}
 
   destr@2.0.3:
     resolution: {integrity: sha512-2N3BOUU4gYMpTP24s5rF5iP7BDr7uNTCs4ozw3kf/eKfvWSIu93GEBi5m427YoyJoeOzQ5smuu4nNAPGb8idSQ==}
@@ -4835,6 +4865,10 @@ packages:
     resolution: {integrity: sha512-4gd7VpWNQNB4UKKCFFVcp1AVv+FMOgs9NKzjHKusc8jTMhd5eL1NqQqOpE0KzMds804/yHlglp3uxgluOqAPLw==}
     engines: {node: '>= 0.4'}
 
+  ioredis@5.4.2:
+    resolution: {integrity: sha512-0SZXGNGZ+WzISQ67QDyZ2x0+wVxjjUndtD8oSeik/4ajifeiRufed8fCb8QW8VMyi4MXcS+UO1k/0NGhvq1PAg==}
+    engines: {node: '>=12.22.0'}
+
   ip-address@9.0.5:
     resolution: {integrity: sha512-zHtQzGojZXTwZTHQqra+ETKd4Sn3vgi7uBmlPoXVWZqYvuKmtI0l/VZTjqGmJY9x88GGOaZ9+G9ES8hC4T4X8g==}
     engines: {node: '>= 12'}
@@ -5387,8 +5421,14 @@ packages:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
 
+  lodash.defaults@4.2.0:
+    resolution: {integrity: sha512-qjxPLHd3r5DnsdGacqOMU6pb/avJzdh9tFX2ymgoZE27BmjXrNy/y4LoaiTeAb+O3gL8AfpJGtqfX/ae2leYYQ==}
+
   lodash.get@4.4.2:
     resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
+
+  lodash.isarguments@3.1.0:
+    resolution: {integrity: sha512-chi4NHZlZqZD18a0imDHnZPrDeBbTtVN7GXMwuGdRH9qotxAjYs3aVLKc7zNOG9eddR5Ksd8rvFEBc9SsggPpg==}
 
   lodash.isequal@4.5.0:
     resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
@@ -6185,6 +6225,14 @@ packages:
     resolution: {integrity: sha512-r/H9MzAWtrv8aSVjPCMFpDMl5q66GqtmmRkRjpHTsp4zBAa+snZyiQNlMONiUmEJcsnaw0wCauJ2GWODr/aFkg==}
     engines: {node: '>= 12.13.0'}
 
+  redis-errors@1.2.0:
+    resolution: {integrity: sha512-1qny3OExCf0UvUV/5wpYKf2YwPcOqXzkwKKSmKHiE6ZMQs5heeE/c8eXK+PNllPvmjgAbfnsbpkGZWy8cBpn9w==}
+    engines: {node: '>=4'}
+
+  redis-parser@3.0.0:
+    resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
+    engines: {node: '>=4'}
+
   reflect.getprototypeof@1.0.9:
     resolution: {integrity: sha512-r0Ay04Snci87djAsI4U+WNRcSw5S4pOH7qFjd/veA5gC7TbqESR3tcj28ia95L/fYUDw11JKP7uqUKUAfVvV5Q==}
     engines: {node: '>= 0.4'}
@@ -6492,6 +6540,9 @@ packages:
 
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
+
+  standard-as-callback@2.1.0:
+    resolution: {integrity: sha512-qoRRSyROncaz1z0mvYqIE4lCd9p2R90i6GxW3uZv5ucSu8tU7B5HXUP1gG8pVZsYNVaXjk8ClXHPttLyxAL48A==}
 
   std-env@3.8.0:
     resolution: {integrity: sha512-Bc3YwwCB+OzldMxOXJIIvC6cPRWr/LxOp48CdQTOkPyk/t4JWWJbrilwBd7RJzKV8QW7tJkcgAmeuLLJugl5/w==}
@@ -8524,6 +8575,9 @@ snapshots:
   '@img/sharp-win32-x64@0.33.5':
     optional: true
 
+  '@ioredis/commands@1.2.0':
+    optional: true
+
   '@isaacs/cliui@8.0.2':
     dependencies:
       string-width: 5.1.2
@@ -9024,7 +9078,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@privy-io/react-auth@1.98.4(@solana/web3.js@1.98.0(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10))(@types/react@19.0.2)(bs58@5.0.0)(bufferutil@4.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@19.0.0))(utf-8-validate@5.0.10)(zod@3.24.1)':
+  '@privy-io/react-auth@1.98.4(@solana/web3.js@1.98.0(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10))(@types/react@19.0.2)(@upstash/redis@1.34.3)(bs58@5.0.0)(bufferutil@4.0.8)(ioredis@5.4.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.7.2)(use-sync-external-store@1.2.0(react@19.0.0))(utf-8-validate@5.0.10)(zod@3.24.1)':
     dependencies:
       '@coinbase/wallet-sdk': 4.0.3
       '@ethersproject/abstract-signer': 5.7.0
@@ -9048,7 +9102,7 @@ snapshots:
       '@solana/wallet-standard-wallet-adapter-base': 1.1.2(@solana/web3.js@1.98.0(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10))(bs58@5.0.0)
       '@solana/wallet-standard-wallet-adapter-react': 1.1.2(@solana/wallet-adapter-base@0.9.23(@solana/web3.js@1.98.0(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)))(@solana/web3.js@1.98.0(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10))(bs58@5.0.0)(react@19.0.0)
       '@wallet-standard/app': 1.1.0
-      '@walletconnect/ethereum-provider': 2.17.3(@types/react@19.0.2)(bufferutil@4.0.8)(encoding@0.1.13)(react@19.0.0)(utf-8-validate@5.0.10)
+      '@walletconnect/ethereum-provider': 2.17.3(@types/react@19.0.2)(@upstash/redis@1.34.3)(bufferutil@4.0.8)(encoding@0.1.13)(ioredis@5.4.2)(react@19.0.0)(utf-8-validate@5.0.10)
       '@walletconnect/modal': 2.7.0(@types/react@19.0.2)(react@19.0.0)
       base64-js: 1.5.1
       dotenv: 16.4.7
@@ -10203,6 +10257,18 @@ snapshots:
       '@typescript-eslint/types': 8.18.1
       eslint-visitor-keys: 4.2.0
 
+  '@upstash/core-analytics@0.0.9':
+    dependencies:
+      '@upstash/redis': 1.34.3
+
+  '@upstash/ratelimit@1.2.1':
+    dependencies:
+      '@upstash/core-analytics': 0.0.9
+
+  '@upstash/redis@1.34.3':
+    dependencies:
+      crypto-js: 4.2.0
+
   '@vercel/analytics@1.4.1(next@15.1.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)':
     optionalDependencies:
       next: 15.1.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -10304,21 +10370,21 @@ snapshots:
     dependencies:
       '@wallet-standard/base': 1.1.0
 
-  '@walletconnect/core@2.17.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+  '@walletconnect/core@2.17.3(@upstash/redis@1.34.3)(bufferutil@4.0.8)(ioredis@5.4.2)(utf-8-validate@5.0.10)':
     dependencies:
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-provider': 1.0.14
       '@walletconnect/jsonrpc-types': 1.0.4
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/jsonrpc-ws-connection': 1.0.16(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      '@walletconnect/keyvaluestorage': 1.1.1
+      '@walletconnect/keyvaluestorage': 1.1.1(@upstash/redis@1.34.3)(ioredis@5.4.2)
       '@walletconnect/logger': 2.1.2
       '@walletconnect/relay-api': 1.0.11
       '@walletconnect/relay-auth': 1.0.4
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.17.3
-      '@walletconnect/utils': 2.17.3
+      '@walletconnect/types': 2.17.3(@upstash/redis@1.34.3)(ioredis@5.4.2)
+      '@walletconnect/utils': 2.17.3(@upstash/redis@1.34.3)(ioredis@5.4.2)
       '@walletconnect/window-getters': 1.0.1
       events: 3.3.0
       lodash.isequal: 4.5.0
@@ -10349,18 +10415,18 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@walletconnect/ethereum-provider@2.17.3(@types/react@19.0.2)(bufferutil@4.0.8)(encoding@0.1.13)(react@19.0.0)(utf-8-validate@5.0.10)':
+  '@walletconnect/ethereum-provider@2.17.3(@types/react@19.0.2)(@upstash/redis@1.34.3)(bufferutil@4.0.8)(encoding@0.1.13)(ioredis@5.4.2)(react@19.0.0)(utf-8-validate@5.0.10)':
     dependencies:
       '@walletconnect/jsonrpc-http-connection': 1.0.8(encoding@0.1.13)
       '@walletconnect/jsonrpc-provider': 1.0.14
       '@walletconnect/jsonrpc-types': 1.0.4
       '@walletconnect/jsonrpc-utils': 1.0.8
-      '@walletconnect/keyvaluestorage': 1.1.1
+      '@walletconnect/keyvaluestorage': 1.1.1(@upstash/redis@1.34.3)(ioredis@5.4.2)
       '@walletconnect/modal': 2.7.0(@types/react@19.0.2)(react@19.0.0)
-      '@walletconnect/sign-client': 2.17.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      '@walletconnect/types': 2.17.3
-      '@walletconnect/universal-provider': 2.17.3(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)
-      '@walletconnect/utils': 2.17.3
+      '@walletconnect/sign-client': 2.17.3(@upstash/redis@1.34.3)(bufferutil@4.0.8)(ioredis@5.4.2)(utf-8-validate@5.0.10)
+      '@walletconnect/types': 2.17.3(@upstash/redis@1.34.3)(ioredis@5.4.2)
+      '@walletconnect/universal-provider': 2.17.3(@upstash/redis@1.34.3)(bufferutil@4.0.8)(encoding@0.1.13)(ioredis@5.4.2)(utf-8-validate@5.0.10)
+      '@walletconnect/utils': 2.17.3(@upstash/redis@1.34.3)(ioredis@5.4.2)
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -10434,11 +10500,11 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@walletconnect/keyvaluestorage@1.1.1':
+  '@walletconnect/keyvaluestorage@1.1.1(@upstash/redis@1.34.3)(ioredis@5.4.2)':
     dependencies:
       '@walletconnect/safe-json': 1.0.2
       idb-keyval: 6.2.1
-      unstorage: 1.14.1(idb-keyval@6.2.1)
+      unstorage: 1.14.1(@upstash/redis@1.34.3)(idb-keyval@6.2.1)(ioredis@5.4.2)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -10505,16 +10571,16 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@walletconnect/sign-client@2.17.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+  '@walletconnect/sign-client@2.17.3(@upstash/redis@1.34.3)(bufferutil@4.0.8)(ioredis@5.4.2)(utf-8-validate@5.0.10)':
     dependencies:
-      '@walletconnect/core': 2.17.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@walletconnect/core': 2.17.3(@upstash/redis@1.34.3)(bufferutil@4.0.8)(ioredis@5.4.2)(utf-8-validate@5.0.10)
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 2.1.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.17.3
-      '@walletconnect/utils': 2.17.3
+      '@walletconnect/types': 2.17.3(@upstash/redis@1.34.3)(ioredis@5.4.2)
+      '@walletconnect/utils': 2.17.3(@upstash/redis@1.34.3)(ioredis@5.4.2)
       events: 3.3.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
@@ -10542,12 +10608,12 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@walletconnect/types@2.17.3':
+  '@walletconnect/types@2.17.3(@upstash/redis@1.34.3)(ioredis@5.4.2)':
     dependencies:
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-types': 1.0.4
-      '@walletconnect/keyvaluestorage': 1.1.1
+      '@walletconnect/keyvaluestorage': 1.1.1(@upstash/redis@1.34.3)(ioredis@5.4.2)
       '@walletconnect/logger': 2.1.2
       events: 3.3.0
     transitivePeerDependencies:
@@ -10570,18 +10636,18 @@ snapshots:
       - ioredis
       - uploadthing
 
-  '@walletconnect/universal-provider@2.17.3(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)':
+  '@walletconnect/universal-provider@2.17.3(@upstash/redis@1.34.3)(bufferutil@4.0.8)(encoding@0.1.13)(ioredis@5.4.2)(utf-8-validate@5.0.10)':
     dependencies:
       '@walletconnect/events': 1.0.1
       '@walletconnect/jsonrpc-http-connection': 1.0.8(encoding@0.1.13)
       '@walletconnect/jsonrpc-provider': 1.0.14
       '@walletconnect/jsonrpc-types': 1.0.4
       '@walletconnect/jsonrpc-utils': 1.0.8
-      '@walletconnect/keyvaluestorage': 1.1.1
+      '@walletconnect/keyvaluestorage': 1.1.1(@upstash/redis@1.34.3)(ioredis@5.4.2)
       '@walletconnect/logger': 2.1.2
-      '@walletconnect/sign-client': 2.17.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      '@walletconnect/types': 2.17.3
-      '@walletconnect/utils': 2.17.3
+      '@walletconnect/sign-client': 2.17.3(@upstash/redis@1.34.3)(bufferutil@4.0.8)(ioredis@5.4.2)(utf-8-validate@5.0.10)
+      '@walletconnect/types': 2.17.3(@upstash/redis@1.34.3)(ioredis@5.4.2)
+      '@walletconnect/utils': 2.17.3(@upstash/redis@1.34.3)(ioredis@5.4.2)
       events: 3.3.0
       lodash: 4.17.21
     transitivePeerDependencies:
@@ -10607,7 +10673,7 @@ snapshots:
       - uploadthing
       - utf-8-validate
 
-  '@walletconnect/utils@2.17.3':
+  '@walletconnect/utils@2.17.3(@upstash/redis@1.34.3)(ioredis@5.4.2)':
     dependencies:
       '@ethersproject/hash': 5.7.0
       '@ethersproject/transactions': 5.7.0
@@ -10617,12 +10683,12 @@ snapshots:
       '@stablelib/sha256': 1.0.1
       '@stablelib/x25519': 1.0.3
       '@walletconnect/jsonrpc-utils': 1.0.8
-      '@walletconnect/keyvaluestorage': 1.1.1
+      '@walletconnect/keyvaluestorage': 1.1.1(@upstash/redis@1.34.3)(ioredis@5.4.2)
       '@walletconnect/relay-api': 1.0.11
       '@walletconnect/relay-auth': 1.0.4
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      '@walletconnect/types': 2.17.3
+      '@walletconnect/types': 2.17.3(@upstash/redis@1.34.3)(ioredis@5.4.2)
       '@walletconnect/window-getters': 1.0.1
       '@walletconnect/window-metadata': 1.0.1
       detect-browser: 5.3.0
@@ -11189,6 +11255,9 @@ snapshots:
 
   clsx@2.1.1: {}
 
+  cluster-key-slot@1.1.2:
+    optional: true
+
   co@4.6.0:
     optional: true
 
@@ -11298,6 +11367,8 @@ snapshots:
       uncrypto: 0.1.3
 
   crypt@0.0.2: {}
+
+  crypto-js@4.2.0: {}
 
   css-color-keywords@1.0.0: {}
 
@@ -11430,6 +11501,9 @@ snapshots:
   delay@5.0.0: {}
 
   delayed-stream@1.0.0:
+    optional: true
+
+  denque@2.1.0:
     optional: true
 
   destr@2.0.3: {}
@@ -12768,6 +12842,21 @@ snapshots:
       hasown: 2.0.2
       side-channel: 1.1.0
 
+  ioredis@5.4.2:
+    dependencies:
+      '@ioredis/commands': 1.2.0
+      cluster-key-slot: 1.1.2
+      debug: 4.4.0
+      denque: 2.1.0
+      lodash.defaults: 4.2.0
+      lodash.isarguments: 3.1.0
+      redis-errors: 1.2.0
+      redis-parser: 3.0.0
+      standard-as-callback: 2.1.0
+    transitivePeerDependencies:
+      - supports-color
+    optional: true
+
   ip-address@9.0.5:
     dependencies:
       jsbn: 1.1.0
@@ -13570,7 +13659,13 @@ snapshots:
     dependencies:
       p-locate: 5.0.0
 
+  lodash.defaults@4.2.0:
+    optional: true
+
   lodash.get@4.4.2: {}
+
+  lodash.isarguments@3.1.0:
+    optional: true
 
   lodash.isequal@4.5.0: {}
 
@@ -14404,6 +14499,14 @@ snapshots:
 
   real-require@0.1.0: {}
 
+  redis-errors@1.2.0:
+    optional: true
+
+  redis-parser@3.0.0:
+    dependencies:
+      redis-errors: 1.2.0
+    optional: true
+
   reflect.getprototypeof@1.0.9:
     dependencies:
       call-bind: 1.0.8
@@ -14784,6 +14887,9 @@ snapshots:
     optional: true
 
   stackback@0.0.2:
+    optional: true
+
+  standard-as-callback@2.1.0:
     optional: true
 
   std-env@3.8.0: {}
@@ -15290,7 +15396,7 @@ snapshots:
 
   universalify@2.0.1: {}
 
-  unstorage@1.14.1(idb-keyval@6.2.1):
+  unstorage@1.14.1(@upstash/redis@1.34.3)(idb-keyval@6.2.1)(ioredis@5.4.2):
     dependencies:
       anymatch: 3.1.3
       chokidar: 3.6.0
@@ -15303,7 +15409,9 @@ snapshots:
       ofetch: 1.4.1
       ufo: 1.5.4
     optionalDependencies:
+      '@upstash/redis': 1.34.3
       idb-keyval: 6.2.1
+      ioredis: 5.4.2
 
   untun@0.1.3:
     dependencies:
