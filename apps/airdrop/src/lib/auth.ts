@@ -43,9 +43,27 @@ export const sessionOptions = {
     sameSite: "lax" as const,
     path: "/",
     maxAge: 4 * 60 * 60, // 4 hours
+    // In development, domain is undefined to work with localhost
     domain: undefined,
   },
 };
+
+// Helper to determine cookie domain based on host
+export function getCookieDomain(host: string): string | undefined {
+  if (process.env.NODE_ENV !== "production") {
+    return undefined;
+  }
+
+  if (host.endsWith(".krain.ai")) {
+    return ".krain.ai";
+  }
+
+  if (host.endsWith(".vercel.app")) {
+    return ".vercel.app";
+  }
+
+  return undefined;
+}
 
 // Constants for security
 const MAX_LOGIN_ATTEMPTS = 5;

@@ -1,15 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { User, SessionData } from "@/lib/auth";
+import { User, SessionData, sessionOptions, getCookieDomain } from "@/lib/auth";
 import { isValidSolanaAddress } from "@repo/utils";
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
-import { sessionOptions } from "@/lib/auth";
 import { IronSessionCookieStore } from "@/lib/cookie-store";
 
 export async function POST(request: NextRequest) {
   try {
     console.info("[SERVER] Processing auth callback");
     const data = await request.json();
+
+    // Get the request host and determine cookie domain
+    const host = request.headers.get("host") || "";
+    const cookieDomain = getCookieDomain(host);
+
+    console.info("[SERVER] Auth configuration", {
+      host,
+      cookieDomain,
+      nodeEnv: process.env.NODE_ENV,
+    });
+
+    // Create custom session options for this request
+    const requestSessionOptions = {
+      ...sessionOptions,
+      cookieOptions: {
+        ...sessionOptions.cookieOptions,
+        domain: cookieDomain,
+      },
+    };
 
     // Validate user ID
     if (!data.user?.id) {
@@ -46,13 +64,15 @@ export async function POST(request: NextRequest) {
     console.info("[SERVER] Creating session for user", {
       userId: user.id,
       walletAddress: walletAddress,
+      cookieDomain,
+      host,
     });
 
     // Create a new cookie store and session
     const cookieStore = new IronSessionCookieStore(await cookies());
     const session = await getIronSession<SessionData>(
       cookieStore,
-      sessionOptions,
+      requestSessionOptions,
     );
 
     // Set session data
@@ -64,6 +84,8 @@ export async function POST(request: NextRequest) {
     console.info("[SERVER] Session created successfully", {
       userId: user.id,
       timestamp: new Date().toISOString(),
+      cookieDomain,
+      host,
     });
 
     // Create response with session cookie
