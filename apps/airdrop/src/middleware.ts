@@ -18,10 +18,19 @@ const PUBLIC_PATHS = [
   "/favicon.ico",
   "/blocked",
   "/terms",
+  "/error",
 ];
 
 export async function middleware(request: NextRequest) {
   try {
+    // Skip middleware for public paths - this check needs to be first
+    const isPublicPath = PUBLIC_PATHS.some((path) =>
+      request.nextUrl.pathname.startsWith(path),
+    );
+    if (isPublicPath) {
+      return NextResponse.next();
+    }
+
     // Rate limiting check
     const clientIp = getClientIp(request.headers);
     const rateLimit = await checkRateLimit(clientIp);
@@ -55,14 +64,6 @@ export async function middleware(request: NextRequest) {
 
     if (!geo?.country) {
       console.warn("No geolocation data available");
-    }
-
-    // Skip middleware for public paths
-    const isPublicPath = PUBLIC_PATHS.some((path) =>
-      request.nextUrl.pathname.startsWith(path),
-    );
-    if (isPublicPath) {
-      return response;
     }
 
     // List of blocked countries (using ISO country codes)
