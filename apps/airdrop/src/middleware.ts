@@ -22,6 +22,12 @@ const PUBLIC_PATHS = [
 ];
 
 export async function middleware(request: NextRequest) {
+  // Add debug log at the very start
+  console.info("[MIDDLEWARE] Request received:", {
+    path: request.nextUrl.pathname,
+    method: request.method,
+  });
+
   try {
     // Skip middleware for public paths - this check needs to be first
     const isPublicPath = PUBLIC_PATHS.some((path) =>
@@ -88,8 +94,16 @@ export async function middleware(request: NextRequest) {
     const geo = geolocation(request);
 
     // Add detailed logging for geolocation debugging
-    console.info("[MIDDLEWARE] Geolocation debug:", {
-      operation: "geo_check",
+    console.info("[MIDDLEWARE] Geolocation check starting", {
+      operation: "geo_check_start",
+      headers: {
+        // Log all headers to see what Vercel is sending
+        ...Object.fromEntries(request.headers.entries()),
+      },
+    });
+
+    console.info("[MIDDLEWARE] Geolocation result:", {
+      operation: "geo_check_result",
       geoData: geo,
       vercelGeoHeaders: {
         country: request.headers.get("x-vercel-ip-country"),
@@ -184,5 +198,13 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|public/).*)"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!_next/static|_next/image|favicon.ico).*)",
+  ],
 };
