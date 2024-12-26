@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { clearPrivyUser } from "@/lib/auth";
+import { clearUserSession } from "@/lib/auth";
 
 export async function POST() {
   try {
-    await clearPrivyUser();
+    await clearUserSession();
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[SERVER] Error in logout:", error);
