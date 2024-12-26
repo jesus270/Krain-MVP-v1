@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Bell,
-  CreditCard,
-  LogOut,
-  Sparkles,
-  User,
-  ChevronsUpDown,
-} from "lucide-react";
+import { LogOut, User, ChevronsUpDown } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
 import {

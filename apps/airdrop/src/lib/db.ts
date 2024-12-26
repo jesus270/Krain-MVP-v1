@@ -24,6 +24,28 @@ interface DbError extends Error {
   severity?: string;
 }
 
+const CIRCUIT_BREAKER = {
+  failureThreshold: 5,
+  resetTimeout: 30000, // 30 seconds
+  failures: 0,
+  lastFailure: 0,
+};
+
+function shouldBreakCircuit(): boolean {
+  const now = Date.now();
+  // Reset failures if enough time has passed
+  if (now - CIRCUIT_BREAKER.lastFailure > CIRCUIT_BREAKER.resetTimeout) {
+    CIRCUIT_BREAKER.failures = 0;
+    return false;
+  }
+  return CIRCUIT_BREAKER.failures >= CIRCUIT_BREAKER.failureThreshold;
+}
+
+function recordFailure() {
+  CIRCUIT_BREAKER.failures++;
+  CIRCUIT_BREAKER.lastFailure = Date.now();
+}
+
 export function getPool(): Pool {
   if (!pool) {
     pool = new Pool({
@@ -182,14 +204,26 @@ export async function executeWithRetry<T>(
   retries: number = MAX_RETRIES,
   delay: number = RETRY_DELAY,
 ): Promise<T> {
+  if (shouldBreakCircuit()) {
+    throw new Error(
+      "Database circuit breaker active - too many recent failures",
+    );
+  }
+
   let lastError: Error | undefined;
   let currentDelay = delay;
 
   for (let attempt = 1; attempt <= retries + 1; attempt++) {
     try {
-      return await executeWithTimeout(operation());
+      const result = await executeWithTimeout(operation());
+      // Reset circuit breaker on success
+      CIRCUIT_BREAKER.failures = 0;
+      return result;
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
+
+      // Record failure for circuit breaker
+      recordFailure();
 
       // Don't retry certain errors
       if (
@@ -199,23 +233,24 @@ export async function executeWithRetry<T>(
         throw lastError;
       }
 
-      if (attempt <= retries) {
-        // Exponential backoff with jitter
+      if (attempt <= retries && !shouldBreakCircuit()) {
         currentDelay =
           Math.min(delay * Math.pow(2, attempt - 1), 5000) *
           (0.75 + Math.random() * 0.5);
 
-        console.warn(
-          `[DB] Retrying operation. Attempt ${attempt}/${retries}. Waiting ${Math.round(currentDelay)}ms...`,
-          { error: lastError.message },
-        );
+        console.warn("[DB] Operation retry scheduled", {
+          attempt,
+          maxRetries: retries,
+          nextAttemptMs: Math.round(currentDelay),
+          operation: "database_retry",
+        });
 
         await new Promise((resolve) => setTimeout(resolve, currentDelay));
       }
     }
   }
 
-  console.error("[DB] All retry attempts failed:", {
+  console.error("[DB] All retry attempts failed", {
     code: (lastError as DbError)?.code,
     message: lastError?.message,
     operation: "retryable_query",

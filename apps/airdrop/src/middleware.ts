@@ -31,12 +31,35 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Rate limiting check
-    const clientIp = getClientIp(request.headers);
-    const rateLimit = await checkRateLimit(clientIp);
+    // Determine rate limit type based on path
+    let rateLimit;
+    if (request.nextUrl.pathname.startsWith("/api/auth")) {
+      rateLimit = await checkRateLimit(getClientIp(request.headers), "auth");
+    } else if (request.nextUrl.pathname.startsWith("/api/")) {
+      rateLimit = await checkRateLimit(getClientIp(request.headers), "api");
+    } else {
+      rateLimit = await checkRateLimit(getClientIp(request.headers), "default");
+    }
 
-    // Create base response
+    // Create base response with security headers
     const response = NextResponse.next();
+
+    // Add security headers
+    const securityHeaders = {
+      "X-DNS-Prefetch-Control": "off",
+      "X-Frame-Options": "SAMEORIGIN",
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "Permissions-Policy":
+        "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+      "X-XSS-Protection": "1; mode=block",
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    };
+
+    // Add security headers to response
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
 
     // Add rate limit headers
     response.headers.set("X-RateLimit-Limit", String(rateLimit.limit));
@@ -49,6 +72,7 @@ export async function middleware(request: NextRequest) {
         {
           status: 429,
           headers: {
+            ...securityHeaders,
             "X-RateLimit-Limit": String(rateLimit.limit),
             "X-RateLimit-Remaining": "0",
             "X-RateLimit-Reset": String(rateLimit.reset),
