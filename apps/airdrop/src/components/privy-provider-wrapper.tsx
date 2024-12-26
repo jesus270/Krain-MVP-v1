@@ -5,7 +5,7 @@ import {
   toSolanaWalletConnectors,
   useSolanaWallets,
 } from "@privy-io/react-auth/solana";
-import { useEffect } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 
 const solanaConnectors = toSolanaWalletConnectors({
   shouldAutoConnect: true,
@@ -20,10 +20,38 @@ function SessionRevalidator({
 }) {
   const { user } = usePrivy();
   const { wallets: solanaWallets } = useSolanaWallets();
+  const [isRevalidating, setIsRevalidating] = useState<boolean>(false);
+  const revalidationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounced revalidation function
+  const debouncedRevalidate = useCallback(
+    async (user: User, walletAddress: string) => {
+      if (isRevalidating) {
+        console.info("[CLIENT] Skipping revalidation - already in progress");
+        return;
+      }
+
+      try {
+        setIsRevalidating(true);
+        await revalidateSession(user, walletAddress);
+      } catch (error) {
+        console.error("[CLIENT] Error revalidating session:", error);
+      } finally {
+        setIsRevalidating(false);
+      }
+    },
+    [revalidateSession, isRevalidating],
+  );
 
   useLogin({
     onComplete: async (user) => {
       try {
+        // Clear any pending revalidation
+        if (revalidationTimeoutRef.current !== null) {
+          clearTimeout(revalidationTimeoutRef.current);
+          revalidationTimeoutRef.current = null;
+        }
+
         // Wait for wallet to be available
         let attempts = 0;
         while (!solanaWallets[0]?.address && attempts < 5) {
@@ -33,12 +61,15 @@ function SessionRevalidator({
 
         const walletAddress = solanaWallets[0]?.address;
         if (walletAddress) {
-          await revalidateSession(user, walletAddress);
+          // Add slight delay to ensure any previous session operations are complete
+          revalidationTimeoutRef.current = setTimeout(() => {
+            debouncedRevalidate(user, walletAddress);
+          }, 1000);
         } else {
           console.error("[CLIENT] No Solana wallet address found after login");
         }
       } catch (error) {
-        console.error("[CLIENT] Error revalidating session:", error);
+        console.error("[CLIENT] Error in login callback:", error);
       }
     },
   });
@@ -57,6 +88,12 @@ function SessionRevalidator({
         });
 
         if (!response.ok) {
+          // Clear any pending revalidation
+          if (revalidationTimeoutRef.current !== null) {
+            clearTimeout(revalidationTimeoutRef.current);
+            revalidationTimeoutRef.current = null;
+          }
+
           // Wait for wallet to be available
           let attempts = 0;
           while (!solanaWallets[0]?.address && attempts < 5) {
@@ -66,7 +103,10 @@ function SessionRevalidator({
 
           const walletAddress = solanaWallets[0]?.address;
           if (walletAddress) {
-            await revalidateSession(user, walletAddress);
+            // Add slight delay to ensure any previous session operations are complete
+            revalidationTimeoutRef.current = setTimeout(() => {
+              debouncedRevalidate(user, walletAddress);
+            }, 1000);
           } else {
             console.error(
               "[CLIENT] No Solana wallet address found during session check",
@@ -84,8 +124,14 @@ function SessionRevalidator({
     // Set up periodic session checks
     const interval = setInterval(checkSession, 5 * 60 * 1000); // Check every 5 minutes
 
-    return () => clearInterval(interval);
-  }, [user, revalidateSession, solanaWallets]);
+    return () => {
+      clearInterval(interval);
+      if (revalidationTimeoutRef.current !== null) {
+        clearTimeout(revalidationTimeoutRef.current);
+        revalidationTimeoutRef.current = null;
+      }
+    };
+  }, [user, debouncedRevalidate, solanaWallets]);
 
   return <>{children}</>;
 }
