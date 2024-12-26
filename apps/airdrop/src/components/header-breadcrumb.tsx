@@ -19,23 +19,26 @@ export default function HeaderBreadcrumb() {
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        <BreadcrumbItem>
-          <BreadcrumbLink asChild>
-            <Link href="/">Dashboard</Link>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        {paths.map((path, index) => (
-          <Fragment key={`${path}-${index}`}>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/${paths.slice(0, index + 1).join("/")}`}>
-                  {capitalizeEachWord(path)}
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-          </Fragment>
-        ))}
+        {pathname === "/" ? (
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/">Dashboard</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+        ) : (
+          paths.map((path, index) => (
+            <Fragment key={`${path}-${index}`}>
+              {index > 0 && <BreadcrumbSeparator />}
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href={`/${paths.slice(0, index + 1).join("/")}`}>
+                    {capitalizeEachWord(path)}
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </Fragment>
+          ))
+        )}
       </BreadcrumbList>
     </Breadcrumb>
   );
