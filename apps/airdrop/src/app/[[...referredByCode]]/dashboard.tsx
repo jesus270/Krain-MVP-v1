@@ -328,7 +328,7 @@ export function Dashboard({
         referralsCount={referralsCount}
         referralUrl={
           wallet?.referralCode
-            ? `https://airdrop.krain.ai/${wallet.referralCode}`
+            ? `${process.env.NEXT_PUBLIC_APP_URL}/${wallet.referralCode}`
             : ""
         }
         locale={locale}
