@@ -17,6 +17,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/ui/card";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 
 const redHatMono = Red_Hat_Mono({
   variable: "--font-red-hat-mono",
@@ -47,32 +50,36 @@ export default function RootLayout({
       <body
         className={`${redHatMono.variable} ${manrope.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          <PrivyProviderWrapper>
-            <SidebarProvider>
-              <AuthWrapper>
-                {(authenticated) => (
-                  <>
-                    {authenticated && <SidebarNav />}
-                    <SidebarInset>
-                      {authenticated && <Header />}
-                      <div className="flex flex-grow flex-col">
-                        {children}
-                        <Toaster richColors />
-                      </div>
-                      <Footer />
-                    </SidebarInset>
-                  </>
-                )}
-              </AuthWrapper>
-            </SidebarProvider>
-          </PrivyProviderWrapper>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <PrivyProviderWrapper>
+              <SidebarProvider>
+                <AuthWrapper>
+                  {(authenticated) => (
+                    <>
+                      {authenticated && <SidebarNav />}
+                      <SidebarInset>
+                        {authenticated && <Header />}
+                        <div className="flex flex-grow flex-col">
+                          {children}
+                          <Toaster richColors />
+                          <SpeedInsights />
+                          <Analytics />
+                        </div>
+                        <Footer />
+                      </SidebarInset>
+                    </>
+                  )}
+                </AuthWrapper>
+              </SidebarProvider>
+            </PrivyProviderWrapper>
+          </ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

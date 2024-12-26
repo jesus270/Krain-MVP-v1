@@ -1,4 +1,4 @@
-import { Pool } from "@neondatabase/serverless";
+import { Pool, QueryResult } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import * as schema from "@repo/database";
 
@@ -19,7 +19,7 @@ const IDLE_TIMEOUT = 30000; // 30 seconds
 // Create a singleton pool instance with optimized settings
 let pool: Pool | null = null;
 
-function getPool(): Pool {
+export function getPool(): Pool {
   if (!pool) {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
@@ -31,6 +31,10 @@ function getPool(): Pool {
       allowExitOnIdle: true,
       statement_timeout: DB_TIMEOUT,
       query_timeout: DB_TIMEOUT,
+      ssl:
+        process.env.NODE_ENV === "production"
+          ? { rejectUnauthorized: true }
+          : false,
     });
 
     // Add event listeners for better monitoring
@@ -48,8 +52,42 @@ function getPool(): Pool {
         active: totalCount - idleCount,
       });
     });
+
+    // Handle pool removal
+    process.on("SIGTERM", async () => {
+      await pool?.end();
+      pool = null;
+    });
   }
+
   return pool;
+}
+
+// Wrapper for safe query execution with retries
+export async function executeQuery<T extends QueryResult>(
+  query: string,
+  params: any[] = [],
+  retries = MAX_RETRIES,
+): Promise<T> {
+  try {
+    const client = await getPool().connect();
+    try {
+      return (await client.query(query, params)) as T;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    if (retries > 0 && isRetryableError(error)) {
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+      return executeQuery(query, params, retries - 1);
+    }
+    throw error;
+  }
+}
+
+function isRetryableError(error: any): boolean {
+  const retryableCodes = ["40001", "40P01"]; // Serialization failure, deadlock detected
+  return retryableCodes.includes(error.code);
 }
 
 // Create a drizzle instance with schema

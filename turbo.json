@@ -5,7 +5,8 @@
     "NODE_ENV",
     "DATABASE_URL",
     "SESSION_SECRET",
-    "NEXT_PUBLIC_PRIVY_APP_ID"
+    "NEXT_PUBLIC_PRIVY_APP_ID",
+    "MONITORING_ORIGINS"
   ],
   "pipeline": {
     "build": {
