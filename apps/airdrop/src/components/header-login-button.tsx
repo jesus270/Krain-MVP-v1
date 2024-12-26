@@ -74,10 +74,11 @@ export function HeaderLoginButton() {
                 await fetch("/api/auth/logout", {
                   method: "POST",
                 });
-                logout();
               } catch (error) {
-                console.error("[CLIENT] Error in logout:", error);
+                console.error("[CLIENT] Error in server logout:", error);
               }
+              // Always logout on client side regardless of server response
+              logout();
             }}
           >
             <LogOut />
