@@ -1,15 +1,34 @@
 import { NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
-import { SessionData, sessionOptions } from "@/lib/auth";
+import { SessionData, sessionOptions, getCookieDomain } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { IronSessionCookieStore } from "@/lib/cookie-store";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Get the request host and determine cookie domain
+    const host = request.headers.get("host") || "";
+    const cookieDomain = getCookieDomain(host);
+
+    console.info("[SERVER] Verify configuration", {
+      host,
+      cookieDomain,
+      nodeEnv: process.env.NODE_ENV,
+    });
+
+    // Create custom session options for this request
+    const requestSessionOptions = {
+      ...sessionOptions,
+      cookieOptions: {
+        ...sessionOptions.cookieOptions,
+        domain: cookieDomain,
+      },
+    };
+
     const cookieStore = new IronSessionCookieStore(await cookies());
     const session = await getIronSession<SessionData>(
       cookieStore,
-      sessionOptions,
+      requestSessionOptions,
     );
 
     // If no session or not logged in, return 401

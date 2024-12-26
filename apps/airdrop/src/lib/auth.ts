@@ -58,8 +58,9 @@ export function getCookieDomain(host: string): string | undefined {
     return ".krain.ai";
   }
 
+  // For Vercel preview deployments, use the exact domain
   if (host.endsWith(".vercel.app")) {
-    return ".vercel.app";
+    return host; // Return the full domain instead of just .vercel.app
   }
 
   return undefined;

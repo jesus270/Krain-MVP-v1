@@ -87,6 +87,23 @@ export async function middleware(request: NextRequest) {
 
     const geo = geolocation(request);
 
+    // Add detailed logging for geolocation debugging
+    console.info("[MIDDLEWARE] Geolocation debug:", {
+      operation: "geo_check",
+      geoData: geo,
+      vercelGeoHeaders: {
+        country: request.headers.get("x-vercel-ip-country"),
+        region: request.headers.get("x-vercel-ip-country-region"),
+        city: request.headers.get("x-vercel-ip-city"),
+        latitude: request.headers.get("x-vercel-ip-latitude"),
+        longitude: request.headers.get("x-vercel-ip-longitude"),
+      },
+      ip:
+        request.headers.get("x-real-ip") ||
+        request.headers.get("x-forwarded-for"),
+      url: request.url,
+    });
+
     if (!geo?.country) {
       console.warn("No geolocation data available");
     }
