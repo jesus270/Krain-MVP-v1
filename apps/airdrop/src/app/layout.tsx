@@ -20,6 +20,7 @@ import {
 import { ErrorBoundary } from "@/components/error-boundary";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
+import { usePathname } from "next/navigation";
 
 const redHatMono = Red_Hat_Mono({
   variable: "--font-red-hat-mono",
@@ -45,6 +46,8 @@ export default function RootLayout({
     throw new Error("NEXT_PUBLIC_PRIVY_APP_ID is not set");
   }
 
+  const pathname = usePathname();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -57,27 +60,31 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <PrivyProviderWrapper>
-              <SidebarProvider>
-                <AuthWrapper>
-                  {(authenticated) => (
-                    <>
-                      {authenticated && <SidebarNav />}
-                      <SidebarInset>
-                        {authenticated && <Header />}
-                        <div className="flex flex-grow flex-col">
-                          {children}
-                          <Toaster richColors />
-                          <SpeedInsights />
-                          <Analytics />
-                        </div>
-                        <Footer />
-                      </SidebarInset>
-                    </>
-                  )}
-                </AuthWrapper>
-              </SidebarProvider>
-            </PrivyProviderWrapper>
+            {pathname !== "/blocked" ? (
+              <PrivyProviderWrapper>
+                <SidebarProvider>
+                  <AuthWrapper>
+                    {(authenticated) => (
+                      <>
+                        {authenticated && <SidebarNav />}
+                        <SidebarInset>
+                          {authenticated && <Header />}
+                          <div className="flex flex-grow flex-col">
+                            {children}
+                            <Toaster richColors />
+                            <SpeedInsights />
+                            <Analytics />
+                          </div>
+                          <Footer />
+                        </SidebarInset>
+                      </>
+                    )}
+                  </AuthWrapper>
+                </SidebarProvider>
+              </PrivyProviderWrapper>
+            ) : (
+              <>{children}</>
+            )}
           </ThemeProvider>
         </ErrorBoundary>
       </body>
