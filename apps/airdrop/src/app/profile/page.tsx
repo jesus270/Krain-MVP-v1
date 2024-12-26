@@ -105,7 +105,10 @@ export default function Profile() {
             <CardTitle className="text-3xl font-bold">
               Account Integrations
             </CardTitle>
-            <Badge variant="secondary" className="text-lg px-4 py-2">
+            <Badge
+              variant="secondary"
+              className="text-lg px-4 py-2 text-center"
+            >
               {totalPoints.toLocaleString()} Points
             </Badge>
           </div>
