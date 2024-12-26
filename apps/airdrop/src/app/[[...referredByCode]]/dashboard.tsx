@@ -55,10 +55,27 @@ async function verifySession(attempt = 1): Promise<boolean> {
   try {
     const verifyResponse = await fetch("/api/auth/verify", {
       credentials: "include",
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
     });
 
     if (verifyResponse.ok) {
       return true;
+    }
+
+    // If unauthorized, try to revalidate the session
+    if (verifyResponse.status === 401 && attempt < SESSION_VERIFY_MAX_RETRIES) {
+      console.info("[AUTH] Session verification failed, retrying", {
+        operation: "verify_session",
+        status: "retry",
+        attempt,
+        nextAttemptMs: RETRY_DELAY,
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+      return verifySession(attempt + 1);
     }
 
     if (attempt >= SESSION_VERIFY_MAX_RETRIES) {
@@ -77,7 +94,14 @@ async function verifySession(attempt = 1): Promise<boolean> {
       operation: "verify_session",
       status: "error",
       errorMessage: error instanceof Error ? error.message : String(error),
+      attempt,
     });
+
+    if (attempt < SESSION_VERIFY_MAX_RETRIES) {
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+      return verifySession(attempt + 1);
+    }
+
     return false;
   }
 }
@@ -162,14 +186,12 @@ export function Dashboard({
         setIsLoadingReferrals(true);
         setError(undefined);
 
-        // Start session verification in parallel with initial UI render
-        verifySession().then((verified) => {
-          if (isMounted) {
-            if (!verified) {
-              setError("Unable to verify session. Please try again.");
-            }
-          }
-        });
+        // Verify session first
+        const verified = await verifySession();
+        if (!verified) {
+          setError("Unable to verify session. Please try again.");
+          return;
+        }
 
         if (!isMounted) return;
 
