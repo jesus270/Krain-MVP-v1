@@ -148,6 +148,20 @@ export function Dashboard({
                 ? error.message
                 : "Unable to load wallet data";
             setError(`${message}. Please refresh to try again.`);
+
+            // Retry after delay if it's a connection error
+            if (
+              error instanceof Error &&
+              (error.message.toLowerCase().includes("network") ||
+                error.message.toLowerCase().includes("connection") ||
+                error.message.toLowerCase().includes("timeout"))
+            ) {
+              console.log(
+                "[CLIENT] Connection error detected, scheduling retry...",
+              );
+              retryTimeout = setTimeout(loadData, RETRY_DELAY);
+              return;
+            }
           }
         }
 
@@ -167,6 +181,20 @@ export function Dashboard({
                   ? error.message
                   : "Unable to load referrals";
               setError(`${message}. Please refresh to try again.`);
+
+              // Retry after delay if it's a connection error
+              if (
+                error instanceof Error &&
+                (error.message.toLowerCase().includes("network") ||
+                  error.message.toLowerCase().includes("connection") ||
+                  error.message.toLowerCase().includes("timeout"))
+              ) {
+                console.log(
+                  "[CLIENT] Connection error detected, scheduling retry...",
+                );
+                retryTimeout = setTimeout(loadData, RETRY_DELAY);
+                return;
+              }
             }
           }
         }
@@ -177,6 +205,19 @@ export function Dashboard({
               ? error.message
               : "Unable to load wallet data";
           setError(`${message}. Please refresh to try again.`);
+
+          // Retry after delay if it's a connection error
+          if (
+            error instanceof Error &&
+            (error.message.toLowerCase().includes("network") ||
+              error.message.toLowerCase().includes("connection") ||
+              error.message.toLowerCase().includes("timeout"))
+          ) {
+            console.log(
+              "[CLIENT] Connection error detected, scheduling retry...",
+            );
+            retryTimeout = setTimeout(loadData, RETRY_DELAY);
+          }
         }
       } finally {
         if (isMounted) {
