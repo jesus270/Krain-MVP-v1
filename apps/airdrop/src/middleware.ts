@@ -29,7 +29,67 @@ export async function middleware(request: NextRequest) {
   });
 
   try {
-    // Skip middleware for public paths - this check needs to be first
+    // Perform geolocation check first, before any other middleware logic
+    const geo = geolocation(request);
+
+    // Add detailed logging for geolocation debugging
+    console.info("[MIDDLEWARE] Geolocation check starting", {
+      operation: "geo_check_start",
+      headers: {
+        // Log all headers to see what Vercel is sending
+        ...Object.fromEntries(request.headers.entries()),
+      },
+    });
+
+    console.info("[MIDDLEWARE] Geolocation result:", {
+      operation: "geo_check_result",
+      geoData: geo,
+      vercelGeoHeaders: {
+        country: request.headers.get("x-vercel-ip-country"),
+        region: request.headers.get("x-vercel-ip-country-region"),
+        city: request.headers.get("x-vercel-ip-city"),
+        latitude: request.headers.get("x-vercel-ip-latitude"),
+        longitude: request.headers.get("x-vercel-ip-longitude"),
+      },
+      ip:
+        request.headers.get("x-real-ip") ||
+        request.headers.get("x-forwarded-for"),
+      url: request.url,
+    });
+
+    if (!geo?.country) {
+      console.warn("No geolocation data available");
+    }
+
+    // List of blocked countries (using ISO country codes)
+    const blockedCountries = [
+      "US", // United States
+      "KP", // North Korea
+      "IR", // Iran
+      "SY", // Syria
+      "CU", // Cuba
+      "RU", // Russia
+      "BY", // Belarus
+    ];
+
+    // Check if user's country is in the blocked list - do this before public path check
+    if (geo?.country && blockedCountries.includes(geo.country)) {
+      console.info(`Blocking traffic from: ${geo.country}`);
+      return NextResponse.redirect(new URL("/blocked", request.url));
+    }
+
+    // Special handling for Ukraine regions (Crimea, Donetsk, Luhansk)
+    if (geo?.country === "UA") {
+      const restrictedRegions = ["Crimea", "Donetsk", "Luhansk"];
+      if (geo.region && restrictedRegions.includes(geo.region)) {
+        console.info(
+          `Blocking traffic from restricted region: ${geo.region}, Ukraine`,
+        );
+        return NextResponse.redirect(new URL("/blocked", request.url));
+      }
+    }
+
+    // Skip remaining middleware for public paths - but only after geolocation check
     const isPublicPath = PUBLIC_PATHS.some((path) =>
       request.nextUrl.pathname.startsWith(path),
     );
@@ -89,65 +149,6 @@ export async function middleware(request: NextRequest) {
           },
         },
       );
-    }
-
-    const geo = geolocation(request);
-
-    // Add detailed logging for geolocation debugging
-    console.info("[MIDDLEWARE] Geolocation check starting", {
-      operation: "geo_check_start",
-      headers: {
-        // Log all headers to see what Vercel is sending
-        ...Object.fromEntries(request.headers.entries()),
-      },
-    });
-
-    console.info("[MIDDLEWARE] Geolocation result:", {
-      operation: "geo_check_result",
-      geoData: geo,
-      vercelGeoHeaders: {
-        country: request.headers.get("x-vercel-ip-country"),
-        region: request.headers.get("x-vercel-ip-country-region"),
-        city: request.headers.get("x-vercel-ip-city"),
-        latitude: request.headers.get("x-vercel-ip-latitude"),
-        longitude: request.headers.get("x-vercel-ip-longitude"),
-      },
-      ip:
-        request.headers.get("x-real-ip") ||
-        request.headers.get("x-forwarded-for"),
-      url: request.url,
-    });
-
-    if (!geo?.country) {
-      console.warn("No geolocation data available");
-    }
-
-    // List of blocked countries (using ISO country codes)
-    const blockedCountries = [
-      "US", // United States
-      "KP", // North Korea
-      "IR", // Iran
-      "SY", // Syria
-      "CU", // Cuba
-      "RU", // Russia
-      "BY", // Belarus
-    ];
-
-    // Check if user's country is in the blocked list
-    if (geo?.country && blockedCountries.includes(geo.country)) {
-      console.info(`Blocking traffic from: ${geo.country}`);
-      return NextResponse.redirect(new URL("/blocked", request.url));
-    }
-
-    // Special handling for Ukraine regions (Crimea, Donetsk, Luhansk)
-    if (geo?.country === "UA") {
-      const restrictedRegions = ["Crimea", "Donetsk", "Luhansk"];
-      if (geo.region && restrictedRegions.includes(geo.region)) {
-        console.info(
-          `Blocking traffic from restricted region: ${geo.region}, Ukraine`,
-        );
-        return NextResponse.redirect(new URL("/blocked", request.url));
-      }
     }
 
     // Check if this is a protected route
