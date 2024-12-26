@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from "@repo/ui/components/ui/card";
 import { Button } from "@repo/ui/components/ui/button";
+import { log } from "@/lib/logger";
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2 seconds
@@ -41,11 +42,9 @@ function isNetworkError(error: unknown): boolean {
 function logClientError(error: unknown, context: Record<string, unknown> = {}) {
   const clientError: ClientError =
     error instanceof Error ? error : new Error(String(error));
-  console.error("[CLIENT] Operation failed", {
-    code: clientError.code,
-    message: clientError.message,
-    operation: context.operation,
-    status: "error",
+  log.error(clientError, {
+    operation: "client_error",
+    entity: "CLIENT",
     ...context,
   });
   return clientError;
@@ -59,11 +58,11 @@ async function verifySession(attempt = 1): Promise<boolean> {
     const startTime = Date.now();
 
     while (Date.now() - startTime < SESSION_TIMEOUT) {
-      console.info("[AUTH] Polling session verification", {
+      log.info("Polling session verification", {
         operation: "verify_session",
+        entity: "AUTH",
         attempt,
         elapsedMs: Date.now() - startTime,
-        timestamp: new Date().toISOString(),
       });
 
       const verifyResponse = await fetch("/api/auth/verify", {
@@ -75,9 +74,9 @@ async function verifySession(attempt = 1): Promise<boolean> {
       });
 
       if (verifyResponse.ok) {
-        console.info("[AUTH] Session verification successful", {
+        log.info("Session verification successful", {
           operation: "verify_session",
-          status: "success",
+          entity: "AUTH",
           attempt,
           elapsedMs: Date.now() - startTime,
           responseStatus: verifyResponse.status,
@@ -87,15 +86,13 @@ async function verifySession(attempt = 1): Promise<boolean> {
 
       // If we get a non-401 error, something else is wrong
       if (verifyResponse.status !== 401) {
-        console.error(
-          "[AUTH] Session verification failed with unexpected status",
-          {
-            operation: "verify_session",
-            status: "error",
-            responseStatus: verifyResponse.status,
-            attempt,
-          },
-        );
+        log.error(new Error(`Unexpected status: ${verifyResponse.status}`), {
+          operation: "verify_session",
+          entity: "AUTH",
+          status: "error",
+          responseStatus: verifyResponse.status,
+          attempt,
+        });
         return false;
       }
 
@@ -103,18 +100,17 @@ async function verifySession(attempt = 1): Promise<boolean> {
       await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
     }
 
-    console.error("[AUTH] Session verification timed out", {
+    log.error(new Error("Session verification timed out"), {
       operation: "verify_session",
+      entity: "AUTH",
       status: "timeout",
       timeoutMs: SESSION_TIMEOUT,
       attempts: attempt,
     });
     return false;
   } catch (error) {
-    console.error("[AUTH] Session verification error", {
+    log.error(error, {
       operation: "verify_session",
-      status: "error",
-      errorMessage: error instanceof Error ? error.message : String(error),
       attempt,
     });
     return false;
@@ -204,8 +200,9 @@ export function Dashboard({
         // Wait for wallet to be available first
         let walletAttempts = 0;
         while (!userWalletAddress && walletAttempts < 5) {
-          console.info("[CLIENT] Waiting for wallet address", {
+          log.info("Waiting for wallet address", {
             operation: "load_data",
+            entity: "CLIENT",
             status: "waiting",
             attempt: walletAttempts + 1,
           });
@@ -214,10 +211,11 @@ export function Dashboard({
         }
 
         if (!userWalletAddress) {
-          console.error(
-            "[CLIENT] Wallet address not available after max attempts",
+          log.error(
+            new Error("Wallet address not available after max attempts"),
             {
               operation: "load_data",
+              entity: "CLIENT",
               status: "error",
             },
           );
@@ -255,13 +253,11 @@ export function Dashboard({
 
             // If it's an unauthorized error, try verifying session again
             if (clientError.message.includes("Unauthorized")) {
-              console.info(
-                "[CLIENT] Unauthorized error, retrying session verification",
-                {
-                  operation: "load_wallet",
-                  status: "retry",
-                },
-              );
+              log.info("Unauthorized error, retrying session verification", {
+                operation: "load_wallet",
+                entity: "CLIENT",
+                status: "retry",
+              });
               const reVerified = await verifySession();
               if (reVerified) {
                 // Retry wallet submission
@@ -292,8 +288,9 @@ export function Dashboard({
 
             // Retry after delay if it's a network error
             if (isNetworkError(error)) {
-              console.info("[CLIENT] Scheduling retry", {
+              log.info("Scheduling retry", {
                 operation: "load_wallet",
+                entity: "CLIENT",
                 status: "retry",
                 nextAttemptMs: RETRY_DELAY,
               });
@@ -322,8 +319,9 @@ export function Dashboard({
               setError(`${clientError.message}. Please refresh to try again.`);
 
               if (isNetworkError(error)) {
-                console.info("[CLIENT] Scheduling retry", {
+                log.info("Scheduling retry", {
                   operation: "load_referrals",
+                  entity: "CLIENT",
                   status: "retry",
                   nextAttemptMs: RETRY_DELAY,
                 });
@@ -342,8 +340,9 @@ export function Dashboard({
           setError(`${clientError.message}. Please refresh to try again.`);
 
           if (isNetworkError(error)) {
-            console.info("[CLIENT] Scheduling retry", {
+            log.info("Scheduling retry", {
               operation: "load_dashboard",
+              entity: "CLIENT",
               status: "retry",
               nextAttemptMs: RETRY_DELAY,
             });

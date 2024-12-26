@@ -3,14 +3,16 @@ import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions, getCookieDomain } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { IronSessionCookieStore } from "@/lib/cookie-store";
+import { log } from "@/lib/logger";
 
 export async function GET(request: Request) {
   try {
-    // Get the request host and determine cookie domain
     const host = request.headers.get("host") || "";
     const cookieDomain = getCookieDomain(host);
 
-    console.info("[SERVER] Verify configuration", {
+    log.info("Processing session verification", {
+      entity: "API-auth/verify",
+      operation: "verify_session",
       host,
       cookieDomain,
       nodeEnv: process.env.NODE_ENV,
@@ -33,15 +35,23 @@ export async function GET(request: Request) {
 
     // If no session or not logged in, return 401
     if (!session.isLoggedIn || !session.user) {
+      log.warn("No active session found", {
+        entity: "API-auth/verify",
+        operation: "verify_session",
+        status: "unauthorized",
+      });
       return NextResponse.json(
-        {
-          error: "No active session",
-          isLoggedIn: false,
-          user: null,
-        },
+        { error: "No active session", isLoggedIn: false, user: null },
         { status: 401 },
       );
     }
+
+    log.info("Session verified successfully", {
+      entity: "API-auth/verify",
+      operation: "verify_session",
+      userId: session.user.id,
+      walletAddress: session.user.walletAddress,
+    });
 
     // Create response with session cookie
     const response = NextResponse.json({
@@ -57,7 +67,11 @@ export async function GET(request: Request) {
 
     return response;
   } catch (error) {
-    console.error("[SERVER] Session verification error:", error);
+    log.error(error, {
+      entity: "API-auth/verify",
+      operation: "verify_session",
+      status: "error",
+    });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

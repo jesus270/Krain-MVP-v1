@@ -1,5 +1,6 @@
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
+import { log } from "./logger";
 
 // Initialize Redis client
 export const redis = Redis.fromEnv();
@@ -97,11 +98,10 @@ export async function checkRateLimit(
       reset: result.reset,
     };
   } catch (error) {
-    console.error("[RATE_LIMIT] Check failed", {
-      operation: "rate_limit",
-      status: "error",
+    log.error(error, {
+      operation: "rate_limit_check",
+      entity: "REDIS",
       type,
-      errorMessage: error instanceof Error ? error.message : String(error),
     });
 
     // Fail open in production, but with reduced limits

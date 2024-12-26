@@ -1,6 +1,7 @@
 import { Pool, QueryResult, DatabaseError } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import * as schema from "@repo/database";
+import { log } from "./logger";
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not set");
@@ -66,9 +67,10 @@ export function getPool(): Pool {
 
     // Add event listeners for better monitoring
     pool.on("error", (err: DbError) => {
-      console.error("[DB] Pool error:", {
+      log.error(err, {
+        operation: "pool_error",
+        entity: "DB",
         code: err.code,
-        message: err.message,
         severity: err.severity,
       });
       // Reset pool on critical errors
@@ -79,7 +81,9 @@ export function getPool(): Pool {
       const totalCount = pool?.totalCount ?? 0;
       const idleCount = pool?.idleCount ?? 0;
       if (process.env.NODE_ENV === "development") {
-        console.debug("[DB] Pool status:", {
+        log.info("Pool connection established", {
+          operation: "pool_connect",
+          entity: "DB",
           total: totalCount,
           active: totalCount - idleCount,
         });
@@ -143,9 +147,10 @@ export async function executeWithTimeout<T>(
     const result = await Promise.race([promise, timeoutPromise]);
     const duration = Date.now() - start;
     if (duration > 1000) {
-      console.warn("[DB] Slow query detected:", {
-        durationMs: duration,
+      log.warn("Slow query detected", {
         operation: "query",
+        entity: "DB",
+        durationMs: duration,
       });
     }
     return result;
@@ -155,42 +160,45 @@ export async function executeWithTimeout<T>(
       const errorMessage = error.message.toLowerCase();
 
       if (errorMessage.includes("timed out")) {
-        console.error("[DB] Operation timed out:", {
-          error,
-          stack: error.stack,
+        log.error(error, {
+          operation: "timeout",
+          entity: "DB",
         });
         throw new Error("Database operation timed out. Please try again.");
       }
 
       if (errorMessage.includes("server login has been failing")) {
-        console.error("[DB] Authentication error:", {
-          error,
-          stack: error.stack,
+        log.error(error, {
+          operation: "auth_error",
+          entity: "DB",
         });
         pool = null;
         throw new Error("Database authentication failed. Please try again.");
       }
 
       if (errorMessage.includes("too many connections")) {
-        console.error("[DB] Connection limit reached:", {
-          error,
-          stack: error.stack,
+        log.error(error, {
+          operation: "connection_limit",
+          entity: "DB",
         });
         pool = null;
         throw new Error("Database is under high load. Please try again.");
       }
 
       if (errorMessage.includes("connection terminated")) {
-        console.error("[DB] Connection terminated:", {
-          error,
-          stack: error.stack,
+        log.error(error, {
+          operation: "connection_terminated",
+          entity: "DB",
         });
         pool = null;
         throw new Error("Database connection lost. Please try again.");
       }
 
       if (errorMessage.includes("deadlock detected")) {
-        console.error("[DB] Deadlock detected:", { error, stack: error.stack });
+        log.error(error, {
+          operation: "deadlock",
+          entity: "DB",
+        });
         throw new Error("Database conflict detected. Please try again.");
       }
     }
@@ -238,11 +246,12 @@ export async function executeWithRetry<T>(
           Math.min(delay * Math.pow(2, attempt - 1), 5000) *
           (0.75 + Math.random() * 0.5);
 
-        console.warn("[DB] Operation retry scheduled", {
+        log.warn("Operation retry scheduled", {
+          operation: "retry",
+          entity: "DB",
           attempt,
           maxRetries: retries,
           nextAttemptMs: Math.round(currentDelay),
-          operation: "database_retry",
         });
 
         await new Promise((resolve) => setTimeout(resolve, currentDelay));
@@ -250,10 +259,10 @@ export async function executeWithRetry<T>(
     }
   }
 
-  console.error("[DB] All retry attempts failed", {
+  log.error(lastError || new Error("Unknown error"), {
+    operation: "retry_failed",
+    entity: "DB",
     code: (lastError as DbError)?.code,
-    message: lastError?.message,
-    operation: "retryable_query",
     severity: (lastError as DbError)?.severity,
   });
   throw lastError;
@@ -261,14 +270,18 @@ export async function executeWithRetry<T>(
 
 // Graceful shutdown handling
 async function shutdownPool() {
-  console.log("[DB] Initiating pool shutdown");
+  log.info("Initiating pool shutdown", {
+    operation: "shutdown",
+    entity: "DB",
+  });
   if (pool) {
     try {
       await pool.end();
     } catch (error) {
-      console.error("[DB] Pool shutdown error:", {
+      log.error(error, {
+        operation: "shutdown_error",
+        entity: "DB",
         code: (error as DbError)?.code,
-        message: (error as Error)?.message,
         severity: (error as DbError)?.severity,
       });
     }

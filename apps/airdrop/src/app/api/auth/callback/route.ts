@@ -4,17 +4,22 @@ import { isValidSolanaAddress } from "@repo/utils";
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { IronSessionCookieStore } from "@/lib/cookie-store";
+import { log } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
-    console.info("[SERVER] Processing auth callback");
-    const data = await request.json();
+    log.info("Processing auth callback", {
+      entity: "API-auth/callback",
+      operation: "auth_callback",
+    });
 
-    // Get the request host and determine cookie domain
+    const data = await request.json();
     const host = request.headers.get("host") || "";
     const cookieDomain = getCookieDomain(host);
 
-    console.info("[SERVER] Auth configuration", {
+    log.info("Auth configuration", {
+      entity: "API-auth/callback",
+      operation: "auth_callback",
       host,
       cookieDomain,
       nodeEnv: process.env.NODE_ENV,
@@ -31,7 +36,11 @@ export async function POST(request: NextRequest) {
 
     // Validate user ID
     if (!data.user?.id) {
-      console.error("[SERVER] Missing user ID");
+      log.error("Missing user ID", {
+        entity: "API-auth/callback",
+        operation: "auth_callback",
+        status: "error",
+      });
       return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
     }
 
@@ -39,7 +48,11 @@ export async function POST(request: NextRequest) {
     const walletAddress = data.walletAddress || data.user?.wallet?.address;
 
     if (!walletAddress) {
-      console.error("[SERVER] No wallet address found");
+      log.error("No wallet address found", {
+        entity: "API-auth/callback",
+        operation: "auth_callback",
+        status: "error",
+      });
       return NextResponse.json(
         { error: "No wallet connected" },
         { status: 400 },
@@ -48,7 +61,11 @@ export async function POST(request: NextRequest) {
 
     // Validate wallet address
     if (!isValidSolanaAddress(walletAddress)) {
-      console.error("[SERVER] Invalid Solana address");
+      log.error("Invalid Solana address", {
+        entity: "API-auth/callback",
+        operation: "auth_callback",
+        status: "error",
+      });
       return NextResponse.json(
         { error: "Invalid Solana address" },
         { status: 400 },
@@ -61,7 +78,9 @@ export async function POST(request: NextRequest) {
       walletAddress: walletAddress,
     };
 
-    console.info("[SERVER] Creating session for user", {
+    log.info("Creating session for user", {
+      entity: "API-auth/callback",
+      operation: "auth_callback",
       userId: user.id,
       walletAddress: walletAddress,
       cookieDomain,
@@ -81,7 +100,9 @@ export async function POST(request: NextRequest) {
     session.lastActivity = Date.now();
     await session.save();
 
-    console.info("[SERVER] Session created successfully", {
+    log.info("Session created successfully", {
+      entity: "API-auth/callback",
+      operation: "auth_callback",
       userId: user.id,
       timestamp: new Date().toISOString(),
       cookieDomain,
@@ -99,7 +120,11 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error("[SERVER] Auth callback error:", error);
+    log.error(error, {
+      entity: "API-auth/callback",
+      operation: "auth_callback",
+      status: "error",
+    });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

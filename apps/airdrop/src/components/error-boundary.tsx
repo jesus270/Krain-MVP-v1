@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/ui/card";
+import { log } from "@/lib/logger";
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -31,8 +32,11 @@ export class ErrorBoundary extends React.Component<Props, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log to your error tracking service here
-    console.error("Uncaught error:", error, errorInfo);
+    log.error(error, {
+      operation: "render",
+      entity: "ERROR_BOUNDARY",
+      componentStack: errorInfo.componentStack,
+    });
   }
 
   render() {

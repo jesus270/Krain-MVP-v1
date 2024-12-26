@@ -6,6 +6,7 @@ import {
   useSolanaWallets,
 } from "@privy-io/react-auth/solana";
 import { useEffect, useRef, useCallback, useState } from "react";
+import { log } from "@/lib/logger";
 
 const solanaConnectors = toSolanaWalletConnectors({
   shouldAutoConnect: true,
@@ -165,7 +166,12 @@ export function PrivyProviderWrapper({
         throw new Error("Failed to revalidate session");
       }
     } catch (error) {
-      console.error("[CLIENT] Error revalidating session:", error);
+      log.error(error, {
+        operation: "revalidate_session",
+        entity: "CLIENT",
+        userId: user.id,
+        walletAddress,
+      });
       throw error;
     }
   };

@@ -5,6 +5,7 @@ import { sessionOptions, SessionData } from "./lib/auth";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { IronSessionCookieStore } from "./lib/cookie-store";
 import { getClientIp, checkRateLimit } from "./lib/redis";
+import { log } from "./lib/logger";
 
 // Protected paths that require authentication
 const PROTECTED_PATHS = ["/api/wallet", "/api/referral"];
@@ -14,7 +15,9 @@ const PUBLIC_PATHS = ["/", "/api/auth", "/terms"];
 
 export async function middleware(request: NextRequest) {
   // Add debug log at the very start
-  console.info("[MIDDLEWARE] Request received:", {
+  log.info("Request received", {
+    entity: "MIDDLEWARE",
+    operation: "request_received",
     path: request.nextUrl.pathname,
     method: request.method,
   });
@@ -40,7 +43,8 @@ export async function middleware(request: NextRequest) {
     const geo = geolocation(request);
 
     // Add detailed logging for geolocation debugging
-    console.info("[MIDDLEWARE] Geolocation check starting", {
+    log.info("Geolocation check starting", {
+      entity: "MIDDLEWARE",
       operation: "geo_check_start",
       headers: {
         // Log all headers to see what Vercel is sending
@@ -48,7 +52,8 @@ export async function middleware(request: NextRequest) {
       },
     });
 
-    console.info("[MIDDLEWARE] Geolocation result:", {
+    log.info("Geolocation result", {
+      entity: "MIDDLEWARE",
       operation: "geo_check_result",
       geoData: geo,
       vercelGeoHeaders: {
@@ -65,7 +70,11 @@ export async function middleware(request: NextRequest) {
     });
 
     if (!geo?.country) {
-      console.warn("No geolocation data available");
+      log.warn("No geolocation data available", {
+        entity: "MIDDLEWARE",
+        operation: "geo_check_result",
+        geoData: geo,
+      });
     }
 
     // List of blocked countries (using ISO country codes)
@@ -81,7 +90,11 @@ export async function middleware(request: NextRequest) {
 
     // Check if user's country is in the blocked list - do this before public path check
     if (geo?.country && blockedCountries.includes(geo.country)) {
-      console.info(`Blocking traffic from: ${geo.country}`);
+      log.info(`Blocking traffic from: ${geo.country}`, {
+        entity: "MIDDLEWARE",
+        operation: "geo_check_result",
+        geoData: geo,
+      });
       return NextResponse.redirect(new URL("/blocked", request.url));
     }
 
@@ -89,8 +102,13 @@ export async function middleware(request: NextRequest) {
     if (geo?.country === "UA") {
       const restrictedRegions = ["Crimea", "Donetsk", "Luhansk"];
       if (geo.region && restrictedRegions.includes(geo.region)) {
-        console.info(
+        log.info(
           `Blocking traffic from restricted region: ${geo.region}, Ukraine`,
+          {
+            entity: "MIDDLEWARE",
+            operation: "geo_check_result",
+            geoData: geo,
+          },
         );
         return NextResponse.redirect(new URL("/blocked", request.url));
       }
@@ -187,7 +205,8 @@ export async function middleware(request: NextRequest) {
     }
 
     if (process.env.NODE_ENV === "development") {
-      console.info("[MIDDLEWARE] Traffic allowed", {
+      log.info("Traffic allowed", {
+        entity: "MIDDLEWARE",
         operation: "geo_check",
         country: geo?.country,
         status: "success",
@@ -195,7 +214,8 @@ export async function middleware(request: NextRequest) {
     }
     return response;
   } catch (error) {
-    console.error("[MIDDLEWARE] Request failed", {
+    log.error("Request failed", {
+      entity: "MIDDLEWARE",
       operation: "middleware",
       status: "error",
       path: request.nextUrl.pathname,

@@ -7,6 +7,7 @@ import { getCurrentUser } from "../lib/auth";
 import { referralSchema, referralCodeSchema } from "../lib/validations";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { log } from "../lib/logger";
 
 export const createReferral = async (input: {
   referredByCode: string;
@@ -14,9 +15,10 @@ export const createReferral = async (input: {
 }) => {
   const start = Date.now();
   try {
-    console.log("[REFERRAL] Creating referral", {
+    log.info("Creating referral", {
+      operation: "create",
+      entity: "REFERRAL",
       referredByCode: input.referredByCode,
-      operation: "create_referral",
     });
     // Check authentication first
     const user = await getCurrentUser();
@@ -50,10 +52,11 @@ export const createReferral = async (input: {
     }
 
     const duration = Date.now() - start;
-    console.log("[REFERRAL] Referral created", {
+    log.info("Referral created", {
+      operation: "create",
+      entity: "REFERRAL",
       referredByCode: parsed.referredByCode,
       durationMs: duration,
-      operation: "create_referral",
       status: "success",
     });
 
@@ -66,18 +69,17 @@ export const createReferral = async (input: {
     return referral;
   } catch (error) {
     const duration = Date.now() - start;
-    console.error("[REFERRAL] Creation failed", {
+    log.error(error, {
+      operation: "create",
+      entity: "REFERRAL",
       referredByCode: input.referredByCode,
       durationMs: duration,
-      operation: "create_referral",
-      status: "error",
       errorType:
         error instanceof z.ZodError
           ? "validation"
           : error instanceof Error && error.message.includes("Database")
             ? "database"
             : "unknown",
-      errorMessage: error instanceof Error ? error.message : String(error),
     });
 
     if (error instanceof z.ZodError) {
@@ -118,10 +120,16 @@ export const getReferralsCount = async (input: { referralCode: string }) => {
 
     return Number(result?.count || 0);
   } catch (error) {
-    console.error("[SERVER] Error getting referrals count:", {
-      error,
-      input,
-      stack: error instanceof Error ? error.stack : undefined,
+    log.error(error, {
+      operation: "get_count",
+      entity: "REFERRAL",
+      referralCode: input.referralCode,
+      errorType:
+        error instanceof z.ZodError
+          ? "validation"
+          : error instanceof Error && error.message.includes("Database")
+            ? "database"
+            : "unknown",
     });
 
     if (error instanceof z.ZodError) {

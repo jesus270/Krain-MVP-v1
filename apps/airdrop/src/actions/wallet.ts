@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { generateReferralCode, isValidSolanaAddress } from "@repo/utils";
 import { createReferral } from "./referral";
 import { cookies } from "next/headers";
+import { log, AppError, ErrorCodes, createUserContext } from "../lib/logger";
 
 const walletAddressSchema = z.object({
   address: z.string().refine((address) => isValidSolanaAddress(address), {
@@ -27,7 +28,11 @@ export async function createWallet(input: { address: string }) {
     // Check authentication first
     const user = await getCurrentUser(await cookies());
     if (!user) {
-      throw new Error("Unauthorized: Please log in first");
+      throw new AppError(
+        "Unauthorized: Please log in first",
+        ErrorCodes.UNAUTHORIZED,
+        401,
+      );
     }
 
     // Validate input
@@ -35,10 +40,19 @@ export async function createWallet(input: { address: string }) {
 
     // Verify user can only create wallet for their own address
     if (parsed.address !== user.walletAddress) {
-      throw new Error(
+      throw new AppError(
         "Unauthorized: You can only create a wallet for your own address",
+        ErrorCodes.UNAUTHORIZED,
+        401,
       );
     }
+
+    log.info("Creating new wallet", {
+      operation: "create_wallet",
+      entity: "WALLET",
+      ...createUserContext(user),
+      walletAddress: parsed.address,
+    });
 
     // Create wallet
     const wallet = await db
@@ -49,21 +63,36 @@ export async function createWallet(input: { address: string }) {
       })
       .returning();
 
-    return wallet[0];
-  } catch (error) {
-    console.error("[SERVER] Error creating wallet:", {
-      error,
-      input,
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-
-    if (error instanceof z.ZodError) {
-      throw new Error("Invalid Solana address");
+    if (!wallet || wallet.length === 0) {
+      throw new AppError(
+        "Failed to create wallet: No wallet returned",
+        ErrorCodes.DATABASE_ERROR,
+        500,
+      );
     }
 
-    throw new Error(
-      `Failed to create wallet: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    log.info("Wallet created successfully", {
+      operation: "create_wallet",
+      ...createUserContext(user),
+      entity: "WALLET",
+      walletAddress: parsed.address,
+      referralCode: wallet?.[0]?.referralCode,
+    });
+
+    return wallet[0];
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+
+    log.error(error, {
+      operation: "create_wallet",
+      entity: "WALLET",
+      ...createUserContext(await getCurrentUser(await cookies())),
+      inputAddress: input.address,
+    });
+
+    throw new AppError("Failed to create wallet", ErrorCodes.WALLET_ERROR, 500);
   }
 }
 
@@ -86,10 +115,11 @@ export async function getWalletByReferralCode(input: { referralCode: string }) {
 
     return wallet;
   } catch (error) {
-    console.error("[SERVER] Error getting wallet by referral code:", {
-      error,
+    log.error(error, {
+      entity: "WALLET",
+      operation: "get_wallet_by_referral_code",
+      ...createUserContext(await getCurrentUser(await cookies())),
       input,
-      stack: error instanceof Error ? error.stack : undefined,
     });
 
     if (error instanceof z.ZodError) {
@@ -134,10 +164,11 @@ export async function getWallet(input: {
 
     return wallet as WalletWithReferredBy | undefined;
   } catch (error) {
-    console.error("[SERVER] Error getting wallet:", {
-      error,
+    log.error(error, {
+      entity: "WALLET",
+      operation: "get_wallet",
+      ...createUserContext(await getCurrentUser(await cookies())),
       input,
-      stack: error instanceof Error ? error.stack : undefined,
     });
 
     if (error instanceof z.ZodError) {
@@ -276,10 +307,11 @@ export async function handleSubmitWallet(input: {
       return existingWallet;
     }
   } catch (error) {
-    console.error("[SERVER] Error handling wallet submission:", {
-      error,
+    log.error(error, {
+      entity: "WALLET",
+      operation: "submit_wallet",
+      ...createUserContext(await getCurrentUser(await cookies())),
       input,
-      stack: error instanceof Error ? error.stack : undefined,
     });
 
     if (error instanceof z.ZodError) {

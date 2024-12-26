@@ -15,6 +15,7 @@ import {
 import { formatNumber } from "@repo/utils";
 import { toast } from "sonner";
 import { CheckCircle2, Copy, Link as LinkIcon, Loader2 } from "lucide-react";
+import { log } from "@/lib/logger";
 
 interface ReferralProgramCardProps {
   referralsCount: number;
@@ -40,7 +41,10 @@ export function ReferralProgramCard({
       toast.success("Referral link copied to clipboard!");
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error("[CLIENT] Error copying to clipboard:", error);
+      log.error(error, {
+        operation: "copy_referral_link",
+        entity: "CLIENT",
+      });
       toast.error("Failed to copy referral link");
     }
   };

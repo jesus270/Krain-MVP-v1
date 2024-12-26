@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { IronSessionCookieStore } from "./cookie-store";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { log } from "./logger";
 
 // Simple user type with required fields
 export type User = {
@@ -77,6 +78,12 @@ export async function handleFailedLoginAttempt(
   await session.save();
 
   if (session.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+    log.warn("Too many login attempts", {
+      operation: "login_attempt",
+      entity: "AUTH",
+      attempts: session.loginAttempts,
+      blockDuration: LOGIN_BLOCK_DURATION,
+    });
     throw new Error("Too many login attempts. Please try again later.");
   }
 }
@@ -91,6 +98,12 @@ export async function getSession(cookieStore?: ReadonlyRequestCookies) {
     session.lastActivity &&
     Date.now() - session.lastActivity > SESSION_ACTIVITY_TIMEOUT
   ) {
+    log.warn("Session expired due to inactivity", {
+      operation: "session_check",
+      entity: "AUTH",
+      lastActivity: session.lastActivity,
+      timeout: SESSION_ACTIVITY_TIMEOUT,
+    });
     await session.destroy();
     throw new Error("Session expired due to inactivity");
   }
@@ -150,17 +163,33 @@ export function verifyFingerprint(
   session: SessionData,
   request: Request,
 ): boolean {
-  if (!session.fingerprint) return false;
+  if (!session.fingerprint) {
+    log.warn("No fingerprint in session", {
+      operation: "verify_fingerprint",
+      entity: "AUTH",
+    });
+    return false;
+  }
 
   const currentFingerprint = {
     userAgent: request.headers.get("user-agent") || "unknown",
     ip: request.headers.get("x-forwarded-for")?.split(",")[0] || "unknown",
   };
 
-  return (
+  const isValid =
     session.fingerprint.userAgent === currentFingerprint.userAgent &&
-    session.fingerprint.ip === currentFingerprint.ip
-  );
+    session.fingerprint.ip === currentFingerprint.ip;
+
+  if (!isValid) {
+    log.warn("Fingerprint mismatch", {
+      operation: "verify_fingerprint",
+      entity: "AUTH",
+      expected: session.fingerprint,
+      received: currentFingerprint,
+    });
+  }
+
+  return isValid;
 }
 
 // Clear user session
@@ -168,13 +197,23 @@ export async function clearUserSession(
   cookieStore?: ReadonlyRequestCookies,
 ): Promise<void> {
   const session = await getSession(cookieStore);
-  session.destroy();
+  log.info("Clearing user session", {
+    operation: "clear_session",
+    entity: "AUTH",
+    userId: session.user?.id,
+  });
+  await session.destroy();
 }
 
 // Add session rotation logic
 export async function rotateSession(cookieStore?: ReadonlyRequestCookies) {
   const session = await getSession(cookieStore);
   if (session.user) {
+    log.info("Rotating session", {
+      operation: "rotate_session",
+      entity: "AUTH",
+      userId: session.user.id,
+    });
     const newSession = { ...session };
     await session.destroy();
     await newSession.save();
