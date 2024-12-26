@@ -171,22 +171,17 @@ export async function executeWithRetry<T>(
 }
 
 // Graceful shutdown handling
-async function shutdownPool(signal: string) {
+async function shutdownPool() {
   console.log("[DB] Shutting down pool");
   if (pool) {
     try {
       await pool.end();
     } catch (error) {
-      console.error(
-        "[DB] Shutdown error:",
-        error instanceof Error ? error.message : error,
-      );
-    } finally {
-      pool = null;
+      console.error("[DB] Error shutting down pool:", error);
     }
   }
 }
 
 // Ensure connections are released on process exit
-process.on("SIGTERM", () => shutdownPool("SIGTERM"));
-process.on("SIGINT", () => shutdownPool("SIGINT"));
+process.on("SIGTERM", () => shutdownPool());
+process.on("SIGINT", () => shutdownPool());

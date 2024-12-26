@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { db, referralTable, Wallet, walletTable } from "@repo/database";
+import { db, Wallet, walletTable } from "@repo/database";
 import { getCurrentUser } from "../lib/auth";
 import { eq } from "drizzle-orm";
 import { generateReferralCode, isValidSolanaAddress } from "@repo/utils";

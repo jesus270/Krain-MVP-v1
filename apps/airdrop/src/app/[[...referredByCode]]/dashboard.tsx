@@ -6,7 +6,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 import { Wallet } from "@repo/database";
 import { useLocale } from "@repo/utils";
-import { getWallet, handleSubmitWallet } from "@/actions/wallet";
+import { handleSubmitWallet } from "@/actions/wallet";
 import { getReferralsCount } from "@/actions/referral";
 import { ConnectWalletCard } from "@/components/dashboard/connect-wallet-card";
 import { PointsStatusCard } from "@/components/dashboard/points-status-card";
@@ -95,7 +95,6 @@ export function Dashboard({
   const [isLoadingWallet, setIsLoadingWallet] = useState(true);
   const [isLoadingReferrals, setIsLoadingReferrals] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
-  const [isSessionValid, setIsSessionValid] = useState(false);
   const locale = useLocale();
 
   const userEmailAddress = user?.email?.address ?? undefined;
@@ -122,7 +121,6 @@ export function Dashboard({
         // Start session verification in parallel with initial UI render
         verifySession().then((verified) => {
           if (isMounted) {
-            setIsSessionValid(verified);
             if (!verified) {
               setError("Unable to verify session. Please try again.");
             }

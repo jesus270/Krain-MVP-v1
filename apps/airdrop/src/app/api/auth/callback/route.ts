@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { User, setUserSession, SessionData } from "@/lib/auth";
+import { User, SessionData } from "@/lib/auth";
 import { isValidSolanaAddress } from "@repo/utils";
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";

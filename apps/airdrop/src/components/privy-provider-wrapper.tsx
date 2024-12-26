@@ -1,6 +1,6 @@
 "use client";
 
-import { PrivyProvider, usePrivy, useLogin } from "@privy-io/react-auth";
+import { PrivyProvider, usePrivy, useLogin, User } from "@privy-io/react-auth";
 import {
   toSolanaWalletConnectors,
   useSolanaWallets,
@@ -16,11 +16,11 @@ function SessionRevalidator({
   revalidateSession,
 }: {
   children: React.ReactNode;
-  revalidateSession: (user: any, walletAddress: string) => Promise<void>;
+  revalidateSession: (user: User, walletAddress: string) => Promise<void>;
 }) {
   const { user } = usePrivy();
   const { wallets: solanaWallets } = useSolanaWallets();
-  const { login } = useLogin({
+  useLogin({
     onComplete: async (user) => {
       try {
         const walletAddress = solanaWallets[0]?.address;
@@ -30,7 +30,7 @@ function SessionRevalidator({
           console.error("[CLIENT] No Solana wallet address found after login");
         }
       } catch (error) {
-        console.error("[CLIENT] Auth callback failed");
+        console.error("[CLIENT] Error revalidating session:", error);
       }
     },
   });
@@ -80,41 +80,24 @@ export function PrivyProviderWrapper({
     throw new Error("NEXT_PUBLIC_PRIVY_APP_ID is not set");
   }
 
-  const revalidateSession = async (user: any, walletAddress: string) => {
+  const revalidateSession = async (user: User, walletAddress: string) => {
     try {
-      // Try to establish a new session
       const response = await fetch("/api/auth/callback", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user: {
-            id: user.id,
-            wallet: {
-              address: walletAddress,
-            },
-          },
+          user,
+          walletAddress,
         }),
-        credentials: "include",
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        console.error("[CLIENT] Session error:", data);
-        throw new Error(data.error || "Failed to set user session");
-      }
-
-      // Verify the session was set
-      const verifyResponse = await fetch("/api/auth/verify", {
-        credentials: "include",
-      });
-
-      if (!verifyResponse.ok) {
-        throw new Error("Failed to verify session");
+        throw new Error("Failed to revalidate session");
       }
     } catch (error) {
-      console.error("[CLIENT] Session revalidation error:", error);
+      console.error("[CLIENT] Error revalidating session:", error);
       throw error;
     }
   };

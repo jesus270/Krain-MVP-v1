@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
+import { geolocation } from "@vercel/functions";
 import { getIronSession } from "iron-session";
 import { sessionOptions, SessionData } from "./lib/auth";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
@@ -20,12 +21,46 @@ const PUBLIC_PATHS = [
 
 export async function middleware(request: NextRequest) {
   try {
+    const geo = geolocation(request);
+
+    if (!geo?.country) {
+      console.warn("No geolocation data available");
+    }
+
     // Skip middleware for public paths
     const isPublicPath = PUBLIC_PATHS.some((path) =>
       request.nextUrl.pathname.startsWith(path),
     );
     if (isPublicPath) {
       return NextResponse.next();
+    }
+
+    // List of blocked countries (using ISO country codes)
+    const blockedCountries = [
+      "US", // United States
+      "KP", // North Korea
+      "IR", // Iran
+      "SY", // Syria
+      "CU", // Cuba
+      "RU", // Russia
+      "BY", // Belarus
+    ];
+
+    // Check if user's country is in the blocked list
+    if (geo?.country && blockedCountries.includes(geo.country)) {
+      console.info(`Blocking traffic from: ${geo.country}`);
+      return NextResponse.redirect(new URL("/blocked", request.url));
+    }
+
+    // Special handling for Ukraine regions (Crimea, Donetsk, Luhansk)
+    if (geo?.country === "UA") {
+      const restrictedRegions = ["Crimea", "Donetsk", "Luhansk"];
+      if (geo.region && restrictedRegions.includes(geo.region)) {
+        console.info(
+          `Blocking traffic from restricted region: ${geo.region}, Ukraine`,
+        );
+        return NextResponse.redirect(new URL("/blocked", request.url));
+      }
     }
 
     // Check if this is a protected route
@@ -57,6 +92,7 @@ export async function middleware(request: NextRequest) {
       return response;
     }
 
+    console.info("Allowing traffic from:", geo?.country);
     return NextResponse.next();
   } catch (error) {
     console.error("[SERVER] Middleware error:", error);

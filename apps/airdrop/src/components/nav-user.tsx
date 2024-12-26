@@ -1,21 +1,8 @@
 "use client";
 
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogIn,
-  LogOut,
-  Sparkles,
-  User,
-} from "lucide-react";
+import { Bell, CreditCard, LogOut, Sparkles, User } from "lucide-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@repo/ui/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,19 +12,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@repo/ui/components/ui/dropdown-menu";
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@repo/ui/components/ui/sidebar";
+import { SidebarMenuButton, useSidebar } from "@repo/ui/components/ui/sidebar";
 import { usePrivy } from "@privy-io/react-auth";
 import { NavLoginButton } from "./nav-login-button";
 import { capitalize } from "@repo/utils";
 import { useRouter } from "next/navigation";
 
 export function NavUser() {
-  const { ready, authenticated, user, login, logout } = usePrivy();
+  const { ready, authenticated, user, logout } = usePrivy();
   const { isMobile } = useSidebar();
   const router = useRouter();
 

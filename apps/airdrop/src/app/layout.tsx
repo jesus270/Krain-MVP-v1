@@ -13,7 +13,6 @@ import { PrivyProviderWrapper } from "@/components/privy-provider-wrapper";
 import { usePrivy } from "@privy-io/react-auth";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -85,7 +84,7 @@ function AuthWrapper({
   children: (authenticated: boolean) => React.ReactNode;
 }) {
   const { authenticated, ready } = usePrivy();
-  console.log("ready", ready);
+
   if (!ready)
     return (
       <main className="flex flex-grow justify-center items-center min-h-[400px]">
