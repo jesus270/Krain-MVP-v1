@@ -20,9 +20,17 @@ function SessionRevalidator({
 }) {
   const { user } = usePrivy();
   const { wallets: solanaWallets } = useSolanaWallets();
+
   useLogin({
     onComplete: async (user) => {
       try {
+        // Wait for wallet to be available
+        let attempts = 0;
+        while (!solanaWallets[0]?.address && attempts < 5) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          attempts++;
+        }
+
         const walletAddress = solanaWallets[0]?.address;
         if (walletAddress) {
           await revalidateSession(user, walletAddress);
@@ -42,9 +50,20 @@ function SessionRevalidator({
       try {
         const response = await fetch("/api/auth/verify", {
           credentials: "include",
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
         });
 
         if (!response.ok) {
+          // Wait for wallet to be available
+          let attempts = 0;
+          while (!solanaWallets[0]?.address && attempts < 5) {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            attempts++;
+          }
+
           const walletAddress = solanaWallets[0]?.address;
           if (walletAddress) {
             await revalidateSession(user, walletAddress);
@@ -55,7 +74,7 @@ function SessionRevalidator({
           }
         }
       } catch (error) {
-        console.error("[CLIENT] Session check failed");
+        console.error("[CLIENT] Session check failed:", error);
       }
     };
 
@@ -86,11 +105,14 @@ export function PrivyProviderWrapper({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
         },
         body: JSON.stringify({
           user,
           walletAddress,
         }),
+        credentials: "include",
       });
 
       if (!response.ok) {
