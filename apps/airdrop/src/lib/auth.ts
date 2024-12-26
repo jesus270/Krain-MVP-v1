@@ -53,6 +53,20 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_BLOCK_DURATION = 15 * 60 * 1000; // 15 minutes
 const SESSION_ACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
+// Handle failed login attempts
+export async function handleFailedLoginAttempt(
+  cookieStore?: ReadonlyRequestCookies,
+): Promise<void> {
+  const session = await getSession(cookieStore);
+  session.loginAttempts = (session.loginAttempts || 0) + 1;
+  session.lastActivity = Date.now();
+  await session.save();
+
+  if (session.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+    throw new Error("Too many login attempts. Please try again later.");
+  }
+}
+
 // Get the current session with additional security checks
 export async function getSession(cookieStore?: ReadonlyRequestCookies) {
   const store = new IronSessionCookieStore(cookieStore || (await cookies()));
@@ -96,7 +110,6 @@ export async function setUserSession(
     if (Date.now() - lastAttempt < LOGIN_BLOCK_DURATION) {
       throw new Error("Too many login attempts. Please try again later.");
     }
-    session.loginAttempts = 0;
   }
 
   // Set session data
@@ -108,7 +121,7 @@ export async function setUserSession(
     ip: request.headers.get("x-forwarded-for")?.split(",")[0] || "unknown",
   };
   session.lastActivity = Date.now();
-  session.loginAttempts = 0;
+  session.loginAttempts = 0; // Reset login attempts on successful login
 
   await session.save();
 }
