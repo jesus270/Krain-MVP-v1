@@ -122,10 +122,21 @@ export async function middleware(request: NextRequest) {
       return response;
     }
 
-    console.info("Allowing traffic from:", geo?.country);
+    if (process.env.NODE_ENV === "development") {
+      console.info("[MIDDLEWARE] Traffic allowed", {
+        operation: "geo_check",
+        country: geo?.country,
+        status: "success",
+      });
+    }
     return response;
   } catch (error) {
-    console.error("[SERVER] Middleware error:", error);
+    console.error("[MIDDLEWARE] Request failed", {
+      operation: "middleware",
+      status: "error",
+      path: request.nextUrl.pathname,
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.redirect(new URL("/error", request.url));
   }
 }

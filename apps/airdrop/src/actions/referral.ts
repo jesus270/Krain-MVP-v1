@@ -14,8 +14,9 @@ export const createReferral = async (input: {
 }) => {
   const start = Date.now();
   try {
-    console.log("[SERVER] Starting referral creation", {
-      input,
+    console.log("[REFERRAL] Creating referral", {
+      referredByCode: input.referredByCode,
+      operation: "create_referral",
     });
     // Check authentication first
     const user = await getCurrentUser();
@@ -49,10 +50,11 @@ export const createReferral = async (input: {
     }
 
     const duration = Date.now() - start;
-    console.log("[SERVER] Referral created successfully", {
-      input,
-      durationMs: duration,
+    console.log("[REFERRAL] Referral created", {
       referredByCode: parsed.referredByCode,
+      durationMs: duration,
+      operation: "create_referral",
+      status: "success",
     });
 
     // Only revalidate paths in non-test environments
@@ -64,11 +66,18 @@ export const createReferral = async (input: {
     return referral;
   } catch (error) {
     const duration = Date.now() - start;
-    console.error("[SERVER] Error creating referral:", {
-      error,
-      input,
+    console.error("[REFERRAL] Creation failed", {
+      referredByCode: input.referredByCode,
       durationMs: duration,
-      stack: error instanceof Error ? error.stack : undefined,
+      operation: "create_referral",
+      status: "error",
+      errorType:
+        error instanceof z.ZodError
+          ? "validation"
+          : error instanceof Error && error.message.includes("Database")
+            ? "database"
+            : "unknown",
+      errorMessage: error instanceof Error ? error.message : String(error),
     });
 
     if (error instanceof z.ZodError) {

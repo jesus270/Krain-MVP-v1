@@ -39,7 +39,11 @@ export function getPool(): Pool {
 
     // Add event listeners for better monitoring
     pool.on("error", (err) => {
-      console.error("[DB Pool] Unexpected error:", err);
+      console.error("[DB] Pool error:", {
+        code: err.code,
+        message: err.message,
+        severity: err.severity,
+      });
       // Reset pool on critical errors
       pool = null;
     });
@@ -47,10 +51,12 @@ export function getPool(): Pool {
     pool.on("connect", () => {
       const totalCount = pool?.totalCount ?? 0;
       const idleCount = pool?.idleCount ?? 0;
-      console.debug("[DB Pool] Status:", {
-        total: totalCount,
-        active: totalCount - idleCount,
-      });
+      if (process.env.NODE_ENV === "development") {
+        console.debug("[DB] Pool status:", {
+          total: totalCount,
+          active: totalCount - idleCount,
+        });
+      }
     });
 
     // Handle pool removal
@@ -110,7 +116,10 @@ export async function executeWithTimeout<T>(
     const result = await Promise.race([promise, timeoutPromise]);
     const duration = Date.now() - start;
     if (duration > 1000) {
-      console.warn("[DB] Slow operation:", { durationMs: duration });
+      console.warn("[DB] Slow query detected:", {
+        durationMs: duration,
+        operation: "query",
+      });
     }
     return result;
   } catch (error) {
@@ -202,20 +211,26 @@ export async function executeWithRetry<T>(
   }
 
   console.error("[DB] All retry attempts failed:", {
-    error: lastError?.message,
-    stack: lastError?.stack,
+    code: lastError?.code,
+    message: lastError?.message,
+    operation: "retryable_query",
+    severity: lastError?.severity,
   });
   throw lastError;
 }
 
 // Graceful shutdown handling
 async function shutdownPool() {
-  console.log("[DB] Shutting down pool");
+  console.log("[DB] Initiating pool shutdown");
   if (pool) {
     try {
       await pool.end();
     } catch (error) {
-      console.error("[DB] Error shutting down pool:", error);
+      console.error("[DB] Pool shutdown error:", {
+        code: error?.code,
+        message: error?.message,
+        severity: error?.severity,
+      });
     }
   }
 }

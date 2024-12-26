@@ -35,17 +35,22 @@ async function verifySession(attempt = 1): Promise<boolean> {
     }
 
     if (attempt >= SESSION_VERIFY_MAX_RETRIES) {
-      console.error("[CLIENT] Session verification failed");
+      console.error("[AUTH] Session verification failed", {
+        operation: "verify_session",
+        status: "error",
+        attempts: attempt,
+      });
       return false;
     }
 
     await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
     return verifySession(attempt + 1);
   } catch (error) {
-    console.error(
-      "[CLIENT] Session verification error:",
-      error instanceof Error ? error.message : error,
-    );
+    console.error("[AUTH] Session verification error", {
+      operation: "verify_session",
+      status: "error",
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
     return false;
   }
 }
@@ -74,13 +79,25 @@ async function fetchWithRetry(
         currentDelay =
           Math.min(delay * Math.pow(2, attempt - 1), 10000) *
           (0.75 + Math.random() * 0.5);
-        console.log(`[CLIENT] Retrying in ${Math.round(currentDelay)}ms...`);
+        if (process.env.NODE_ENV === "development") {
+          console.log("[REFERRAL] Retrying count fetch", {
+            operation: "get_referral_count",
+            status: "retry",
+            attempt,
+            nextAttemptMs: Math.round(currentDelay),
+          });
+        }
         await new Promise((resolve) => setTimeout(resolve, currentDelay));
       }
     }
   }
 
-  console.error("[CLIENT] All retry attempts failed:", lastError);
+  console.error("[REFERRAL] All count fetch attempts failed", {
+    operation: "get_referral_count",
+    status: "error",
+    errorMessage: lastError?.message,
+    totalAttempts: retries + 1,
+  });
   throw lastError;
 }
 

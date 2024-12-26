@@ -54,7 +54,11 @@ export async function checkRateLimit(ip: string): Promise<RateLimitResult> {
     };
   } catch (error) {
     // For any errors, allow the request but log the error
-    console.error("[RATE_LIMIT] Error checking rate limit:", error);
+    console.error("[RATE_LIMIT] Check failed", {
+      operation: "rate_limit",
+      status: "error",
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
     return {
       success: true,
       limit: 100,
