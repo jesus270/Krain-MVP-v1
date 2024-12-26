@@ -54,6 +54,7 @@ export async function middleware(request: NextRequest) {
         "camera=(), microphone=(), geolocation=(), interest-cohort=()",
       "X-XSS-Protection": "1; mode=block",
       "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+      "Content-Security-Policy": `frame-ancestors 'self' http://localhost:3000 https://airdrop.krain.ai https://airdrop-git-feat-server-actionsecurity-krain.vercel.app https://auth.privy.io/`,
     };
 
     // Add security headers to response
