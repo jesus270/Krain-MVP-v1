@@ -24,6 +24,33 @@ const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2 seconds
 const SESSION_VERIFY_MAX_RETRIES = 3;
 
+interface ClientError extends Error {
+  code?: string;
+  context?: Record<string, unknown>;
+}
+
+function isNetworkError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error.message.toLowerCase().includes("network") ||
+      error.message.toLowerCase().includes("connection") ||
+      error.message.toLowerCase().includes("timeout"))
+  );
+}
+
+function logClientError(error: unknown, context: Record<string, unknown> = {}) {
+  const clientError: ClientError =
+    error instanceof Error ? error : new Error(String(error));
+  console.error("[CLIENT] Operation failed", {
+    code: clientError.code,
+    message: clientError.message,
+    operation: context.operation,
+    status: "error",
+    ...context,
+  });
+  return clientError;
+}
+
 async function verifySession(attempt = 1): Promise<boolean> {
   try {
     const verifyResponse = await fetch("/api/auth/verify", {
@@ -160,22 +187,20 @@ export function Dashboard({
           }
         } catch (error) {
           if (isMounted) {
-            const message =
-              error instanceof Error
-                ? error.message
-                : "Unable to load wallet data";
-            setError(`${message}. Please refresh to try again.`);
+            const clientError = logClientError(error, {
+              operation: "load_wallet",
+              walletAddress: userWalletAddress,
+            });
 
-            // Retry after delay if it's a connection error
-            if (
-              error instanceof Error &&
-              (error.message.toLowerCase().includes("network") ||
-                error.message.toLowerCase().includes("connection") ||
-                error.message.toLowerCase().includes("timeout"))
-            ) {
-              console.log(
-                "[CLIENT] Connection error detected, scheduling retry...",
-              );
+            setError(`${clientError.message}. Please refresh to try again.`);
+
+            // Retry after delay if it's a network error
+            if (isNetworkError(error)) {
+              console.info("[CLIENT] Scheduling retry", {
+                operation: "load_wallet",
+                status: "retry",
+                nextAttemptMs: RETRY_DELAY,
+              });
               retryTimeout = setTimeout(loadData, RETRY_DELAY);
               return;
             }
@@ -193,22 +218,19 @@ export function Dashboard({
             }
           } catch (error) {
             if (isMounted) {
-              const message =
-                error instanceof Error
-                  ? error.message
-                  : "Unable to load referrals";
-              setError(`${message}. Please refresh to try again.`);
+              const clientError = logClientError(error, {
+                operation: "load_referrals",
+                referralCode: walletResult?.referralCode,
+              });
 
-              // Retry after delay if it's a connection error
-              if (
-                error instanceof Error &&
-                (error.message.toLowerCase().includes("network") ||
-                  error.message.toLowerCase().includes("connection") ||
-                  error.message.toLowerCase().includes("timeout"))
-              ) {
-                console.log(
-                  "[CLIENT] Connection error detected, scheduling retry...",
-                );
+              setError(`${clientError.message}. Please refresh to try again.`);
+
+              if (isNetworkError(error)) {
+                console.info("[CLIENT] Scheduling retry", {
+                  operation: "load_referrals",
+                  status: "retry",
+                  nextAttemptMs: RETRY_DELAY,
+                });
                 retryTimeout = setTimeout(loadData, RETRY_DELAY);
                 return;
               }
@@ -217,22 +239,18 @@ export function Dashboard({
         }
       } catch (error) {
         if (isMounted) {
-          const message =
-            error instanceof Error
-              ? error.message
-              : "Unable to load wallet data";
-          setError(`${message}. Please refresh to try again.`);
+          const clientError = logClientError(error, {
+            operation: "load_dashboard",
+          });
 
-          // Retry after delay if it's a connection error
-          if (
-            error instanceof Error &&
-            (error.message.toLowerCase().includes("network") ||
-              error.message.toLowerCase().includes("connection") ||
-              error.message.toLowerCase().includes("timeout"))
-          ) {
-            console.log(
-              "[CLIENT] Connection error detected, scheduling retry...",
-            );
+          setError(`${clientError.message}. Please refresh to try again.`);
+
+          if (isNetworkError(error)) {
+            console.info("[CLIENT] Scheduling retry", {
+              operation: "load_dashboard",
+              status: "retry",
+              nextAttemptMs: RETRY_DELAY,
+            });
             retryTimeout = setTimeout(loadData, RETRY_DELAY);
           }
         }

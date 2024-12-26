@@ -1,4 +1,4 @@
-import { Pool, QueryResult } from "@neondatabase/serverless";
+import { Pool, QueryResult, DatabaseError } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import * as schema from "@repo/database";
 
@@ -19,6 +19,11 @@ const IDLE_TIMEOUT = 30000; // 30 seconds
 // Create a singleton pool instance with optimized settings
 let pool: Pool | null = null;
 
+interface DbError extends Error {
+  code?: string;
+  severity?: string;
+}
+
 export function getPool(): Pool {
   if (!pool) {
     pool = new Pool({
@@ -38,7 +43,7 @@ export function getPool(): Pool {
     });
 
     // Add event listeners for better monitoring
-    pool.on("error", (err) => {
+    pool.on("error", (err: DbError) => {
       console.error("[DB] Pool error:", {
         code: err.code,
         message: err.message,
@@ -211,10 +216,10 @@ export async function executeWithRetry<T>(
   }
 
   console.error("[DB] All retry attempts failed:", {
-    code: lastError?.code,
+    code: (lastError as DbError)?.code,
     message: lastError?.message,
     operation: "retryable_query",
-    severity: lastError?.severity,
+    severity: (lastError as DbError)?.severity,
   });
   throw lastError;
 }
@@ -227,9 +232,9 @@ async function shutdownPool() {
       await pool.end();
     } catch (error) {
       console.error("[DB] Pool shutdown error:", {
-        code: error?.code,
-        message: error?.message,
-        severity: error?.severity,
+        code: (error as DbError)?.code,
+        message: (error as Error)?.message,
+        severity: (error as DbError)?.severity,
       });
     }
   }
