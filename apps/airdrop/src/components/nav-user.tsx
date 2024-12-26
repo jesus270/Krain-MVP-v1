@@ -97,18 +97,6 @@ export function NavUser() {
             <User key="profile-icon" />
             Profile
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/notifications")}>
-            <Bell key="notifications-icon" />
-            Notifications
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/billing")}>
-            <CreditCard key="billing-icon" />
-            Billing
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/rewards")}>
-            <Sparkles key="rewards-icon" />
-            Rewards
-          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem
