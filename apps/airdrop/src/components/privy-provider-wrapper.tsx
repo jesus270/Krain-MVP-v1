@@ -19,10 +19,97 @@ function SessionRevalidator({
   children: React.ReactNode;
   revalidateSession: (user: User, walletAddress: string) => Promise<void>;
 }) {
-  const { user } = usePrivy();
+  const { user, login } = usePrivy();
+  console.log("user", user);
   const { wallets: solanaWallets } = useSolanaWallets();
   const [isRevalidating, setIsRevalidating] = useState<boolean>(false);
+  const [walletError, setWalletError] = useState<string | null>(null);
   const revalidationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const walletCheckRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup function for timeouts
+  const cleanupTimeouts = () => {
+    if (revalidationTimeoutRef.current) {
+      clearTimeout(revalidationTimeoutRef.current);
+      revalidationTimeoutRef.current = null;
+    }
+    if (walletCheckRef.current) {
+      clearTimeout(walletCheckRef.current);
+      walletCheckRef.current = null;
+    }
+  };
+
+  // Function to check wallet connection
+  const checkWalletConnection = useCallback(async () => {
+    let attempts = 0;
+    const maxAttempts = 8;
+    const baseDelay = 1000;
+
+    while (attempts < maxAttempts) {
+      // First check user.wallet directly
+      if (user?.wallet?.address) {
+        if (process.env.NODE_ENV === "development") {
+          console.info(
+            "[CLIENT] Found wallet address in user.wallet:",
+            user.wallet.address,
+          );
+        }
+        return user.wallet.address;
+      }
+
+      // Then check linkedAccounts
+      const solanaWallet = user?.linkedAccounts?.find(
+        (account) =>
+          account.type === "wallet" && account.chainType === "solana",
+      );
+
+      if (solanaWallet?.address) {
+        if (process.env.NODE_ENV === "development") {
+          console.info(
+            "[CLIENT] Found wallet address in linkedAccounts:",
+            solanaWallet.address,
+          );
+        }
+        return solanaWallet.address;
+      }
+
+      // Finally check solanaWallets
+      if (solanaWallets[0]?.address) {
+        if (process.env.NODE_ENV === "development") {
+          console.info(
+            "[CLIENT] Found wallet address in solanaWallets:",
+            solanaWallets[0].address,
+          );
+        }
+        return solanaWallets[0].address;
+      }
+
+      // If we have a wallet but no address, try to connect
+      if (solanaWallets[0]) {
+        try {
+          if (process.env.NODE_ENV === "development") {
+            console.info("[CLIENT] Found wallet, attempting to connect...");
+          }
+          await solanaWallets[0].loginOrLink();
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        } catch (error) {
+          console.error("[CLIENT] Error connecting wallet:", error);
+        }
+      }
+
+      const delay = Math.min(baseDelay * Math.pow(2, attempts), 10000);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      attempts++;
+
+      if (process.env.NODE_ENV === "development") {
+        console.info(
+          `[CLIENT] Attempt ${attempts}/${maxAttempts} to get wallet address`,
+        );
+      }
+    }
+
+    return null;
+  }, [solanaWallets, user]);
 
   // Debounced revalidation function
   const debouncedRevalidate = useCallback(
@@ -34,9 +121,23 @@ function SessionRevalidator({
 
       try {
         setIsRevalidating(true);
+        setWalletError(null);
+
+        if (process.env.NODE_ENV === "development") {
+          console.info(
+            "[CLIENT] Starting session revalidation with wallet:",
+            walletAddress,
+          );
+        }
+
         await revalidateSession(user, walletAddress);
+
+        if (process.env.NODE_ENV === "development") {
+          console.info("[CLIENT] Session revalidation successful");
+        }
       } catch (error) {
         console.error("[CLIENT] Error revalidating session:", error);
+        setWalletError("Failed to validate session. Please try again.");
       } finally {
         setIsRevalidating(false);
       }
@@ -47,104 +148,108 @@ function SessionRevalidator({
   useLogin({
     onComplete: async (user) => {
       try {
-        // Clear any pending revalidation
-        if (revalidationTimeoutRef.current !== null) {
-          clearTimeout(revalidationTimeoutRef.current);
-          revalidationTimeoutRef.current = null;
+        cleanupTimeouts();
+
+        if (process.env.NODE_ENV === "development") {
+          console.info("[CLIENT] Login completed, checking for wallet...");
         }
 
-        // Wait for wallet to be available with exponential backoff
-        let attempts = 0;
-        const maxAttempts = 8; // Increased from 5
-        const baseDelay = 1000;
-
-        while (!solanaWallets[0]?.address && attempts < maxAttempts) {
-          const delay = Math.min(baseDelay * Math.pow(2, attempts), 10000); // Cap at 10 seconds
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          attempts++;
-
-          // Log retry attempts in development
+        // Check user.wallet first
+        if (user?.wallet?.address) {
           if (process.env.NODE_ENV === "development") {
             console.info(
-              `[CLIENT] Attempt ${attempts}/${maxAttempts} to get wallet address`,
+              "[CLIENT] Found wallet address in user.wallet:",
+              user.wallet.address,
             );
           }
+          await debouncedRevalidate(user, user.wallet.address);
+          return;
         }
 
-        const walletAddress = solanaWallets[0]?.address;
+        // Check linkedAccounts
+        const solanaWallet = user?.linkedAccounts?.find(
+          (account) =>
+            account.type === "wallet" && account.chainType === "solana",
+        );
+
+        if (solanaWallet?.address) {
+          if (process.env.NODE_ENV === "development") {
+            console.info(
+              "[CLIENT] Found wallet address in linkedAccounts:",
+              solanaWallet.address,
+            );
+          }
+          await debouncedRevalidate(user, solanaWallet.address);
+          return;
+        }
+
+        // If no wallet found in user object, try connection process
+        if (process.env.NODE_ENV === "development") {
+          console.info(
+            "[CLIENT] No wallet found in user object, checking wallet connection...",
+          );
+        }
+
+        const walletAddress = await checkWalletConnection();
+
         if (walletAddress) {
-          // Add slight delay to ensure any previous session operations are complete
+          if (process.env.NODE_ENV === "development") {
+            console.info("[CLIENT] Wallet found, scheduling revalidation...");
+          }
+
           revalidationTimeoutRef.current = setTimeout(() => {
             debouncedRevalidate(user, walletAddress);
-          }, 2000); // Increased from 1000ms
+          }, 2000);
         } else {
+          const errorMsg =
+            "No wallet address found. Please make sure your wallet is connected and try again.";
+          setWalletError(errorMsg);
           console.error("[CLIENT] No Solana wallet address found after login");
-          // Consider showing a user-friendly error message or retry prompt
+
+          if (process.env.NODE_ENV === "development") {
+            console.info("[CLIENT] Scheduling retry in 5 seconds...");
+          }
+
+          walletCheckRef.current = setTimeout(async () => {
+            const retryAddress = await checkWalletConnection();
+            if (retryAddress) {
+              debouncedRevalidate(user, retryAddress);
+            }
+          }, 5000);
         }
       } catch (error) {
         console.error("[CLIENT] Error in login callback:", error);
+        setWalletError("Failed to connect wallet. Please try again.");
       }
     },
   });
 
   useEffect(() => {
-    if (!user) return;
-
-    const checkSession = async () => {
-      try {
-        const response = await fetch("/api/auth/verify", {
-          credentials: "include",
-          headers: {
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-          },
-        });
-
-        if (!response.ok) {
-          // Clear any pending revalidation
-          if (revalidationTimeoutRef.current !== null) {
-            clearTimeout(revalidationTimeoutRef.current);
-            revalidationTimeoutRef.current = null;
-          }
-
-          // Wait for wallet to be available
-          let attempts = 0;
-          while (!solanaWallets[0]?.address && attempts < 5) {
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            attempts++;
-          }
-
-          const walletAddress = solanaWallets[0]?.address;
-          if (walletAddress) {
-            // Add slight delay to ensure any previous session operations are complete
-            revalidationTimeoutRef.current = setTimeout(() => {
-              debouncedRevalidate(user, walletAddress);
-            }, 1000);
-          } else {
-            console.error(
-              "[CLIENT] No Solana wallet address found during session check",
-            );
-          }
-        }
-      } catch (error) {
-        console.error("[CLIENT] Session check failed:", error);
-      }
-    };
-
-    // Check session immediately
-    checkSession();
-
-    // Set up periodic session checks
-    const interval = setInterval(checkSession, 5 * 60 * 1000); // Check every 5 minutes
-
     return () => {
-      clearInterval(interval);
-      if (revalidationTimeoutRef.current !== null) {
-        clearTimeout(revalidationTimeoutRef.current);
-        revalidationTimeoutRef.current = null;
-      }
+      cleanupTimeouts();
     };
-  }, [user, debouncedRevalidate, solanaWallets]);
+  }, []);
+
+  // Show error message if there's a wallet error
+  if (walletError) {
+    return (
+      <>
+        <div className="fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <p>{walletError}</p>
+          <button
+            onClick={() => {
+              setWalletError(null);
+              login();
+            }}
+            className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          >
+            Try Again
+          </button>
+        </div>
+        {children}
+      </>
+    );
+  }
 
   return <>{children}</>;
 }
@@ -196,7 +301,15 @@ export function PrivyProviderWrapper({
           accentColor: "#4c4fc6",
           theme: "#1a1b4d",
           showWalletLoginFirst: true,
-          logo: "logo.png",
+          logo: (
+            <img
+              src="/logo.png"
+              alt="Logo"
+              width={150}
+              height={40}
+              style={{ width: "150px", height: "auto" }}
+            />
+          ),
           walletChainType: "solana-only",
           walletList: ["detected_solana_wallets", "phantom"],
         },

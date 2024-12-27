@@ -45,15 +45,16 @@ export const sessionOptions = {
     path: "/",
     maxAge: 4 * 60 * 60, // 4 hours
     // Set domain based on environment
-    domain:
-      process.env.NODE_ENV === "production"
-        ? ".krain.ai" // Include subdomain support with leading dot
-        : undefined,
+    domain: getCookieDomain(process.env.DOMAIN),
   },
 };
 
 // Helper to determine cookie domain based on host
-export function getCookieDomain(host: string): string | undefined {
+export function getCookieDomain(host: string | undefined): string | undefined {
+  if (!host) {
+    return undefined;
+  }
+
   if (process.env.NODE_ENV !== "production") {
     return undefined;
   }
