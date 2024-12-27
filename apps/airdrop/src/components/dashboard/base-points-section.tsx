@@ -84,9 +84,15 @@ export function BasePointsSection({
               {formatNumber(accountCreationPoints, locale)} pts
             </Badge>
           </div>
-          <p className="text-xs text-muted-foreground mt-1.5">
-            Earned by creating your account
-          </p>
+          <div className="flex items-center gap-2 mt-2">
+            <CheckCircle2
+              className="h-4 w-4 text-green-500"
+              key="wallet-check"
+            />
+            <p className="text-xs text-muted-foreground">
+              Account successfully created
+            </p>
+          </div>
         </div>
       </div>
     </div>
