@@ -44,8 +44,11 @@ export const sessionOptions = {
     sameSite: "lax" as const,
     path: "/",
     maxAge: 4 * 60 * 60, // 4 hours
-    // In development, domain is undefined to work with localhost
-    domain: undefined,
+    // Set domain based on environment
+    domain:
+      process.env.NODE_ENV === "production"
+        ? ".krain.ai" // Include subdomain support with leading dot
+        : undefined,
   },
 };
 

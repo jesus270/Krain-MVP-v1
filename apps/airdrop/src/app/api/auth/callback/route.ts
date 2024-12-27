@@ -13,6 +13,15 @@ export async function POST(request: NextRequest) {
       operation: "auth_callback",
     });
 
+    // Validate request content type
+    const contentType = request.headers.get("content-type");
+    if (!contentType?.includes("application/json")) {
+      return NextResponse.json(
+        { error: "Invalid content type" },
+        { status: 400 },
+      );
+    }
+
     const data = await request.json();
     const host = request.headers.get("host") || "";
     const cookieDomain = getCookieDomain(host);
@@ -44,14 +53,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
     }
 
-    // Get wallet address from either format
+    // Get wallet address from either format with detailed logging
     const walletAddress = data.walletAddress || data.user?.wallet?.address;
+    log.info("Wallet address check", {
+      entity: "API-auth/callback",
+      operation: "auth_callback",
+      hasDirectWalletAddress: !!data.walletAddress,
+      hasNestedWalletAddress: !!data.user?.wallet?.address,
+      finalWalletAddress: walletAddress,
+    });
 
     if (!walletAddress) {
       log.error("No wallet address found", {
         entity: "API-auth/callback",
         operation: "auth_callback",
         status: "error",
+        requestData: JSON.stringify(data),
       });
       return NextResponse.json(
         { error: "No wallet connected" },
@@ -65,6 +82,7 @@ export async function POST(request: NextRequest) {
         entity: "API-auth/callback",
         operation: "auth_callback",
         status: "error",
+        walletAddress,
       });
       return NextResponse.json(
         { error: "Invalid Solana address" },
@@ -78,52 +96,47 @@ export async function POST(request: NextRequest) {
       walletAddress: walletAddress,
     };
 
-    log.info("Creating session for user", {
-      entity: "API-auth/callback",
-      operation: "auth_callback",
-      userId: user.id,
-      walletAddress: walletAddress,
-      cookieDomain,
-      host,
-    });
+    try {
+      // Create a new cookie store and session
+      const cookieStore = new IronSessionCookieStore(await cookies());
+      const session = await getIronSession<SessionData>(
+        cookieStore,
+        requestSessionOptions,
+      );
 
-    // Create a new cookie store and session
-    const cookieStore = new IronSessionCookieStore(await cookies());
-    const session = await getIronSession<SessionData>(
-      cookieStore,
-      requestSessionOptions,
-    );
+      // Set session data
+      session.user = user;
+      session.isLoggedIn = true;
+      session.lastActivity = Date.now();
+      await session.save();
 
-    // Set session data
-    session.user = user;
-    session.isLoggedIn = true;
-    session.lastActivity = Date.now();
-    await session.save();
+      log.info("Session created successfully", {
+        entity: "API-auth/callback",
+        operation: "auth_callback",
+        userId: user.id,
+        timestamp: new Date().toISOString(),
+        cookieDomain,
+        host,
+      });
 
-    log.info("Session created successfully", {
-      entity: "API-auth/callback",
-      operation: "auth_callback",
-      userId: user.id,
-      timestamp: new Date().toISOString(),
-      cookieDomain,
-      host,
-    });
-
-    // Create response with session cookie
-    const response = NextResponse.json({ success: true });
-
-    // Add all cookie headers from the store
-    const cookieHeaders = cookieStore.getCookieHeaders();
-    for (const header of cookieHeaders) {
-      response.headers.append("Set-Cookie", header);
+      return NextResponse.json({ success: true });
+    } catch (sessionError) {
+      log.error("Session creation failed", {
+        entity: "API-auth/callback",
+        operation: "auth_callback",
+        error: sessionError,
+        userId: user.id,
+      });
+      return NextResponse.json(
+        { error: "Failed to create session" },
+        { status: 500 },
+      );
     }
-
-    return response;
   } catch (error) {
-    log.error(error, {
+    log.error("Auth callback failed", {
       entity: "API-auth/callback",
       operation: "auth_callback",
-      status: "error",
+      error,
     });
     return NextResponse.json(
       { error: "Internal server error" },

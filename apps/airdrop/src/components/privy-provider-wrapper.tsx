@@ -53,11 +53,22 @@ function SessionRevalidator({
           revalidationTimeoutRef.current = null;
         }
 
-        // Wait for wallet to be available
+        // Wait for wallet to be available with exponential backoff
         let attempts = 0;
-        while (!solanaWallets[0]?.address && attempts < 5) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+        const maxAttempts = 8; // Increased from 5
+        const baseDelay = 1000;
+
+        while (!solanaWallets[0]?.address && attempts < maxAttempts) {
+          const delay = Math.min(baseDelay * Math.pow(2, attempts), 10000); // Cap at 10 seconds
+          await new Promise((resolve) => setTimeout(resolve, delay));
           attempts++;
+
+          // Log retry attempts in development
+          if (process.env.NODE_ENV === "development") {
+            console.info(
+              `[CLIENT] Attempt ${attempts}/${maxAttempts} to get wallet address`,
+            );
+          }
         }
 
         const walletAddress = solanaWallets[0]?.address;
@@ -65,9 +76,10 @@ function SessionRevalidator({
           // Add slight delay to ensure any previous session operations are complete
           revalidationTimeoutRef.current = setTimeout(() => {
             debouncedRevalidate(user, walletAddress);
-          }, 1000);
+          }, 2000); // Increased from 1000ms
         } else {
           console.error("[CLIENT] No Solana wallet address found after login");
+          // Consider showing a user-friendly error message or retry prompt
         }
       } catch (error) {
         console.error("[CLIENT] Error in login callback:", error);
