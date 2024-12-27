@@ -1,20 +1,17 @@
 import { usePrivy } from "@privy-io/react-auth";
+import { Button } from "@repo/ui/components/ui/button";
 import { LogIn } from "lucide-react";
-import { SidebarMenuButton } from "@repo/ui/components/ui/sidebar";
 
 export function NavLoginButton() {
   const { ready, authenticated, login } = usePrivy();
+
   // Disable login when Privy is not ready or the user is already authenticated
-  const disableLogin = !ready || (ready && authenticated);
+  const disableLogin = !ready || authenticated;
 
   return (
-    <SidebarMenuButton
-      disabled={disableLogin}
-      onClick={login}
-      className="w-full bg-primary text-primary-foreground"
-    >
-      <LogIn />
-      <span>Log in</span>
-    </SidebarMenuButton>
+    <Button variant="ghost" size="sm" onClick={login} disabled={disableLogin}>
+      <LogIn key="login-icon" />
+      <span className="ml-2">Log in</span>
+    </Button>
   );
 }

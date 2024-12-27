@@ -2,8 +2,20 @@
 module.exports = {
   root: true,
   extends: ["@repo/eslint-config/next.js"],
-  parser: "@typescript-eslint/parser",
   parserOptions: {
-    project: true,
+    project: ["./tsconfig.json"],
+    tsconfigRootDir: __dirname,
   },
+  env: {
+    node: true,
+  },
+  ignorePatterns: [".next/**/*", ".turbo/**/*", "node_modules/**/*"],
+  overrides: [
+    {
+      files: ["**/*.ts", "**/*.tsx"],
+      rules: {
+        "@typescript-eslint/no-unused-vars": "warn",
+      },
+    },
+  ],
 };

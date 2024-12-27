@@ -2,7 +2,6 @@ import { usePrivy } from "@privy-io/react-auth";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/ui/card";

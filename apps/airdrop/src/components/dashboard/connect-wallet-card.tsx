@@ -28,21 +28,21 @@ export function ConnectWalletCard() {
         </div>
         <CardDescription className="space-y-4 text-base">
           <div className="space-y-1">
-            <p className="font-medium">Already registered your wallet?</p>
+            <p className="font-bold text-lg">Already registered your wallet?</p>
             <p className="text-muted-foreground">
               Connect your wallet to create an account, check your status, and
               earn more points!
             </p>
           </div>
           <div className="space-y-1">
-            <p className="font-medium">Haven't registered yet?</p>
+            <p className="font-bold text-lg">Haven't registered yet?</p>
             <p className="text-muted-foreground">
               You can still add your wallet to the airdrop list by connecting
               and creating an account.
             </p>
           </div>
           <div className="space-y-1">
-            <p className="font-medium">Already created an account?</p>
+            <p className="font-bold text-lg">Already created an account?</p>
             <p className="text-muted-foreground">
               You can log in by connecting your wallet.
             </p>

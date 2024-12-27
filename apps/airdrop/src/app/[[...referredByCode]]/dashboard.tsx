@@ -1,17 +1,121 @@
+/// <reference types="node" />
+
 "use client";
 
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 import { Wallet } from "@repo/database";
 import { useLocale } from "@repo/utils";
-import { getWallet, handleSubmitWallet } from "@/actions/wallet";
+import { handleSubmitWallet } from "@/actions/wallet";
 import { getReferralsCount } from "@/actions/referral";
 import { ConnectWalletCard } from "@/components/dashboard/connect-wallet-card";
 import { PointsStatusCard } from "@/components/dashboard/points-status-card";
 import { ReferralProgramCard } from "@/components/dashboard/referral-program-card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
+import { Button } from "@repo/ui/components/ui/button";
+import { log } from "@/lib/logger";
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2 seconds
+const SESSION_VERIFY_MAX_RETRIES = 3;
+
+interface ClientError extends Error {
+  code?: string;
+  context?: Record<string, unknown>;
+}
+
+function isNetworkError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error.message.toLowerCase().includes("network") ||
+      error.message.toLowerCase().includes("connection") ||
+      error.message.toLowerCase().includes("timeout"))
+  );
+}
+
+function logClientError(error: unknown, context: Record<string, unknown> = {}) {
+  const clientError: ClientError =
+    error instanceof Error ? error : new Error(String(error));
+  log.error(clientError, {
+    operation: "client_error",
+    entity: "CLIENT",
+    ...context,
+  });
+  return clientError;
+}
+
+async function verifySession(attempt = 1): Promise<boolean> {
+  try {
+    // Maximum time to wait for session (15 seconds)
+    const SESSION_TIMEOUT = 15000;
+    const POLL_INTERVAL = 500;
+    const startTime = Date.now();
+
+    while (Date.now() - startTime < SESSION_TIMEOUT) {
+      log.info("Polling session verification", {
+        operation: "verify_session",
+        entity: "AUTH",
+        attempt,
+        elapsedMs: Date.now() - startTime,
+      });
+
+      const verifyResponse = await fetch("/api/auth/verify", {
+        credentials: "include",
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+      });
+
+      if (verifyResponse.ok) {
+        log.info("Session verification successful", {
+          operation: "verify_session",
+          entity: "AUTH",
+          attempt,
+          elapsedMs: Date.now() - startTime,
+          responseStatus: verifyResponse.status,
+        });
+        return true;
+      }
+
+      // If we get a non-401 error, something else is wrong
+      if (verifyResponse.status !== 401) {
+        log.error(new Error(`Unexpected status: ${verifyResponse.status}`), {
+          operation: "verify_session",
+          entity: "AUTH",
+          status: "error",
+          responseStatus: verifyResponse.status,
+          attempt,
+        });
+        return false;
+      }
+
+      // Wait before next poll
+      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
+    }
+
+    log.error(new Error("Session verification timed out"), {
+      operation: "verify_session",
+      entity: "AUTH",
+      status: "timeout",
+      timeoutMs: SESSION_TIMEOUT,
+      attempts: attempt,
+    });
+    return false;
+  } catch (error) {
+    log.error(error, {
+      operation: "verify_session",
+      attempt,
+    });
+    return false;
+  }
+}
 
 async function fetchWithRetry(
   referralCode: string,
@@ -23,7 +127,7 @@ async function fetchWithRetry(
 
   for (let attempt = 1; attempt <= retries + 1; attempt++) {
     try {
-      const count = await getReferralsCount(referralCode);
+      const count = await getReferralsCount({ referralCode });
       if (typeof count === "number") {
         return count;
       }
@@ -37,13 +141,25 @@ async function fetchWithRetry(
         currentDelay =
           Math.min(delay * Math.pow(2, attempt - 1), 10000) *
           (0.75 + Math.random() * 0.5);
-        console.log(`[CLIENT] Retrying in ${Math.round(currentDelay)}ms...`);
+        if (process.env.NODE_ENV === "development") {
+          console.log("[REFERRAL] Retrying count fetch", {
+            operation: "get_referral_count",
+            status: "retry",
+            attempt,
+            nextAttemptMs: Math.round(currentDelay),
+          });
+        }
         await new Promise((resolve) => setTimeout(resolve, currentDelay));
       }
     }
   }
 
-  console.error("[CLIENT] All retry attempts failed:", lastError);
+  console.error("[REFERRAL] All count fetch attempts failed", {
+    operation: "get_referral_count",
+    status: "error",
+    errorMessage: lastError?.message,
+    totalAttempts: retries + 1,
+  });
   throw lastError;
 }
 
@@ -65,14 +181,15 @@ export function Dashboard({
   const userTwitterUsername = user?.twitter?.username ?? undefined;
 
   useEffect(() => {
-    if (!userWalletAddress) {
+    // Only proceed if authenticated and have wallet address
+    if (!authenticated || !userWalletAddress || !ready) {
       setIsLoadingWallet(false);
       setIsLoadingReferrals(false);
       return;
     }
 
     let isMounted = true;
-    let retryTimeout: NodeJS.Timeout | undefined;
+    let retryTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const loadData = async () => {
       try {
@@ -80,56 +197,155 @@ export function Dashboard({
         setIsLoadingReferrals(true);
         setError(undefined);
 
-        // First get the wallet
-        const walletResult = await getWallet({
-          address: userWalletAddress,
-          with: { referredBy: true },
-        });
+        // Wait for wallet to be available first
+        let walletAttempts = 0;
+        while (!userWalletAddress && walletAttempts < 5) {
+          log.info("Waiting for wallet address", {
+            operation: "load_data",
+            entity: "CLIENT",
+            status: "waiting",
+            attempt: walletAttempts + 1,
+          });
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          walletAttempts++;
+        }
+
+        if (!userWalletAddress) {
+          log.error(
+            new Error("Wallet address not available after max attempts"),
+            {
+              operation: "load_data",
+              entity: "CLIENT",
+              status: "error",
+            },
+          );
+          setError("Unable to get wallet address. Please try again.");
+          return;
+        }
+
+        // Verify session with retries
+        const verified = await verifySession();
+        if (!verified) {
+          setError("Unable to verify session. Please refresh and try again.");
+          return;
+        }
 
         if (!isMounted) return;
 
-        if (walletResult) {
-          setWallet(walletResult);
-          // Then submit wallet if needed
-          if (referredByCode) {
-            await handleSubmitWallet({
-              address: userWalletAddress,
-              referredByCode,
-            });
+        let walletResult: Wallet | undefined;
+        try {
+          const wallet = await handleSubmitWallet({
+            walletAddress: userWalletAddress,
+            referredByCode,
+          });
+
+          if (isMounted && wallet) {
+            setWallet(wallet);
+            setIsLoadingWallet(false);
+            walletResult = wallet;
           }
+        } catch (error) {
+          if (isMounted) {
+            const clientError = logClientError(error, {
+              operation: "load_wallet",
+              walletAddress: userWalletAddress,
+            });
 
-          if (!isMounted) return;
-
-          // Get referrals count with retry logic
-          if (walletResult.referralCode) {
-            try {
-              const count = await fetchWithRetry(walletResult.referralCode);
-              if (isMounted) {
-                setReferralsCount(count);
+            // If it's an unauthorized error, try verifying session again
+            if (clientError.message.includes("Unauthorized")) {
+              log.info("Unauthorized error, retrying session verification", {
+                operation: "load_wallet",
+                entity: "CLIENT",
+                status: "retry",
+              });
+              const reVerified = await verifySession();
+              if (reVerified) {
+                // Retry wallet submission
+                try {
+                  const wallet = await handleSubmitWallet({
+                    walletAddress: userWalletAddress,
+                    referredByCode,
+                  });
+                  if (isMounted && wallet) {
+                    setWallet(wallet);
+                    setIsLoadingWallet(false);
+                    walletResult = wallet;
+                  }
+                } catch (retryError) {
+                  setError(
+                    `${retryError instanceof Error ? retryError.message : String(retryError)}. Please refresh to try again.`,
+                  );
+                }
+              } else {
+                setError(
+                  "Session verification failed. Please refresh to try again.",
+                );
               }
-            } catch (error) {
-              console.error("[CLIENT] Error getting referrals count:", error);
-              if (isMounted) {
-                const message =
-                  error instanceof Error
-                    ? error.message
-                    : "Unable to load referrals";
-                setError(`${message}. Please refresh to try again.`);
+              return;
+            }
+
+            setError(`${clientError.message}. Please refresh to try again.`);
+
+            // Retry after delay if it's a network error
+            if (isNetworkError(error)) {
+              log.info("Scheduling retry", {
+                operation: "load_wallet",
+                entity: "CLIENT",
+                status: "retry",
+                nextAttemptMs: RETRY_DELAY,
+              });
+              retryTimeout = setTimeout(loadData, RETRY_DELAY);
+              return;
+            }
+          }
+        }
+
+        if (!isMounted) return;
+
+        // Get referrals count with retry logic
+        if (walletResult?.referralCode) {
+          try {
+            const count = await fetchWithRetry(walletResult.referralCode);
+            if (isMounted) {
+              setReferralsCount(count);
+            }
+          } catch (error) {
+            if (isMounted) {
+              const clientError = logClientError(error, {
+                operation: "load_referrals",
+                referralCode: walletResult?.referralCode,
+              });
+
+              setError(`${clientError.message}. Please refresh to try again.`);
+
+              if (isNetworkError(error)) {
+                log.info("Scheduling retry", {
+                  operation: "load_referrals",
+                  entity: "CLIENT",
+                  status: "retry",
+                  nextAttemptMs: RETRY_DELAY,
+                });
+                retryTimeout = setTimeout(loadData, RETRY_DELAY);
+                return;
               }
             }
           }
         }
       } catch (error) {
-        console.error("[CLIENT] Error loading data:", error);
         if (isMounted) {
-          const message =
-            error instanceof Error
-              ? error.message
-              : "Unable to load wallet data";
-          setError(`${message}. Please refresh to try again.`);
+          const clientError = logClientError(error, {
+            operation: "load_dashboard",
+          });
 
-          // Retry after a delay if it's a connection issue
-          if (error instanceof Error && error.message.includes("connection")) {
+          setError(`${clientError.message}. Please refresh to try again.`);
+
+          if (isNetworkError(error)) {
+            log.info("Scheduling retry", {
+              operation: "load_dashboard",
+              entity: "CLIENT",
+              status: "retry",
+              nextAttemptMs: RETRY_DELAY,
+            });
             retryTimeout = setTimeout(loadData, RETRY_DELAY);
           }
         }
@@ -141,6 +357,7 @@ export function Dashboard({
       }
     };
 
+    // Start loading immediately
     loadData();
 
     return () => {
@@ -149,59 +366,70 @@ export function Dashboard({
         clearTimeout(retryTimeout);
       }
     };
-  }, [referredByCode, userWalletAddress]);
+  }, [authenticated, userWalletAddress, referredByCode, ready]);
 
-  if (!ready) return null;
-  if (ready && (!authenticated || !userWalletAddress)) {
+  // Show connect wallet card if not authenticated
+  if (ready && !authenticated) {
     return (
-      <main className="container mx-auto p-4">
+      <main className="container mx-auto py-8 px-4">
         <ConnectWalletCard />
       </main>
     );
   }
 
-  const walletConnectionPoints = 1000;
-  const accountCreationPoints = 5000;
-  const basePoints = walletConnectionPoints + accountCreationPoints;
-  const referralPoints = referralsCount * 1000;
-  const twitterPoints = userTwitterUsername ? 2000 : 0;
-  const emailPoints = userEmailAddress ? 3000 : 0;
-  const totalPoints = basePoints + referralPoints + twitterPoints + emailPoints;
-
-  const referralUrl = wallet?.referralCode
-    ? `https://airdrop.krain.ai/${wallet?.referralCode}`
-    : "";
-
-  return (
-    <main className="container mx-auto p-4">
-      <div className="max-w-2xl mx-auto space-y-6">
-        {error && (
-          <div className="bg-destructive/15 text-destructive px-4 py-3 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
-        <PointsStatusCard
-          totalPoints={totalPoints}
-          userWalletAddress={userWalletAddress}
-          userEmailAddress={userEmailAddress}
-          userTwitterUsername={userTwitterUsername}
-          referralsCount={referralsCount}
-          walletConnectionPoints={walletConnectionPoints}
-          accountCreationPoints={accountCreationPoints}
-          referralPoints={referralPoints}
-          twitterPoints={twitterPoints}
-          emailPoints={emailPoints}
-          locale={locale}
-          isLoadingReferrals={isLoadingReferrals}
-        />
-        <ReferralProgramCard
-          referralsCount={referralsCount}
-          referralUrl={referralUrl}
-          locale={locale}
-          isLoadingWallet={isLoadingWallet}
-          isLoadingReferrals={isLoadingReferrals}
-        />
+  // Show error state if any
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-red-500">{error}</div>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
+          </CardFooter>
+        </Card>
       </div>
-    </main>
+    );
+  }
+
+  // Show main dashboard content with progressive loading
+  return (
+    <div className="space-y-4 p-4">
+      <PointsStatusCard
+        totalPoints={
+          5000 + // Base points for having an account
+          (userWalletAddress ? 1000 : 0) + // Points for wallet connection
+          referralsCount * 1000 + // Referral points: 1000 per referral
+          (userTwitterUsername ? 2000 : 0) + // Twitter points: 2000 base
+          (userEmailAddress ? 3000 : 0) // Email points: 3000
+        }
+        userWalletAddress={userWalletAddress}
+        userEmailAddress={userEmailAddress}
+        userTwitterUsername={userTwitterUsername}
+        referralsCount={referralsCount}
+        walletConnectionPoints={1000}
+        accountCreationPoints={5000}
+        referralPoints={referralsCount * 1000}
+        twitterPoints={2000}
+        emailPoints={3000}
+        locale={locale}
+        isLoadingReferrals={isLoadingReferrals}
+      />
+      <ReferralProgramCard
+        referralsCount={referralsCount}
+        referralUrl={
+          wallet?.referralCode
+            ? `https://airdrop.krain.ai/${wallet.referralCode}`
+            : ""
+        }
+        locale={locale}
+        isLoadingWallet={isLoadingWallet}
+        isLoadingReferrals={isLoadingReferrals}
+      />
+    </div>
   );
 }

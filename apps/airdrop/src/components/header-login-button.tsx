@@ -68,7 +68,19 @@ export function HeaderLoginButton() {
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={logout}>
+          <DropdownMenuItem
+            onClick={async () => {
+              try {
+                await fetch("/api/auth/logout", {
+                  method: "POST",
+                });
+              } catch (error) {
+                console.error("[CLIENT] Error in server logout:", error);
+              }
+              // Always logout on client side regardless of server response
+              logout();
+            }}
+          >
             <LogOut />
             Log out
           </DropdownMenuItem>

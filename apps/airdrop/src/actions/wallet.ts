@@ -1,154 +1,325 @@
 "use server";
 
-import { db as baseDb, walletTable, Wallet } from "@repo/database";
-import { isValidSolanaAddress } from "@repo/utils";
+import { z } from "zod";
+import { db, Wallet, walletTable } from "@repo/database";
+import { getCurrentUser } from "../lib/auth";
 import { eq } from "drizzle-orm";
+import { generateReferralCode, isValidSolanaAddress } from "@repo/utils";
 import { createReferral } from "./referral";
-import { db, executeWithRetry } from "../lib/db";
+import { cookies } from "next/headers";
+import { log, AppError, ErrorCodes, createUserContext } from "../lib/logger";
 
-export async function createWallet({
-  address,
-}: {
-  address: string;
-}): Promise<Wallet> {
-  if (!isValidSolanaAddress(address)) {
-    console.error("[SERVER] Invalid Solana address:", address);
-    throw new Error("Invalid Solana address");
-  }
+const walletAddressSchema = z.object({
+  address: z.string().refine((address) => isValidSolanaAddress(address), {
+    message: "Invalid Solana address",
+  }),
+});
 
+const referralCodeSchema = z.object({
+  referralCode: z.string().length(6),
+});
+
+const referredBySchema = z.object({
+  referredByCode: z.string().length(6),
+});
+
+export async function createWallet(input: { address: string }) {
   try {
-    console.log("[SERVER] Creating wallet for address:", address);
-    const wallet = await executeWithRetry(() =>
-      db
-        .insert(walletTable)
-        .values({
-          address,
-          referralCode: generateReferralCode(),
-        })
-        .returning(),
-    );
-
-    if (!wallet[0]) {
-      console.error("[SERVER] Failed to create wallet for address:", address);
-      throw new Error("Failed to create wallet");
+    // Check authentication first
+    const user = await getCurrentUser(await cookies());
+    if (!user) {
+      throw new AppError(
+        "Unauthorized: Please log in first",
+        ErrorCodes.UNAUTHORIZED,
+        401,
+      );
     }
 
-    console.log("[SERVER] Successfully created wallet:", wallet[0]);
+    // Validate input
+    const parsed = walletAddressSchema.parse(input);
+
+    // Verify user can only create wallet for their own address
+    if (parsed.address !== user.walletAddress) {
+      throw new AppError(
+        "Unauthorized: You can only create a wallet for your own address",
+        ErrorCodes.UNAUTHORIZED,
+        401,
+      );
+    }
+
+    log.info("Creating new wallet", {
+      operation: "create_wallet",
+      entity: "WALLET",
+      ...createUserContext(user),
+      walletAddress: parsed.address,
+    });
+
+    // Create wallet
+    const wallet = await db
+      .insert(walletTable)
+      .values({
+        address: parsed.address,
+        referralCode: generateReferralCode(),
+      })
+      .returning();
+
+    if (!wallet || wallet.length === 0) {
+      throw new AppError(
+        "Failed to create wallet: No wallet returned",
+        ErrorCodes.DATABASE_ERROR,
+        500,
+      );
+    }
+
+    log.info("Wallet created successfully", {
+      operation: "create_wallet",
+      ...createUserContext(user),
+      entity: "WALLET",
+      walletAddress: parsed.address,
+      referralCode: wallet?.[0]?.referralCode,
+    });
+
     return wallet[0];
   } catch (error) {
-    console.error("[SERVER] Error creating wallet:", {
-      error,
-      address,
-      stack: error instanceof Error ? error.stack : undefined,
+    if (error instanceof AppError) {
+      throw error;
+    }
+
+    log.error(error, {
+      operation: "create_wallet",
+      entity: "WALLET",
+      ...createUserContext(await getCurrentUser(await cookies())),
+      inputAddress: input.address,
     });
-    throw error;
+
+    throw new AppError("Failed to create wallet", ErrorCodes.WALLET_ERROR, 500);
   }
 }
 
-export async function getWallet({
-  address,
-  with: { referredBy } = {},
-}: {
-  address: string;
-  with?: {
-    referredBy?: boolean;
-  };
-}): Promise<Wallet | undefined> {
-  if (!isValidSolanaAddress(address)) {
-    console.error("[SERVER] Invalid Solana address in getWallet:", address);
-    throw new Error("Invalid Solana address");
-  }
-
+export async function getWalletByReferralCode(input: { referralCode: string }) {
   try {
-    console.log("[SERVER] Getting wallet for address:", address);
-    const wallet = await executeWithRetry(() =>
-      db.select().from(walletTable).where(eq(walletTable.address, address)),
-    );
+    const user = await getCurrentUser(await cookies());
+    if (!user) {
+      throw new Error("Unauthorized: Please log in first");
+    }
 
-    console.log("[SERVER] Wallet lookup result:", wallet[0] || "Not found");
-    return wallet[0];
-  } catch (error) {
-    console.error("[SERVER] Error getting wallet:", {
-      error,
-      address,
-      stack: error instanceof Error ? error.stack : undefined,
+    const parsed = referralCodeSchema.parse(input);
+
+    const wallet = await db.query.walletTable.findFirst({
+      where: eq(walletTable.referralCode, parsed.referralCode),
     });
-    throw error;
-  }
-}
-
-export async function handleSubmitWallet(formData: {
-  address: string;
-  referredByCode: string | undefined;
-}): Promise<Wallet> {
-  "use server";
-
-  const { address, referredByCode } = formData;
-
-  if (!isValidSolanaAddress(address)) {
-    console.error(
-      "[SERVER] Invalid Solana address in handleSubmitWallet:",
-      address,
-    );
-    throw new Error("Invalid Solana address");
-  }
-
-  try {
-    console.log("[SERVER] Handling wallet submission:", {
-      address,
-      referredByCode,
-    });
-    let wallet = await getWallet({ address });
 
     if (!wallet) {
-      console.log("[SERVER] Wallet not found, creating new wallet");
-      wallet = await createWallet({ address });
+      return undefined;
     }
 
-    if (referredByCode && wallet.referralCode !== referredByCode) {
-      console.log("[SERVER] Creating referral relationship:", {
-        referredByCode,
-        walletAddress: address,
-      });
-
-      await createReferral({
-        referredByCode,
-        referredWalletAddress: address,
-      });
-
-      console.log("[SERVER] Updating wallet with referral code");
-      const updatedWallet = await executeWithRetry(() =>
-        db
-          .update(walletTable)
-          .set({ referralCode: referredByCode })
-          .where(eq(walletTable.address, address))
-          .returning(),
-      );
-
-      if (!updatedWallet[0]) {
-        console.error("[SERVER] Failed to update wallet with referral code:", {
-          address,
-          referredByCode,
-        });
-        throw new Error("Failed to update wallet with referral code");
-      }
-
-      wallet = updatedWallet[0];
-    }
-
-    console.log("[SERVER] Successfully handled wallet submission:", wallet);
     return wallet;
   } catch (error) {
-    console.error("[SERVER] Error handling wallet submission:", {
-      error,
-      address,
-      referredByCode,
-      stack: error instanceof Error ? error.stack : undefined,
+    log.error(error, {
+      entity: "WALLET",
+      operation: "get_wallet_by_referral_code",
+      ...createUserContext(await getCurrentUser(await cookies())),
+      input,
     });
-    throw error;
+
+    if (error instanceof z.ZodError) {
+      throw new Error("String must contain exactly 6 character(s)");
+    }
+
+    throw new Error(
+      `Failed to get referrals count: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
-function generateReferralCode() {
-  return Math.random().toString(36).substring(2, 8);
+export interface WalletWithReferredBy extends Wallet {
+  referredBy: Wallet | null;
+}
+
+export async function getWallet(input: {
+  address: string;
+}): Promise<WalletWithReferredBy | undefined> {
+  try {
+    // Check authentication first
+    const user = await getCurrentUser(await cookies());
+    if (!user) {
+      throw new Error("Unauthorized: Please log in first");
+    }
+
+    // Validate input
+    const parsed = walletAddressSchema.parse(input);
+
+    // Verify user can only access their own wallet
+    if (parsed.address !== user.walletAddress) {
+      throw new Error("Unauthorized: You can only access your own wallet");
+    }
+
+    // Get wallet
+    const wallet = await db.query.walletTable.findFirst({
+      where: eq(walletTable.address, parsed.address),
+      with: {
+        referredBy: true,
+      },
+    });
+
+    return wallet as WalletWithReferredBy | undefined;
+  } catch (error) {
+    log.error(error, {
+      entity: "WALLET",
+      operation: "get_wallet",
+      ...createUserContext(await getCurrentUser(await cookies())),
+      input,
+    });
+
+    if (error instanceof z.ZodError) {
+      throw new Error("Invalid Solana address");
+    }
+
+    throw new Error(
+      `Failed to get wallet: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
+export async function isValidReferralCode(input: {
+  referredByCode: string;
+  referredWallet: WalletWithReferredBy;
+}) {
+  const user = await getCurrentUser(await cookies());
+  if (!user) {
+    throw new Error("Unauthorized: Please log in first");
+  }
+
+  if (input.referredWallet.address !== user.walletAddress) {
+    throw new Error("Unauthorized: You can only check your own referral code");
+  }
+
+  if (input.referredWallet.referredBy) {
+    throw new Error("Wallet already has a referral");
+  }
+
+  if (!input.referredWallet) {
+    throw new Error("Referred wallet not found");
+  }
+
+  const referralWallet = await getWalletByReferralCode({
+    referralCode: input.referredByCode,
+  });
+
+  if (!referralWallet) {
+    throw new Error("Referral code wallet not found");
+  }
+
+  if (referralWallet.address === input.referredWallet.address) {
+    throw new Error(
+      "Referral code wallet cannot be the same as referred wallet",
+    );
+  }
+
+  if (referralWallet.createdAt > input.referredWallet.createdAt) {
+    throw new Error("Referral code wallet is newer than referred wallet");
+  }
+
+  return true;
+}
+
+export async function handleSubmitWallet(input: {
+  walletAddress: string;
+  referredByCode?: string;
+}) {
+  try {
+    // Check authentication first
+    const user = await getCurrentUser(await cookies());
+    if (!user) {
+      throw new Error("Unauthorized: Please log in first");
+    }
+
+    // Parse input
+    const parsedReferredByCode = input.referredByCode
+      ? referredBySchema.parse({
+          referredByCode: input.referredByCode,
+        })
+      : undefined;
+
+    const parsedWalletAddress = walletAddressSchema.parse({
+      address: input.walletAddress,
+    });
+
+    // Get existing wallet
+    const existingWallet = await getWallet({
+      address: parsedWalletAddress.address,
+    });
+
+    // if wallet doesn't exist, create it
+    if (!existingWallet) {
+      const newWallet = await createWallet({
+        address: parsedWalletAddress.address,
+      });
+      if (!newWallet) {
+        throw new Error("Failed to create wallet");
+      }
+
+      // if referral code is provided, create referral
+      if (parsedReferredByCode?.referredByCode) {
+        const referralWallet = await getWalletByReferralCode({
+          referralCode: parsedReferredByCode.referredByCode,
+        });
+
+        if (!referralWallet) {
+          throw new Error("Referral code wallet not found");
+        }
+
+        await isValidReferralCode({
+          referredByCode: parsedReferredByCode.referredByCode,
+          referredWallet: newWallet as WalletWithReferredBy,
+        });
+        await createReferral({
+          referredByCode: parsedReferredByCode.referredByCode,
+          referredWalletAddress: newWallet.address,
+        });
+      }
+
+      return newWallet;
+    } else {
+      if (parsedReferredByCode?.referredByCode && !existingWallet.referredBy) {
+        const referralWallet = await getWalletByReferralCode({
+          referralCode: parsedReferredByCode.referredByCode,
+        });
+
+        if (!referralWallet) {
+          throw new Error("Referral code wallet not found");
+        }
+
+        await isValidReferralCode({
+          referredByCode: parsedReferredByCode.referredByCode,
+          referredWallet: existingWallet as WalletWithReferredBy,
+        });
+        await createReferral({
+          referredByCode: parsedReferredByCode.referredByCode,
+          referredWalletAddress: existingWallet.address,
+        });
+      } else if (
+        parsedReferredByCode?.referredByCode &&
+        existingWallet.referredBy
+      ) {
+        throw new Error("Wallet already has a referral code");
+      }
+      return existingWallet;
+    }
+  } catch (error) {
+    log.error(error, {
+      entity: "WALLET",
+      operation: "submit_wallet",
+      ...createUserContext(await getCurrentUser(await cookies())),
+      input,
+    });
+
+    if (error instanceof z.ZodError) {
+      throw new Error("Invalid Solana address");
+    }
+
+    throw new Error(
+      `Failed to submit wallet: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 }

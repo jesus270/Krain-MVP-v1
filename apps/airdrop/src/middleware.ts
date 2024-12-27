@@ -1,13 +1,80 @@
 import { NextResponse, NextRequest } from "next/server";
 import { geolocation } from "@vercel/functions";
+import { getIronSession } from "iron-session";
+import { sessionOptions, SessionData } from "./lib/auth";
+import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { IronSessionCookieStore } from "./lib/cookie-store";
+import { getClientIp, checkRateLimit } from "./lib/redis";
+import { log } from "./lib/logger";
+
+// Protected paths that require authentication
+const PROTECTED_PATHS = ["/api/wallet", "/api/referral"];
+
+// Public paths that don't require authentication but still need geo checks
+const PUBLIC_PATHS = ["/", "/api/auth", "/terms"];
 
 export async function middleware(request: NextRequest) {
+  // Add debug log at the very start
+  log.info("Request received", {
+    entity: "MIDDLEWARE",
+    operation: "request_received",
+    path: request.nextUrl.pathname,
+    method: request.method,
+  });
+
   try {
+    // First check if we're already on the blocked page to prevent redirect loops
+    if (request.nextUrl.pathname === "/blocked") {
+      return NextResponse.next();
+    }
+
+    // Then check for other public paths that should skip geolocation
+    const bypassGeoPaths = ["/_next", "/static", "/favicon.ico", "/error"];
+
+    const skipGeoCheck = bypassGeoPaths.some((path) =>
+      request.nextUrl.pathname.startsWith(path),
+    );
+
+    if (skipGeoCheck) {
+      return NextResponse.next();
+    }
+
+    // Perform geolocation check for all other paths
     const geo = geolocation(request);
 
+    // Add detailed logging for geolocation debugging
+    log.info("Geolocation check starting", {
+      entity: "MIDDLEWARE",
+      operation: "geo_check_start",
+      headers: {
+        // Log all headers to see what Vercel is sending
+        ...Object.fromEntries(request.headers.entries()),
+      },
+    });
+
+    log.info("Geolocation result", {
+      entity: "MIDDLEWARE",
+      operation: "geo_check_result",
+      geoData: geo,
+      vercelGeoHeaders: {
+        country: request.headers.get("x-vercel-ip-country"),
+        region: request.headers.get("x-vercel-ip-country-region"),
+        city: request.headers.get("x-vercel-ip-city"),
+        latitude: request.headers.get("x-vercel-ip-latitude"),
+        longitude: request.headers.get("x-vercel-ip-longitude"),
+      },
+      ip:
+        request.headers.get("x-real-ip") ||
+        request.headers.get("x-forwarded-for"),
+      url: request.url,
+    });
+
     if (!geo?.country) {
-      console.warn("No geolocation data available");
-      return NextResponse.next();
+      log.warn("No geolocation data available", {
+        entity: "MIDDLEWARE",
+        operation: "geo_check_result",
+        geoData: geo,
+      });
     }
 
     // List of blocked countries (using ISO country codes)
@@ -21,44 +88,151 @@ export async function middleware(request: NextRequest) {
       "BY", // Belarus
     ];
 
-    // Check if user's country is in the blocked list
-    if (blockedCountries.includes(geo.country)) {
-      console.info(`Blocking traffic from: ${geo.country}`);
+    // Check if user's country is in the blocked list - do this before public path check
+    if (geo?.country && blockedCountries.includes(geo.country)) {
+      log.info(`Blocking traffic from: ${geo.country}`, {
+        entity: "MIDDLEWARE",
+        operation: "geo_check_result",
+        geoData: geo,
+      });
       return NextResponse.redirect(new URL("/blocked", request.url));
     }
 
     // Special handling for Ukraine regions (Crimea, Donetsk, Luhansk)
-    if (geo.country === "UA") {
-      // Note: Region checking depends on the geolocation service's data format
-      // You may need to adjust this based on actual region codes provided
+    if (geo?.country === "UA") {
       const restrictedRegions = ["Crimea", "Donetsk", "Luhansk"];
       if (geo.region && restrictedRegions.includes(geo.region)) {
-        console.info(
-          `Blocking traffic from restricted region: ${geo.region}, Ukraine`
+        log.info(
+          `Blocking traffic from restricted region: ${geo.region}, Ukraine`,
+          {
+            entity: "MIDDLEWARE",
+            operation: "geo_check_result",
+            geoData: geo,
+          },
         );
         return NextResponse.redirect(new URL("/blocked", request.url));
       }
     }
 
-    console.info("Allowing traffic from:", geo.country);
-    return NextResponse.next();
+    // Skip remaining middleware for public paths - but only after geolocation check
+    const isPublicPath = PUBLIC_PATHS.some((path) =>
+      request.nextUrl.pathname.startsWith(path),
+    );
+    if (isPublicPath) {
+      return NextResponse.next();
+    }
+
+    // Determine rate limit type based on path
+    let rateLimit;
+    if (request.nextUrl.pathname.startsWith("/api/auth")) {
+      rateLimit = await checkRateLimit(getClientIp(request.headers), "auth");
+    } else if (request.nextUrl.pathname.startsWith("/api/")) {
+      rateLimit = await checkRateLimit(getClientIp(request.headers), "api");
+    } else {
+      rateLimit = await checkRateLimit(getClientIp(request.headers), "default");
+    }
+
+    // Create base response with security headers
+    const response = NextResponse.next();
+
+    // Add security headers
+    const securityHeaders = {
+      "X-DNS-Prefetch-Control": "off",
+      "X-Frame-Options": "SAMEORIGIN",
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "Permissions-Policy":
+        "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+      "X-XSS-Protection": "1; mode=block",
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+      "Content-Security-Policy": `frame-ancestors 'self' ${process.env.NEXT_PUBLIC_APP_URL} https://auth.privy.io/ https://*.vercel.app`,
+    };
+
+    // Add security headers to response
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+
+    // Add rate limit headers
+    response.headers.set("X-RateLimit-Limit", String(rateLimit.limit));
+    response.headers.set("X-RateLimit-Remaining", String(rateLimit.remaining));
+    response.headers.set("X-RateLimit-Reset", String(rateLimit.reset));
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "Too many requests, please try again later." },
+        {
+          status: 429,
+          headers: {
+            ...securityHeaders,
+            "X-RateLimit-Limit": String(rateLimit.limit),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": String(rateLimit.reset),
+            "Retry-After": String(
+              Math.ceil((rateLimit.reset - Date.now()) / 1000),
+            ),
+          },
+        },
+      );
+    }
+
+    // Check if this is a protected route
+    const isProtectedPath = PROTECTED_PATHS.some((path) =>
+      request.nextUrl.pathname.startsWith(path),
+    );
+
+    // Only check authentication for protected paths
+    if (isProtectedPath) {
+      const cookieStore = new IronSessionCookieStore(
+        request.cookies as unknown as ReadonlyRequestCookies,
+      );
+      const session = await getIronSession<SessionData>(
+        cookieStore,
+        sessionOptions,
+      );
+
+      // Check if session exists and is valid
+      if (!session.isLoggedIn || !session.user) {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+
+      // Add session cookie headers to response
+      const cookieHeaders = cookieStore.getCookieHeaders();
+      for (const header of cookieHeaders) {
+        response.headers.append("Set-Cookie", header);
+      }
+      return response;
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      log.info("Traffic allowed", {
+        entity: "MIDDLEWARE",
+        operation: "geo_check",
+        country: geo?.country,
+        status: "success",
+      });
+    }
+    return response;
   } catch (error) {
-    console.error("Middleware error:", error);
-    return NextResponse.next();
+    log.error("Request failed", {
+      entity: "MIDDLEWARE",
+      operation: "middleware",
+      status: "error",
+      path: request.nextUrl.pathname,
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
+    return NextResponse.redirect(new URL("/error", request.url));
   }
 }
 
-// More specific matcher to exclude static files and api routes
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - blocked (already blocked page)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|blocked|terms).*)",
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };

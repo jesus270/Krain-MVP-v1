@@ -1,4 +1,4 @@
-import { LayoutDashboard, Rocket, User } from "lucide-react";
+import { LayoutDashboard, User } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,

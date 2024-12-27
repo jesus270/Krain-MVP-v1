@@ -3,13 +3,7 @@
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Label } from "@repo/ui/components/ui/label";
 import { formatNumber } from "@repo/utils";
-import {
-  AlertCircle,
-  CheckCircle2,
-  Share2,
-  Users,
-  Loader2,
-} from "lucide-react";
+import { AlertCircle, CheckCircle2, Share2, User } from "lucide-react";
 
 interface ReferralPointsSectionProps {
   referralsCount: number;
@@ -27,54 +21,51 @@ export function ReferralPointsSection({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Users className="h-5 w-5 text-primary" />
+        <Share2 className="h-5 w-5 text-primary" key="referral-section-icon" />
         <Label className="font-medium">Referral Points</Label>
       </div>
       <div className="rounded-lg border bg-card/50 p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Share2 className="h-4 w-4 text-primary" />
+            <User className="h-4 w-4 text-primary" key="referral-icon" />
             <span className="text-sm font-medium">Referrals</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge
-              variant={referralsCount > 0 ? "secondary" : "outline"}
-              className="text-center"
-            >
-              {isLoading ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Loading...
-                </span>
-              ) : (
-                `${formatNumber(referralPoints, locale)} pts`
-              )}
-            </Badge>
-          </div>
+          <Badge
+            variant={referralsCount > 0 ? "secondary" : "outline"}
+            className={`text-center ${isLoading ? "animate-pulse bg-muted" : ""}`}
+          >
+            {isLoading
+              ? "Loading..."
+              : `${formatNumber(referralPoints, locale)} pts`}
+          </Badge>
         </div>
         <div className="flex items-center gap-2 mt-2">
           {isLoading ? (
-            <>
-              <AlertCircle className="h-4 w-4 text-yellow-500" />
-              <p className="text-xs text-muted-foreground">
-                Loading referral data...
-              </p>
-            </>
+            <div key="referrals-exist" className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
+              <p className="text-xs text-muted-foreground">Loading...</p>
+            </div>
           ) : referralsCount > 0 ? (
-            <>
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <div key="referrals-exist" className="flex items-center gap-2">
+              <CheckCircle2
+                className="h-4 w-4 text-green-500"
+                key="referral-check"
+              />
               <p className="text-xs text-muted-foreground">
-                You've referred {formatNumber(referralsCount, locale)} friend
-                {referralsCount === 1 ? "" : "s"}
+                {formatNumber(referralsCount, locale)} successful{" "}
+                {referralsCount === 1 ? "referral" : "referrals"}
               </p>
-            </>
+            </div>
           ) : (
-            <>
-              <AlertCircle className="h-4 w-4 text-yellow-500" />
+            <div key="no-referrals" className="flex items-center gap-2">
+              <AlertCircle
+                className="h-4 w-4 text-yellow-500"
+                key="referral-alert"
+              />
               <p className="text-xs text-muted-foreground">
-                Invite friends to earn points
+                Share your referral link to earn points
               </p>
-            </>
+            </div>
           )}
         </div>
       </div>

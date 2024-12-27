@@ -8,7 +8,14 @@ module.exports = {
     "eslint:recommended",
     require.resolve("@vercel/style-guide/eslint/next"),
     "turbo",
+    "plugin:@typescript-eslint/recommended",
   ],
+  parser: "@typescript-eslint/parser",
+  parserOptions: {
+    project,
+    ecmaVersion: "latest",
+    sourceType: "module",
+  },
   globals: {
     React: true,
     JSX: true,
@@ -16,8 +23,9 @@ module.exports = {
   env: {
     node: true,
     browser: true,
+    es2022: true,
   },
-  plugins: ["only-warn"],
+  plugins: ["only-warn", "@typescript-eslint"],
   settings: {
     "import/resolver": {
       typescript: {
@@ -29,6 +37,14 @@ module.exports = {
     // Ignore dotfiles
     ".*.js",
     "node_modules/",
+    ".next",
+    "dist",
+    "build",
   ],
-  overrides: [{ files: ["*.js?(x)", "*.ts?(x)"] }],
+  overrides: [
+    {
+      files: ["*.js?(x)", "*.ts?(x)"],
+      parser: "@typescript-eslint/parser",
+    },
+  ],
 };
