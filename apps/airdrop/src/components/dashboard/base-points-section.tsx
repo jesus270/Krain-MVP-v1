@@ -27,14 +27,14 @@ export function BasePointsSection({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Coins className="h-5 w-5 text-primary" key="base-points-icon" />
+        <Coins className="h-5 w-5 text-primary" />
         <Label className="font-medium">Base Points</Label>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-lg border bg-card/50 p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <WalletIcon className="h-4 w-4 text-primary" key="wallet-icon" />
+              <WalletIcon className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium">Add Wallet</span>
             </div>
             <Badge
@@ -46,24 +46,15 @@ export function BasePointsSection({
           </div>
           <div className="flex items-center gap-2 mt-2">
             {userWalletAddress ? (
-              <div key="wallet-connected" className="flex items-center gap-2">
-                <CheckCircle2
-                  className="h-4 w-4 text-green-500"
-                  key="wallet-check"
-                />
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
                 <p className="text-xs text-muted-foreground">
                   Wallet successfully connected
                 </p>
               </div>
             ) : (
-              <div
-                key="wallet-not-connected"
-                className="flex items-center gap-2"
-              >
-                <AlertCircle
-                  className="h-4 w-4 text-yellow-500"
-                  key="wallet-alert"
-                />
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-yellow-500" />
                 <p className="text-xs text-muted-foreground">
                   Connect your wallet to earn points
                 </p>
@@ -74,7 +65,7 @@ export function BasePointsSection({
         <div className="rounded-lg border bg-card/50 p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-primary" key="account-icon" />
+              <User className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium">Create Account</span>
             </div>
             <Badge
@@ -85,10 +76,7 @@ export function BasePointsSection({
             </Badge>
           </div>
           <div className="flex items-center gap-2 mt-2">
-            <CheckCircle2
-              className="h-4 w-4 text-green-500"
-              key="wallet-check"
-            />
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
             <p className="text-xs text-muted-foreground">
               Account successfully created
             </p>

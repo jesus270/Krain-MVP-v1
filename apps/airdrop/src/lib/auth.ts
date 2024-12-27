@@ -44,20 +44,35 @@ export const sessionOptions = {
     sameSite: "lax" as const,
     path: "/",
     maxAge: 4 * 60 * 60, // 4 hours
-    // In development, domain is undefined to work with localhost
-    domain: undefined,
+    // Set domain based on environment
+    domain: getCookieDomain(process.env.DOMAIN),
   },
 };
 
 // Helper to determine cookie domain based on host
-export function getCookieDomain(host: string): string | undefined {
+export function getCookieDomain(host: string | undefined): string | undefined {
+  if (!host) {
+    return undefined;
+  }
+
   if (process.env.NODE_ENV !== "production") {
     return undefined;
   }
 
-  // For both Krain and Vercel deployments, use the exact domain
-  if (host.endsWith(".krain.ai") || host.endsWith(".vercel.app")) {
+  // For Krain deployments, use .krain.ai
+  if (host.endsWith(".krain.ai")) {
+    return ".krain.ai";
+  }
+
+  // For Vercel preview deployments, use the exact host
+  // This is needed because each preview has a unique subdomain
+  if (host.includes("-krain.vercel.app")) {
     return host;
+  }
+
+  // For production Vercel deployments, use .vercel.app
+  if (host.endsWith(".vercel.app")) {
+    return ".vercel.app";
   }
 
   return undefined;

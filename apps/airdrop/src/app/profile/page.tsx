@@ -120,7 +120,7 @@ export default function Profile() {
           <div className="rounded-lg border bg-card p-6 space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <User className="h-5 w-5" key="account-icon" />
+                <User className="h-5 w-5" />
                 <div>
                   <h3 className="font-semibold">Account</h3>
                   <p className="text-sm text-muted-foreground">
@@ -142,7 +142,7 @@ export default function Profile() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Wallet className="h-5 w-5" key="wallet-icon" />
+                <Wallet className="h-5 w-5" />
                 <div>
                   <h3 className="font-semibold">Wallet</h3>
                   <p className="text-sm text-muted-foreground font-mono">
@@ -177,18 +177,12 @@ export default function Profile() {
                 >
                   {wallet ? (
                     <>
-                      <XCircle
-                        className="h-4 w-4 mr-2"
-                        key="unlink-wallet-icon"
-                      />
+                      <XCircle className="h-4 w-4 mr-2" />
                       Unlink
                     </>
                   ) : (
                     <>
-                      <CheckCircle2
-                        className="h-4 w-4 mr-2"
-                        key="connect-wallet-icon"
-                      />
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
                       Connect
                     </>
                   )}
@@ -200,7 +194,7 @@ export default function Profile() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <XLogo className="h-5 w-5" key="twitter-icon" />
+                <XLogo className="h-5 w-5" />
                 <div>
                   <h3 className="font-semibold">X Account</h3>
                   <div className="space-y-1">
@@ -241,18 +235,12 @@ export default function Profile() {
                 >
                   {twitterSubject ? (
                     <>
-                      <XCircle
-                        className="h-4 w-4 mr-2"
-                        key="unlink-twitter-icon"
-                      />
+                      <XCircle className="h-4 w-4 mr-2" />
                       Unlink
                     </>
                   ) : (
                     <>
-                      <CheckCircle2
-                        className="h-4 w-4 mr-2"
-                        key="connect-twitter-icon"
-                      />
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
                       Connect
                     </>
                   )}
@@ -265,7 +253,7 @@ export default function Profile() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Mail className="h-5 w-5" key="email-icon" />
+                  <Mail className="h-5 w-5" />
                   <div>
                     <h3 className="font-semibold">Email</h3>
                     <p className="text-sm text-muted-foreground">
@@ -291,18 +279,12 @@ export default function Profile() {
                   >
                     {email ? (
                       <>
-                        <XCircle
-                          className="h-4 w-4 mr-2"
-                          key="unlink-email-icon"
-                        />
+                        <XCircle className="h-4 w-4 mr-2" />
                         Unlink
                       </>
                     ) : (
                       <>
-                        <CheckCircle2
-                          className="h-4 w-4 mr-2"
-                          key="connect-email-icon"
-                        />
+                        <CheckCircle2 className="h-4 w-4 mr-2" />
                         Connect
                       </>
                     )}
@@ -311,7 +293,7 @@ export default function Profile() {
               </div>
               {!email && (
                 <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <AlertCircle className="h-3 w-3" key="alert-icon" />
+                  <AlertCircle className="h-3 w-3" />
                   By connecting email, you agree to receive marketing updates
                   from us
                 </p>
