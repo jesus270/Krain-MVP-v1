@@ -59,9 +59,14 @@ export function getCookieDomain(host: string | undefined): string | undefined {
     return undefined;
   }
 
-  // For both Krain and Vercel deployments, use the exact domain
-  if (host.endsWith(".krain.ai") || host.endsWith(".vercel.app")) {
-    return host;
+  // For Krain deployments, use .krain.ai
+  if (host.endsWith(".krain.ai")) {
+    return ".krain.ai";
+  }
+
+  // For Vercel deployments, use .vercel.app
+  if (host.endsWith(".vercel.app")) {
+    return ".vercel.app";
   }
 
   return undefined;
