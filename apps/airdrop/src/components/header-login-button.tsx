@@ -1,5 +1,6 @@
 "use client";
 
+import { log } from "@/lib/logger";
 import { usePrivy } from "@privy-io/react-auth";
 import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
 import { Button } from "@repo/ui/components/ui/button";
@@ -75,7 +76,11 @@ export function HeaderLoginButton() {
                   method: "POST",
                 });
               } catch (error) {
-                console.error("[CLIENT] Error in server logout:", error);
+                log.error("Error in server logout", {
+                  entity: "CLIENT",
+                  operation: "logout",
+                  error,
+                });
               }
               // Always logout on client side regardless of server response
               logout();

@@ -134,7 +134,13 @@ async function fetchWithRetry(
       throw new Error("Invalid referral count received");
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
-      console.error(`[CLIENT] Attempt ${attempt} failed:`, lastError);
+      log.error(lastError, {
+        entity: "CLIENT",
+        operation: "get_referral_count",
+        status: "error",
+        errorMessage: lastError?.message,
+        totalAttempts: retries + 1,
+      });
 
       if (attempt <= retries) {
         // Exponential backoff with jitter
@@ -142,7 +148,8 @@ async function fetchWithRetry(
           Math.min(delay * Math.pow(2, attempt - 1), 10000) *
           (0.75 + Math.random() * 0.5);
         if (process.env.NODE_ENV === "development") {
-          console.log("[REFERRAL] Retrying count fetch", {
+          log.info("Retrying count fetch", {
+            entity: "CLIENT",
             operation: "get_referral_count",
             status: "retry",
             attempt,
@@ -154,7 +161,8 @@ async function fetchWithRetry(
     }
   }
 
-  console.error("[REFERRAL] All count fetch attempts failed", {
+  log.error(lastError, {
+    entity: "CLIENT",
     operation: "get_referral_count",
     status: "error",
     errorMessage: lastError?.message,

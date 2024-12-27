@@ -17,6 +17,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { NavLoginButton } from "./nav-login-button";
 import { capitalize } from "@repo/utils";
 import { useRouter } from "next/navigation";
+import { log } from "@/lib/logger";
 
 export function NavUser() {
   const { ready, authenticated, user, logout } = usePrivy();
@@ -99,7 +100,11 @@ export function NavUser() {
                 method: "POST",
               });
             } catch (error) {
-              console.error("[CLIENT] Error in server logout:", error);
+              log.error("Error in server logout", {
+                entity: "CLIENT",
+                operation: "logout",
+                error,
+              });
             }
             // Always logout on client side regardless of server response
             logout();

@@ -24,6 +24,7 @@ import {
 import { XLogo } from "@repo/ui/components/icons/XLogo";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
+import { log } from "@/lib/logger";
 
 export default function Profile() {
   const {
@@ -54,7 +55,11 @@ export default function Profile() {
       }
       toast.success("Wallet connected successfully");
     } catch (error) {
-      console.error("Error connecting wallet:", error);
+      log.error("Error connecting wallet", {
+        entity: "CLIENT",
+        operation: "connect_wallet",
+        error,
+      });
       toast.error("Failed to connect wallet");
     }
   };
