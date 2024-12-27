@@ -268,7 +268,7 @@ function SessionRevalidator({
           }, 5000);
         }
       } catch (error) {
-        slog.error("Error in login callback", {
+        log.error("Error in login callback", {
           entity: "CLIENT",
           operation: "check_wallet_connection",
           error,
