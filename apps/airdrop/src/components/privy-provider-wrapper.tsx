@@ -1,6 +1,13 @@
 "use client";
 
-import { PrivyProvider, usePrivy, useLogin, User } from "@privy-io/react-auth";
+import {
+  PrivyProvider,
+  usePrivy,
+  useLogin,
+  User,
+  LinkedAccountWithMetadata,
+  Wallet,
+} from "@privy-io/react-auth";
 import {
   toSolanaWalletConnectors,
   useSolanaWallets,
@@ -61,7 +68,7 @@ function SessionRevalidator({
       const solanaWallet = user?.linkedAccounts?.find(
         (account) =>
           account.type === "wallet" && account.chainType === "solana",
-      );
+      ) as Wallet | undefined;
 
       if (solanaWallet?.address) {
         if (process.env.NODE_ENV === "development") {
@@ -170,7 +177,7 @@ function SessionRevalidator({
         const solanaWallet = user?.linkedAccounts?.find(
           (account) =>
             account.type === "wallet" && account.chainType === "solana",
-        );
+        ) as Wallet | undefined;
 
         if (solanaWallet?.address) {
           if (process.env.NODE_ENV === "development") {
