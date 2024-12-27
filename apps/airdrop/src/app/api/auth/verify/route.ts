@@ -16,6 +16,7 @@ export async function GET(request: Request) {
       host,
       cookieDomain,
       nodeEnv: process.env.NODE_ENV,
+      cookies: request.headers.get("cookie"),
     });
 
     // Create custom session options for this request
@@ -32,6 +33,12 @@ export async function GET(request: Request) {
       cookieStore,
       requestSessionOptions,
     );
+
+    log.info("Session data", {
+      entity: "API-auth/verify",
+      operation: "verify_session",
+      session,
+    });
 
     // If no session or not logged in, return 401
     if (!session.isLoggedIn || !session.user) {

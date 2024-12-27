@@ -110,6 +110,15 @@ export async function POST(request: NextRequest) {
       session.lastActivity = Date.now();
       await session.save();
 
+      // Create response with session cookie
+      const response = NextResponse.json({ success: true });
+
+      // Add all cookie headers from the store
+      const cookieHeaders = cookieStore.getCookieHeaders();
+      for (const header of cookieHeaders) {
+        response.headers.append("Set-Cookie", header);
+      }
+
       log.info("Session created successfully", {
         entity: "API-auth/callback",
         operation: "auth_callback",
@@ -117,9 +126,10 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
         cookieDomain,
         host,
+        cookieHeaders: cookieHeaders.length,
       });
 
-      return NextResponse.json({ success: true });
+      return response;
     } catch (sessionError) {
       log.error("Session creation failed", {
         entity: "API-auth/callback",
