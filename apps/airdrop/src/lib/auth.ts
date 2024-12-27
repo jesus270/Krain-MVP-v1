@@ -64,7 +64,13 @@ export function getCookieDomain(host: string | undefined): string | undefined {
     return ".krain.ai";
   }
 
-  // For Vercel deployments, use .vercel.app
+  // For Vercel preview deployments, use the exact host
+  // This is needed because each preview has a unique subdomain
+  if (host.includes("-krain.vercel.app")) {
+    return host;
+  }
+
+  // For production Vercel deployments, use .vercel.app
   if (host.endsWith(".vercel.app")) {
     return ".vercel.app";
   }

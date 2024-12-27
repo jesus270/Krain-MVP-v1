@@ -117,6 +117,11 @@ export async function POST(request: NextRequest) {
       const cookieHeaders = cookieStore.getCookieHeaders();
       for (const header of cookieHeaders) {
         response.headers.append("Set-Cookie", header);
+        log.info("Setting cookie header", {
+          entity: "API-auth/callback",
+          operation: "set_cookie",
+          header,
+        });
       }
 
       log.info("Session created successfully", {
@@ -127,6 +132,7 @@ export async function POST(request: NextRequest) {
         cookieDomain,
         host,
         cookieHeaders: cookieHeaders.length,
+        sessionOptions: JSON.stringify(requestSessionOptions),
       });
 
       return response;

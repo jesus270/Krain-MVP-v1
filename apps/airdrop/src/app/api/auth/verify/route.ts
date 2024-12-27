@@ -38,6 +38,10 @@ export async function GET(request: Request) {
       entity: "API-auth/verify",
       operation: "verify_session",
       session,
+      sessionOptions: JSON.stringify(requestSessionOptions),
+      cookieStore: {
+        headers: cookieStore.getCookieHeaders(),
+      },
     });
 
     // If no session or not logged in, return 401
