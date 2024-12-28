@@ -198,7 +198,12 @@ export function ReferralCodeConfirmationCard({
         >
           {isSubmitting ? "Confirming..." : "Confirm Referral Code"}
         </Button>
-        <Button variant="outline" className="w-full" onClick={handleGenerate}>
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={handleGenerate}
+          disabled={isSubmitting}
+        >
           Generate a New Referral Code
         </Button>
       </CardFooter>
