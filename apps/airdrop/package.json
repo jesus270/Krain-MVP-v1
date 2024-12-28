@@ -31,7 +31,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",
-    "drizzle-orm": "^0.38.1",
+    "drizzle-orm": "^0.38.3",
     "iron-session": "^8.0.4",
     "lucide-react": "^0.468.0",
     "next": "15.1.0",

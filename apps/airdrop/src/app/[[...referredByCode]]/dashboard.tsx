@@ -11,6 +11,7 @@ import { getReferralsCount } from "@/actions/referral";
 import { ConnectWalletCard } from "@/components/dashboard/connect-wallet-card";
 import { PointsStatusCard } from "@/components/dashboard/points-status-card";
 import { ReferralProgramCard } from "@/components/dashboard/referral-program-card";
+import { ReferralCodeConfirmationCard } from "@/components/dashboard/referral-code-confirmation-card";
 import {
   Card,
   CardContent,
@@ -401,6 +402,15 @@ export function Dashboard({
           </CardFooter>
         </Card>
       </div>
+    );
+  }
+
+  // Show referral code confirmation if wallet exists but has no referral code
+  if (wallet && !wallet.referralCode && userWalletAddress) {
+    return (
+      <main className="container mx-auto py-8 px-4">
+        <ReferralCodeConfirmationCard walletAddress={userWalletAddress} />
+      </main>
     );
   }
 
