@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Card,
@@ -16,7 +15,6 @@ import { updateReferralCode } from "@/actions/wallet";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -27,7 +25,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@repo/ui/components/ui/input";
 import { generateReferralCode } from "@repo/utils";
-import { log } from "@/lib/logger";
 
 interface ReferralCodeConfirmationCardProps {
   walletAddress: string;
@@ -103,8 +100,6 @@ export function ReferralCodeConfirmationCard({
     },
   });
 
-  const router = useRouter();
-
   const handleConfirm = async () => {
     try {
       // Validate form before proceeding
@@ -120,7 +115,7 @@ export function ReferralCodeConfirmationCard({
         referralCode: form.getValues("referralCode"),
       });
       toast.success("Referral code confirmed successfully");
-      router.refresh();
+      window.location.reload();
     } catch (error) {
       if (error instanceof Error) {
         // Handle specific error cases
