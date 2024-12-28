@@ -4,6 +4,7 @@ import {
   timestamp,
   serial,
   index,
+  unique,
 } from "drizzle-orm/pg-core";
 import { generateReferralCode } from "@repo/utils";
 import { relations } from "drizzle-orm";
@@ -11,14 +12,11 @@ import { relations } from "drizzle-orm";
 export const walletTable = pgTable(
   "wallet",
   {
-    address: varchar("address", { length: 255 })
-      .notNull()
-      .unique()
-      .primaryKey(),
+    address: varchar("address", { length: 255 }).notNull().primaryKey(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
-    referralCode: varchar("referralCode", { length: 255 })
-      .notNull()
-      .$default(() => generateReferralCode()),
+    referralCode: varchar("referralCode", { length: 255 }).$default(() =>
+      generateReferralCode(),
+    ),
   },
   (table) => ({
     referralCodeIdx: index("idx_wallet_referralCode").on(table.referralCode),

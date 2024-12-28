@@ -35,16 +35,16 @@ interface PointsStatusCardProps {
 }
 
 export function PointsStatusCard({
-  totalPoints,
+  totalPoints = 0,
   userWalletAddress,
   userEmailAddress,
   userTwitterUsername,
-  referralsCount,
-  walletConnectionPoints,
-  accountCreationPoints,
-  referralPoints,
-  twitterPoints,
-  emailPoints,
+  referralsCount = 0,
+  walletConnectionPoints = 0,
+  accountCreationPoints = 0,
+  referralPoints = 0,
+  twitterPoints = 0,
+  emailPoints = 0,
   locale,
   isLoadingReferrals,
 }: PointsStatusCardProps) {

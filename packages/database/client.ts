@@ -1,8 +1,10 @@
-import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+import { config } from "dotenv";
 import * as schema from "./schema";
 
-// Ensure this code only runs on the server
+config({ path: ".env" });
+
 if (typeof window !== "undefined") {
   throw new Error("Database client cannot be used on the client side");
 }

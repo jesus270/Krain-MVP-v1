@@ -323,3 +323,69 @@ export async function handleSubmitWallet(input: {
     );
   }
 }
+
+export async function updateReferralCode(input: {
+  walletAddress: string;
+  referralCode: string;
+}) {
+  try {
+    log.info("Updating referral code", {
+      entity: "WALLET",
+      operation: "update_referral_code",
+      ...createUserContext(await getCurrentUser(await cookies())),
+      input,
+    });
+    // Check authentication first
+    const user = await getCurrentUser(await cookies());
+    if (!user) {
+      throw new Error("Unauthorized: Please log in first");
+    }
+
+    const wallet = await getWallet({ address: input.walletAddress });
+    const walletWithReferralCode = await getWalletByReferralCode({
+      referralCode: input.referralCode,
+    });
+
+    if (!wallet) {
+      throw new Error("Wallet not found");
+    }
+
+    if (wallet.referralCode) {
+      throw new Error("Wallet already has a referral code");
+    }
+
+    if (walletWithReferralCode) {
+      throw new Error("Referral code already exists");
+    }
+
+    const parsedReferralCode = referralCodeSchema.parse({
+      referralCode: input.referralCode,
+    });
+
+    const updatedWallet = await db
+      .update(walletTable)
+      .set({ referralCode: parsedReferralCode.referralCode })
+      .where(eq(walletTable.address, input.walletAddress))
+      .returning();
+
+    log.info("Referral code updated successfully", {
+      entity: "WALLET",
+      operation: "update_referral_code",
+      ...createUserContext(await getCurrentUser(await cookies())),
+      input,
+      updatedWallet,
+    });
+    return updatedWallet;
+  } catch (error) {
+    log.error(error, {
+      entity: "WALLET",
+      operation: "update_referral_code",
+      ...createUserContext(await getCurrentUser(await cookies())),
+      input,
+    });
+
+    throw new Error(
+      `Failed to update referral code: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
