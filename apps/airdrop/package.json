@@ -45,8 +45,8 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@krain/eslint-config": "workspace:*",
-    "@krain/typescript-config": "workspace:*",
+    "@krain/eslint-config": "workspace:",
+    "@krain/typescript-config": "workspace:",
     "@swc/core": "^1.4.2",
     "@types/node": "^20",
     "@types/react": "catalog:",

@@ -168,7 +168,7 @@ krain/
    ```json
    {
      "dependencies": {
-       "@krain/ui": "workspace:*"
+       "@krain/ui": "workspace:"
      }
    }
    ```
