@@ -13,7 +13,18 @@ import {
   useSolanaWallets,
 } from "@privy-io/react-auth/solana";
 import { useEffect, useRef, useCallback, useState } from "react";
-import { log } from "@/lib/logger";
+import { log } from "@krain/utils";
+
+// Types for props
+interface SessionRevalidatorProps {
+  children: React.ReactNode;
+  revalidateSession: (user: User, walletAddress: string) => Promise<void>;
+}
+
+interface PrivyProviderWrapperProps {
+  children: React.ReactNode;
+  privyAppId: string;
+}
 
 const solanaConnectors = toSolanaWalletConnectors({
   shouldAutoConnect: true,
@@ -22,10 +33,7 @@ const solanaConnectors = toSolanaWalletConnectors({
 function SessionRevalidator({
   children,
   revalidateSession,
-}: {
-  children: React.ReactNode;
-  revalidateSession: (user: User, walletAddress: string) => Promise<void>;
-}) {
+}: SessionRevalidatorProps) {
   const { user, login } = usePrivy();
   const { wallets: solanaWallets } = useSolanaWallets();
   const [isRevalidating, setIsRevalidating] = useState<boolean>(false);
@@ -246,34 +254,19 @@ function SessionRevalidator({
         } else {
           const errorMsg =
             "No wallet address found. Please make sure your wallet is connected and try again.";
-          setWalletError(errorMsg);
-          log.error("No Solana wallet address found after login", {
+          log.error(errorMsg, {
             entity: "CLIENT",
             operation: "check_wallet_connection",
-            error: errorMsg,
           });
-
-          if (process.env.NODE_ENV === "development") {
-            log.info("Scheduling retry in 5 seconds", {
-              entity: "CLIENT",
-              operation: "check_wallet_connection",
-            });
-          }
-
-          walletCheckRef.current = setTimeout(async () => {
-            const retryAddress = await checkWalletConnection();
-            if (retryAddress) {
-              debouncedRevalidate(user, retryAddress);
-            }
-          }, 5000);
+          setWalletError(errorMsg);
         }
       } catch (error) {
-        log.error("Error in login callback", {
+        log.error("Error in login completion handler", {
           entity: "CLIENT",
           operation: "check_wallet_connection",
           error,
         });
-        setWalletError("Failed to connect wallet. Please try again.");
+        setWalletError("Failed to validate session. Please try again.");
       }
     },
   });
@@ -284,72 +277,58 @@ function SessionRevalidator({
     };
   }, []);
 
-  // Show error message if there's a wallet error
-  if (walletError) {
-    return (
-      <>
-        <div className="fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>{walletError}</p>
-          <button
-            onClick={() => {
-              setWalletError(null);
-              login();
-            }}
-            className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-          >
-            Try Again
-          </button>
+  return (
+    <>
+      {children}
+      {walletError && (
+        <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg">
+          {walletError}
         </div>
-        {children}
-      </>
-    );
-  }
-
-  return <>{children}</>;
+      )}
+    </>
+  );
 }
 
 export function PrivyProviderWrapper({
   children,
-}: {
-  children: React.ReactNode;
-}) {
-  if (!process.env.NEXT_PUBLIC_PRIVY_APP_ID) {
-    throw new Error("NEXT_PUBLIC_PRIVY_APP_ID is not set");
-  }
+  privyAppId,
+}: PrivyProviderWrapperProps) {
+  const revalidateSession = useCallback(
+    async (user: User, walletAddress: string) => {
+      try {
+        const response = await fetch("/api/auth/callback", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user: {
+              id: user.id,
+              wallet: {
+                address: walletAddress,
+              },
+            },
+          }),
+        });
 
-  const revalidateSession = async (user: User, walletAddress: string) => {
-    try {
-      const response = await fetch("/api/auth/callback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-cache",
-          Pragma: "no-cache",
-        },
-        body: JSON.stringify({
-          user,
-          walletAddress,
-        }),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to revalidate session");
+        if (!response.ok) {
+          throw new Error("Failed to establish session");
+        }
+      } catch (error) {
+        log.error("Error establishing session", {
+          entity: "CLIENT",
+          operation: "establish_session",
+          error,
+        });
+        throw error;
       }
-    } catch (error) {
-      log.error(error, {
-        operation: "revalidate_session",
-        entity: "CLIENT",
-        userId: user.id,
-        walletAddress,
-      });
-      throw error;
-    }
-  };
+    },
+    [],
+  );
 
   return (
     <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
+      appId={privyAppId}
       config={{
         appearance: {
           accentColor: "#4c4fc6",

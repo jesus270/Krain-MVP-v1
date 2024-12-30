@@ -1,8 +1,8 @@
 "use client";
 
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Label } from "@repo/ui/components/ui/label";
-import { formatNumber } from "@repo/utils";
+import { Badge } from "@krain/ui/components/ui/badge";
+import { Label } from "@krain/ui/components/ui/label";
+import { formatNumber } from "@krain/utils";
 import { AlertCircle, CheckCircle2, Share2, User } from "lucide-react";
 
 interface ReferralPointsSectionProps {

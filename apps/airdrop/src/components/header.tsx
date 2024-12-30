@@ -1,5 +1,5 @@
-import { SidebarTrigger } from "@repo/ui/components/ui/sidebar";
-import { Separator } from "@repo/ui/components/ui/separator";
+import { SidebarTrigger } from "@krain/ui/components/ui/sidebar";
+import { Separator } from "@krain/ui/components/ui/separator";
 import HeaderBreadcrumb from "./header-breadcrumb";
 import { HeaderLoginButton } from "./header-login-button";
 import Image from "next/image";

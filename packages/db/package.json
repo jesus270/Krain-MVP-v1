@@ -1,5 +1,5 @@
 {
-  "name": "@repo/database",
+  "name": "@krain/db",
   "version": "0.0.0",
   "private": true,
   "main": "./index.ts",
@@ -12,14 +12,14 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.7.0",
-    "@repo/utils": "workspace:*",
+    "@neondatabase/serverless": "^0.10.0",
+    "@krain/utils": "workspace:",
     "drizzle-orm": "^0.38.3",
     "postgresql": "^0.0.1"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
+    "@krain/eslint-config": "workspace:",
+    "@krain/typescript-config": "workspace:",
     "@types/node": "^20",
     "@types/pg": "^8.10.9",
     "dotenv": "^16.3.1",

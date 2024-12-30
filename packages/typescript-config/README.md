@@ -5,6 +5,7 @@ Shared TypeScript configuration for Krain applications and packages.
 ## Overview
 
 This package provides consistent TypeScript configurations for different types of packages in the Krain monorepo:
+
 - Base configuration
 - React configuration
 - Next.js configuration
@@ -15,7 +16,7 @@ This package provides consistent TypeScript configurations for different types o
 The package is automatically available to all applications in the monorepo. For manual installation:
 
 ```bash
-pnpm add -D @repo/typescript-config
+pnpm add -D @krain/typescript-config
 ```
 
 ## Usage
@@ -23,27 +24,30 @@ pnpm add -D @repo/typescript-config
 Extend the appropriate configuration in your `tsconfig.json`:
 
 ### For Next.js Applications
+
 ```json
 {
-  "extends": "@repo/typescript-config/nextjs.json",
+  "extends": "@krain/typescript-config/nextjs.json",
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }
 ```
 
 ### For React Libraries
+
 ```json
 {
-  "extends": "@repo/typescript-config/react-library.json",
+  "extends": "@krain/typescript-config/react-library.json",
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]
 }
 ```
 
 ### For Base Libraries
+
 ```json
 {
-  "extends": "@repo/typescript-config/base.json",
+  "extends": "@krain/typescript-config/base.json",
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]
 }
@@ -52,6 +56,7 @@ Extend the appropriate configuration in your `tsconfig.json`:
 ## Available Configurations
 
 ### Base Configuration (`base.json`)
+
 ```json
 {
   "$schema": "https://json.schemastore.org/tsconfig",
@@ -76,9 +81,11 @@ Extend the appropriate configuration in your `tsconfig.json`:
 ```
 
 ### React Library Configuration (`react-library.json`)
+
 Extends the base configuration with React-specific settings.
 
 ### Next.js Configuration (`nextjs.json`)
+
 Extends the base configuration with Next.js-specific settings.
 
 ## Type Checking
@@ -96,4 +103,4 @@ See the [Contributing Guide](../../docs/CONTRIBUTING.md) for details on making c
 ## Documentation
 
 - [TypeScript Documentation](https://www.typescriptlang.org/docs/)
-- [TSConfig Reference](https://www.typescriptlang.org/tsconfig) 
+- [TSConfig Reference](https://www.typescriptlang.org/tsconfig)

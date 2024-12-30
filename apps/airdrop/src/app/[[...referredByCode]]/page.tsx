@@ -1,4 +1,4 @@
-import { Dashboard } from "./dashboard";
+import { HomePageClient } from "./home-page-client";
 
 export default async function Home({
   params,
@@ -7,7 +7,5 @@ export default async function Home({
 }) {
   const resolvedParams = await params;
 
-  const referredByCode = resolvedParams.referredByCode?.[0];
-
-  return <Dashboard referredByCode={referredByCode} />;
+  return <HomePageClient params={resolvedParams} />;
 }

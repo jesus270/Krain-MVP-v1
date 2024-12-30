@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Button } from "@repo/ui/components/ui/button";
+import { Badge } from "@krain/ui/components/ui/badge";
+import { Button } from "@krain/ui/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,8 +10,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@repo/ui/components/ui/card";
-import { formatNumber } from "@repo/utils";
+} from "@krain/ui/components/ui/card";
+import { formatNumber } from "@krain/utils";
 import { ArrowRight } from "lucide-react";
 import { BasePointsSection } from "./base-points-section";
 import { ReferralPointsSection } from "./referral-points-section";

@@ -1,13 +1,23 @@
+"use server";
+
 import { NextRequest, NextResponse } from "next/server";
-import { User, SessionData, sessionOptions, getCookieDomain } from "@/lib/auth";
-import { isValidSolanaAddress } from "@repo/utils";
-import { cookies } from "next/headers";
-import { getIronSession } from "iron-session";
-import { IronSessionCookieStore } from "@/lib/cookie-store";
-import { log } from "@/lib/logger";
+import {
+  getRedisClient,
+  withRateLimit,
+  getRateLimitHeaders,
+  setUserSession,
+} from "@krain/session";
+import { sessionOptions } from "@/lib/session-config";
+import { isValidSolanaAddress } from "@krain/utils";
+import { log } from "@krain/utils";
+import { Session } from "@krain/session";
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting
+    const rateLimitResponse = await withRateLimit(request.headers, "auth");
+    if (rateLimitResponse) return rateLimitResponse;
+
     log.info("Processing auth callback", {
       entity: "API-auth/callback",
       operation: "auth_callback",
@@ -23,25 +33,6 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    const host = request.headers.get("host") || "";
-    const cookieDomain = getCookieDomain(host);
-
-    log.info("Auth configuration", {
-      entity: "API-auth/callback",
-      operation: "auth_callback",
-      host,
-      cookieDomain,
-      nodeEnv: process.env.NODE_ENV,
-    });
-
-    // Create custom session options for this request
-    const requestSessionOptions = {
-      ...sessionOptions,
-      cookieOptions: {
-        ...sessionOptions.cookieOptions,
-        domain: cookieDomain,
-      },
-    };
 
     // Validate user ID
     if (!data.user?.id) {
@@ -91,48 +82,47 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user session
-    const user: User = {
+    const user = {
       id: data.user.id,
       walletAddress: walletAddress,
     };
 
     try {
-      // Create a new cookie store and session
-      const cookieStore = new IronSessionCookieStore(await cookies());
-      const session = await getIronSession<SessionData>(
-        cookieStore,
-        requestSessionOptions,
-      );
+      // Get Redis client
+      const redis = await getRedisClient();
 
-      // Set session data
-      session.user = user;
-      session.isLoggedIn = true;
-      session.lastActivity = Date.now();
+      // Create session
+      const session = await Session.create(user.id, redis, sessionOptions);
+      session.set("user", user);
+      session.set("isLoggedIn", true);
       await session.save();
 
-      // Create response with session cookie
-      const response = NextResponse.json({ success: true });
+      // Generate CSRF token
+      const csrfToken = await session.generateCsrfToken();
+      await session.save();
 
-      // Add all cookie headers from the store
-      const cookieHeaders = cookieStore.getCookieHeaders();
-      for (const header of cookieHeaders) {
-        response.headers.append("Set-Cookie", header);
-        log.info("Setting cookie header", {
-          entity: "API-auth/callback",
-          operation: "set_cookie",
-          header,
-        });
-      }
+      const response = NextResponse.json({
+        success: true,
+        userId: user.id,
+        csrfToken,
+      });
+
+      // Add user ID to headers
+      response.headers.set("x-user-id", user.id);
+
+      // Set user ID cookie
+      response.cookies.set("user_id", user.id, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+      });
 
       log.info("Session created successfully", {
         entity: "API-auth/callback",
         operation: "auth_callback",
         userId: user.id,
         timestamp: new Date().toISOString(),
-        cookieDomain,
-        host,
-        cookieHeaders: cookieHeaders.length,
-        sessionOptions: JSON.stringify(requestSessionOptions),
       });
 
       return response;

@@ -1,7 +1,7 @@
 import { Pool, QueryResult, DatabaseError } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
-import * as schema from "@repo/database";
-import { log } from "./logger";
+import * as schema from "@krain/db";
+import { log } from "@krain/utils";
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not set");

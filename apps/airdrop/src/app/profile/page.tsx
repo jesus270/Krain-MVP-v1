@@ -8,11 +8,11 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@repo/ui/components/ui/card";
-import { Button } from "@repo/ui/components/ui/button";
-import { Skeleton } from "@repo/ui/components/ui/skeleton";
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Separator } from "@repo/ui/components/ui/separator";
+} from "@krain/ui/components/ui/card";
+import { Button } from "@krain/ui/components/ui/button";
+import { Skeleton } from "@krain/ui/components/ui/skeleton";
+import { Badge } from "@krain/ui/components/ui/badge";
+import { Separator } from "@krain/ui/components/ui/separator";
 import {
   Wallet,
   Mail,
@@ -21,10 +21,10 @@ import {
   XCircle,
   User,
 } from "lucide-react";
-import { XLogo } from "@repo/ui/components/icons/XLogo";
+import { XLogo } from "@krain/ui/components/icons/XLogo";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
-import { log } from "@/lib/logger";
+import { log } from "@krain/utils";
 
 export default function Profile() {
   const {

@@ -4,8 +4,8 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@repo/ui/components/ui/card";
-import { Button } from "@repo/ui/components/ui/button";
+} from "@krain/ui/components/ui/card";
+import { Button } from "@krain/ui/components/ui/button";
 
 export const LoginCard = () => {
   const { login } = usePrivy();

@@ -5,6 +5,7 @@ Shared database utilities and models using [Drizzle ORM](https://orm.drizzle.tea
 ## Overview
 
 This package provides:
+
 - Database schema definitions
 - Type-safe query builders
 - Migration utilities
@@ -15,14 +16,14 @@ This package provides:
 The package is automatically available to all applications in the monorepo. For manual installation:
 
 ```bash
-pnpm add @repo/database
+pnpm add @krain/db
 ```
 
 ## Usage
 
 ```typescript
-import { db } from "@repo/database";
-import { airdrop } from "@repo/database/schema";
+import { db } from "@krain/db";
+import { airdrop } from "@krain/db/schema";
 
 // Query example
 const records = await db.select().from(airdrop);
@@ -41,13 +42,15 @@ The database schema is defined using Drizzle ORM:
 
 ```typescript
 // Example schema - update with actual schema
-export const airdrop = pgTable('airdrop', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  tokenMint: text('token_mint').notNull(),
-  amount: numeric('amount').notNull(),
-  recipients: array(text('recipients')).notNull(),
-  status: text('status', { enum: ['pending', 'completed', 'failed'] }).notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
+export const airdrop = pgTable("airdrop", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tokenMint: text("token_mint").notNull(),
+  amount: numeric("amount").notNull(),
+  recipients: array(text("recipients")).notNull(),
+  status: text("status", {
+    enum: ["pending", "completed", "failed"],
+  }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 ```
 
@@ -72,6 +75,7 @@ This will apply any pending migrations to the database.
 ## Environment Variables
 
 Required environment variables:
+
 - `DATABASE_URL` - Vercel Postgres connection URL
 
 ## Scripts
@@ -88,4 +92,4 @@ See the [Contributing Guide](../../docs/CONTRIBUTING.md) for details on making c
 ## Documentation
 
 - [Drizzle ORM Documentation](https://orm.drizzle.team/docs/overview)
-- [Vercel Postgres Documentation](https://vercel.com/docs/storage/vercel-postgres) 
+- [Vercel Postgres Documentation](https://vercel.com/docs/storage/vercel-postgres)

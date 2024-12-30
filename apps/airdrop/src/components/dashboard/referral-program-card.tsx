@@ -1,21 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Button } from "@repo/ui/components/ui/button";
-import { Input } from "@repo/ui/components/ui/input";
-import { Label } from "@repo/ui/components/ui/label";
+import { Badge } from "@krain/ui/components/ui/badge";
+import { Button } from "@krain/ui/components/ui/button";
+import { Input } from "@krain/ui/components/ui/input";
+import { Label } from "@krain/ui/components/ui/label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@repo/ui/components/ui/card";
-import { formatNumber } from "@repo/utils";
+} from "@krain/ui/components/ui/card";
+import { formatNumber } from "@krain/utils";
 import { toast } from "sonner";
 import { CheckCircle2, Copy, Link as LinkIcon, Loader2 } from "lucide-react";
-import { log } from "@/lib/logger";
+import { log } from "@krain/utils";
 
 interface ReferralProgramCardProps {
   referralsCount: number;

@@ -1,154 +1,144 @@
 "use server";
 
-import { referralTable } from "@repo/database";
+import { z } from "zod";
 import { eq, count } from "drizzle-orm";
-import { db } from "../lib/db";
-import { getCurrentUser } from "../lib/auth";
+import { db, referralTable } from "@krain/db";
+import {
+  getRedisClient,
+  getCurrentUser,
+  withAuth,
+  withServerActionProtection,
+} from "@krain/session";
+import { sessionOptions } from "../lib/session-config";
 import { referralSchema, referralCodeSchema } from "../lib/validations";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
-import { log } from "../lib/logger";
+import { log, AppError, ErrorCodes } from "@krain/utils";
+import { headers } from "next/headers";
 
 export const createReferral = async (input: {
   referredByCode: string;
   referredWalletAddress: string;
+  userId: string;
 }) => {
-  const start = Date.now();
-  try {
-    log.info("Creating referral", {
-      operation: "create",
-      entity: "REFERRAL",
-      referredByCode: input.referredByCode,
-    });
-    // Check authentication first
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized: Please log in first");
-    }
+  // Validate origin and apply rate limiting
+  const protectionResponse = await withServerActionProtection(
+    { headers: headers() } as any,
+    "default",
+  );
+  if (protectionResponse) throw new Error(protectionResponse.statusText);
 
-    // Validate input
-    const parsed = referralSchema.parse(input);
+  return withAuth(
+    await getRedisClient(),
+    sessionOptions,
+    input.userId,
+    async (session) => {
+      const start = Date.now();
+      try {
+        log.info("Creating referral", {
+          operation: "create",
+          entity: "REFERRAL",
+          referredByCode: input.referredByCode,
+        });
 
-    // Verify user can only create referrals for their own wallet
-    if (parsed.referredWalletAddress !== user.walletAddress) {
-      throw new Error(
-        "Unauthorized: can only create referrals for your own wallet",
-      );
-    }
+        const user = session.get("user");
+        if (!user) throw new Error("No user in session");
 
-    // Create referral
-    const [referral] = await db
-      .insert(referralTable)
-      .values({
-        referredByCode: parsed.referredByCode,
-        referredWalletAddress: parsed.referredWalletAddress,
-      })
-      .returning();
+        // Validate input
+        const parsed = referralSchema.parse(input);
 
-    if (!referral) {
-      throw new Error(
-        "Failed to create referral: No referral returned from database",
-      );
-    }
+        // Check if referral already exists
+        const existingReferral = await db.query.referralTable.findFirst({
+          where: eq(
+            referralTable.referredWalletAddress,
+            parsed.referredWalletAddress,
+          ),
+        });
 
-    const duration = Date.now() - start;
-    log.info("Referral created", {
-      operation: "create",
-      entity: "REFERRAL",
-      referredByCode: parsed.referredByCode,
-      durationMs: duration,
-      status: "success",
-    });
+        if (existingReferral) {
+          throw new Error("Referral already exists");
+        }
 
-    // Only revalidate paths in non-test environments
-    if (process.env.NODE_ENV !== "test") {
-      revalidatePath("/");
-      revalidatePath("/profile");
-    }
+        // Create referral
+        const referral = await db
+          .insert(referralTable)
+          .values({
+            referredByCode: parsed.referredByCode,
+            referredWalletAddress: parsed.referredWalletAddress,
+          })
+          .returning();
 
-    return referral;
-  } catch (error) {
-    const duration = Date.now() - start;
-    log.error(error, {
-      operation: "create",
-      entity: "REFERRAL",
-      referredByCode: input.referredByCode,
-      durationMs: duration,
-      errorType:
-        error instanceof z.ZodError
-          ? "validation"
-          : error instanceof Error && error.message.includes("Database")
-            ? "database"
-            : "unknown",
-    });
+        if (!referral || referral.length === 0) {
+          throw new Error("Failed to create referral");
+        }
 
-    if (error instanceof z.ZodError) {
-      throw new Error(
-        `Failed to create referral: ${error.errors[0]?.message || JSON.stringify(error.errors)}`,
-      );
-    }
+        // Revalidate cache
+        revalidatePath("/dashboard");
 
-    if (
-      error instanceof Error &&
-      error.message.includes("Database connection error")
-    ) {
-      throw new Error("Failed to create referral: Database connection error");
-    }
+        log.info("Referral created successfully", {
+          operation: "create",
+          entity: "REFERRAL",
+          duration: Date.now() - start,
+          referral: referral[0],
+        });
 
-    throw new Error(
-      `Failed to create referral: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
+        return referral[0];
+      } catch (error) {
+        log.error(error, {
+          operation: "create",
+          entity: "REFERRAL",
+          duration: Date.now() - start,
+          input,
+        });
+
+        throw error;
+      }
+    },
+  );
 };
 
-export const getReferralsCount = async (input: { referralCode: string }) => {
-  try {
-    // Check authentication first
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized: Please log in first");
-    }
+export const getReferralCount = async (input: {
+  referralCode: string;
+  userId: string;
+}) => {
+  // Validate origin and apply rate limiting
+  const protectionResponse = await withServerActionProtection(
+    { headers: headers() } as any,
+    "default",
+  );
+  if (protectionResponse) throw new Error(protectionResponse.statusText);
 
-    // Validate input
-    const parsed = referralCodeSchema.parse(input);
+  return withAuth(
+    await getRedisClient(),
+    sessionOptions,
+    input.userId,
+    async (session) => {
+      try {
+        const user = session.get("user");
+        if (!user) throw new Error("No user in session");
 
-    // Get referrals count
-    const [result] = await db
-      .select({ count: count() })
-      .from(referralTable)
-      .where(eq(referralTable.referredByCode, parsed.referralCode));
+        const parsed = referralCodeSchema.parse(input);
 
-    return Number(result?.count || 0);
-  } catch (error) {
-    log.error(error, {
-      operation: "get_count",
-      entity: "REFERRAL",
-      referralCode: input.referralCode,
-      errorType:
-        error instanceof z.ZodError
-          ? "validation"
-          : error instanceof Error && error.message.includes("Database")
-            ? "database"
-            : "unknown",
-    });
+        const result = await db
+          .select({ value: count() })
+          .from(referralTable)
+          .where(eq(referralTable.referredByCode, parsed.referralCode));
 
-    if (error instanceof z.ZodError) {
-      throw new Error(
-        `Failed to get referrals count: ${error.errors[0]?.message || JSON.stringify(error.errors)}`,
-      );
-    }
+        return result[0]?.value || 0;
+      } catch (error) {
+        log.error(error, {
+          entity: "REFERRAL",
+          operation: "get_referral_count",
+          input,
+        });
 
-    if (
-      error instanceof Error &&
-      error.message.includes("Database connection error")
-    ) {
-      throw new Error(
-        "Failed to get referrals count: Database connection error",
-      );
-    }
+        if (error instanceof z.ZodError) {
+          throw new Error("String must contain exactly 6 character(s)");
+        }
 
-    throw new Error(
-      `Failed to get referrals count: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
+        throw new Error(
+          `Failed to get referrals count: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    },
+  );
 };

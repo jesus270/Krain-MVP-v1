@@ -6,7 +6,7 @@ import {
   index,
   unique,
 } from "drizzle-orm/pg-core";
-import { generateReferralCode } from "@repo/utils";
+import { generateReferralCode } from "@krain/utils";
 import { relations } from "drizzle-orm";
 
 export const walletTable = pgTable(

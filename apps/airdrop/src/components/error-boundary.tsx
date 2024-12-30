@@ -1,13 +1,13 @@
 import React from "react";
-import { Button } from "@repo/ui/components/ui/button";
+import { Button } from "@krain/ui/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@repo/ui/components/ui/card";
-import { log } from "@/lib/logger";
+} from "@krain/ui/components/ui/card";
+import { log } from "@krain/utils";
 
 interface ErrorBoundaryState {
   hasError: boolean;

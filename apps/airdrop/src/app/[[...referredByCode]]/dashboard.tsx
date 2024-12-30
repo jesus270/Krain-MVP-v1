@@ -4,10 +4,10 @@
 
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
-import { Wallet } from "@repo/database";
-import { useLocale } from "@repo/utils";
+import { Wallet } from "@krain/db";
+import { useLocale } from "@krain/utils";
 import { handleSubmitWallet } from "@/actions/wallet";
-import { getReferralsCount } from "@/actions/referral";
+import { getReferralCount } from "@/actions/referral";
 import { ConnectWalletCard } from "@/components/dashboard/connect-wallet-card";
 import { PointsStatusCard } from "@/components/dashboard/points-status-card";
 import { ReferralProgramCard } from "@/components/dashboard/referral-program-card";
@@ -18,18 +18,12 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@repo/ui/components/ui/card";
-import { Button } from "@repo/ui/components/ui/button";
-import { log } from "@/lib/logger";
+} from "@krain/ui/components/ui/card";
+import { Button } from "@krain/ui/components/ui/button";
+import { log } from "@krain/utils";
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2 seconds
-const SESSION_VERIFY_MAX_RETRIES = 3;
-
-interface ClientError extends Error {
-  code?: string;
-  context?: Record<string, unknown>;
-}
 
 function isNetworkError(error: unknown): boolean {
   return (
@@ -38,138 +32,6 @@ function isNetworkError(error: unknown): boolean {
       error.message.toLowerCase().includes("connection") ||
       error.message.toLowerCase().includes("timeout"))
   );
-}
-
-function logClientError(error: unknown, context: Record<string, unknown> = {}) {
-  const clientError: ClientError =
-    error instanceof Error ? error : new Error(String(error));
-  log.error(clientError, {
-    operation: "client_error",
-    entity: "CLIENT",
-    ...context,
-  });
-  return clientError;
-}
-
-async function verifySession(attempt = 1): Promise<boolean> {
-  try {
-    // Maximum time to wait for session (15 seconds)
-    const SESSION_TIMEOUT = 15000;
-    const POLL_INTERVAL = 500;
-    const startTime = Date.now();
-
-    while (Date.now() - startTime < SESSION_TIMEOUT) {
-      log.info("Polling session verification", {
-        operation: "verify_session",
-        entity: "AUTH",
-        attempt,
-        elapsedMs: Date.now() - startTime,
-      });
-
-      const verifyResponse = await fetch("/api/auth/verify", {
-        credentials: "include",
-        headers: {
-          "Cache-Control": "no-cache",
-          Pragma: "no-cache",
-        },
-      });
-
-      if (verifyResponse.ok) {
-        log.info("Session verification successful", {
-          operation: "verify_session",
-          entity: "AUTH",
-          attempt,
-          elapsedMs: Date.now() - startTime,
-          responseStatus: verifyResponse.status,
-        });
-        return true;
-      }
-
-      // If we get a non-401 error, something else is wrong
-      if (verifyResponse.status !== 401) {
-        log.error(new Error(`Unexpected status: ${verifyResponse.status}`), {
-          operation: "verify_session",
-          entity: "AUTH",
-          status: "error",
-          responseStatus: verifyResponse.status,
-          attempt,
-        });
-        return false;
-      }
-
-      // Wait before next poll
-      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
-    }
-
-    log.error(new Error("Session verification timed out"), {
-      operation: "verify_session",
-      entity: "AUTH",
-      status: "timeout",
-      timeoutMs: SESSION_TIMEOUT,
-      attempts: attempt,
-    });
-    return false;
-  } catch (error) {
-    log.error(error, {
-      operation: "verify_session",
-      attempt,
-    });
-    return false;
-  }
-}
-
-async function fetchWithRetry(
-  referralCode: string,
-  retries = MAX_RETRIES,
-  delay = RETRY_DELAY,
-): Promise<number> {
-  let lastError: Error | undefined;
-  let currentDelay = delay;
-
-  for (let attempt = 1; attempt <= retries + 1; attempt++) {
-    try {
-      const count = await getReferralsCount({ referralCode });
-      if (typeof count === "number") {
-        return count;
-      }
-      throw new Error("Invalid referral count received");
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
-      log.error(lastError, {
-        entity: "CLIENT",
-        operation: "get_referral_count",
-        status: "error",
-        errorMessage: lastError?.message,
-        totalAttempts: retries + 1,
-      });
-
-      if (attempt <= retries) {
-        // Exponential backoff with jitter
-        currentDelay =
-          Math.min(delay * Math.pow(2, attempt - 1), 10000) *
-          (0.75 + Math.random() * 0.5);
-        if (process.env.NODE_ENV === "development") {
-          log.info("Retrying count fetch", {
-            entity: "CLIENT",
-            operation: "get_referral_count",
-            status: "retry",
-            attempt,
-            nextAttemptMs: Math.round(currentDelay),
-          });
-        }
-        await new Promise((resolve) => setTimeout(resolve, currentDelay));
-      }
-    }
-  }
-
-  log.error(lastError, {
-    entity: "CLIENT",
-    operation: "get_referral_count",
-    status: "error",
-    errorMessage: lastError?.message,
-    totalAttempts: retries + 1,
-  });
-  throw lastError;
 }
 
 export function Dashboard({
@@ -189,15 +51,23 @@ export function Dashboard({
   const userWalletAddress = user?.wallet?.address ?? undefined;
   const userTwitterUsername = user?.twitter?.username ?? undefined;
 
+  // Load wallet and referral data
   useEffect(() => {
-    // Only proceed if authenticated and have wallet address
-    if (!authenticated || !userWalletAddress || !ready) {
+    // Reset loading states when not authenticated
+    if (!authenticated || !ready) {
       setIsLoadingWallet(false);
       setIsLoadingReferrals(false);
       return;
     }
 
-    let isMounted = true;
+    // Only proceed if authenticated and have wallet address
+    if (!userWalletAddress) {
+      setIsLoadingWallet(false);
+      setIsLoadingReferrals(false);
+      return;
+    }
+
+    let isDataMounted = true;
     let retryTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const loadData = async () => {
@@ -206,94 +76,50 @@ export function Dashboard({
         setIsLoadingReferrals(true);
         setError(undefined);
 
-        // Wait for wallet to be available first
-        let walletAttempts = 0;
-        while (!userWalletAddress && walletAttempts < 5) {
-          log.info("Waiting for wallet address", {
-            operation: "load_data",
-            entity: "CLIENT",
-            status: "waiting",
-            attempt: walletAttempts + 1,
-          });
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          walletAttempts++;
-        }
-
-        if (!userWalletAddress) {
-          log.error(
-            new Error("Wallet address not available after max attempts"),
-            {
-              operation: "load_data",
-              entity: "CLIENT",
-              status: "error",
-            },
-          );
-          setError("Unable to get wallet address. Please try again.");
-          return;
-        }
-
-        // Verify session with retries
-        const verified = await verifySession();
-        if (!verified) {
-          setError("Unable to verify session. Please refresh and try again.");
-          return;
-        }
-
-        if (!isMounted) return;
-
-        let walletResult: Wallet | undefined;
         try {
+          // Submit wallet
           const wallet = await handleSubmitWallet({
             walletAddress: userWalletAddress,
             referredByCode,
+            userId: user?.id ?? "",
           });
 
-          if (isMounted && wallet) {
+          if (isDataMounted && wallet) {
             setWallet(wallet);
             setIsLoadingWallet(false);
-            walletResult = wallet;
+
+            // Only fetch referrals if we have a wallet and referral code
+            if (wallet.referralCode) {
+              try {
+                const count = await getReferralCount({
+                  referralCode: wallet.referralCode,
+                  userId: user?.id ?? "",
+                });
+                if (isDataMounted) {
+                  setReferralsCount(count);
+                }
+              } catch (error) {
+                if (isDataMounted) {
+                  log.error(error, {
+                    entity: "CLIENT",
+                    operation: "load_referrals",
+                    walletAddress: userWalletAddress,
+                  });
+                  setError("Failed to load referrals. Please try again.");
+                }
+              }
+            }
           }
-        } catch (error) {
-          if (isMounted) {
-            const clientError = logClientError(error, {
+        } catch (e) {
+          const error = e as Error;
+          if (isDataMounted) {
+            log.error(error, {
+              entity: "CLIENT",
               operation: "load_wallet",
               walletAddress: userWalletAddress,
             });
 
-            // If it's an unauthorized error, try verifying session again
-            if (clientError.message.includes("Unauthorized")) {
-              log.info("Unauthorized error, retrying session verification", {
-                operation: "load_wallet",
-                entity: "CLIENT",
-                status: "retry",
-              });
-              const reVerified = await verifySession();
-              if (reVerified) {
-                // Retry wallet submission
-                try {
-                  const wallet = await handleSubmitWallet({
-                    walletAddress: userWalletAddress,
-                    referredByCode,
-                  });
-                  if (isMounted && wallet) {
-                    setWallet(wallet);
-                    setIsLoadingWallet(false);
-                    walletResult = wallet;
-                  }
-                } catch (retryError) {
-                  setError(
-                    `${retryError instanceof Error ? retryError.message : String(retryError)}. Please refresh to try again.`,
-                  );
-                }
-              } else {
-                setError(
-                  "Session verification failed. Please refresh to try again.",
-                );
-              }
-              return;
-            }
-
-            setError(`${clientError.message}. Please refresh to try again.`);
+            setError(`${error.message}. Please try again.`);
 
             // Retry after delay if it's a network error
             if (isNetworkError(error)) {
@@ -301,122 +127,69 @@ export function Dashboard({
                 operation: "load_wallet",
                 entity: "CLIENT",
                 status: "retry",
-                nextAttemptMs: RETRY_DELAY,
               });
               retryTimeout = setTimeout(loadData, RETRY_DELAY);
-              return;
-            }
-          }
-        }
-
-        if (!isMounted) return;
-
-        // Get referrals count with retry logic
-        if (walletResult?.referralCode) {
-          try {
-            const count = await fetchWithRetry(walletResult.referralCode);
-            if (isMounted) {
-              setReferralsCount(count);
-            }
-          } catch (error) {
-            if (isMounted) {
-              const clientError = logClientError(error, {
-                operation: "load_referrals",
-                referralCode: walletResult?.referralCode,
-              });
-
-              setError(`${clientError.message}. Please refresh to try again.`);
-
-              if (isNetworkError(error)) {
-                log.info("Scheduling retry", {
-                  operation: "load_referrals",
-                  entity: "CLIENT",
-                  status: "retry",
-                  nextAttemptMs: RETRY_DELAY,
-                });
-                retryTimeout = setTimeout(loadData, RETRY_DELAY);
-                return;
-              }
             }
           }
         }
       } catch (error) {
-        if (isMounted) {
-          const clientError = logClientError(error, {
-            operation: "load_dashboard",
+        if (isDataMounted) {
+          log.error(error, {
+            entity: "CLIENT",
+            operation: "load_data",
+            walletAddress: userWalletAddress,
           });
-
-          setError(`${clientError.message}. Please refresh to try again.`);
-
-          if (isNetworkError(error)) {
-            log.info("Scheduling retry", {
-              operation: "load_dashboard",
-              entity: "CLIENT",
-              status: "retry",
-              nextAttemptMs: RETRY_DELAY,
-            });
-            retryTimeout = setTimeout(loadData, RETRY_DELAY);
-          }
+          setError("Failed to load data. Please try again.");
         }
       } finally {
-        if (isMounted) {
+        if (isDataMounted) {
           setIsLoadingWallet(false);
           setIsLoadingReferrals(false);
         }
       }
     };
 
-    // Start loading immediately
+    // Only load data if authenticated and have wallet address
     loadData();
 
     return () => {
-      isMounted = false;
+      isDataMounted = false;
       if (retryTimeout) {
         clearTimeout(retryTimeout);
       }
     };
-  }, [authenticated, userWalletAddress, referredByCode, ready]);
+  }, [authenticated, ready, userWalletAddress, referredByCode, user?.id]);
 
-  // Show connect wallet card if not authenticated
-  if (ready && !authenticated) {
-    return (
-      <main className="container mx-auto py-8 px-4">
-        <ConnectWalletCard />
-      </main>
-    );
+  // Show connect wallet card if not authenticated or not ready
+  if (!authenticated || !ready) {
+    return <ConnectWalletCard />;
   }
 
-  // Show error state if any
+  // Show connect wallet card if no wallet address
+  if (!userWalletAddress) {
+    return <ConnectWalletCard />;
+  }
+
+  // Show error state
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Error</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-red-500">{error}</div>
-          </CardContent>
-          <CardFooter>
-            <Button onClick={() => window.location.reload()}>Retry</Button>
-          </CardFooter>
-        </Card>
-      </div>
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>Error</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-destructive">{error}</p>
+        </CardContent>
+        <CardFooter>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </CardFooter>
+      </Card>
     );
   }
 
-  // Show referral code confirmation if wallet exists but has no referral code
-  if (wallet && !wallet.referralCode && userWalletAddress) {
-    return (
-      <main className="container mx-auto py-8 px-4">
-        <ReferralCodeConfirmationCard walletAddress={userWalletAddress} />
-      </main>
-    );
-  }
-
-  // Show main dashboard content with progressive loading
+  // Show wallet status
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-8">
       <PointsStatusCard
         totalPoints={
           5000 + // Base points for having an account
@@ -448,6 +221,9 @@ export function Dashboard({
         isLoadingWallet={isLoadingWallet}
         isLoadingReferrals={isLoadingReferrals}
       />
+      {referredByCode && !wallet?.referralCode && (
+        <ReferralCodeConfirmationCard walletAddress={userWalletAddress || ""} />
+      )}
     </div>
   );
 }

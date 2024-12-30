@@ -7,15 +7,21 @@
     "SESSION_SECRET",
     "NEXT_PUBLIC_PRIVY_APP_ID",
     "MONITORING_ORIGINS",
-    "DOMAIN"
+    "DOMAIN",
+    "NEXT_PUBLIC_APP_URL",
+    "KV_REST_API_URL",
+    "KV_REST_API_TOKEN",
+    "KV_REST_API_READ_ONLY_TOKEN",
+    "KV_URL",
+    "NEXT_PUBLIC_INTERCOM_APP_ID"
   ],
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["^build"]
     },
     "dev": {
       "cache": false,

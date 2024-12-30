@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isValidSolanaAddress } from "@repo/utils";
+import { isValidSolanaAddress } from "@krain/utils";
 
 export const walletSchema = z.object({
   address: z

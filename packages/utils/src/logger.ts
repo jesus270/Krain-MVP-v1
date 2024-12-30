@@ -1,4 +1,8 @@
-import { User } from "./auth";
+// Generic user interface for logging
+interface BaseUser {
+  id?: string;
+  walletAddress?: string;
+}
 
 interface LogContext {
   operation: string;
@@ -125,7 +129,7 @@ class Logger {
 
 export const log = new Logger();
 
-export function createUserContext(user: User | null) {
+export function createUserContext(user: BaseUser | null) {
   return {
     userId: user?.id,
     walletAddress: user?.walletAddress,
