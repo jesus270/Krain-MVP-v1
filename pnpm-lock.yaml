@@ -56,6 +56,9 @@ importers:
       '@krain/session':
         specifier: 'workspace:'
         version: link:../../packages/session
+      '@krain/typescript-config':
+        specifier: 'workspace:'
+        version: link:../../packages/typescript-config
       '@krain/ui':
         specifier: 'workspace:'
         version: link:../../packages/ui
@@ -147,9 +150,6 @@ importers:
       '@krain/eslint-config':
         specifier: 'workspace:'
         version: link:../../packages/eslint-config
-      '@krain/typescript-config':
-        specifier: 'workspace:'
-        version: link:../../packages/typescript-config
       '@swc/core':
         specifier: ^1.4.2
         version: 1.10.4(@swc/helpers@0.5.15)
