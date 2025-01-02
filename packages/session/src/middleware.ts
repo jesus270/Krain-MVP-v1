@@ -27,18 +27,14 @@ function getAllowedOrigins(): string[] {
     throw new Error("DOMAIN environment variable must be set");
   }
 
-  const origins = [domain];
-  if (!domain.startsWith("localhost")) {
-    origins.push(`www.${domain}`);
-  }
-
-  console.log("Allowed origins:", origins);
-  return origins;
+  return [domain];
 }
 
 const ALLOWED_ORIGINS = getAllowedOrigins();
 
-function parseOriginDomain(url: string): string {
+function parseOriginDomain(url: string | null): string {
+  if (!url) return "";
+
   try {
     // Handle localhost with port
     if (url.includes("://localhost:")) {
@@ -54,20 +50,33 @@ function parseOriginDomain(url: string): string {
 }
 
 export async function validateOrigin(headers: HeadersLike): Promise<boolean> {
+  // Get the host header which will be present even without origin/referer
+  const host = await getHeaderValue(headers, "host");
+  console.log("Received host:", host);
+
   const origin = await getHeaderValue(headers, "origin");
   const referer = await getHeaderValue(headers, "referer");
 
   console.log("Received origin:", origin);
   console.log("Received referer:", referer);
 
-  // In development, allow requests without origin/referer
+  // If no origin/referer, use the host header
   if (!origin && !referer) {
-    const isDev = process.env.NODE_ENV === "development";
-    console.log("No origin/referer, isDev:", isDev);
-    return isDev;
+    if (!host) {
+      console.log("No origin/referer/host headers");
+      return false;
+    }
+    const hostDomain = host.split(":")[0]; // Remove port if present
+    console.log("Using host header:", hostDomain);
+    return ALLOWED_ORIGINS.includes(hostDomain);
   }
 
-  const originDomain = parseOriginDomain(origin || referer || "");
+  const originUrl = origin || referer;
+  if (!originUrl) {
+    return false;
+  }
+
+  const originDomain = parseOriginDomain(originUrl);
   console.log("Checking domain:", originDomain);
   console.log("Against allowed origins:", ALLOWED_ORIGINS);
   return ALLOWED_ORIGINS.includes(originDomain);
