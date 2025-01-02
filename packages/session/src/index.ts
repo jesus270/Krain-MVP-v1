@@ -26,3 +26,6 @@ export {
 
 // Rate limiting
 export { RateLimiter } from "./rate-limit";
+
+// Callback handler
+export { handleAuthCallback } from "./routes/callback";

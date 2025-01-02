@@ -8,6 +8,7 @@ export interface AuthConfig {
   privyAppId: string | undefined;
   loadingTitle?: string;
   loadingDescription?: string;
+  privyLoginMethods?: ("wallet" | "email" | "twitter")[] | undefined;
 }
 
 interface AuthProviderProps {
@@ -27,7 +28,10 @@ export function AuthProvider({ children, config }: AuthProviderProps) {
   }
 
   return (
-    <PrivyProviderWrapper privyAppId={config.privyAppId}>
+    <PrivyProviderWrapper
+      privyAppId={config.privyAppId}
+      loginMethods={config.privyLoginMethods}
+    >
       <AuthStateManager config={config}>{children}</AuthStateManager>
     </PrivyProviderWrapper>
   );

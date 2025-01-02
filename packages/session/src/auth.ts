@@ -24,11 +24,15 @@ export async function setUserSession(
   user: User,
   request: Request,
 ): Promise<void> {
-  const session = await Session.create(
-    user.id,
-    await getRedisClient(),
+  const session = await Session.create({
+    userId: user.id,
+    data: {
+      user,
+      isLoggedIn: true,
+    },
+    redis: await getRedisClient(),
     options,
-  );
+  });
 
   // Check login attempts
   const canLogin = await session.checkLoginAttempts();

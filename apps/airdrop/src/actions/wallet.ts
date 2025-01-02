@@ -8,7 +8,7 @@ import {
   getCurrentUser,
   withServerActionProtection,
 } from "@krain/session";
-import { sessionOptions } from "../lib/session-config";
+import { defaultSessionConfig as sessionOptions } from "@krain/session";
 import { eq } from "drizzle-orm";
 import { generateReferralCode, isValidSolanaAddress } from "@krain/utils";
 import { createReferral } from "./referral";
@@ -29,14 +29,6 @@ const referredBySchema = z.object({
   referredByCode: z.string().length(6),
 });
 
-// Helper for logging context
-const createLogContext = (
-  user: { id: string; walletAddress: string } | null,
-) => ({
-  userId: user?.id,
-  walletAddress: user?.walletAddress,
-});
-
 export async function createWallet(input: { address: string; userId: string }) {
   // Validate origin and apply rate limiting
   const protectionResponse = await withServerActionProtection(
@@ -46,125 +38,109 @@ export async function createWallet(input: { address: string; userId: string }) {
   if (protectionResponse)
     throw new AppError(ErrorCodes.UNAUTHORIZED, "Unauthorized request");
 
-  return withAuth(
-    await getRedisClient(),
-    sessionOptions,
-    input.userId,
-    async (session) => {
-      try {
-        const user = session.get("user");
-        if (!user) throw new Error("No user in session");
+  return withAuth(input.userId, async (session) => {
+    try {
+      const user = session.get("user");
+      if (!user) throw new Error("No user in session");
 
-        // Validate input
-        const parsed = walletAddressSchema.parse(input);
+      // Validate input
+      const parsed = walletAddressSchema.parse(input);
 
-        // Verify user can only create wallet for their own address
-        if (parsed.address !== user.walletAddress) {
-          throw new AppError(
-            "Unauthorized: You can only create a wallet for your own address",
-            ErrorCodes.UNAUTHORIZED,
-            401,
-          );
-        }
-
-        log.info("Creating new wallet", {
-          operation: "create_wallet",
-          entity: "WALLET",
-          ...createLogContext(user),
-          walletAddress: parsed.address,
-        });
-
-        // Create wallet
-        const wallet = await db
-          .insert(walletTable)
-          .values({
-            address: parsed.address,
-            referralCode: generateReferralCode(),
-          })
-          .returning();
-
-        if (!wallet || wallet.length === 0) {
-          throw new AppError(
-            "Failed to create wallet: No wallet returned",
-            ErrorCodes.DATABASE_ERROR,
-            500,
-          );
-        }
-
-        log.info("Wallet created successfully", {
-          operation: "create_wallet",
-          ...createLogContext(user),
-          entity: "WALLET",
-          walletAddress: parsed.address,
-          referralCode: wallet?.[0]?.referralCode,
-        });
-
-        return wallet[0];
-      } catch (error) {
-        if (error instanceof AppError) {
-          throw error;
-        }
-
-        const currentUser = await getCurrentUser(
-          await getRedisClient(),
-          sessionOptions,
-        );
-        log.error(error, {
-          operation: "create_wallet",
-          entity: "WALLET",
-          ...createLogContext(currentUser),
-          inputAddress: input.address,
-        });
-
+      // Verify user can only create wallet for their own address
+      if (parsed.address !== user.wallet.address) {
         throw new AppError(
-          "Failed to create wallet",
-          ErrorCodes.WALLET_ERROR,
+          "Unauthorized: You can only create a wallet for your own address",
+          ErrorCodes.UNAUTHORIZED,
+          401,
+        );
+      }
+
+      log.info("Creating new wallet", {
+        operation: "create_wallet",
+        entity: "WALLET",
+        user,
+        walletAddress: parsed.address,
+      });
+
+      // Create wallet
+      const wallet = await db
+        .insert(walletTable)
+        .values({
+          address: parsed.address,
+          referralCode: generateReferralCode(),
+        })
+        .returning();
+
+      if (!wallet || wallet.length === 0) {
+        throw new AppError(
+          "Failed to create wallet: No wallet returned",
+          ErrorCodes.DATABASE_ERROR,
           500,
         );
       }
-    },
-  );
+
+      log.info("Wallet created successfully", {
+        operation: "create_wallet",
+        entity: "WALLET",
+        user,
+        walletAddress: parsed.address,
+        referralCode: wallet?.[0]?.referralCode,
+      });
+
+      return wallet[0];
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      const currentUser = await getCurrentUser(input.userId);
+      log.error(error, {
+        operation: "create_wallet",
+        entity: "WALLET",
+        currentUser,
+        inputAddress: input.address,
+      });
+
+      throw new AppError(
+        "Failed to create wallet",
+        ErrorCodes.WALLET_ERROR,
+        500,
+      );
+    }
+  });
 }
 
 export async function getWalletByReferralCode(input: {
   referralCode: string;
   userId: string;
 }) {
-  return withAuth(
-    await getRedisClient(),
-    sessionOptions,
-    input.userId,
-    async (session) => {
-      try {
-        const parsed = referralCodeSchema.parse(input);
+  return withAuth(input.userId, async (session) => {
+    try {
+      const parsed = referralCodeSchema.parse(input);
 
-        const wallet = await db.query.walletTable.findFirst({
-          where: eq(walletTable.referralCode, parsed.referralCode),
-        });
+      const wallet = await db.query.walletTable.findFirst({
+        where: eq(walletTable.referralCode, parsed.referralCode),
+      });
 
-        return wallet;
-      } catch (error) {
-        const currentUser = await getCurrentUser(
-          await getRedisClient(),
-          sessionOptions,
-        );
-        log.error(error, {
-          entity: "WALLET",
-          operation: "get_wallet_by_referral_code",
-          ...createLogContext(currentUser),
-          input,
-        });
+      return wallet;
+    } catch (error) {
+      const currentUser = await getCurrentUser(input.userId);
+      log.error(error, {
+        entity: "WALLET",
+        operation: "get_wallet_by_referral_code",
+        currentUser,
+        input,
+      });
 
-        if (error instanceof z.ZodError) {
-          throw new Error("String must contain exactly 6 character(s)");
-        }
-
-        throw new Error(
-          `Failed to get referrals count: ${error instanceof Error ? error.message : String(error)}`,
-        );
+      if (error instanceof z.ZodError) {
+        throw new Error("String must contain exactly 6 character(s)");
       }
-    },
-  );
+
+      throw new Error(
+        `Failed to get referrals count: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  });
 }
 
 export interface WalletWithReferredBy extends Wallet {
@@ -175,54 +151,46 @@ export async function getWallet(input: {
   address: string;
   userId: string;
 }): Promise<WalletWithReferredBy | undefined> {
-  return withAuth(
-    await getRedisClient(),
-    sessionOptions,
-    input.userId,
-    async (session) => {
-      try {
-        const user = session.get("user");
-        if (!user) throw new Error("No user in session");
+  return withAuth(input.userId, async (session) => {
+    try {
+      const user = session.get("user");
+      if (!user) throw new Error("No user in session");
 
-        // Validate input
-        const parsed = walletAddressSchema.parse(input);
+      // Validate input
+      const parsed = walletAddressSchema.parse(input);
 
-        // Verify user can only access their own wallet
-        if (parsed.address !== user.walletAddress) {
-          throw new Error("Unauthorized: You can only access your own wallet");
-        }
-
-        // Get wallet
-        const wallet = await db.query.walletTable.findFirst({
-          where: eq(walletTable.address, parsed.address),
-          with: {
-            referredBy: true,
-          },
-        });
-
-        return wallet as WalletWithReferredBy | undefined;
-      } catch (error) {
-        const currentUser = await getCurrentUser(
-          await getRedisClient(),
-          sessionOptions,
-        );
-        log.error(error, {
-          entity: "WALLET",
-          operation: "get_wallet",
-          ...createLogContext(currentUser),
-          input,
-        });
-
-        if (error instanceof z.ZodError) {
-          throw new Error("Invalid Solana address");
-        }
-
-        throw new Error(
-          `Failed to get wallet: ${error instanceof Error ? error.message : String(error)}`,
-        );
+      // Verify user can only access their own wallet
+      if (parsed.address !== user.wallet.address) {
+        throw new Error("Unauthorized: You can only access your own wallet");
       }
-    },
-  );
+
+      // Get wallet
+      const wallet = await db.query.walletTable.findFirst({
+        where: eq(walletTable.address, parsed.address),
+        with: {
+          referredBy: true,
+        },
+      });
+
+      return wallet as WalletWithReferredBy | undefined;
+    } catch (error) {
+      const currentUser = await getCurrentUser(input.userId);
+      log.error(error, {
+        entity: "WALLET",
+        operation: "get_wallet",
+        currentUser,
+        input,
+      });
+
+      if (error instanceof z.ZodError) {
+        throw new Error("Invalid Solana address");
+      }
+
+      throw new Error(
+        `Failed to get wallet: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  });
 }
 
 export async function isValidReferralCode(input: {
@@ -230,50 +198,45 @@ export async function isValidReferralCode(input: {
   referredWallet: WalletWithReferredBy;
   userId: string;
 }) {
-  return withAuth(
-    await getRedisClient(),
-    sessionOptions,
-    input.userId,
-    async (session) => {
-      const user = session.get("user");
-      if (!user) throw new Error("No user in session");
+  return withAuth(input.userId, async (session) => {
+    const user = session.get("user");
+    if (!user) throw new Error("No user in session");
 
-      if (input.referredWallet.address !== user.walletAddress) {
-        throw new Error(
-          "Unauthorized: You can only check your own referral code",
-        );
-      }
+    if (input.referredWallet.address !== user.wallet.address) {
+      throw new Error(
+        "Unauthorized: You can only check your own referral code",
+      );
+    }
 
-      if (input.referredWallet.referredBy) {
-        throw new Error("Wallet already has a referral");
-      }
+    if (input.referredWallet.referredBy) {
+      throw new Error("Wallet already has a referral");
+    }
 
-      if (!input.referredWallet) {
-        throw new Error("Referred wallet not found");
-      }
+    if (!input.referredWallet) {
+      throw new Error("Referred wallet not found");
+    }
 
-      const referralWallet = await getWalletByReferralCode({
-        referralCode: input.referredByCode,
-        userId: input.userId,
-      });
+    const referralWallet = await getWalletByReferralCode({
+      referralCode: input.referredByCode,
+      userId: input.userId,
+    });
 
-      if (!referralWallet) {
-        throw new Error("Referral code wallet not found");
-      }
+    if (!referralWallet) {
+      throw new Error("Referral code wallet not found");
+    }
 
-      if (referralWallet.address === input.referredWallet.address) {
-        throw new Error(
-          "Referral code wallet cannot be the same as referred wallet",
-        );
-      }
+    if (referralWallet.address === input.referredWallet.address) {
+      throw new Error(
+        "Referral code wallet cannot be the same as referred wallet",
+      );
+    }
 
-      if (referralWallet.createdAt > input.referredWallet.createdAt) {
-        throw new Error("Referral code wallet is newer than referred wallet");
-      }
+    if (referralWallet.createdAt > input.referredWallet.createdAt) {
+      throw new Error("Referral code wallet is newer than referred wallet");
+    }
 
-      return true;
-    },
-  );
+    return true;
+  });
 }
 
 export async function handleSubmitWallet(input: {
@@ -281,129 +244,121 @@ export async function handleSubmitWallet(input: {
   referredByCode?: string;
   userId: string;
 }) {
-  return withAuth(
-    await getRedisClient(),
-    sessionOptions,
-    input.userId,
-    async (session) => {
-      try {
-        const user = session.get("user");
-        if (!user) throw new Error("No user in session");
+  return withAuth(input.userId, async (session) => {
+    try {
+      const user = session.get("user");
+      if (!user) throw new Error("No user in session");
 
-        // Verify user can only submit their own wallet
-        if (input.walletAddress !== user.walletAddress) {
-          throw new AppError(
-            "Unauthorized: You can only submit your own wallet",
-            ErrorCodes.UNAUTHORIZED,
-            401,
-          );
-        }
+      // Verify user can only submit their own wallet
+      if (input.walletAddress !== user.wallet.address) {
+        throw new AppError(
+          "Unauthorized: You can only submit your own wallet",
+          ErrorCodes.UNAUTHORIZED,
+          401,
+        );
+      }
 
-        // Parse input
-        const parsedReferredByCode = input.referredByCode
-          ? referredBySchema.parse({
-              referredByCode: input.referredByCode,
-            })
-          : undefined;
+      // Parse input
+      const parsedReferredByCode = input.referredByCode
+        ? referredBySchema.parse({
+            referredByCode: input.referredByCode,
+          })
+        : undefined;
 
-        const parsedWalletAddress = walletAddressSchema.parse({
-          address: input.walletAddress,
-        });
+      const parsedWalletAddress = walletAddressSchema.parse({
+        address: input.walletAddress,
+      });
 
-        // Get existing wallet
-        const existingWallet = await getWallet({
+      // Get existing wallet
+      const existingWallet = await getWallet({
+        address: parsedWalletAddress.address,
+        userId: input.userId,
+      });
+
+      // if wallet doesn't exist, create it
+      if (!existingWallet) {
+        const newWallet = await createWallet({
           address: parsedWalletAddress.address,
           userId: input.userId,
         });
+        if (!newWallet) {
+          throw new Error("Failed to create wallet");
+        }
 
-        // if wallet doesn't exist, create it
-        if (!existingWallet) {
-          const newWallet = await createWallet({
-            address: parsedWalletAddress.address,
+        // if referral code is provided, create referral
+        if (parsedReferredByCode?.referredByCode) {
+          const referralWallet = await getWalletByReferralCode({
+            referralCode: parsedReferredByCode.referredByCode,
             userId: input.userId,
           });
-          if (!newWallet) {
-            throw new Error("Failed to create wallet");
+
+          if (!referralWallet) {
+            throw new Error("Referral code wallet not found");
           }
 
-          // if referral code is provided, create referral
-          if (parsedReferredByCode?.referredByCode) {
-            const referralWallet = await getWalletByReferralCode({
-              referralCode: parsedReferredByCode.referredByCode,
-              userId: input.userId,
-            });
-
-            if (!referralWallet) {
-              throw new Error("Referral code wallet not found");
-            }
-
-            await isValidReferralCode({
-              referredByCode: parsedReferredByCode.referredByCode,
-              referredWallet: newWallet as WalletWithReferredBy,
-              userId: input.userId,
-            });
-            await createReferral({
-              referredByCode: parsedReferredByCode.referredByCode,
-              referredWalletAddress: newWallet.address,
-              userId: input.userId,
-            });
-          }
-
-          return newWallet;
-        } else {
-          if (
-            parsedReferredByCode?.referredByCode &&
-            !existingWallet.referredBy
-          ) {
-            const referralWallet = await getWalletByReferralCode({
-              referralCode: parsedReferredByCode.referredByCode,
-              userId: input.userId,
-            });
-
-            if (!referralWallet) {
-              throw new Error("Referral code wallet not found");
-            }
-
-            await isValidReferralCode({
-              referredByCode: parsedReferredByCode.referredByCode,
-              referredWallet: existingWallet as WalletWithReferredBy,
-              userId: input.userId,
-            });
-            await createReferral({
-              referredByCode: parsedReferredByCode.referredByCode,
-              referredWalletAddress: existingWallet.address,
-              userId: input.userId,
-            });
-          } else if (
-            parsedReferredByCode?.referredByCode &&
-            existingWallet.referredBy
-          ) {
-            throw new Error("Wallet already has a referral code");
-          }
-          return existingWallet;
-        }
-      } catch (error) {
-        const currentUser = await getCurrentUser(
-          await getRedisClient(),
-          sessionOptions,
-        );
-        log.error(error, {
-          entity: "WALLET",
-          operation: "submit_wallet",
-          ...createLogContext(currentUser),
-          input,
-        });
-
-        if (error instanceof z.ZodError) {
-          throw new Error("Invalid Solana address");
+          await isValidReferralCode({
+            referredByCode: parsedReferredByCode.referredByCode,
+            referredWallet: newWallet as WalletWithReferredBy,
+            userId: input.userId,
+          });
+          await createReferral({
+            referredByCode: parsedReferredByCode.referredByCode,
+            referredWalletAddress: newWallet.address,
+            userId: input.userId,
+          });
         }
 
-        throw new Error(
-          `Failed to submit wallet: ${error instanceof Error ? error.message : String(error)}`,
-        );
+        return newWallet;
+      } else {
+        if (
+          parsedReferredByCode?.referredByCode &&
+          !existingWallet.referredBy
+        ) {
+          const referralWallet = await getWalletByReferralCode({
+            referralCode: parsedReferredByCode.referredByCode,
+            userId: input.userId,
+          });
+
+          if (!referralWallet) {
+            throw new Error("Referral code wallet not found");
+          }
+
+          await isValidReferralCode({
+            referredByCode: parsedReferredByCode.referredByCode,
+            referredWallet: existingWallet as WalletWithReferredBy,
+            userId: input.userId,
+          });
+          await createReferral({
+            referredByCode: parsedReferredByCode.referredByCode,
+            referredWalletAddress: existingWallet.address,
+            userId: input.userId,
+          });
+        } else if (
+          parsedReferredByCode?.referredByCode &&
+          existingWallet.referredBy
+        ) {
+          throw new Error("Wallet already has a referral code");
+        }
+        return existingWallet;
       }
-    },
-  );
+    } catch (error) {
+      const currentUser = await getCurrentUser(input.userId);
+      log.error(error, {
+        entity: "WALLET",
+        operation: "submit_wallet",
+        currentUser,
+        input,
+      });
+
+      if (error instanceof z.ZodError) {
+        throw new Error("Invalid Solana address");
+      }
+
+      throw new Error(
+        `Failed to submit wallet: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  });
 }
 
 export async function updateReferralCode(input: {
@@ -411,83 +366,75 @@ export async function updateReferralCode(input: {
   referralCode: string;
   userId: string;
 }) {
-  return withAuth(
-    await getRedisClient(),
-    sessionOptions,
-    input.userId,
-    async (session) => {
-      try {
-        const user = session.get("user");
-        if (!user) throw new Error("No user in session");
+  return withAuth(input.userId, async (session) => {
+    try {
+      const user = session.get("user");
+      if (!user) throw new Error("No user in session");
 
-        log.info("Updating referral code", {
-          entity: "WALLET",
-          operation: "update_referral_code",
-          ...createLogContext(user),
-          input,
-        });
+      log.info("Updating referral code", {
+        entity: "WALLET",
+        operation: "update_referral_code",
+        user,
+        input,
+      });
 
-        if (user.walletAddress !== input.walletAddress) {
-          throw new Error("Unauthorized: You can only update your own wallet");
-        }
-
-        const wallet = await getWallet({
-          address: input.walletAddress,
-          userId: input.userId,
-        });
-
-        if (!wallet) {
-          throw new Error("Wallet not found");
-        }
-
-        if (wallet.referralCode) {
-          throw new Error("Wallet already has a referral code");
-        }
-
-        const walletWithReferralCode = await getWalletByReferralCode({
-          referralCode: input.referralCode,
-          userId: input.userId,
-        });
-
-        if (walletWithReferralCode) {
-          throw new Error("Referral code already exists");
-        }
-
-        const parsedReferralCode = referralCodeSchema.parse({
-          referralCode: input.referralCode,
-        });
-
-        const updatedWallet = await db
-          .update(walletTable)
-          .set({ referralCode: parsedReferralCode.referralCode })
-          .where(eq(walletTable.address, input.walletAddress))
-          .returning();
-
-        log.info("Referral code updated successfully", {
-          entity: "WALLET",
-          operation: "update_referral_code",
-          ...createLogContext(user),
-          input,
-          updatedWallet,
-        });
-
-        return updatedWallet;
-      } catch (error) {
-        const currentUser = await getCurrentUser(
-          await getRedisClient(),
-          sessionOptions,
-        );
-        log.error(error, {
-          entity: "WALLET",
-          operation: "update_referral_code",
-          ...createLogContext(currentUser),
-          input,
-        });
-
-        throw new Error(
-          `Failed to update referral code: ${error instanceof Error ? error.message : String(error)}`,
-        );
+      if (user.wallet.address !== input.walletAddress) {
+        throw new Error("Unauthorized: You can only update your own wallet");
       }
-    },
-  );
+
+      const wallet = await getWallet({
+        address: input.walletAddress,
+        userId: input.userId,
+      });
+
+      if (!wallet) {
+        throw new Error("Wallet not found");
+      }
+
+      if (wallet.referralCode) {
+        throw new Error("Wallet already has a referral code");
+      }
+
+      const walletWithReferralCode = await getWalletByReferralCode({
+        referralCode: input.referralCode,
+        userId: input.userId,
+      });
+
+      if (walletWithReferralCode) {
+        throw new Error("Referral code already exists");
+      }
+
+      const parsedReferralCode = referralCodeSchema.parse({
+        referralCode: input.referralCode,
+      });
+
+      const updatedWallet = await db
+        .update(walletTable)
+        .set({ referralCode: parsedReferralCode.referralCode })
+        .where(eq(walletTable.address, input.walletAddress))
+        .returning();
+
+      log.info("Referral code updated successfully", {
+        entity: "WALLET",
+        operation: "update_referral_code",
+        user,
+        input,
+        updatedWallet,
+      });
+
+      return updatedWallet;
+    } catch (error) {
+      const currentUser = await getCurrentUser(input.userId);
+      log.error(error, {
+        entity: "WALLET",
+        operation: "update_referral_code",
+        currentUser,
+        input,
+      });
+
+      throw new Error(
+        `Failed to update referral code: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  });
 }

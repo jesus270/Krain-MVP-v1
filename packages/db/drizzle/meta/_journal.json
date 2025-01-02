@@ -22,6 +22,13 @@
       "when": 1735325107412,
       "tag": "0002_woozy_changeling",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1735857352102,
+      "tag": "0003_low_medusa",
+      "breakpoints": true
     }
   ]
 }

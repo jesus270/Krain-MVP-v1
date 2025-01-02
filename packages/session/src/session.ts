@@ -26,15 +26,22 @@ export class Session {
     this.store = new RedisSessionStore(redis, options);
   }
 
-  static async create(
-    userId: string,
-    redis: Redis,
-    options: SessionOptions,
-  ): Promise<Session> {
-    const data: SessionData = {
-      isLoggedIn: false,
+  static async create({
+    userId,
+    data,
+    redis,
+    options,
+  }: {
+    userId: string;
+    data: SessionData;
+    redis: Redis;
+    options: SessionOptions;
+  }): Promise<Session> {
+    const sessionData: SessionData = {
+      ...data,
+      isLoggedIn: true,
     };
-    const session = new Session(userId, data, redis, options);
+    const session = new Session(userId, sessionData, redis, options);
     await session.save();
     return session;
   }
@@ -48,15 +55,7 @@ export class Session {
     const data = await store.get(userId);
     if (!data) return null;
 
-    try {
-      // Validate session data
-      const validatedData = sessionDataSchema.parse(data);
-      return new Session(userId, validatedData, redis, options);
-    } catch (error) {
-      console.error("Invalid session data:", error);
-      await store.delete(userId);
-      return null;
-    }
+    return new Session(userId, data, redis, options);
   }
 
   getId(): string {

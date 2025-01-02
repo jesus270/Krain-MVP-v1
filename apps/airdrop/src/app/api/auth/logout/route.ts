@@ -4,7 +4,6 @@ import {
   withRateLimit,
   clearUserSession,
 } from "@krain/session";
-import { sessionOptions } from "@/lib/session-config";
 import { log } from "@krain/utils";
 
 export const runtime = "nodejs";
@@ -28,7 +27,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await clearUserSession(await getRedisClient(), sessionOptions, data.userId);
+    await clearUserSession(data.userId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

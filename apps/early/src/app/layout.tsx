@@ -10,20 +10,17 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <RootLayout
-          authConfig={{
-            privyAppId: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
-            loadingTitle: "Welcome to the $KRAIN Early Access Signup",
-            loadingDescription: "Please wait while we validate your session...",
-          }}
-          intercomAppId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID}
-        >
-          {children}
-          <Toaster />
-        </RootLayout>
-      </body>
-    </html>
+    <RootLayout
+      authConfig={{
+        privyAppId: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
+        loadingTitle: "Welcome to the $KRAIN Early Access Signup",
+        loadingDescription: "Please wait while we validate your session...",
+        privyLoginMethods: ["email", "wallet"],
+      }}
+      intercomAppId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID}
+    >
+      {children}
+      <Toaster />
+    </RootLayout>
   );
 }

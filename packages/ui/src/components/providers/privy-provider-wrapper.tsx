@@ -24,6 +24,7 @@ interface SessionRevalidatorProps {
 interface PrivyProviderWrapperProps {
   children: React.ReactNode;
   privyAppId: string;
+  loginMethods: ("wallet" | "email" | "twitter")[] | undefined;
 }
 
 const solanaConnectors = toSolanaWalletConnectors({
@@ -292,39 +293,32 @@ function SessionRevalidator({
 export function PrivyProviderWrapper({
   children,
   privyAppId,
+  loginMethods,
 }: PrivyProviderWrapperProps) {
-  const revalidateSession = useCallback(
-    async (user: User, walletAddress: string) => {
-      try {
-        const response = await fetch("/api/auth/callback", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user: {
-              id: user.id,
-              wallet: {
-                address: walletAddress,
-              },
-            },
-          }),
-        });
+  const revalidateSession = useCallback(async (user: User) => {
+    try {
+      const response = await fetch("/api/auth/callback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user,
+        }),
+      });
 
-        if (!response.ok) {
-          throw new Error("Failed to establish session");
-        }
-      } catch (error) {
-        log.error("Error establishing session", {
-          entity: "CLIENT",
-          operation: "establish_session",
-          error,
-        });
-        throw error;
+      if (!response.ok) {
+        throw new Error("Failed to establish session");
       }
-    },
-    [],
-  );
+    } catch (error) {
+      log.error("Error establishing session", {
+        entity: "CLIENT",
+        operation: "establish_session",
+        error,
+      });
+      throw error;
+    }
+  }, []);
 
   return (
     <PrivyProvider
@@ -344,14 +338,13 @@ export function PrivyProviderWrapper({
             />
           ),
           walletChainType: "solana-only",
-          walletList: ["detected_solana_wallets", "phantom"],
         },
         externalWallets: {
           solana: {
             connectors: solanaConnectors,
           },
         },
-        loginMethods: ["wallet"],
+        loginMethods: loginMethods?.length ? loginMethods : ["wallet"],
         embeddedWallets: {
           createOnLogin: "off",
           requireUserPasswordOnCreate: false,

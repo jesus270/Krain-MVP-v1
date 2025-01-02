@@ -34,7 +34,7 @@ export function RootLayout({
         )}
       >
         <Providers authConfig={authConfig} intercomAppId={intercomAppId}>
-          {children}
+          <div className="flex flex-col h-screen w-screen">{children}</div>
         </Providers>
       </body>
     </html>

@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { geolocation } from "@vercel/functions";
-import { sessionOptions } from "./lib/session-config";
+import { defaultSessionConfig } from "@krain/session";
 import { log } from "@krain/utils";
 import {
   Session,
@@ -72,8 +72,7 @@ export async function middleware(request: NextRequest) {
       }
 
       // Get Redis client and verify session
-      const redis = await getRedisClient();
-      const session = await getSession(redis, sessionOptions, userId);
+      const session = await getSession(userId);
 
       if (!session?.get("isLoggedIn")) {
         // For API routes, return JSON error

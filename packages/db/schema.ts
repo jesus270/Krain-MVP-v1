@@ -18,14 +18,11 @@ export const walletTable = pgTable(
       generateReferralCode(),
     ),
   },
-  (table) => ({
-    referralCodeIdx: index("idx_wallet_referralCode").on(table.referralCode),
-    createdAtIdx: index("idx_wallet_createdAt").on(table.createdAt),
-    codeCreatedIdx: index("idx_wallet_code_created").on(
-      table.referralCode,
-      table.createdAt,
-    ),
-  }),
+  (table) => [
+    index("idx_wallet_referralCode").on(table.referralCode),
+    index("idx_wallet_createdAt").on(table.createdAt),
+    index("idx_wallet_code_created").on(table.referralCode, table.createdAt),
+  ],
 );
 
 export type Wallet = typeof walletTable.$inferSelect;
@@ -56,16 +53,14 @@ export const referralTable = pgTable(
       .notNull()
       .unique(),
   },
-  (table) => ({
-    referredByCodeIdx: index("idx_referral_referredByCode").on(
-      table.referredByCode,
-    ),
-    createdAtIdx: index("idx_referral_createdAt").on(table.createdAt),
-    codeCreatedIdx: index("idx_referral_code_created").on(
+  (table) => [
+    index("idx_referral_referredByCode").on(table.referredByCode),
+    index("idx_referral_createdAt").on(table.createdAt),
+    index("idx_referral_code_created").on(
       table.referredByCode,
       table.createdAt,
     ),
-  }),
+  ],
 );
 
 export type Referral = typeof referralTable.$inferSelect;
@@ -82,3 +77,18 @@ export const referralRelations = relations(referralTable, ({ one }) => ({
     relationName: "walletReferredBy",
   }),
 }));
+
+export const earlyAccessSignupTable = pgTable(
+  "earlyAccessSignup",
+  {
+    id: serial("id").primaryKey(),
+    email: varchar("email", { length: 255 }).notNull().unique(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_earlyAccessSignup_email").on(table.email),
+    index("idx_earlyAccessSignup_createdAt").on(table.createdAt),
+  ],
+);
+
+export type EarlyAccessSignup = typeof earlyAccessSignupTable.$inferSelect;

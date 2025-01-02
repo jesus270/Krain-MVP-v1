@@ -6,7 +6,13 @@ export interface SessionOptions {
 
 export interface User {
   id: string;
-  walletAddress: string;
+  createdAt: Date;
+  wallet: {
+    address: string;
+  };
+  email: {
+    address: string;
+  };
 }
 
 export interface Session {
@@ -30,7 +36,13 @@ export const sessionDataSchema = z.object({
   user: z
     .object({
       id: z.string(),
-      walletAddress: z.string(),
+      createdAt: z.date(),
+      wallet: z.object({
+        address: z.string(),
+      }),
+      email: z.object({
+        address: z.string(),
+      }),
     })
     .optional(),
   csrfToken: z.string().optional(),
