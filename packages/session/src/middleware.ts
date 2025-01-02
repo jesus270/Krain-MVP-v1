@@ -32,7 +32,7 @@ function getAllowedOrigins(): string[] {
 
 const ALLOWED_ORIGINS = getAllowedOrigins();
 
-function parseOriginDomain(url: string | null): string {
+function parseOriginDomain(url: string | null | undefined): string {
   if (!url) return "";
 
   try {
@@ -66,17 +66,12 @@ export async function validateOrigin(headers: HeadersLike): Promise<boolean> {
       console.log("No origin/referer/host headers");
       return false;
     }
-    const hostDomain = host.split(":")[0]; // Remove port if present
+    const hostDomain = host.split(":")[0] || ""; // Remove port if present
     console.log("Using host header:", hostDomain);
     return ALLOWED_ORIGINS.includes(hostDomain);
   }
 
-  const originUrl = origin || referer;
-  if (!originUrl) {
-    return false;
-  }
-
-  const originDomain = parseOriginDomain(originUrl);
+  const originDomain = parseOriginDomain((origin || referer || "") as string);
   console.log("Checking domain:", originDomain);
   console.log("Against allowed origins:", ALLOWED_ORIGINS);
   return ALLOWED_ORIGINS.includes(originDomain);
