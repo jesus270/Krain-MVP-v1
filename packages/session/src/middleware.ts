@@ -32,6 +32,7 @@ function getAllowedOrigins(): string[] {
     origins.push(`www.${domain}`);
   }
 
+  console.log("Allowed origins:", origins);
   return origins;
 }
 
@@ -44,8 +45,10 @@ function parseOriginDomain(url: string): string {
       return "localhost";
     }
     const urlObj = new URL(url);
+    console.log("Parsed URL hostname:", urlObj.hostname);
     return urlObj.hostname;
   } catch {
+    console.log("Failed to parse URL, using raw:", url);
     return url;
   }
 }
@@ -54,12 +57,19 @@ export async function validateOrigin(headers: HeadersLike): Promise<boolean> {
   const origin = await getHeaderValue(headers, "origin");
   const referer = await getHeaderValue(headers, "referer");
 
+  console.log("Received origin:", origin);
+  console.log("Received referer:", referer);
+
   // In development, allow requests without origin/referer
   if (!origin && !referer) {
-    return process.env.NODE_ENV === "development";
+    const isDev = process.env.NODE_ENV === "development";
+    console.log("No origin/referer, isDev:", isDev);
+    return isDev;
   }
 
   const originDomain = parseOriginDomain(origin || referer || "");
+  console.log("Checking domain:", originDomain);
+  console.log("Against allowed origins:", ALLOWED_ORIGINS);
   return ALLOWED_ORIGINS.includes(originDomain);
 }
 
