@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
   useSidebar,
-} from "@repo/ui/components/ui/sidebar";
+} from "@krain/ui/components/ui/sidebar";
 import { NavUser } from "./nav-user";
 import Image from "next/image";
 import Link from "next/link";

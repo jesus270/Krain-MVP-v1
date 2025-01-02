@@ -7,12 +7,17 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@repo/ui/components/ui/card";
-import { Button } from "@repo/ui/components/ui/button";
+} from "@krain/ui/components/ui/card";
+import { Button } from "@krain/ui/components/ui/button";
 import { AlertCircle, Wallet as WalletIcon } from "lucide-react";
 
 export function ConnectWalletCard() {
-  const { login } = usePrivy();
+  const { login, authenticated } = usePrivy();
+
+  // Don't show the card if already authenticated
+  if (authenticated) {
+    return null;
+  }
 
   return (
     <Card className="border-2 max-w-2xl mx-auto">

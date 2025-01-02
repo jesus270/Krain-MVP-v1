@@ -1,5 +1,5 @@
 import { usePrivy } from "@privy-io/react-auth";
-import { Button } from "@repo/ui/components/ui/button";
+import { Button } from "@krain/ui/components/ui/button";
 import { LogIn } from "lucide-react";
 
 export function NavLoginButton() {

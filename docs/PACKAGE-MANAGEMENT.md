@@ -5,6 +5,7 @@ This guide covers package management in the Krain monorepo using pnpm workspaces
 ## Overview
 
 The monorepo uses:
+
 - [pnpm](https://pnpm.io/) for package management
 - [Turborepo](https://turbo.build/repo/docs) for build system
 - Workspaces for package organization
@@ -29,20 +30,25 @@ krain/
 ### Installing Dependencies
 
 1. **Install all dependencies**
+
    ```bash
    pnpm install
    ```
 
 2. **Add dependency to specific package**
+
    ```bash
    pnpm add <package> --filter <workspace-name>
    ```
+
    Example:
+
    ```bash
-   pnpm add react --filter @repo/ui
+   pnpm add react --filter @krain/ui
    ```
 
 3. **Add development dependency**
+
    ```bash
    pnpm add -D <package> --filter <workspace-name>
    ```
@@ -55,6 +61,7 @@ krain/
 ### Removing Dependencies
 
 1. **Remove from specific package**
+
    ```bash
    pnpm remove <package> --filter <workspace-name>
    ```
@@ -67,11 +74,13 @@ krain/
 ### Updating Dependencies
 
 1. **Check for updates**
+
    ```bash
    pnpm update --interactive
    ```
 
 2. **Update specific package**
+
    ```bash
    pnpm update <package> --filter <workspace-name>
    ```
@@ -86,20 +95,23 @@ krain/
 ### Adding New Package
 
 1. Create package directory:
+
    ```bash
    mkdir packages/new-package
    ```
 
 2. Initialize package:
+
    ```bash
    cd packages/new-package
    pnpm init
    ```
 
 3. Update `package.json`:
+
    ```json
    {
-     "name": "@repo/new-package",
+     "name": "@krain/new-package",
      "version": "0.1.0",
      "private": true,
      "main": "./dist/index.js",
@@ -116,13 +128,14 @@ krain/
 4. Add to `pnpm-workspace.yaml`:
    ```yaml
    packages:
-     - 'packages/*'
-     - 'apps/*'
+     - "packages/*"
+     - "apps/*"
    ```
 
 ### Adding New Application
 
 1. Create application:
+
    ```bash
    pnpm create next-app apps/new-app
    ```
@@ -146,15 +159,16 @@ krain/
 ### Internal Dependencies
 
 1. **Add workspace dependency**
+
    ```bash
-   pnpm add @repo/ui --filter airdrop
+   pnpm add @krain/ui --filter airdrop
    ```
 
 2. In `package.json`:
    ```json
    {
      "dependencies": {
-       "@repo/ui": "workspace:*"
+       "@krain/ui": "workspace:"
      }
    }
    ```
@@ -169,6 +183,7 @@ krain/
 ### Package Versioning
 
 1. **Update version**
+
    ```bash
    pnpm version <major|minor|patch> --filter <package-name>
    ```
@@ -181,6 +196,7 @@ krain/
 ### Lockfile Management
 
 1. **Update lockfile**
+
    ```bash
    pnpm install --lockfile-only
    ```
@@ -195,11 +211,13 @@ krain/
 ### Running Scripts
 
 1. **Run script in all packages**
+
    ```bash
    pnpm -r <script>
    ```
 
 2. **Run script in specific package**
+
    ```bash
    pnpm --filter <package-name> <script>
    ```
@@ -227,16 +245,19 @@ krain/
 ## Best Practices
 
 1. **Dependency Management**
+
    - Keep dependencies up to date
    - Use exact versions
    - Minimize duplicate dependencies
 
 2. **Workspace Organization**
+
    - Group related packages
    - Use consistent naming
    - Maintain clean dependencies
 
 3. **Version Control**
+
    - Commit lockfile changes
    - Review dependency updates
    - Keep versions in sync
@@ -251,11 +272,13 @@ krain/
 ### Common Issues
 
 1. **Dependency Conflicts**
+
    - Check version requirements
    - Update lockfile
    - Clean install
 
 2. **Build Issues**
+
    - Clear Turborepo cache
    - Check package.json scripts
    - Verify dependencies

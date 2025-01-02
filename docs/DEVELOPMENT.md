@@ -18,12 +18,14 @@ This guide covers the development workflow and best practices for working with t
 ### Setup
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/your-org/krain.git
    cd krain
    ```
 
 2. Install dependencies:
+
    ```bash
    pnpm install
    ```
@@ -38,6 +40,7 @@ This guide covers the development workflow and best practices for working with t
 ### Running Applications
 
 1. Start all applications:
+
    ```bash
    pnpm dev
    ```
@@ -50,40 +53,45 @@ This guide covers the development workflow and best practices for working with t
 ### Building
 
 1. Build all packages and applications:
+
    ```bash
    pnpm build
    ```
 
 2. Build specific packages:
    ```bash
-   pnpm build --filter "@repo/ui"
+   pnpm build --filter "@krain/ui"
    ```
 
 ### Testing
 
 1. Run all tests:
+
    ```bash
    pnpm test
    ```
 
 2. Run tests in watch mode:
+
    ```bash
    pnpm test:watch
    ```
 
 3. Run tests for a specific package:
    ```bash
-   pnpm test --filter "@repo/utils"
+   pnpm test --filter "@krain/utils"
    ```
 
 ### Code Quality
 
 1. Lint code:
+
    ```bash
    pnpm lint
    ```
 
 2. Format code:
+
    ```bash
    pnpm format
    ```
@@ -98,6 +106,7 @@ This guide covers the development workflow and best practices for working with t
 ### Applications (`apps/`)
 
 Each application follows this structure:
+
 ```
 apps/app-name/
 ├── src/
@@ -114,6 +123,7 @@ apps/app-name/
 ### Packages (`packages/`)
 
 Each package follows this structure:
+
 ```
 packages/package-name/
 ├── src/
@@ -128,11 +138,13 @@ packages/package-name/
 ### Code Organization
 
 1. **Component Structure**
+
    - One component per file
    - Co-locate related files (tests, styles, types)
    - Use index files for clean exports
 
 2. **State Management**
+
    - Use React hooks for local state
    - Consider Zustand for global state
    - Keep state as close to usage as possible
@@ -145,6 +157,7 @@ packages/package-name/
 ### TypeScript
 
 1. **Type Safety**
+
    - Avoid using `any`
    - Use strict type checking
    - Create reusable type definitions
@@ -157,6 +170,7 @@ packages/package-name/
 ### Testing
 
 1. **Unit Tests**
+
    - Test individual components and functions
    - Mock external dependencies
    - Focus on behavior, not implementation
@@ -169,6 +183,7 @@ packages/package-name/
 ### Git Workflow
 
 1. **Branches**
+
    - `main`: Production-ready code
    - `develop`: Development branch
    - Feature branches: `feature/name`
@@ -184,11 +199,13 @@ packages/package-name/
 ### Common Issues
 
 1. **Build Failures**
+
    - Clear Turborepo cache: `pnpm clean`
    - Remove node_modules: `pnpm clean:deps`
    - Rebuild: `pnpm install && pnpm build`
 
 2. **Type Errors**
+
    - Update dependencies
    - Check type definitions
    - Run `pnpm type-check`
@@ -203,4 +220,4 @@ packages/package-name/
 - [Next.js Documentation](https://nextjs.org/docs)
 - [TypeScript Documentation](https://www.typescriptlang.org/docs)
 - [Turborepo Documentation](https://turbo.build/repo/docs)
-- [pnpm Documentation](https://pnpm.io/motivation) 
+- [pnpm Documentation](https://pnpm.io/motivation)

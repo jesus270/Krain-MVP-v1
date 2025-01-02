@@ -9,8 +9,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@repo/ui/components/ui/card";
-import { Button } from "@repo/ui/components/ui/button";
+} from "@krain/ui/components/ui/card";
+import { Button } from "@krain/ui/components/ui/button";
 import { updateReferralCode } from "@/actions/wallet";
 import {
   Form,
@@ -19,12 +19,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@repo/ui/components/ui/form";
+} from "@krain/ui/components/ui/form";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@repo/ui/components/ui/input";
-import { generateReferralCode } from "@repo/utils";
+import { Input } from "@krain/ui/components/ui/input";
+import { generateReferralCode } from "@krain/utils";
+import { usePrivy } from "@privy-io/react-auth";
 
 interface ReferralCodeConfirmationCardProps {
   walletAddress: string;
@@ -93,6 +94,7 @@ export function ReferralCodeConfirmationCard({
 }: ReferralCodeConfirmationCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>();
+  const { user } = usePrivy();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -108,11 +110,17 @@ export function ReferralCodeConfirmationCard({
         return; // Stop if validation fails
       }
 
+      if (!user?.id) {
+        setError("You must be logged in to set a referral code.");
+        return;
+      }
+
       setIsSubmitting(true);
       setError(undefined);
       await updateReferralCode({
         walletAddress,
         referralCode: form.getValues("referralCode"),
+        userId: user.id,
       });
       toast.success("Referral code confirmed successfully");
       window.location.reload();

@@ -1,8 +1,12 @@
 {
-  "name": "@repo/typescript-config",
+  "name": "@krain/typescript-config",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf .turbo && rm -rf node_modules",
+    "build": "echo 'No build needed'"
+  },
   "files": [
     "base.json",
     "nextjs.json",

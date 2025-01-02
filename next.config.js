@@ -4,6 +4,7 @@ module.exports = {
     serverActions: {
       // Add your production domain and any trusted proxies here
       allowedOrigins: [
+        "localhost:3001",
         "localhost:3000",
         "localhost",
         process.env.NEXT_PUBLIC_APP_URL,

@@ -1,9 +1,9 @@
 "use client";
 
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Label } from "@repo/ui/components/ui/label";
-import { formatNumber } from "@repo/utils";
-import { XLogo } from "@repo/ui/components/icons/XLogo";
+import { Badge } from "@krain/ui/components/ui/badge";
+import { Label } from "@krain/ui/components/ui/label";
+import { formatNumber } from "@krain/utils";
+import { XLogo } from "@krain/ui/components/icons/XLogo";
 import { AlertCircle, CheckCircle2, Mail, User } from "lucide-react";
 
 interface ProfilePointsSectionProps {

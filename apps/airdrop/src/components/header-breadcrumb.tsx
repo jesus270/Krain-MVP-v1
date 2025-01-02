@@ -1,14 +1,14 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { capitalizeEachWord } from "@repo/utils";
+import { capitalizeEachWord } from "@krain/utils";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbSeparator,
-} from "@repo/ui/components/ui/breadcrumb";
+} from "@krain/ui/components/ui/breadcrumb";
 import { Fragment } from "react";
 import Link from "next/link";
 

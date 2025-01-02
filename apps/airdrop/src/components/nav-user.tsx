@@ -2,7 +2,7 @@
 
 import { LogOut, User, ChevronsUpDown } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@krain/ui/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,13 +11,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@repo/ui/components/ui/dropdown-menu";
-import { SidebarMenuButton, useSidebar } from "@repo/ui/components/ui/sidebar";
+} from "@krain/ui/components/ui/dropdown-menu";
+import { SidebarMenuButton, useSidebar } from "@krain/ui/components/ui/sidebar";
 import { usePrivy } from "@privy-io/react-auth";
 import { NavLoginButton } from "./nav-login-button";
-import { capitalize } from "@repo/utils";
+import { capitalize } from "@krain/utils";
 import { useRouter } from "next/navigation";
-import { log } from "@/lib/logger";
+import { log } from "@krain/utils";
 
 export function NavUser() {
   const { ready, authenticated, user, logout } = usePrivy();

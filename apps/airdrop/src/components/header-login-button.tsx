@@ -1,9 +1,9 @@
 "use client";
 
-import { log } from "@/lib/logger";
+import { log } from "@krain/utils";
 import { usePrivy } from "@privy-io/react-auth";
-import { Avatar, AvatarFallback } from "@repo/ui/components/ui/avatar";
-import { Button } from "@repo/ui/components/ui/button";
+import { Avatar, AvatarFallback } from "@krain/ui/components/ui/avatar";
+import { Button } from "@krain/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,10 +12,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuGroup,
-} from "@repo/ui/components/ui/dropdown-menu";
-import { useSidebar } from "@repo/ui/components/ui/sidebar";
-import { Skeleton } from "@repo/ui/components/ui/skeleton";
-import { capitalize } from "@repo/utils";
+} from "@krain/ui/components/ui/dropdown-menu";
+import { useSidebar } from "@krain/ui/components/ui/sidebar";
+import { Skeleton } from "@krain/ui/components/ui/skeleton";
+import { capitalize } from "@krain/utils";
 import { User, LogOut, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
 
