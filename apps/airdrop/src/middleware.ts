@@ -37,18 +37,50 @@ export async function middleware(request: NextRequest) {
   try {
     const pathname = request.nextUrl.pathname;
 
-    // Skip middleware for public assets
-    if (pathname.startsWith("/_next") || pathname.includes(".")) {
-      return NextResponse.next();
-    }
+    // Skip middleware for public assets and specific paths
+    const bypassGeoPaths = [
+      "/_next",
+      "/static",
+      "/favicon.ico",
+      "/error",
+      "/blocked",
+    ];
+    const skipGeoCheck = bypassGeoPaths.some((path) =>
+      pathname.startsWith(path),
+    );
 
-    // Skip geolocation check if already on blocked page
-    if (pathname === "/blocked") {
+    if (skipGeoCheck) {
       return NextResponse.next();
     }
 
     // Perform geolocation check
     const geo = geolocation(request);
+
+    // Add detailed logging for geolocation debugging
+    log.info("Geolocation check starting", {
+      entity: "MIDDLEWARE",
+      operation: "geo_check_start",
+      headers: {
+        ...Object.fromEntries(request.headers.entries()),
+      },
+    });
+
+    log.info("Geolocation result", {
+      entity: "MIDDLEWARE",
+      operation: "geo_check_result",
+      geoData: geo,
+      vercelGeoHeaders: {
+        country: request.headers.get("x-vercel-ip-country"),
+        region: request.headers.get("x-vercel-ip-country-region"),
+        city: request.headers.get("x-vercel-ip-city"),
+        latitude: request.headers.get("x-vercel-ip-latitude"),
+        longitude: request.headers.get("x-vercel-ip-longitude"),
+      },
+      ip:
+        request.headers.get("x-real-ip") ||
+        request.headers.get("x-forwarded-for"),
+      url: request.url,
+    });
 
     // List of blocked countries (using ISO country codes)
     const blockedCountries = [
@@ -61,26 +93,31 @@ export async function middleware(request: NextRequest) {
       "BY", // Belarus
     ];
 
+    // Get country from Vercel headers if geolocation fails
+    const country = geo?.country || request.headers.get("x-vercel-ip-country");
+    const region =
+      geo?.region || request.headers.get("x-vercel-ip-country-region");
+
     // Check if user's country is in the blocked list
-    if (geo?.country && blockedCountries.includes(geo.country)) {
-      log.info(`Blocking traffic from: ${geo.country}`, {
+    if (country && blockedCountries.includes(country)) {
+      log.info(`Blocking traffic from: ${country}`, {
         entity: "MIDDLEWARE",
         operation: "geo_check_result",
-        geoData: geo,
+        geoData: { country, region },
       });
       return NextResponse.redirect(new URL("/blocked", request.url));
     }
 
     // Special handling for Ukraine regions (Crimea, Donetsk, Luhansk)
-    if (geo?.country === "UA") {
+    if (country === "UA") {
       const restrictedRegions = ["Crimea", "Donetsk", "Luhansk"];
-      if (geo.region && restrictedRegions.includes(geo.region)) {
+      if (region && restrictedRegions.includes(region)) {
         log.info(
-          `Blocking traffic from restricted region: ${geo.region}, Ukraine`,
+          `Blocking traffic from restricted region: ${region}, Ukraine`,
           {
             entity: "MIDDLEWARE",
             operation: "geo_check_result",
-            geoData: geo,
+            geoData: { country, region },
           },
         );
         return NextResponse.redirect(new URL("/blocked", request.url));
