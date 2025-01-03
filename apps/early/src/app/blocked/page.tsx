@@ -1,4 +1,4 @@
-import { BlockedPage } from "@krain/ui";
+import { BlockedPage } from "@krain/ui/components/blocked-page";
 
 export default function Blocked() {
   return (
