@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { RateLimiter } from "./rate-limit";
 import { getRedisClient } from "./redis";
-import { AppError, ErrorCodes } from "@krain/utils";
+import { AppError, ErrorCodes, log } from "@krain/utils";
 import { headers as NextHeaders } from "next/headers";
 
 type HeadersLike =
@@ -41,10 +41,13 @@ function parseOriginDomain(url: string | null | undefined): string {
       return "localhost";
     }
     const urlObj = new URL(url);
-    console.log("Parsed URL hostname:", urlObj.hostname);
     return urlObj.hostname;
   } catch {
-    console.log("Failed to parse URL, using raw:", url);
+    log.error("Failed to parse URL", {
+      entity: "SESSION MIDDLEWARE",
+      operation: "parse_origin_domain",
+      url,
+    });
     return url;
   }
 }
@@ -52,28 +55,24 @@ function parseOriginDomain(url: string | null | undefined): string {
 export async function validateOrigin(headers: HeadersLike): Promise<boolean> {
   // Get the host header which will be present even without origin/referer
   const host = await getHeaderValue(headers, "host");
-  console.log("Received host:", host);
 
   const origin = await getHeaderValue(headers, "origin");
   const referer = await getHeaderValue(headers, "referer");
 
-  console.log("Received origin:", origin);
-  console.log("Received referer:", referer);
-
   // If no origin/referer, use the host header
   if (!origin && !referer) {
     if (!host) {
-      console.log("No origin/referer/host headers");
+      log.error("No origin/referer/host headers", {
+        entity: "SESSION MIDDLEWARE",
+        operation: "validate_origin",
+      });
       return false;
     }
     const hostDomain = host.split(":")[0] || ""; // Remove port if present
-    console.log("Using host header:", hostDomain);
     return ALLOWED_ORIGINS.includes(hostDomain);
   }
 
   const originDomain = parseOriginDomain((origin || referer || "") as string);
-  console.log("Checking domain:", originDomain);
-  console.log("Against allowed origins:", ALLOWED_ORIGINS);
   return ALLOWED_ORIGINS.includes(originDomain);
 }
 

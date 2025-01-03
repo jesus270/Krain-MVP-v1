@@ -21,11 +21,8 @@ export default function HomePage() {
 
   const checkSignupStatus = useCallback(async () => {
     setIsLoading(true);
-    console.log("checkSignupStatus checking signup status");
     if (!user?.id || !user.email?.address) return;
 
-    console.log("checkSignupStatus user id", user.id);
-    console.log("checkSignupStatus user email address", user.email?.address);
     try {
       const result = await checkEarlyAccessSignup({ userId: user.id });
       setIsSignedUp(result.isSignedUp);
@@ -75,7 +72,6 @@ export default function HomePage() {
       !isSignedUp &&
       !isLoading
     ) {
-      console.log("useEffect ready and user email address");
       if (!isSignedUp) {
         void checkSignupStatus();
       }

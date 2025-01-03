@@ -20,7 +20,7 @@ export async function signupForEarlyAccess(input: { userId: string }) {
 
   return withAuth(input.userId, async (session) => {
     const user = session.get("user");
-    console.log("signupForEarlyAccess user", user);
+
     if (!user) throw new Error("No user in session");
     if (!user.email)
       throw new Error("Email is required for early access signup");
@@ -58,7 +58,6 @@ export async function checkEarlyAccessSignup(input: { userId: string }) {
 
   return withAuth(input.userId, async (session) => {
     const user = session.get("user");
-    console.log("checkEarlyAccessSignup user", user);
     if (!user) throw new Error("No user in session");
     if (!user.email) return { isSignedUp: false };
 
