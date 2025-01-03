@@ -338,6 +338,14 @@ export function PrivyProviderWrapper({
             />
           ),
           walletChainType: "solana-only",
+          walletList: [
+            "phantom",
+            "detected_wallets",
+            "metamask",
+            "coinbase_wallet",
+            "rainbow",
+            "wallet_connect",
+          ],
         },
         externalWallets: {
           solana: {
