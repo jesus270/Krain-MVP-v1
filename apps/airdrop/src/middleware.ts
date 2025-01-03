@@ -13,7 +13,13 @@ import {
 const PROTECTED_PATHS = ["/api/wallet", "/api/referral", "/"];
 
 // Public paths that don't require authentication
-const PUBLIC_PATHS = ["/api/auth", "/terms", "/login", "/api/auth/callback"];
+const PUBLIC_PATHS = [
+  "/api/auth",
+  "/terms",
+  "/login",
+  "/api/auth/callback",
+  "/blocked",
+];
 
 // Security headers
 const securityHeaders = {
@@ -34,6 +40,51 @@ export async function middleware(request: NextRequest) {
     // Skip middleware for public assets
     if (pathname.startsWith("/_next") || pathname.includes(".")) {
       return NextResponse.next();
+    }
+
+    // Skip geolocation check if already on blocked page
+    if (pathname === "/blocked") {
+      return NextResponse.next();
+    }
+
+    // Perform geolocation check
+    const geo = geolocation(request);
+
+    // List of blocked countries (using ISO country codes)
+    const blockedCountries = [
+      "US", // United States
+      "KP", // North Korea
+      "IR", // Iran
+      "SY", // Syria
+      "CU", // Cuba
+      "RU", // Russia
+      "BY", // Belarus
+    ];
+
+    // Check if user's country is in the blocked list
+    if (geo?.country && blockedCountries.includes(geo.country)) {
+      log.info(`Blocking traffic from: ${geo.country}`, {
+        entity: "MIDDLEWARE",
+        operation: "geo_check_result",
+        geoData: geo,
+      });
+      return NextResponse.redirect(new URL("/blocked", request.url));
+    }
+
+    // Special handling for Ukraine regions (Crimea, Donetsk, Luhansk)
+    if (geo?.country === "UA") {
+      const restrictedRegions = ["Crimea", "Donetsk", "Luhansk"];
+      if (geo.region && restrictedRegions.includes(geo.region)) {
+        log.info(
+          `Blocking traffic from restricted region: ${geo.region}, Ukraine`,
+          {
+            entity: "MIDDLEWARE",
+            operation: "geo_check_result",
+            geoData: geo,
+          },
+        );
+        return NextResponse.redirect(new URL("/blocked", request.url));
+      }
     }
 
     // Apply security headers
