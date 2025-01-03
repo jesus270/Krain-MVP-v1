@@ -68,13 +68,27 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    if (ready && authenticated && user?.email?.address && !isSignedUp) {
+    if (
+      ready &&
+      authenticated &&
+      user?.email?.address &&
+      !isSignedUp &&
+      !isLoading
+    ) {
       console.log("useEffect ready and user email address");
       if (!isSignedUp) {
         void checkSignupStatus();
       }
     }
-  }, [ready, user, checkSignupStatus, isSignedUp, handleSignup, authenticated]);
+  }, [
+    ready,
+    user,
+    checkSignupStatus,
+    isSignedUp,
+    handleSignup,
+    authenticated,
+    isLoading,
+  ]);
 
   return (
     <main className="flex-grow  flex flex-col items-center justify-center p-4 text-center">
