@@ -92,3 +92,19 @@ export const earlyAccessSignupTable = pgTable(
 );
 
 export type EarlyAccessSignup = typeof earlyAccessSignupTable.$inferSelect;
+
+export const tokenSignupTable = pgTable(
+  "tokenSignup",
+  {
+    id: serial("id").primaryKey(),
+    walletAddress: varchar("walletAddress", { length: 255 }).notNull().unique(),
+    paymentTxHash: varchar("paymentTxHash", { length: 255 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_tokenSignup_walletAddress").on(table.walletAddress),
+    index("idx_tokenSignup_createdAt").on(table.createdAt),
+  ],
+);
+
+export type TokenSignup = typeof tokenSignupTable.$inferSelect;
