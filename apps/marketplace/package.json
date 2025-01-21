@@ -1,5 +1,5 @@
 {
-  "name": "token",
+  "name": "marketplace",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,26 +15,21 @@
     "@krain/typescript-config": "workspace:",
     "@krain/ui": "workspace:",
     "@krain/utils": "workspace:",
-    "@solana/wallet-adapter-base": "^0.9.23",
-    "@solana/wallet-adapter-phantom": "^0.9.24",
-    "@solana/wallet-adapter-react": "^0.15.35",
-    "@solana/web3.js": "^1.87.6",
-    "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "zod": "^3.22.4"
+    "next": "catalog:"
   },
   "devDependencies": {
     "@krain/eslint-config": "workspace:",
     "@krain/typescript-config": "workspace:",
+    "typescript": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "autoprefixer": "^10.4.16",
-    "crypto-browserify": "^3.12.1",
-    "eslint": "catalog:",
     "postcss": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "eslint": "catalog:",
+    "eslint-config-next": "catalog:",
+    "@eslint/eslintrc": "catalog:"
   }
 }
