@@ -29,6 +29,13 @@
       "when": 1735857352102,
       "tag": "0003_low_medusa",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1736003482356,
+      "tag": "0004_tan_vanisher",
+      "breakpoints": true
     }
   ]
 }
