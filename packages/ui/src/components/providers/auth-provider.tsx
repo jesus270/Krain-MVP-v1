@@ -9,6 +9,7 @@ export interface AuthConfig {
   loadingTitle?: string;
   loadingDescription?: string;
   privyLoginMethods?: ("wallet" | "email" | "twitter")[] | undefined;
+  validateSession?: boolean;
 }
 
 interface AuthProviderProps {
@@ -31,6 +32,7 @@ export function AuthProvider({ children, config }: AuthProviderProps) {
     <PrivyProviderWrapper
       privyAppId={config.privyAppId}
       loginMethods={config.privyLoginMethods}
+      validateSession={config.validateSession}
     >
       <AuthStateManager config={config}>{children}</AuthStateManager>
     </PrivyProviderWrapper>

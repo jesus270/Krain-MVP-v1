@@ -33,7 +33,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.38.3",
-    "lucide-react": "^0.303.0",
+    "lucide-react": "catalog:",
     "next": "catalog:",
     "next-themes": "^0.2.1",
     "react": "catalog:",

@@ -1,101 +1,309 @@
+"use client";
+
+import { Button } from "@krain/ui/components/ui/button";
+import { Textarea } from "@krain/ui/components/ui/textarea";
+import { MicIcon, SearchIcon, StarIcon, BotIcon } from "lucide-react";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@krain/ui/components/ui/card";
+import { Badge } from "@krain/ui/components/ui/badge";
+import { agents } from "./agent-data";
+import Link from "next/link";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [searchQuery, setSearchQuery] = useState("");
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const { transcript, listening, browserSupportsSpeechRecognition } =
+    useSpeechRecognition();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // Common words to filter out from search
+  const stopWords = new Set([
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "by",
+    "for",
+    "from",
+    "has",
+    "he",
+    "in",
+    "is",
+    "it",
+    "its",
+    "me",
+    "of",
+    "on",
+    "that",
+    "the",
+    "to",
+    "was",
+    "were",
+    "will",
+    "with",
+    "find",
+    "show",
+    "get",
+    "want",
+    "looking",
+    "search",
+    "need",
+    "can",
+    "could",
+    "would",
+    "should",
+    "please",
+    "help",
+  ]);
+
+  // Process natural language query into search terms
+  const processSearchQuery = (query: string): string[] => {
+    return query
+      .toLowerCase()
+      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") // Remove punctuation
+      .split(/\s+/) // Split on whitespace
+      .filter(
+        (word) =>
+          word.length > 1 && // Filter out single characters
+          !stopWords.has(word), // Filter out stop words
+      );
+  };
+
+  // Filter and sort agents based on processed search terms
+  const filteredAgents = agents
+    .map((agent) => {
+      if (!searchQuery.trim()) return { agent, score: 1 }; // Show all when no search
+
+      const searchTerms = processSearchQuery(searchQuery);
+      if (searchTerms.length === 0) return { agent, score: 1 };
+
+      const searchableText = [
+        agent.name,
+        agent.description,
+        ...agent.tags,
+        agent.category,
+        ...agent.capabilities,
+        ...agent.integrationPlatforms,
+        ...agent.supportedLanguages,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      // Calculate match score (number of matching terms / total terms)
+      const matchingTerms = searchTerms.filter((term) =>
+        searchableText.includes(term),
+      );
+      const score = matchingTerms.length / searchTerms.length;
+
+      return { agent, score };
+    })
+    .filter(({ score }) => score > 0) // Remove non-matches
+    .sort((a, b) => b.score - a.score) // Sort by score descending
+    .map(({ agent }) => agent); // Extract just the agent objects
+
+  const handleVoiceInput = () => {
+    if (!browserSupportsSpeechRecognition) {
+      alert("Speech recognition is not supported in this browser.");
+      return;
+    }
+
+    if (listening) {
+      SpeechRecognition.stopListening();
+    } else {
+      SpeechRecognition.startListening();
+    }
+  };
+
+  // Update search query when transcript changes
+  useEffect(() => {
+    if (transcript) {
+      setSearchQuery(transcript);
+    }
+  }, [transcript]);
+
+  return (
+    <div className="grid grid-rows-[auto_1fr_auto] min-h-screen p-4 sm:p-6 lg:p-8 gap-6 lg:gap-8">
+      <header className="flex flex-col items-center gap-4 lg:gap-6">
+        <div className="flex flex-col items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold">Discover AI Agents</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
+            Use natural language to find the perfect AI agent for your needs
+          </p>
         </div>
+        <div className="w-full max-w-2xl relative">
+          <div className="relative flex items-end shadow-[0_0_10px_rgba(0,0,0,0.10)] rounded-lg">
+            <Textarea
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="resize-none text-sm min-h-[56px] pr-20 border rounded-lg focus-visible:ring-0 focus-visible:ring-offset-0"
+              placeholder="Try saying 'free chatbot with API'"
+              rows={1}
+            />
+            <div className="absolute right-2 bottom-1.5 flex gap-2">
+              <Button
+                onClick={handleVoiceInput}
+                variant="ghost"
+                size="icon"
+                title={listening ? "Stop recording" : "Search with voice"}
+                className="h-8 w-8 hover:bg-muted"
+              >
+                <MicIcon
+                  className={`w-4 h-4 ${listening ? "text-red-500" : ""}`}
+                />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                title="Search"
+                className="h-8 w-8 hover:bg-muted"
+              >
+                <SearchIcon className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {filteredAgents.map((agent) => (
+          <Card
+            key={agent.id}
+            className="group transition-all hover:shadow-xl hover:scale-[1.02] duration-300 flex flex-col"
+          >
+            <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
+              <div className="flex items-start gap-3">
+                <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shrink-0">
+                  {agent.imageUrl.startsWith("http") &&
+                  !failedImages.has(agent.id) ? (
+                    <Image
+                      src={agent.imageUrl}
+                      alt={`${agent.name} icon`}
+                      width={32}
+                      height={32}
+                      className="h-6 w-6 object-contain"
+                      onError={() =>
+                        setFailedImages((prev) => new Set([...prev, agent.id]))
+                      }
+                    />
+                  ) : (
+                    <BotIcon className="h-5 w-5 text-white" />
+                  )}
+                </div>
+                <div className="space-y-0.5">
+                  <CardTitle className="text-base font-semibold">
+                    {agent.name}
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    {agent.category}
+                  </CardDescription>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <span className="text-sm font-medium">
+                  {agent.popularityScore}
+                </span>
+                <StarIcon className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+              </div>
+            </CardHeader>
+
+            <CardContent className="space-y-4 flex-1">
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                {agent.description}
+              </p>
+
+              <div className="flex flex-wrap gap-1.5">
+                {agent.tags.slice(0, 3).map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="outline"
+                    className="hover:bg-secondary transition-colors text-xs px-2 py-0"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+                {agent.tags.length > 3 && (
+                  <Badge variant="outline" className="text-xs px-2 py-0">
+                    +{agent.tags.length - 3}
+                  </Badge>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <p className="text-muted-foreground text-xs">License</p>
+                  <p className="font-medium">{agent.licenseType}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs">Pricing</p>
+                  <p className="font-medium">
+                    {agent.pricing.freeTier
+                      ? "Free"
+                      : `$${agent.pricing.monthly}/mo`}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs">Reviews</p>
+                  <p className="font-medium">
+                    {agent.reviewsCount.toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs">Uptime</p>
+                  <p className="font-medium">{agent.uptime}%</p>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium">Capabilities</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {agent.capabilities.slice(0, 3).map((capability) => (
+                    <Badge
+                      key={capability}
+                      variant="secondary"
+                      className="text-xs px-2 py-0"
+                    >
+                      {capability}
+                    </Badge>
+                  ))}
+                  {agent.capabilities.length > 3 && (
+                    <Badge variant="secondary" className="text-xs px-2 py-0">
+                      +{agent.capabilities.length - 3}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+
+            <CardFooter className="flex gap-2 pt-4">
+              <Button variant="default" asChild className="flex-1 h-8 text-xs">
+                <Link href={`/agent/${agent.id}`}>View Details</Link>
+              </Button>
+              <Button variant="outline" asChild className="flex-1 h-8 text-xs">
+                <a
+                  href={agent.documentationURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Documentation
+                </a>
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }

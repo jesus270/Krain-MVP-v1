@@ -15,21 +15,24 @@
     "@krain/typescript-config": "workspace:",
     "@krain/ui": "workspace:",
     "@krain/utils": "workspace:",
+    "@types/react-speech-recognition": "^3.9.6",
+    "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "next": "catalog:"
+    "react-speech-recognition": "^3.10.0",
+    "lucide-react": "catalog:"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "catalog:",
     "@krain/eslint-config": "workspace:",
     "@krain/typescript-config": "workspace:",
-    "typescript": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "postcss": "catalog:",
-    "tailwindcss": "catalog:",
     "eslint": "catalog:",
     "eslint-config-next": "catalog:",
-    "@eslint/eslintrc": "catalog:"
+    "postcss": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
   }
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { RootLayout } from "@krain/ui/layouts/root-layout";
-import "@krain/ui/globals.css";
 import { Toaster } from "@krain/ui/components/ui/sonner";
 import Footer from "@/components/footer";
 import { SidebarNav } from "@/components/nav-sidebar";
