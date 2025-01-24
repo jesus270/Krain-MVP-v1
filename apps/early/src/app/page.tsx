@@ -103,7 +103,7 @@ export default function HomePage() {
           ) : !user ? (
             <p className="text-xl sm:text-2xl max-w-2xl">
               Sign in with your wallet or email to get early access to KRAiN's
-              revolutionary AI Agent Marketplace & AI Agent Builder.
+              revolutionary AI Agent Hub & AI Agent Builder.
             </p>
           ) : !user.email?.address ? (
             <p className="text-xl sm:text-2xl max-w-2xl text-amber-500">

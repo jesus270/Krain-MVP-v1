@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { RootLayout } from "@krain/ui/layouts/root-layout";
 
 export const metadata: Metadata = {
-  title: "Krain Marketplace",
-  description: "Krain Marketplace",
+  title: "Krain Agent Hub",
+  description: "Krain Agent Hub",
 };
 
 export default function Layout({
@@ -15,7 +15,7 @@ export default function Layout({
     <RootLayout
       authConfig={{
         privyAppId: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
-        loadingTitle: "Welcome to the $KRAIN Marketplace",
+        loadingTitle: "Welcome to the $KRAIN Agent Hub",
         loadingDescription: "Please wait while we validate your session...",
         validateSession: false,
       }}
