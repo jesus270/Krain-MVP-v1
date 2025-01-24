@@ -1,10 +1,11 @@
 "use client";
 
+import "regenerator-runtime/runtime";
 import { Button } from "@krain/ui/components/ui/button";
 import { Textarea } from "@krain/ui/components/ui/textarea";
 import { MicIcon, SearchIcon, StarIcon, BotIcon } from "lucide-react";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
@@ -23,8 +24,66 @@ import Link from "next/link";
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
-  const { transcript, listening, browserSupportsSpeechRecognition } =
-    useSpeechRecognition();
+
+  const commands = [
+    {
+      command: "clear search",
+      callback: ({ resetTranscript }: { resetTranscript: () => void }) => {
+        setSearchQuery("");
+        resetTranscript();
+      },
+    },
+    {
+      command: "search for *",
+      callback: (searchTerm: string) => {
+        setSearchQuery(searchTerm);
+      },
+    },
+    {
+      command: "find *",
+      callback: (searchTerm: string) => {
+        setSearchQuery(searchTerm);
+      },
+    },
+  ];
+
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+    isMicrophoneAvailable,
+  } = useSpeechRecognition({ commands });
+
+  const handleVoiceInput = useCallback(() => {
+    if (!browserSupportsSpeechRecognition) {
+      alert(
+        "Your browser doesn't support speech recognition. Please try Chrome or Edge.",
+      );
+      return;
+    }
+
+    if (!isMicrophoneAvailable) {
+      alert("Please enable microphone access to use voice search.");
+      return;
+    }
+
+    if (listening) {
+      SpeechRecognition.stopListening();
+    } else {
+      SpeechRecognition.startListening({
+        continuous: false,
+        language: "en-US",
+      });
+    }
+  }, [listening, isMicrophoneAvailable, browserSupportsSpeechRecognition]);
+
+  // Update search query when transcript changes
+  useEffect(() => {
+    if (transcript && !listening) {
+      setSearchQuery(transcript);
+    }
+  }, [transcript, listening]);
 
   // Common words to filter out from search
   const stopWords = new Set([
@@ -114,26 +173,6 @@ export default function Home() {
     .sort((a, b) => b.score - a.score) // Sort by score descending
     .map(({ agent }) => agent); // Extract just the agent objects
 
-  const handleVoiceInput = () => {
-    if (!browserSupportsSpeechRecognition) {
-      alert("Speech recognition is not supported in this browser.");
-      return;
-    }
-
-    if (listening) {
-      SpeechRecognition.stopListening();
-    } else {
-      SpeechRecognition.startListening();
-    }
-  };
-
-  // Update search query when transcript changes
-  useEffect(() => {
-    if (transcript) {
-      setSearchQuery(transcript);
-    }
-  }, [transcript]);
-
   return (
     <div className="grid grid-rows-[auto_1fr_auto] min-h-screen p-4 sm:p-6 lg:p-8 gap-6 lg:gap-8">
       <header className="flex flex-col items-center gap-4 lg:gap-6">
@@ -159,9 +198,10 @@ export default function Home() {
                 size="icon"
                 title={listening ? "Stop recording" : "Search with voice"}
                 className="h-8 w-8 hover:bg-muted"
+                disabled={!browserSupportsSpeechRecognition}
               >
                 <MicIcon
-                  className={`w-4 h-4 ${listening ? "text-red-500" : ""}`}
+                  className={`w-4 h-4 ${listening ? "text-red-500" : ""} ${!browserSupportsSpeechRecognition ? "opacity-50" : ""}`}
                 />
               </Button>
               <Button
@@ -174,6 +214,12 @@ export default function Home() {
               </Button>
             </div>
           </div>
+          {!browserSupportsSpeechRecognition && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Voice search is not supported in this browser. Please use Chrome
+              or Edge for voice search functionality.
+            </p>
+          )}
         </div>
       </header>
 
