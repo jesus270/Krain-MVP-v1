@@ -5,13 +5,14 @@ import { AgentDetailsContent } from "./components/agent-details-content";
 import { AgentPricing } from "./components/agent-pricing";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function AgentDetails({ params }: PageProps) {
-  const agent = agents.find((a) => a.id === params.id);
+export default async function AgentDetails({ params }: PageProps) {
+  const { id } = await params;
+  const agent = agents.find((a) => a.id === id);
 
   if (!agent) {
     return (
