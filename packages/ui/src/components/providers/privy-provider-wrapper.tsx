@@ -14,6 +14,7 @@ interface PrivyProviderWrapperProps {
   children: React.ReactNode;
   privyAppId: string;
   loginMethods: ("wallet" | "email" | "twitter")[] | undefined;
+  validateSession?: boolean;
 }
 
 const solanaConnectors = toSolanaWalletConnectors({
@@ -64,6 +65,7 @@ export function PrivyProviderWrapper({
   children,
   privyAppId,
   loginMethods,
+  validateSession = true,
 }: PrivyProviderWrapperProps) {
   return (
     <PrivyProvider
@@ -107,7 +109,11 @@ export function PrivyProviderWrapper({
         },
       }}
     >
-      <SessionRevalidator>{children}</SessionRevalidator>
+      {validateSession ? (
+        <SessionRevalidator>{children}</SessionRevalidator>
+      ) : (
+        children
+      )}
     </PrivyProvider>
   );
 }
