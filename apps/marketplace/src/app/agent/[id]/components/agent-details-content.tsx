@@ -93,12 +93,14 @@ export function AgentDetailsContent({ agent }: AgentDetailsContentProps) {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div className="space-y-1">
             <p className="text-muted-foreground text-sm">Uptime</p>
-            <p className="font-medium text-lg">{agent.uptime}%</p>
+            <p className="font-medium text-lg">
+              {agent.performanceMetrics.uptime}%
+            </p>
           </div>
           <div className="space-y-1">
             <p className="text-muted-foreground text-sm">Reviews</p>
             <p className="font-medium text-lg">
-              {agent.reviewsCount.toLocaleString()}
+              {agent.reputationMetrics.reviewsCount.toLocaleString()}
             </p>
           </div>
           <div className="space-y-1">
