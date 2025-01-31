@@ -188,16 +188,14 @@ export default function Home() {
 
       {/* FAQ Section */}
       <section className="flex flex-col items-center w-full py-24 md:py-32 px-4 md:px-24">
-        <div className="flex flex-col w-full max-w-7xl">
+        <div className="flex flex-col w-full">
           <div className="mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
               FAQs
             </h2>
           </div>
 
-          <div className="max-w-3xl">
-            <FaqSection />
-          </div>
+          <FaqSection />
         </div>
       </section>
 
