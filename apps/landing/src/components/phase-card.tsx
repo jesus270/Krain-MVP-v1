@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader } from "@krain/ui/components/ui/card";
+import Image from "next/image";
 
 interface PhaseCardProps {
   phase: string;
@@ -6,27 +7,42 @@ interface PhaseCardProps {
   features: string[];
 }
 
+type PhaseNumber = "ONE" | "TWO" | "THREE";
+
 export function PhaseCard({ phase, title, features }: PhaseCardProps) {
+  const phaseMap: Record<PhaseNumber, string> = {
+    ONE: "1",
+    TWO: "2",
+    THREE: "3",
+  };
+  const phaseNumber = (phase.split(" ")[1] || "ONE") as PhaseNumber;
+  const backgroundImage = `/phase-${phaseMap[phaseNumber]}.svg`;
+
   return (
-    <Card className="bg-gray-900/50 backdrop-blur border-gray-800 h-full">
-      <CardHeader>
-        <div className="relative">
-          <h3 className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600">
-            {phase}
-          </h3>
-        </div>
-        <h4 className="text-xl font-medium text-white mt-4">{title}</h4>
-      </CardHeader>
-      <CardContent>
-        <ul className="space-y-2">
+    <div className="w-[420px] h-[400px] relative">
+      <div className="relative w-[380px] h-[200px]">
+        <Image
+          src={backgroundImage}
+          alt={phase}
+          fill
+          className="object-contain object-left-top"
+          priority
+        />
+      </div>
+      <div className="absolute top-[140px] right-12 w-[66%]">
+        <ul className="space-y-2.5">
+          <li className="text-white text-base font-medium mb-1">{title}</li>
           {features.map((feature) => (
-            <li key={feature} className="text-gray-400 flex items-start">
-              <span className="mr-2 text-purple-500">•</span>
+            <li
+              key={feature}
+              className="text-white/70 text-[13px] pl-3 relative leading-normal"
+            >
+              <span className="absolute -left-0 text-white/70">•</span>
               {feature}
             </li>
           ))}
         </ul>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
