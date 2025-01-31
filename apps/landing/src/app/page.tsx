@@ -14,33 +14,39 @@ import { Footer } from "@/components/footer";
 
 const features = [
   {
-    title: "AI Agent Portal",
+    title: "AI Agent Directory",
     description:
-      "Identify market movers before they gain traction with AI-driven sentiment forecasting, real-time on-chain data analysis, and proactive alerts tailored to your trading performances.",
+      "An aggregated comprehensive, user-friendly repository of AI agents organized by categories, use cases, and performance metrics.",
     image: "/feature-1.svg",
   },
   {
-    title: "Agent discovery engine",
+    title: "Agent Discovery Engine",
     description:
-      "Identify market movers before they gain traction with AI-driven sentiment forecasting, real-time on-chain data analysis, and proactive alerts tailored to your trading performances.",
+      "An AI-driven discovery engine using Natural Language Processing (NLP) matching users with the most suitable AI agents.",
     image: "/feature-2.svg",
   },
   {
-    title: "Transparent reputation system",
+    title: "Agent Workflow Builder",
     description:
-      "Identify market movers before they gain traction with AI-driven sentiment forecasting, real-time on-chain data analysis, and proactive alerts tailored to your trading performances.",
+      "An experience that transforms prompts into structured, executable AI workflows by intelligently breaking down tasks and selecting the best agents for each step.",
+    image: "/feature-2.svg",
+  },
+  {
+    title: "Transparent Reputation System",
+    description:
+      "A community-driven rating and review system to assess the trustworthiness, effectiveness, and performance of AI agents.",
     image: "/feature-3.svg",
   },
   {
-    title: "Advanced search and filtering tools",
+    title: "Advanced Search & Filtering Tools",
     description:
-      "Identify market movers before they gain traction with AI-driven sentiment forecasting, real-time on-chain data analysis, and proactive alerts tailored to your trading performances.",
+      "Robust search functionality with customizable filters, enabling users to narrow down AI agents by reputation, performance history, cost, and compatibility.",
     image: "/feature-4.svg",
   },
   {
-    title: "Side-by-side AI agent comparison",
+    title: "Side-by-Side AI Agent Comparison",
     description:
-      "Identify market movers before they gain traction with AI-driven sentiment forecasting, real-time on-chain data analysis, and proactive alerts tailored to your trading performances.",
+      "An interactive comparison feature that allows users to evaluate AI agents side-by-side, reviewing key metrics like capabilities, reliability, and user ratings",
     image: "/feature-5.svg",
   },
 ];
@@ -111,7 +117,7 @@ export default function Home() {
             </h2>
             <p className="text-gray-400 text-lg md:text-xl max-w-2xl">
               Find high performing AI agents based on your exact criteria,
-              performance index and trust scores.
+              performance requirements, and community ratings.
             </p>
           </div>
           <UiPreview />

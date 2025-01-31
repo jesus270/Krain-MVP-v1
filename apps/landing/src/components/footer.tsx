@@ -3,6 +3,9 @@ import { SocialLink } from "./social-link";
 import { FooterLink } from "./footer-link";
 import { Button } from "@krain/ui/components/ui/button";
 import { Copy } from "lucide-react";
+import { CoinMarketCapLogo } from "@krain/ui/components/icons/logo-coinmarketcap";
+import { MediumLogo } from "@krain/ui/components/icons/logo-medium";
+import { XLogo } from "@krain/ui/components/icons/XLogo";
 
 const socialLinks = [
   {
@@ -10,42 +13,42 @@ const socialLinks = [
     icon: Send,
     label: "TG community",
     sublabel: "@KRAIN_AI",
-    className: "hover:bg-blue-600/10",
+    bgClass: "hover:bg-[linear-gradient(90deg,rgba(19,33,53,0.5),transparent)]",
   },
   {
     href: "#",
     icon: Send,
     label: "TG announcement",
     sublabel: "@KRAIN_AI",
-    className: "hover:bg-blue-500/10",
+    bgClass: "hover:bg-[linear-gradient(90deg,rgba(19,33,53,0.5),transparent)]",
   },
   {
     href: "#",
-    icon: Twitter,
+    icon: XLogo,
     label: "X / Twitter",
     sublabel: "@KRAIN_AI",
-    className: "hover:bg-gray-800",
+    bgClass: "hover:bg-[linear-gradient(90deg,rgba(44,38,60,0.5),transparent)]",
   },
   {
     href: "#",
-    icon: BookOpen,
+    icon: MediumLogo,
     label: "Medium",
     sublabel: "@KRAIN_AI",
-    className: "hover:bg-emerald-900/20",
+    bgClass: "hover:bg-[linear-gradient(90deg,rgba(18,43,35,0.5),transparent)]",
   },
   {
     href: "#",
-    icon: AtSign,
+    icon: CoinMarketCapLogo,
     label: "Coinmarketcap",
     sublabel: "@KRAIN_AI",
-    className: "hover:bg-indigo-900/20",
+    bgClass: "hover:bg-[linear-gradient(90deg,rgba(20,21,60,0.5),transparent)]",
   },
   {
     href: "#",
     icon: Mail,
     label: "Contact us",
     sublabel: "@KRAIN_AI",
-    className: "hover:bg-purple-900/20",
+    bgClass: "hover:bg-[linear-gradient(90deg,rgba(31,18,56,0.5),transparent)]",
   },
 ];
 
