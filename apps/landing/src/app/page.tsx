@@ -89,10 +89,11 @@ export default function Home() {
         <SocialNav />
         <div className="flex flex-col items-center justify-center flex-1 z-10 px-4 text-center">
           <h1 className="max-w-4xl text-4xl md:text-6xl font-bold text-white mb-4">
-            The infrastructure layer fueling <span>AI agent economy</span>
+            The infrastructure layer fueling the <span>AI agent economy</span>
           </h1>
           <p className="text-gray-400 text-lg md:text-xl mb-8">
-            Accelerate AI agent ecosystems with intelligent infrastructures.
+            From discovery to creation, we accelerate the AI Agent ecosystem
+            with intelligent infrastructure.
           </p>
           <GradientButton>Enter app</GradientButton>
         </div>
@@ -100,7 +101,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="flex flex-col items-center w-full py-24 md:py-32 md:px-24">
+      <section className="flex flex-col items-center w-full py-24 md:py-32 px-4 md:px-20">
         <div className="flex flex-col items-center w-full">
           <div className="flex flex-col items-center text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
@@ -180,14 +181,14 @@ export default function Home() {
       </section>
 
       {/* Roadmap Section */}
-      <section className="flex flex-col items-center w-full py-24 md:py-32 px-4 md:px-24">
+      <section className="flex flex-col items-center w-full py-24 md:py-32 px-4 md:px-20">
         <div className="flex flex-col w-full max-w-7xl">
           <RoadmapCarousel />
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="flex flex-col items-center w-full py-24 md:py-32 px-4 md:px-24">
+      <section className="flex flex-col items-center w-full py-24 md:py-32 px-4 md:px-20">
         <div className="flex flex-col w-full">
           <div className="mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
@@ -200,7 +201,7 @@ export default function Home() {
       </section>
 
       {/* Community Section */}
-      <section className="flex flex-col w-full">
+      <section className="flex flex-col w-full h-screen">
         <CommunitySection />
       </section>
       <Footer />

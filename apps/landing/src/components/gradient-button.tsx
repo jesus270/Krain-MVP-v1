@@ -11,7 +11,7 @@ export function GradientButton({
 }: GradientButtonProps) {
   return (
     <button
-      className={`group relative px-8 py-3 rounded-full text-white font-medium ${className}`}
+      className={`group relative px-5 py-3.5 rounded-full text-white font-medium ${className}`}
       {...props}
     >
       {/* <div className="absolute inset-0 rounded-full bg-[#1f1e2a]" /> */}

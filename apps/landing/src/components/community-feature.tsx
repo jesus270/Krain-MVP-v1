@@ -1,13 +1,28 @@
 interface CommunityFeatureProps {
-  title: string
-  className?: string
+  title: string;
+  className?: string;
 }
 
-export function CommunityFeature({ title, className = "" }: CommunityFeatureProps) {
+export function CommunityFeature({
+  title,
+  className = "",
+}: CommunityFeatureProps) {
   return (
-    <div className={`bg-gray-900/20 backdrop-blur-sm border border-gray-800 rounded-lg p-4 ${className}`}>
-      <p className="text-sm text-gray-300 uppercase tracking-wider">{title}</p>
+    <div
+      className={`relative flex flex-col justify-end min-h-24 pl-4 ${className}`}
+    >
+      <div
+        className="absolute left-0 top-0 bottom-0 w-[2px] rounded-l-lg"
+        style={{
+          background: `linear-gradient(360deg, #D0B9F9 -35.48%, rgba(255, 255, 255, 0) 100%),
+          radial-gradient(1396.3% 29.03% at 50% 89.78%, rgba(145, 91, 240, 0.9) 0%, rgba(145, 91, 240, 0) 23.91%),
+          radial-gradient(4075% 32.57% at 0% 100%, #1FC5D6 0%, rgba(31, 197, 214, 0) 30.62%)`,
+          backdropFilter: "blur(12.7px)",
+          boxShadow:
+            "0 0 10px rgba(145, 91, 240, 0.5), 0 0 20px rgba(31, 197, 214, 0.3)",
+        }}
+      />
+      <p className="text-sm text-[#EFF0F3] uppercase tracking-wider">{title}</p>
     </div>
-  )
+  );
 }
-
