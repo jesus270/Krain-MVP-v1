@@ -120,11 +120,8 @@ export default function Home() {
       {/* Features Grid Section */}
       <section className="flex flex-col w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full">
-          {features.map((feature, index) => (
-            <FeatureCard
-              key={`feature-${index}-${feature.title}`}
-              {...feature}
-            />
+          {features.map((feature) => (
+            <FeatureCard key={`feature-${feature.title}`} {...feature} />
           ))}
         </div>
       </section>
@@ -150,7 +147,7 @@ export default function Home() {
           <div className="h-96" />
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 w-full">
-            {tokenFeatures.map((feature, index) => (
+            {tokenFeatures.map((feature) => (
               <TokenFeature
                 key={feature.title.replace(/\s+/g, "-").toLowerCase()}
                 {...feature}
@@ -170,7 +167,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 w-full max-w-5xl">
-            {exchanges.map((exchange, index) => (
+            {exchanges.map((exchange) => (
               <ExchangeCard
                 key={`exchange-${exchange.name.toLowerCase().replace(/\s+/g, "-")}`}
                 {...exchange}

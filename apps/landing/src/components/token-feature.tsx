@@ -1,7 +1,9 @@
 import type { LucideIcon } from "lucide-react";
+import Image from "next/image";
 
 interface TokenFeatureProps {
-  iconPath: string;
+  icon?: LucideIcon;
+  iconPath?: string;
   title: string;
   className?: string;
 }
@@ -15,10 +17,16 @@ export function TokenFeature({
     <div
       className={`flex flex-col items-center text-center space-y-3 ${className}`}
     >
-      {/* <div className="w-12 h-12 rounded-full bg-purple-600/20 flex items-center justify-center"> */}
-      <img src={iconPath} alt={title} className="w-10 h-10" />
-      {/* </div> */}
-      <p className="text-sm font-medium text-gray-300">{title}</p>
+      <Image
+        src={iconPath || ""}
+        alt={title}
+        width={40}
+        height={40}
+        className="w-10 h-10"
+      />
+      <p className="text-sm font-medium text-gray-300 whitespace-pre-line">
+        {title}
+      </p>
     </div>
   );
 }

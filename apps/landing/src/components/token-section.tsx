@@ -11,6 +11,7 @@ import {
   Vote,
   Flame,
 } from "lucide-react";
+import Image from "next/image";
 
 const tokenFeatures = [
   { icon: Unlock, title: "UNLOCK PREMIUM\nAI FEATURES" },
@@ -46,13 +47,12 @@ export function TokenSection() {
           </p>
         </div>
         <ContractDisplay address="0×000000000000000000000000" />
-        <div className="my-24 relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-cyan-600/20 blur-3xl" />
-          <img
+        <div className="relative h-96">
+          <Image
             src="https://placehold.co/400x300"
             alt="Krain Token"
             width={400}
-            height={400}
+            height={300}
             className="mx-auto relative"
           />
         </div>
