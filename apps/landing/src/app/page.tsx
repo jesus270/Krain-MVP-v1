@@ -91,7 +91,7 @@ export default function Home() {
         >
           <source src="/bg-hero.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-[#04030C]/50" />
         <SocialNav />
         <div className="flex flex-col items-center justify-center flex-1 z-10 px-4 text-center">
           <h1 className="max-w-4xl text-4xl md:text-6xl font-bold text-white mb-4">

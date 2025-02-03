@@ -40,7 +40,7 @@ const features = [
 
 export function FeaturesGridSection() {
   return (
-    <section className="bg-black py-24 md:py-32">
+    <section className="bg-[#04030C] py-24 md:py-32">
       <Container>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature) => (

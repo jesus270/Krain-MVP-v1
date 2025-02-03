@@ -20,7 +20,7 @@ export function CommunitySection() {
     <div className="relative overflow-hidden h-screen">
       {/* Background Image */}
       <div
-        className="absolute inset-0 bg-black bg-cover bg-center bg-no-repeat h-screen"
+        className="absolute inset-0 bg-[#04030C] bg-cover bg-center bg-no-repeat h-screen"
         style={{
           backgroundImage: `url('/bg-community.png')`,
         }}

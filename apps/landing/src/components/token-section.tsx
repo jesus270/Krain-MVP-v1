@@ -26,7 +26,7 @@ const tokenFeatures = [
 
 export function TokenSection() {
   return (
-    <section className="bg-black py-24 md:py-32 relative overflow-hidden">
+    <section className="bg-[#04030C] py-24 md:py-32 relative overflow-hidden">
       <div
         className="absolute inset-0"
         style={{

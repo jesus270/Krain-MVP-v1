@@ -4,7 +4,7 @@ import { Partners } from "./partners";
 export function HeroSection() {
   return (
     <section
-      className="relative min-h-screen bg-black"
+      className="relative min-h-screen bg-[#04030C]"
       style={{
         backgroundImage: `
           radial-gradient(circle at 30% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
