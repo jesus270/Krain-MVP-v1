@@ -29,7 +29,7 @@ const features = [
     title: "Agent Workflow Builder",
     description:
       "An experience that transforms prompts into structured, executable AI workflows by intelligently breaking down tasks and selecting the best agents for each step.",
-    image: "/feature-2.svg",
+    image: "/feature-6.svg",
   },
   {
     title: "Transparent Reputation System",
@@ -44,7 +44,7 @@ const features = [
     image: "/feature-4.svg",
   },
   {
-    title: "Side-by-Side AI Agent Comparison",
+    title: "Side-by-side AI agent comparison",
     description:
       "An interactive comparison feature that allows users to evaluate AI agents side-by-side, reviewing key metrics like capabilities, reliability, and user ratings",
     image: "/feature-5.svg",
