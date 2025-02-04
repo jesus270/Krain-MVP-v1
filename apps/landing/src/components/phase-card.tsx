@@ -4,19 +4,17 @@ import Image from "next/image";
 interface PhaseCardProps {
   phase: string;
   title: string;
+  subtitle: string;
   features: string[];
 }
 
-type PhaseNumber = "ONE" | "TWO" | "THREE";
-
-export function PhaseCard({ phase, title, features }: PhaseCardProps) {
-  const phaseMap: Record<PhaseNumber, string> = {
-    ONE: "1",
-    TWO: "2",
-    THREE: "3",
-  };
-  const phaseNumber = (phase.split(" ")[1] || "ONE") as PhaseNumber;
-  const backgroundImage = `/phase-${phaseMap[phaseNumber]}.svg`;
+export function PhaseCard({
+  phase,
+  title,
+  subtitle,
+  features,
+}: PhaseCardProps) {
+  const backgroundImage = `/phase-${phase}.svg`;
 
   return (
     <div className="w-[420px] h-[400px] relative">
@@ -31,7 +29,11 @@ export function PhaseCard({ phase, title, features }: PhaseCardProps) {
       </div>
       <div className="absolute top-[140px] right-12 w-[66%]">
         <ul className="space-y-2.5">
-          <li className="text-white text-base font-medium mb-1">{title}</li>
+          <li className="text-white text-base font-medium mb-1">
+            {title}
+            <br />
+            {subtitle}
+          </li>
           {features.map((feature) => (
             <li
               key={feature}
