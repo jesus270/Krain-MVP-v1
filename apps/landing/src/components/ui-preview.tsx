@@ -6,11 +6,13 @@ export function UiPreview() {
       <Image
         src="/ui-preview.svg"
         alt="UI Preview"
-        width={3840}
-        height={2160}
-        className="object-cover w-full h-full"
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
+        priority
+        className="object-cover"
+        // quality={90}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+      {/* <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" /> */}
     </div>
   );
 }

@@ -19,7 +19,7 @@ export function HeroSection() {
       >
         <source src="/bg-hero.mp4" type="video/mp4" />
       </video>
-      <div className="absolute inset-0 bg-[#04030C]/50" />
+      {/* <div className="absolute inset-0 bg-[#04030C]/50" /> */}
       <SocialNav />
       <div className="flex flex-col items-center justify-center flex-1 z-10 px-4 text-center">
         <h1 className="max-w-4xl text-4xl md:text-6xl font-bold text-white mb-4">
@@ -29,9 +29,9 @@ export function HeroSection() {
           From discovery to creation, we are accelerating the AI Agent ecosystem
           with intelligent infrastructure.
         </p>
-        <Link href="https://early.krain.ai">
+        {/* <Link href="https://early.krain.ai">
           <GradientButton>Enter app</GradientButton>
-        </Link>
+        </Link> */}
       </div>
       <Partners />
     </section>

@@ -54,16 +54,18 @@ export function CommunitySection() {
             >
               KRAIN COMMUNITY
             </p>
-            <h2 className="text-3xl md:text-5xl font-bold text-white max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-bold text-white max-w-3xl mx-auto mb-4">
               Connect with 100,000s of crypto users in the KRAIN ecosystem
             </h2>
             <Link href={"https://t.me/krainofficial"}>
-              <GradientButton>
-                <div className="flex items-center gap-2">
-                  <TelegramLogo className="w-5 h-5" />
-                  <div className="text-sm font-medium">Join community</div>
-                </div>
-              </GradientButton>
+              <div className="flex items-center justify-center gap-2 mt-8">
+                <GradientButton>
+                  <div className="flex items-center gap-2">
+                    <TelegramLogo className="w-5 h-5" />
+                    <div className="text-sm font-medium">Join community</div>
+                  </div>
+                </GradientButton>
+              </div>
             </Link>
           </div>
 
