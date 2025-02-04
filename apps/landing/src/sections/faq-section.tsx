@@ -120,7 +120,10 @@ CustomAccordionTrigger.displayName = "CustomAccordionTrigger";
 
 export function FaqSection() {
   return (
-    <section id="faq" className="relative flex flex-col w-full bg-[#04030C]">
+    <section
+      id="faq"
+      className="relative flex flex-col w-full bg-[#04030C] p-4 md:p-20"
+    >
       <div className="flex flex-col w-full">
         <div className="mb-16">
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
