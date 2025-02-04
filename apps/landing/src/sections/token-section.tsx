@@ -14,7 +14,7 @@ const tokenFeatures = [
   { iconPath: "/icon-square-vote.svg", title: "PARTICIPATE\nIN GOVERNANCE" },
   {
     iconPath: "/icon-square-burn.svg",
-    title: "TOKEN BUYBACKS\n& BURNS MECHANISM",
+    title: "TOKEN BUYBACK\n& BURN MECHANISMS",
   },
 ];
 
