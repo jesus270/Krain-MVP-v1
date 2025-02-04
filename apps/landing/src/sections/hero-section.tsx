@@ -26,8 +26,8 @@ export function HeroSection() {
           The infrastructure layer fueling the <span>AI agent economy</span>
         </h1>
         <p className="text-gray-400 text-lg md:text-xl mb-8">
-          From discovery to creation, we accelerate the AI Agent ecosystem with
-          intelligent infrastructure.
+          From discovery to creation, we are accelerating the AI Agent ecosystem
+          with intelligent infrastructure.
         </p>
         <Link href="https://early.krain.ai">
           <GradientButton>Enter app</GradientButton>
