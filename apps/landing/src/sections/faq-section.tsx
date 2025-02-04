@@ -10,13 +10,14 @@ import {
 import { cn } from "@krain/ui/lib/utils";
 import Image from "next/image";
 import React from "react";
+import Link from "next/link";
 
 const faqs = [
   {
     id: "QA_1",
     question: "What is KRAIN AI?",
     answer:
-      "The Krain ecosystem is powered by the $Krain token, built to enhance the ecosystem experience by providing access to premium app features, generous staking rewards, community governance voting and more.",
+      "The AI agent ecosystem is fragmented, difficult to navigate, and largely inaccessible to those outside of the developer community. Krain AI is building the intelligent infrastructure that enables seamless discovery, trust, and interoperability in the AI agent space. With Krain AI, innovators and businesses can explore, connect, and create AI agents faster than ever—fueling the next wave of AI-driven automation.",
   },
   {
     id: "QA_2",
@@ -45,15 +46,27 @@ const faqs = [
   {
     id: "QA_6",
     question: "Where can I learn more about KRAIN?",
-    answer:
-      "You can learn more about KRAIN through our whitepaper, documentation, and community channels. Join our Discord or Telegram for the latest updates.",
+    answer: (
+      <>
+        You can learn more about Krain by using our systems, reading out white
+        paper, and participating in our community. Join our{" "}
+        <Link
+          className="font-bold text-blue-500 hover:text-blue-400 underline"
+          href={"https://t.me/krainofficial"}
+          target="_blank"
+        >
+          Telegram
+        </Link>{" "}
+        for the latest updates.
+      </>
+    ),
   },
 ];
 
 const CustomAccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionTrigger>,
   React.ComponentPropsWithoutRef<typeof AccordionTrigger> & {
-    answer: string;
+    answer: string | React.ReactNode;
     questionId: string;
   }
 >(({ className, children, answer, questionId, ...props }, ref) => (
@@ -133,7 +146,7 @@ export function FaqSection() {
                   {faq.question}
                 </CustomAccordionTrigger>
                 <AccordionContent className="pt-4 pb-0 md:hidden">
-                  <p className="text-[#8781BB] text-sm">{faq.answer}</p>
+                  <span className="text-[#8781BB] text-sm">{faq.answer}</span>
                 </AccordionContent>
               </div>
             </AccordionItem>
