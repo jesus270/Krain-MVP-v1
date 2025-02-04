@@ -17,7 +17,7 @@ export function PhaseCard({
   const backgroundImage = `/phase-${phase}.svg`;
 
   return (
-    <div className="w-[420px] h-[400px] relative">
+    <div className="w-[470px] h-[350px] relative">
       <div className="relative w-[380px] h-[200px]">
         <Image
           src={backgroundImage}
