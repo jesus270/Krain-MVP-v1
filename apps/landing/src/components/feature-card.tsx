@@ -17,16 +17,16 @@ export function FeatureCard({
   imageClassName = "",
 }: FeatureCardProps) {
   return (
-    <div
-      className={`relative overflow-hidden ${className} border border-[#272442]`}
-    >
-      <div className={`relative w-full ${imageClassName} p-8`}>
+    <div className={`relative  ${className} border border-[#272442]`}>
+      <div
+        className={`relative ${imageClassName} pt-4 flex items-center justify-center`}
+      >
         <Image
           src={image || "https://placehold.co/400x300"}
           alt={title}
           width={400}
           height={300}
-          className="w-full h-auto"
+          className="w-[400px] h-[300px] object-contain"
         />
       </div>
       <div className="p-6">
