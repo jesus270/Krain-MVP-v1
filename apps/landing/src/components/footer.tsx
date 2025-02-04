@@ -52,7 +52,7 @@ export function Footer() {
         <div className="relative">
           <div className="flex flex-col lg:flex-row justify-between">
             <p
-              className="text-[96px] font-thin leading-[115.2px] px-4 md:px-20 pt-20"
+              className="text-[96px] font-thin leading-[115.2px] p-4 md:p-20 pt-20"
               style={{
                 background:
                   "linear-gradient(90deg, #8781BB 0%, #3E3B55 82.14%)",
@@ -68,7 +68,7 @@ export function Footer() {
               AI agent economy.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 px-4 md:px-20 pt-20">
+            <div className="grid grid-cols-2 gap-8 p-4 md:p-20">
               <div className="space-y-4">
                 <h3 className="text-white font-medium">Resources</h3>
                 {footerLinks.resources.map((link) => (
@@ -101,20 +101,19 @@ export function Footer() {
                     <FooterLink href={link.href}>{link.label}</FooterLink>
                   </div>
                 ))}
+                <div className="flex items-center gap-2 bg-gray-900/50 backdrop-blur rounded-full px-4 py-2">
+                  <code className="text-sm text-white blur-sm">
+                    0×0000...0000
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-400 hover:text-white -mr-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end px-4 md:px-20 py-8">
-            <div className="flex items-center gap-2 bg-gray-900/50 backdrop-blur rounded-full px-6 py-3">
-              <code className="text-sm text-white blur-sm">0×0000...0000</code>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-gray-400 hover:text-white"
-              >
-                <Copy className="w-4 h-4" />
-              </Button>
             </div>
           </div>
         </div>
