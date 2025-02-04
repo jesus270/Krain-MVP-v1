@@ -135,7 +135,17 @@ export default function Home() {
 
       {/* Token Section */}
       <section className="flex flex-col items-center w-full py-24 relative">
-        <div className="absolute inset-0 bg-[url('/bg-token.svg')] bg-cover bg-center" />
+        <div className="absolute inset-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+            poster="/bg-token.svg"
+            src="/bg-token.mp4"
+          />
+        </div>
         <div className="flex flex-col items-center w-full max-w-7xl px-4 z-10">
           <div className="flex flex-col items-center text-center space-y-6 mb-12">
             <h2 className="text-4xl md:text-6xl font-bold text-white">
