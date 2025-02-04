@@ -102,9 +102,9 @@ export function RoadmapCarousel() {
       </div>
 
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="grid grid-flow-col auto-cols-[420px] gap-6">
+        <div className="grid grid-flow-col auto-cols-[90vw] sm:auto-cols-[80vw] md:auto-cols-[420px] gap-6">
           {phases.map((phase, index) => (
-            <div key={index}>
+            <div key={index} className="w-full">
               <PhaseCard {...phase} />
             </div>
           ))}

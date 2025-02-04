@@ -17,8 +17,8 @@ export function PhaseCard({
   const backgroundImage = `/phase-${phase}.svg`;
 
   return (
-    <div className="w-[470px] h-[350px] relative">
-      <div className="relative w-[380px] h-[200px]">
+    <div className="w-full max-w-[470px] min-h-[400px] relative mx-auto">
+      <div className="relative w-full max-w-[380px] h-[200px]">
         <Image
           src={backgroundImage}
           alt={phase}
@@ -27,9 +27,9 @@ export function PhaseCard({
           priority
         />
       </div>
-      <div className="absolute top-[140px] right-12 w-[66%]">
-        <ul className="space-y-2.5">
-          <li className="text-white text-base font-medium mb-1">
+      <div className="absolute top-[140px] right-4 md:right-12 w-[75%]">
+        <ul className="space-y-3">
+          <li className="text-white text-sm md:text-base font-medium mb-2">
             {title}
             <br />
             {subtitle}
@@ -37,7 +37,7 @@ export function PhaseCard({
           {features.map((feature) => (
             <li
               key={feature}
-              className="text-white/70 text-[13px] pl-3 relative leading-normal"
+              className="text-white/70 text-xs md:text-sm pl-3 relative leading-relaxed"
             >
               <span className="absolute -left-0 text-white/70">•</span>
               {feature}
