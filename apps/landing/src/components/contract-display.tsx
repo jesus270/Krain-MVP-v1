@@ -47,12 +47,13 @@ export function ContractDisplay({ address }: ContractDisplayProps) {
             />
             <div className="flex flex-col items-start justify-start gap-2">
               <span className="text-sm text-[#8781BB]">Contract address:</span>
-              <code className="text-sm text-white">{address}</code>
+              <code className="text-sm text-white blur-sm">{address}</code>
             </div>
             <Button
               variant="ghost"
               size="sm"
               className="text-gray-400 hover:text-white"
+              disabled
             >
               <Copy className="w-4 h-4" />
             </Button>
