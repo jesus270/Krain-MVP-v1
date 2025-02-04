@@ -1,282 +1,31 @@
 import { Nav } from "@/components/nav";
-import { SocialNav } from "@/components/social-nav";
-import { Partners } from "@/components/partners";
-import { UiPreview } from "@/components/ui-preview";
-import { FeatureCard } from "@/components/feature-card";
-import { TokenFeature } from "@/components/token-feature";
-import { ContractDisplay } from "@/components/contract-display";
-import { ExchangeCard } from "@/components/exchange-card";
-import { RoadmapCarousel } from "@/components/roadmap-carousel";
-import { FaqSection } from "@/components/faq-section";
-import { CommunitySection } from "@/components/community-section";
-import { GradientButton } from "@/components/gradient-button";
 import { Footer } from "@/components/footer";
-import { Send, Twitter, BookOpen, AtSign, Mail } from "lucide-react";
-import { SocialLink } from "@/components/social-link";
-import { CoinMarketCapLogo } from "@krain/ui/components/icons/logo-coinmarketcap";
-import { MediumLogo } from "@krain/ui/components/icons/logo-medium";
-import { XLogo } from "@krain/ui/components/icons/XLogo";
 
-const features = [
-  {
-    title: "AI Agent Directory",
-    description:
-      "An aggregated comprehensive, user-friendly repository of AI agents organized by categories, use cases, and performance metrics.",
-    image: "/feature-1.svg",
-  },
-  {
-    title: "Agent Discovery Engine",
-    description:
-      "An AI-driven discovery engine using Natural Language Processing (NLP) matching users with the most suitable AI agents.",
-    image: "/feature-2.svg",
-  },
-  {
-    title: "Agent Workflow Builder",
-    description:
-      "An experience that transforms prompts into structured, executable AI workflows by intelligently breaking down tasks and selecting the best agents for each step.",
-    image: "/feature-6.svg",
-  },
-  {
-    title: "Transparent Reputation System",
-    description:
-      "A community-driven rating and review system to assess the trustworthiness, effectiveness, and performance of AI agents.",
-    image: "/feature-3.svg",
-  },
-  {
-    title: "Advanced Search & Filtering Tools",
-    description:
-      "Robust search functionality with customizable filters, enabling users to narrow down AI agents by reputation, performance history, cost, and compatibility.",
-    image: "/feature-4.svg",
-  },
-  {
-    title: "Side-by-side AI agent comparison",
-    description:
-      "An interactive comparison feature that allows users to evaluate AI agents side-by-side, reviewing key metrics like capabilities, reliability, and user ratings",
-    image: "/feature-5.svg",
-  },
-];
-
-const tokenFeatures = [
-  { iconPath: "/icon-square-star.svg", title: "UNLOCK PREMIUM\nAI FEATURES" },
-  { iconPath: "/icon-square-krain.svg", title: "AGENT HUB PRIMARY\nCURRENCY" },
-  { iconPath: "/icon-square-robot.svg", title: "AGENT HUB\nSUBSCRIPTIONS" },
-  { iconPath: "/icon-square-reward.svg", title: "AGENT PERFORMANCE\nREWARDS" },
-  {
-    iconPath: "/icon-square-liquid.svg",
-    title: "AGENT TOKEN\nLIQUIDITY PAIRING",
-  },
-  { iconPath: "/icon-square-coins.svg", title: "EARN\nSTAKING REWARDS" },
-  { iconPath: "/icon-square-vote.svg", title: "PARTICIPATE\nIN GOVERNANCE" },
-  {
-    iconPath: "/icon-square-burn.svg",
-    title: "TOKEN BUYBACKS\n& BURNS MECHANISM",
-  },
-];
-
-const exchanges = [
-  { name: "Exchange 1" },
-  { name: "Exchange 2" },
-  { name: "Exchange 3" },
-];
-
-const socialLinks = [
-  {
-    href: "#",
-    icon: Send,
-    label: "TG community",
-    sublabel: "@KRAIN_AI",
-    bgClass: "hover:bg-[linear-gradient(90deg,rgba(19,33,53,0.5),transparent)]",
-  },
-  {
-    href: "#",
-    icon: Send,
-    label: "TG announcement",
-    sublabel: "@KRAIN_AI",
-    bgClass: "hover:bg-[linear-gradient(90deg,rgba(19,33,53,0.5),transparent)]",
-  },
-  {
-    href: "#",
-    icon: XLogo,
-    label: "X / Twitter",
-    sublabel: "@KRAIN_AI",
-    bgClass: "hover:bg-[linear-gradient(90deg,rgba(44,38,60,0.5),transparent)]",
-  },
-  {
-    href: "#",
-    icon: MediumLogo,
-    label: "Medium",
-    sublabel: "@KRAIN_AI",
-    bgClass: "hover:bg-[linear-gradient(90deg,rgba(18,43,35,0.5),transparent)]",
-  },
-  {
-    href: "#",
-    icon: CoinMarketCapLogo,
-    label: "Coinmarketcap",
-    sublabel: "@KRAIN_AI",
-    bgClass: "hover:bg-[linear-gradient(90deg,rgba(20,21,60,0.5),transparent)]",
-  },
-  {
-    href: "#",
-    icon: Mail,
-    label: "Contact us",
-    sublabel: "@KRAIN_AI",
-    bgClass: "hover:bg-[linear-gradient(90deg,rgba(31,18,56,0.5),transparent)]",
-  },
-];
+import {
+  HeroSection,
+  PreviewSection,
+  FeaturesSection,
+  TokenSection,
+  ExchangesSection,
+  RoadmapSection,
+  FaqSection,
+  CommunitySection,
+  SocialSection,
+} from "@/sections";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-[#04030C]">
       <Nav />
-
-      {/* Hero Section */}
-      <section className="flex flex-col items-center w-full min-h-screen">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-          poster="/bg-hero.png"
-        >
-          <source src="/bg-hero.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-[#04030C]/50" />
-        <SocialNav />
-        <div className="flex flex-col items-center justify-center flex-1 z-10 px-4 text-center">
-          <h1 className="max-w-4xl text-4xl md:text-6xl font-bold text-white mb-4">
-            The infrastructure layer fueling the <span>AI agent economy</span>
-          </h1>
-          <p className="text-gray-400 text-lg md:text-xl mb-8">
-            From discovery to creation, we accelerate the AI Agent ecosystem
-            with intelligent infrastructure.
-          </p>
-          <GradientButton>Enter app</GradientButton>
-        </div>
-        <Partners />
-      </section>
-
-      {/* Features Section */}
-      <section className="flex flex-col items-center w-full py-24 md:py-32 px-4 md:px-20">
-        <div className="flex flex-col items-center w-full">
-          <div className="flex flex-col items-center text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
-              The only AI agent portal
-              <br />
-              you'll ever need
-            </h2>
-            <p className="text-gray-400 text-lg md:text-xl max-w-2xl">
-              Find high performing AI agents based on your exact criteria,
-              performance requirements, and community ratings.
-            </p>
-          </div>
-          <UiPreview />
-        </div>
-      </section>
-
-      {/* Features Grid Section */}
-      <section className="flex flex-col w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full">
-          {features.map((feature) => (
-            <FeatureCard key={`feature-${feature.title}`} {...feature} />
-          ))}
-        </div>
-      </section>
-
-      {/* Token Section */}
-      <section className="flex flex-col items-center w-full py-24 relative">
-        <div className="absolute inset-0">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-            poster="/bg-token.svg"
-            src="/bg-token.mp4"
-          />
-        </div>
-        <div className="flex flex-col items-center w-full max-w-7xl px-4 z-10">
-          <div className="flex flex-col items-center text-center space-y-6 mb-12">
-            <h2 className="text-4xl md:text-6xl font-bold text-white">
-              $KRAIN
-            </h2>
-            <p className="text-gray-400 text-lg md:text-xl max-w-3xl">
-              The Krain ecosystem is powered by the $Krain token, built to
-              enhance the ecosystem experience by providing access to premium
-              app features, generous staking rewards, community governance
-              voting and more.
-            </p>
-          </div>
-
-          <ContractDisplay address="0×000000000000000000000000" />
-
-          <div className="h-96" />
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 w-full">
-            {tokenFeatures.map((feature) => (
-              <TokenFeature
-                key={feature.title.replace(/\s+/g, "-").toLowerCase()}
-                {...feature}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Exchanges Section */}
-      <section className="flex flex-col items-center w-full py-24 md:py-32">
-        <div className="flex flex-col items-center w-full max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-sm font-medium tracking-[0.3em] uppercase bg-clip-text text-transparent bg-gradient-to-r from-[#4E516A] via-white to-[#4E516A]">
-              Available on
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 w-full max-w-5xl">
-            {exchanges.map((exchange) => (
-              <ExchangeCard
-                key={`exchange-${exchange.name.toLowerCase().replace(/\s+/g, "-")}`}
-                {...exchange}
-                className="bg-gray-900/50 backdrop-blur"
-                imageClassName="aspect-[3/2]"
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Roadmap Section */}
-      <section className="flex flex-col items-center w-full py-24 md:py-32 px-4 md:px-20">
-        <div className="flex flex-col w-full max-w-7xl">
-          <RoadmapCarousel />
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="flex flex-col items-center w-full py-24 md:py-32 px-4 md:px-20">
-        <div className="flex flex-col w-full">
-          <div className="mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
-              FAQs
-            </h2>
-          </div>
-
-          <FaqSection />
-        </div>
-      </section>
-
-      {/* Community Section */}
-      <section className="flex flex-col w-full h-screen">
-        <CommunitySection />
-      </section>
-      <section className="flex flex-col w-full">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 border-b border-gray-800 relative z-10">
-          {socialLinks.map((link) => (
-            <SocialLink key={link.label} {...link} />
-          ))}
-        </div>
-      </section>
+      <HeroSection />
+      <PreviewSection />
+      <FeaturesSection />
+      <TokenSection />
+      <ExchangesSection />
+      <RoadmapSection />
+      <FaqSection />
+      <CommunitySection />
+      <SocialSection />
       <Footer />
     </div>
   );

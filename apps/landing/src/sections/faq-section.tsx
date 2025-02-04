@@ -107,30 +107,39 @@ CustomAccordionTrigger.displayName = "CustomAccordionTrigger";
 
 export function FaqSection() {
   return (
-    <Accordion type="single" collapsible className="space-y-0 w-full">
-      {faqs.map((faq, index) => (
-        <AccordionItem
-          key={index}
-          value={`item-${index}`}
-          className={`py-10 border-t border-x-0 ${
-            index === faqs.length - 1 ? "border-b" : ""
-          }`}
-          style={{
-            borderImageSource:
-              "linear-gradient(90deg, #171528 0%, #3F396A 41%, #7B70D0 48%, #3F396A 66%, #171528 100%)",
-            borderImageSlice: "1",
-          }}
-        >
-          <div className="flex flex-col">
-            <CustomAccordionTrigger answer={faq.answer} questionId={faq.id}>
-              {faq.question}
-            </CustomAccordionTrigger>
-            <AccordionContent className="pt-4 pb-0 md:hidden">
-              <p className="text-[#8781BB] text-sm">{faq.answer}</p>
-            </AccordionContent>
-          </div>
-        </AccordionItem>
-      ))}
-    </Accordion>
+    <section id="faq" className="relative flex flex-col w-full bg-[#04030C]">
+      <div className="flex flex-col w-full">
+        <div className="mb-16">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+            FAQs
+          </h2>
+        </div>
+        <Accordion type="single" collapsible className="space-y-0 w-full">
+          {faqs.map((faq, index) => (
+            <AccordionItem
+              key={index}
+              value={`item-${index}`}
+              className={`py-10 border-t border-x-0 ${
+                index === faqs.length - 1 ? "border-b" : ""
+              }`}
+              style={{
+                borderImageSource:
+                  "linear-gradient(90deg, #171528 0%, #3F396A 41%, #7B70D0 48%, #3F396A 66%, #171528 100%)",
+                borderImageSlice: "1",
+              }}
+            >
+              <div className="flex flex-col">
+                <CustomAccordionTrigger answer={faq.answer} questionId={faq.id}>
+                  {faq.question}
+                </CustomAccordionTrigger>
+                <AccordionContent className="pt-4 pb-0 md:hidden">
+                  <p className="text-[#8781BB] text-sm">{faq.answer}</p>
+                </AccordionContent>
+              </div>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </div>
+    </section>
   );
 }
