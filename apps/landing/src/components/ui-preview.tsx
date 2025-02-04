@@ -4,7 +4,7 @@ export function UiPreview() {
   return (
     <div className="relative w-full aspect-video bg-gray-900/50 backdrop-blur">
       <Image
-        src="https://placehold.co/3840x2160"
+        src="/ui-preview.svg"
         alt="UI Preview"
         width={3840}
         height={2160}
