@@ -1,4 +1,4 @@
-import { FooterLink } from "./footer-link";
+import { FooterLink } from "../components/footer-link";
 import { Button } from "@krain/ui/components/ui/button";
 import { Copy } from "lucide-react";
 import Image from "next/image";
@@ -37,7 +37,7 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="relative w-full">
+    <footer className="relative w-full overflow-x-hidden">
       {/* Main Footer Content */}
       <div className="relative">
         {/* Background Image */}

@@ -1,5 +1,5 @@
 import { Nav } from "@/components/nav";
-import { Footer } from "@/components/footer";
+import { Footer } from "@/sections/footer";
 
 import {
   HeroSection,
@@ -15,7 +15,7 @@ import {
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#04030C]">
+    <div className="flex flex-col min-h-screen bg-[#04030C] overflow-x-hidden">
       <Nav />
       <HeroSection />
       <PreviewSection />
