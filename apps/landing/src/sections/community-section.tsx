@@ -3,6 +3,7 @@ import { CommunityFeature } from "../components/community-feature";
 import { GradientButton } from "../components/gradient-button";
 import Image from "next/image";
 import { TelegramLogo } from "@krain/ui/components/icons/logo-telegram";
+import Link from "next/link";
 
 const features = [
   "GET REAL-TIME SUPPORT FROM OUR TEAM",
@@ -56,12 +57,14 @@ export function CommunitySection() {
             <h2 className="text-3xl md:text-5xl font-bold text-white max-w-3xl mx-auto">
               Connect with 100,000s of crypto users in the KRAIN ecosystem
             </h2>
-            <GradientButton>
-              <div className="flex items-center gap-2">
-                <TelegramLogo className="w-5 h-5" />
-                <div className="text-sm font-medium">Join community</div>
-              </div>
-            </GradientButton>
+            <Link href={"https://t.me/krainofficial"}>
+              <GradientButton>
+                <div className="flex items-center gap-2">
+                  <TelegramLogo className="w-5 h-5" />
+                  <div className="text-sm font-medium">Join community</div>
+                </div>
+              </GradientButton>
+            </Link>
           </div>
 
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
