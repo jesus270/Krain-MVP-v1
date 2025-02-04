@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Button } from "@krain/ui/components/ui/button";
-import { Container } from "./container";
 import { GradientButton } from "./gradient-button";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -73,12 +72,16 @@ export function Nav() {
                 {item.label}
               </Button>
             ))}
-            <GradientButton>Enter app</GradientButton>
+            <Link href="https://early.krain.ai">
+              <GradientButton>Enter app</GradientButton>
+            </Link>
           </div>
 
           {/* Mobile Navigation */}
           <div className="flex md:hidden items-center gap-8">
-            <GradientButton>Enter app</GradientButton>
+            <Link href="https://early.krain.ai">
+              <GradientButton>Enter app</GradientButton>
+            </Link>
             <button
               className="p-2 text-white relative"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

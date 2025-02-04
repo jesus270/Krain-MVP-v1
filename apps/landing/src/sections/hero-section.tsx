@@ -1,6 +1,7 @@
 import { SocialNav } from "../components/social-nav";
 import { Partners } from "../components/partners";
 import { GradientButton } from "@/components/gradient-button";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
@@ -28,7 +29,9 @@ export function HeroSection() {
           From discovery to creation, we accelerate the AI Agent ecosystem with
           intelligent infrastructure.
         </p>
-        <GradientButton>Enter app</GradientButton>
+        <Link href="https://early.krain.ai">
+          <GradientButton>Enter app</GradientButton>
+        </Link>
       </div>
       <Partners />
     </section>
