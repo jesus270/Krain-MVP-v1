@@ -1,10 +1,6 @@
 import { ExchangeCard } from "../components/exchange-card";
 
-export const exchanges = [
-  { name: "Exchange 1" },
-  { name: "Exchange 2" },
-  { name: "Exchange 3" },
-];
+export const exchanges = [{ name: "Exchanges To Be Announced" }];
 
 export function ExchangesSection() {
   return (
@@ -19,7 +15,7 @@ export function ExchangesSection() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 w-full max-w-5xl">
+        <div className="flex items-center justify-center w-full max-w-5xl">
           {exchanges.map((exchange) => (
             <ExchangeCard
               key={`exchange-${exchange.name.toLowerCase().replace(/\s+/g, "-")}`}
