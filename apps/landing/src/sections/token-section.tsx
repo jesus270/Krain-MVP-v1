@@ -39,7 +39,7 @@ export function TokenSection() {
         <div className="flex flex-col items-center text-center space-y-6 mb-12">
           <h2 className="text-4xl md:text-6xl font-bold text-white">$KRAIN</h2>
           <p className="text-gray-400 text-lg md:text-xl max-w-3xl">
-            The Krain ecosystem is powered by the $Krain token, built to enhance
+            The Krain ecosystem is powered by the $KRAIN token, built to enhance
             the ecosystem experience by providing access to premium app
             features, generous staking rewards, community governance voting and
             more.
