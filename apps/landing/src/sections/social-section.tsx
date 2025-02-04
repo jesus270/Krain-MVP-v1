@@ -1,26 +1,39 @@
 import { SocialLink } from "../components/social-link";
-import { Send, Mail } from "lucide-react";
+import { Send, Mail, LucideIcon } from "lucide-react";
 import { CoinMarketCapLogo } from "@krain/ui/components/icons/logo-coinmarketcap";
 import { MediumLogo } from "@krain/ui/components/icons/logo-medium";
 import { XLogo } from "@krain/ui/components/icons/XLogo";
 
-export const socialLinks = [
+interface SocialLinkType {
+  href: string;
+  icon:
+    | LucideIcon
+    | typeof XLogo
+    | typeof MediumLogo
+    | typeof CoinMarketCapLogo;
+  label: string;
+  sublabel: string;
+  bgClass: string;
+  disabled?: boolean;
+}
+
+export const socialLinks: SocialLinkType[] = [
   {
-    href: "#",
+    href: "https://t.me/krainofficial",
     icon: Send,
     label: "TG community",
-    sublabel: "@KRAIN_AI",
+    sublabel: "@krainofficial",
     bgClass: "hover:bg-[linear-gradient(90deg,rgba(19,33,53,0.5),transparent)]",
   },
   {
-    href: "#",
+    href: "https://t.me/krainofficial",
     icon: Send,
     label: "TG announcement",
-    sublabel: "@KRAIN_AI",
+    sublabel: "@krainofficial",
     bgClass: "hover:bg-[linear-gradient(90deg,rgba(19,33,53,0.5),transparent)]",
   },
   {
-    href: "#",
+    href: "https://twitter.com/krain_ai",
     icon: XLogo,
     label: "X / Twitter",
     sublabel: "@KRAIN_AI",
@@ -30,21 +43,23 @@ export const socialLinks = [
     href: "#",
     icon: MediumLogo,
     label: "Medium",
-    sublabel: "@KRAIN_AI",
+    sublabel: "Coming Soon",
     bgClass: "hover:bg-[linear-gradient(90deg,rgba(18,43,35,0.5),transparent)]",
+    disabled: true,
   },
   {
     href: "#",
     icon: CoinMarketCapLogo,
     label: "Coinmarketcap",
-    sublabel: "@KRAIN_AI",
+    sublabel: "Coming Soon",
     bgClass: "hover:bg-[linear-gradient(90deg,rgba(20,21,60,0.5),transparent)]",
+    disabled: true,
   },
   {
-    href: "#",
+    href: "mailto:contact@krain.ai",
     icon: Mail,
     label: "Contact us",
-    sublabel: "@KRAIN_AI",
+    sublabel: "contact@krain.ai",
     bgClass: "hover:bg-[linear-gradient(90deg,rgba(31,18,56,0.5),transparent)]",
   },
 ];
