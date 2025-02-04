@@ -36,7 +36,7 @@ export function Partners() {
   ];
 
   return (
-    <div className="absolute bottom-12 left-0 right-0 flex justify-center gap-12 opacity-50 mx-12 flex-wrap">
+    <div className="relative flex justify-center gap-5 md:gap-12 opacity-50 mx-12 flex-wrap mb-12">
       {partners.map((partner, i) => (
         <div
           key={partner.name}

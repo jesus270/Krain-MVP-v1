@@ -21,7 +21,7 @@ export function HeroSection() {
       </video>
       {/* <div className="absolute inset-0 bg-[#04030C]/50" /> */}
       <SocialNav />
-      <div className="flex flex-col items-center justify-center flex-1 z-10 px-4 text-center">
+      <div className="flex flex-col items-center justify-center flex-1 z-10 px-4 md:px-20 text-center mt-24">
         <h1 className="max-w-4xl text-4xl md:text-6xl font-bold text-white mb-4">
           The infrastructure layer fueling the <span>AI agent economy</span>
         </h1>
