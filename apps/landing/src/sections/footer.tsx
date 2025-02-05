@@ -9,7 +9,16 @@ import {
   TooltipTrigger,
 } from "@krain/ui/components/ui/tooltip";
 
-const footerLinks = {
+interface FooterLinkType {
+  href: string;
+  label: string;
+  tooltip?: string;
+}
+
+const footerLinks: {
+  resources: FooterLinkType[];
+  company: FooterLinkType[];
+} = {
   resources: [
     { href: "#", label: "Partners" },
     { href: "#features", label: "Features" },
