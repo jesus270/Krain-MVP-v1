@@ -13,16 +13,6 @@ const footerLinks = {
   resources: [
     { href: "#", label: "Partners" },
     { href: "#features", label: "Features" },
-    {
-      href: "#",
-      label: "Watch demo",
-      tooltip: "Coming Soon",
-    },
-    {
-      href: "#",
-      label: "$KRAIN",
-      tooltip: "Coming Soon",
-    },
     { href: "https://krain.gitbook.io/krain/roadmap", label: "Roadmap" },
     { href: "#faq", label: "FAQs" },
     { href: "https://t.me/krainofficial", label: "Community" },

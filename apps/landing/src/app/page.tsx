@@ -6,7 +6,6 @@ import {
   PreviewSection,
   FeaturesSection,
   TokenSection,
-  ExchangesSection,
   RoadmapSection,
   FaqSection,
   CommunitySection,
@@ -21,7 +20,6 @@ export default function Home() {
       <PreviewSection />
       <FeaturesSection />
       <TokenSection />
-      <ExchangesSection />
       <RoadmapSection />
       <FaqSection />
       <CommunitySection />
