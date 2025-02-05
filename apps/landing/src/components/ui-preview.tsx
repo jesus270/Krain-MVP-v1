@@ -4,7 +4,7 @@ export function UiPreview() {
   return (
     <div className="relative w-full overflow-hidden aspect-video bg-gray-900/50 backdrop-blur">
       <Image
-        src="/ui-preview.svg"
+        src="/ui-preview.webp"
         alt="UI Preview"
         fill
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"

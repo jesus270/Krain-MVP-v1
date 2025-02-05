@@ -1,5 +1,6 @@
 import { ContractDisplay } from "../components/contract-display";
 import { TokenFeature } from "../components/token-feature";
+import { VideoBackground } from "@/components/video-background";
 
 const tokenFeatures = [
   { iconPath: "/icon-square-star.svg", title: "UNLOCK PREMIUM\nAI FEATURES" },
@@ -25,14 +26,10 @@ export function TokenSection() {
       className="relative flex flex-col w-full py-24 bg-[#04030C]"
     >
       <div className="absolute inset-0">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
+        <VideoBackground
+          videoSrc="/bg-token.mp4"
+          posterSrc="/bg-token.webp"
           className="w-full h-full object-cover"
-          poster="/bg-token.svg"
-          src="/bg-token.mp4"
         />
       </div>
       <div className="flex flex-col items-center w-full max-w-7xl px-4 z-10">

@@ -24,7 +24,7 @@ export function CommunitySection() {
         <div
           className="absolute inset-0 bg-[#04030C] bg-cover bg-center bg-no-repeat h-screen"
           style={{
-            backgroundImage: `url('/bg-community.png')`,
+            backgroundImage: `url('/bg-community.webp')`,
           }}
         />
 

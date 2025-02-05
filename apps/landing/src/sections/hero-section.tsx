@@ -1,6 +1,7 @@
 import { SocialNav } from "../components/social-nav";
 import { Partners } from "../components/partners";
 import { GradientButton } from "@/components/gradient-button";
+import { VideoBackground } from "@/components/video-background";
 import Link from "next/link";
 
 export function HeroSection() {
@@ -9,16 +10,11 @@ export function HeroSection() {
       id="hero"
       className="flex flex-col items-center w-full min-h-screen bg-[#04030C]"
     >
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
+      <VideoBackground
+        videoSrc="/bg-hero.mp4"
+        posterSrc="/bg-hero.webp"
         className="absolute inset-0 w-full h-full object-cover"
-        poster="/bg-hero.png"
-      >
-        <source src="/bg-hero.mp4" type="video/mp4" />
-      </video>
+      />
       {/* <div className="absolute inset-0 bg-[#04030C]/50" /> */}
       <SocialNav />
       <div className="flex flex-col items-center justify-center flex-1 z-10 px-4 md:px-20 text-center mt-24">
