@@ -40,8 +40,12 @@ export function SidebarNav() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="mt-3">
-        <Link href="/" onClick={handleClick}>
-          <Image src="/logo.png" alt="Logo" width={100} height={100} />
+        <Link
+          href="/"
+          onClick={handleClick}
+          className="flex items-center w-full ml-2"
+        >
+          <Image src="/logo-krain.svg" alt="Logo" width={116} height={24} />
         </Link>
       </SidebarHeader>
       <SidebarContent>
