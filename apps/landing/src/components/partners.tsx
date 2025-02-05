@@ -36,11 +36,11 @@ export function Partners() {
   ];
 
   return (
-    <div className="relative flex justify-center gap-5 md:gap-12 opacity-50 mx-12 flex-wrap mb-12">
+    <div className="relative flex justify-center gap-4 sm:gap-5 md:gap-12 opacity-50 mx-4 sm:mx-8 md:mx-12 flex-wrap mb-8 md:mb-12">
       {partners.map((partner, i) => (
         <div
           key={partner.name}
-          className="relative w-32 h-8 hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+          className="relative w-24 sm:w-28 md:w-32 h-6 sm:h-7 md:h-8 hover:opacity-100 transition-opacity duration-300 cursor-pointer"
         >
           <Link
             href={partner.url}
@@ -51,7 +51,7 @@ export function Partners() {
               src={partner.logo}
               alt={partner.name}
               fill
-              sizes="(max-width: 128px) 100vw, 128px"
+              sizes="(max-width: 768px) 96px, (max-width: 1024px) 112px, 128px"
               className="object-contain"
             />
           </Link>
