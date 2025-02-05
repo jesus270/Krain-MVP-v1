@@ -52,12 +52,18 @@ export function Nav() {
       {/* Content */}
       <div className="relative z-10 py-6 px-6 md:px-12">
         <div className="flex items-center justify-between">
-          <Link href="/">
-            <Image src="/logo-krain.svg" alt="Krain" width={116} height={24} />
+          <Link href="/" className="shrink-0">
+            <Image
+              src="/logo-krain.svg"
+              alt="Krain"
+              width={116}
+              height={24}
+              className="w-auto h-[20px] md:h-[24px]"
+            />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-8">
             {navItems.map((item) => (
               <Button
                 key={item.id}
@@ -72,15 +78,21 @@ export function Nav() {
                 {item.label}
               </Button>
             ))}
+          </div>
+
+          {/* Desktop CTA */}
+          <div className="hidden lg:block shrink-0">
             <Link href="https://early.krain.ai">
               <GradientButton>Enter app</GradientButton>
             </Link>
           </div>
 
-          {/* Mobile Navigation */}
-          <div className="flex md:hidden items-center gap-8">
+          {/* Mobile & Tablet Navigation */}
+          <div className="flex lg:hidden items-center gap-4 pr-4">
             <Link href="https://early.krain.ai">
-              <GradientButton>Enter app</GradientButton>
+              <GradientButton className="px-4 py-2.5 text-sm">
+                Enter app
+              </GradientButton>
             </Link>
             <button
               className="p-2 text-white relative"
@@ -111,7 +123,6 @@ export function Nav() {
                   d="M19 10H32V13H16L19 10Z"
                   fill="url(#hamburgerGradient)"
                 />
-
                 <defs>
                   <linearGradient
                     id="hamburgerGradient"
@@ -152,7 +163,6 @@ export function Nav() {
                 />
 
                 <defs>
-                  {/* We can reuse the same gradient style; just give them distinct IDs */}
                   <linearGradient
                     id="xGradient1"
                     x1="2"
@@ -188,7 +198,7 @@ export function Nav() {
 
         {/* Mobile Menu */}
         <div
-          className={`md:hidden absolute left-0 right-0 top-[100%] transition-all duration-300 ${
+          className={`lg:hidden absolute left-0 right-0 top-[100%] transition-all duration-300 ${
             isMobileMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
           }`}
         >
