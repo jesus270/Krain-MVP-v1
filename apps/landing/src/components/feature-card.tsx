@@ -29,7 +29,7 @@ export function FeatureCard({
           className="object-cover"
         />
       </div>
-      <div className="p-6">
+      <div className="p-6 pt-0">
         <h3 className="text-xl font-semibold text-white mb-3">{title}</h3>
         <p className="text-gray-400">{description}</p>
       </div>
