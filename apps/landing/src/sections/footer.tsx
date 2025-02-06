@@ -52,22 +52,31 @@ export function Footer() {
         {/* Content */}
         <div className="relative">
           <div className="flex flex-col lg:flex-row items-center justify-between p-12 pt-24 pb-18 md:p-24 pr-24 md:pt-48 md:pb-36 md:pr-48 md:gap-24 gap-12">
-            <p
-              className="text-[36px] md:text-6xl lg:text-8xl font-thin leading-[43.2px] md:leading-tight lg:leading-[115.2px] text-left"
-              style={{
-                background:
-                  "linear-gradient(90deg, #8781BB 0%, #3E3B55 82.14%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              <span className="whitespace-nowrap">The infrastructure</span>
-              <br />
-              <span className="whitespace-nowrap">layer fueling the</span>
-              <br />
-              <span className="whitespace-nowrap">AI agent economy</span>
-            </p>
+            <div className="flex flex-col gap-4 md:gap-12">
+              <Image
+                src="/logo-krain.svg"
+                alt="Krain"
+                width={232}
+                height={48}
+                className="w-[116px] h-[24px] md:w-[232px] md:h-[48px]"
+              />
+              <p
+                className="text-[36px] md:text-6xl lg:text-8xl font-thin leading-[43.2px] md:leading-tight lg:leading-[115.2px] text-left"
+                style={{
+                  background:
+                    "linear-gradient(90deg, #8781BB 0%, #3E3B55 82.14%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                <span className="whitespace-nowrap">The infrastructure</span>
+                <br />
+                <span className="whitespace-nowrap">layer fueling the</span>
+                <br />
+                <span className="whitespace-nowrap">AI agent economy</span>
+              </p>
+            </div>
 
             <div className="grid grid-cols-2 gap-8">
               <div className="space-y-4">
@@ -129,7 +138,6 @@ export function Footer() {
           </FooterLink>
         </div>
         <div className="flex items-center gap-2">
-          <Image src="/logo-krain.svg" alt="Krain" width={116} height={24} />
           <p className="text-sm text-gray-500">
             Copyright ©2025. All rights reserved.
           </p>

@@ -5,22 +5,12 @@ interface FeatureCardProps {
   title: string;
   description: string;
   image: string;
-  className?: string;
-  imageClassName?: string;
 }
 
-export function FeatureCard({
-  title,
-  description,
-  image,
-  className = "",
-  imageClassName = "",
-}: FeatureCardProps) {
+export function FeatureCard({ title, description, image }: FeatureCardProps) {
   return (
-    <div className={`relative  ${className} border border-[#272442]`}>
-      <div
-        className={`relative ${imageClassName} flex items-center justify-center`}
-      >
+    <div className={`relative border border-[#272442]`}>
+      <div className={`relative flex items-center justify-center`}>
         <Image
           src={image}
           alt={title}
