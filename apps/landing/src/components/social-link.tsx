@@ -31,7 +31,7 @@ export function SocialLink({
     <Link
       href={href}
       className={cn(
-        "group block p-6 transition-all hover:text-white border border-[#272442]",
+        "group block p-4 md:p-6 transition-all hover:text-white border border-[#272442] h-full",
         "hover:shadow-[0_0_15px_rgba(37,99,235,0.3)]",
         bgClass,
         className,
@@ -39,10 +39,10 @@ export function SocialLink({
       )}
     >
       <div className="flex flex-col gap-4">
-        <div className="p-3">
+        <div className="md:p-3">
           <Icon className="h-5 w-5 text-white" />
         </div>
-        <div className="pl-3 flex flex-col">
+        <div className="md:pl-3 flex flex-col">
           <span className="text-xs text-gray-500">{sublabel}</span>
           <span className="font-medium">{label}</span>
         </div>
