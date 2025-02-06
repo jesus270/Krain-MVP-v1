@@ -3,7 +3,7 @@
 "use client";
 
 import { usePrivy } from "@privy-io/react-auth";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Wallet } from "@krain/db";
 import { useLocale } from "@krain/utils";
 import { handleSubmitWallet } from "@/actions/wallet";
@@ -47,34 +47,117 @@ export function Dashboard({
   const [error, setError] = useState<string | undefined>(undefined);
   const locale = useLocale();
 
+  // Add a new state to track session updates
+  const [hasUpdatedSession, setHasUpdatedSession] = useState(false);
+
+  // Add retry count state and constants
+  const [sessionRetryCount, setSessionRetryCount] = useState(0);
+  const MAX_SESSION_RETRIES = 3;
+  const SESSION_RETRY_DELAY = 2000;
+
   const userEmailAddress = user?.email?.address ?? undefined;
   const userWalletAddress = user?.wallet?.address ?? undefined;
   const userTwitterUsername = user?.twitter?.username ?? undefined;
 
-  // Load wallet and referral data
+  // Modified updateSession function with retry limit
+  const updateSession = useCallback(async () => {
+    if (
+      !user?.id ||
+      !userWalletAddress ||
+      sessionRetryCount >= MAX_SESSION_RETRIES
+    )
+      return;
+
+    try {
+      await fetch("/api/auth/callback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user }),
+      });
+      setHasUpdatedSession(true);
+      setSessionRetryCount(0); // Reset count on success
+    } catch (error) {
+      log.error(error, {
+        entity: "CLIENT",
+        operation: "update_session",
+        walletAddress: userWalletAddress,
+        userId: user.id,
+        retryCount: sessionRetryCount,
+      });
+
+      // Increment retry count
+      setSessionRetryCount((prev) => prev + 1);
+
+      // Schedule retry with delay
+      if (sessionRetryCount < MAX_SESSION_RETRIES) {
+        setTimeout(() => void updateSession(), SESSION_RETRY_DELAY);
+      }
+    }
+  }, [user, userWalletAddress, sessionRetryCount]);
+
+  // Modified session update effect
   useEffect(() => {
-    // Reset loading states when not authenticated
-    if (!authenticated || !ready) {
-      setIsLoadingWallet(false);
-      setIsLoadingReferrals(false);
-      return;
+    if (
+      authenticated &&
+      ready &&
+      user?.id &&
+      !hasUpdatedSession &&
+      sessionRetryCount < MAX_SESSION_RETRIES
+    ) {
+      void updateSession();
     }
+  }, [
+    authenticated,
+    ready,
+    user?.id,
+    hasUpdatedSession,
+    updateSession,
+    sessionRetryCount,
+  ]);
 
-    // Only proceed if authenticated and have wallet address
-    if (!userWalletAddress) {
-      setIsLoadingWallet(false);
-      setIsLoadingReferrals(false);
-      return;
-    }
-
+  // Modified data loading effect
+  useEffect(() => {
     let isDataMounted = true;
+    let retryCount = 0;
     let retryTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    // Early return if not ready or session update failed
+    if (!authenticated || !ready || sessionRetryCount >= MAX_SESSION_RETRIES) {
+      setIsLoadingWallet(false);
+      setIsLoadingReferrals(false);
+      if (sessionRetryCount >= MAX_SESSION_RETRIES) {
+        setError("Failed to update session. Please refresh the page.");
+      }
+      return;
+    }
+
+    // Early return if session not updated yet
+    if (!hasUpdatedSession) {
+      setIsLoadingWallet(false);
+      setIsLoadingReferrals(false);
+      return;
+    }
 
     const loadData = async () => {
       try {
         setIsLoadingWallet(true);
         setIsLoadingReferrals(true);
         setError(undefined);
+
+        // Add validation check for wallet address
+        if (!userWalletAddress) {
+          log.error("Invalid wallet address", {
+            entity: "CLIENT",
+            operation: "load_wallet",
+            error: "Wallet address is undefined",
+          });
+          setError("Invalid wallet address. Please reconnect your wallet.");
+          setIsLoadingWallet(false);
+          setIsLoadingReferrals(false);
+          return;
+        }
 
         try {
           // Submit wallet
@@ -85,6 +168,11 @@ export function Dashboard({
           });
 
           if (isDataMounted && wallet) {
+            log.info("Wallet loaded successfully", {
+              entity: "CLIENT",
+              operation: "load_wallet",
+              walletAddress: userWalletAddress,
+            });
             setWallet(wallet);
             setIsLoadingWallet(false);
 
@@ -96,6 +184,12 @@ export function Dashboard({
                   userId: user?.id ?? "",
                 });
                 if (isDataMounted) {
+                  log.info("Referrals loaded successfully", {
+                    entity: "CLIENT",
+                    operation: "load_referrals",
+                    walletAddress: userWalletAddress,
+                    count,
+                  });
                   setReferralsCount(count);
                 }
               } catch (error) {
@@ -118,6 +212,23 @@ export function Dashboard({
               operation: "load_wallet",
               walletAddress: userWalletAddress,
             });
+
+            // Modify the session error handling section:
+            if (error.message.includes("No user in session")) {
+              log.info("Session error detected", {
+                entity: "CLIENT",
+                operation: "handle_session_error",
+                retryCount,
+              });
+
+              if (retryCount < MAX_RETRIES) {
+                retryCount++;
+                retryTimeout = setTimeout(loadData, RETRY_DELAY);
+              } else {
+                setError("Session error persists. Please refresh the page.");
+              }
+              return;
+            }
 
             setError(`${error.message}. Please try again.`);
 
@@ -149,8 +260,7 @@ export function Dashboard({
       }
     };
 
-    // Only load data if authenticated and have wallet address
-    loadData();
+    void loadData();
 
     return () => {
       isDataMounted = false;
@@ -158,7 +268,15 @@ export function Dashboard({
         clearTimeout(retryTimeout);
       }
     };
-  }, [authenticated, ready, userWalletAddress, referredByCode, user?.id]);
+  }, [
+    authenticated,
+    ready,
+    hasUpdatedSession,
+    userWalletAddress,
+    user?.id,
+    referredByCode,
+    sessionRetryCount, // Add sessionRetryCount to dependencies
+  ]);
 
   // Show connect wallet card if not authenticated or not ready
   if (!authenticated || !ready) {

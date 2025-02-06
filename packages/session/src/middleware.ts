@@ -27,6 +27,11 @@ function getAllowedOrigins(): string[] {
     throw new Error("DOMAIN environment variable must be set");
   }
 
+  // Include localhost for development
+  if (process.env.NODE_ENV === "development") {
+    return [domain, "localhost"];
+  }
+
   return [domain];
 }
 
@@ -37,27 +42,57 @@ function parseOriginDomain(url: string | null | undefined): string {
 
   try {
     // Handle localhost with port
-    if (url.includes("://localhost:")) {
+    if (url.includes("localhost:")) {
       return "localhost";
     }
     const urlObj = new URL(url);
     return urlObj.hostname;
   } catch {
-    log.error("Failed to parse URL", {
+    log.error("Failed to parse URL, attempting fallback extraction", {
       entity: "SESSION MIDDLEWARE",
       operation: "parse_origin_domain",
       url,
     });
-    return url;
+
+    // Fallback: Try to extract domain using string operations
+    try {
+      // Remove protocol if present
+      let domain = url.replace(/^(https?:\/\/)/, "");
+      // Remove path and query params if present
+      const parts = domain.split("/");
+      domain = parts[0] || "";
+      // Remove port if present
+      const hostParts = domain.split(":");
+      domain = hostParts[0] || "";
+
+      if (domain) {
+        return domain;
+      }
+    } catch {
+      log.error("Fallback domain extraction also failed", {
+        entity: "SESSION MIDDLEWARE",
+        operation: "parse_origin_domain",
+        url,
+      });
+    }
+    return "";
   }
 }
 
 export async function validateOrigin(headers: HeadersLike): Promise<boolean> {
   // Get the host header which will be present even without origin/referer
   const host = await getHeaderValue(headers, "host");
-
   const origin = await getHeaderValue(headers, "origin");
   const referer = await getHeaderValue(headers, "referer");
+
+  // Log headers for debugging
+  log.info("Validating origin", {
+    entity: "SESSION MIDDLEWARE",
+    operation: "validate_origin",
+    host,
+    origin,
+    referer,
+  });
 
   // If no origin/referer, use the host header
   if (!origin && !referer) {
@@ -72,8 +107,24 @@ export async function validateOrigin(headers: HeadersLike): Promise<boolean> {
     return ALLOWED_ORIGINS.includes(hostDomain);
   }
 
-  const originDomain = parseOriginDomain((origin || referer || "") as string);
-  return ALLOWED_ORIGINS.includes(originDomain);
+  // Check both origin and referer
+  const originDomain = parseOriginDomain(origin);
+  const refererDomain = parseOriginDomain(referer);
+
+  // In development, be more lenient with localhost validation
+  if (process.env.NODE_ENV === "development") {
+    return (
+      originDomain === "localhost" ||
+      ALLOWED_ORIGINS.includes(originDomain) ||
+      refererDomain === "localhost" ||
+      ALLOWED_ORIGINS.includes(refererDomain)
+    );
+  }
+
+  return (
+    ALLOWED_ORIGINS.includes(originDomain) ||
+    ALLOWED_ORIGINS.includes(refererDomain)
+  );
 }
 
 export async function withServerActionProtection(

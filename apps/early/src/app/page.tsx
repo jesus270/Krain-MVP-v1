@@ -14,27 +14,54 @@ import { signupForEarlyAccess, checkEarlyAccessSignup } from "./actions";
 import { toast } from "sonner";
 import { cn } from "@krain/ui/lib/utils";
 
+// Key for storing refresh state in sessionStorage
+const REFRESH_KEY = "krain_session_refreshed";
+
 export default function HomePage() {
   const { user, authenticated, login, ready, linkEmail } = usePrivy();
   const [isSignedUp, setIsSignedUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasCheckedSignup, setHasCheckedSignup] = useState(false);
+
+  const updateSession = useCallback(async () => {
+    try {
+      const response = await fetch("/api/auth/callback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update session");
+      }
+    } catch (error) {
+      console.error("Error updating session:", error);
+      toast.error("Failed to update session. Please try logging in again.");
+    }
+  }, [user]);
 
   const checkSignupStatus = useCallback(async () => {
-    setIsLoading(true);
-    if (!user?.id || !user.email?.address) return;
+    if (!user?.id || !user.email?.address || hasCheckedSignup) return;
 
+    setIsLoading(true);
     try {
       const result = await checkEarlyAccessSignup({ userId: user.id });
       setIsSignedUp(result.isSignedUp);
-      if (!result.isSignedUp) {
-        handleSignup();
-      }
+      setHasCheckedSignup(true);
     } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes("Email is required")
+      ) {
+        toast.error("Unable to verify email. Please try logging in again.");
+      }
       console.error("Error checking signup status:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id, user?.email?.address]);
+  }, [user?.id, user?.email?.address, hasCheckedSignup]);
 
   const handleSignup = async () => {
     if (!user) {
@@ -49,45 +76,77 @@ export default function HomePage() {
 
     setIsLoading(true);
     try {
+      // First update the session with the latest user data
+      await updateSession();
+
+      // Then attempt the signup
       const result = await signupForEarlyAccess({ userId: user.id });
       if (result.status === "success") {
         setIsSignedUp(true);
         toast.success(result.message);
-      } else {
-        toast.error(result.message);
       }
     } catch (error) {
       console.error("Error signing up:", error);
-      toast.error("Failed to sign up for early access. Please try again.");
+      if (error instanceof Error) {
+        if (error.message.includes("Already signed up")) {
+          setIsSignedUp(true);
+          toast.success("You're already signed up for early access!");
+        } else if (error.message.includes("Email is required")) {
+          toast.error("Unable to verify email. Please try logging in again.");
+        } else {
+          toast.error("Failed to sign up for early access. Please try again.");
+        }
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Check signup status when ready
   useEffect(() => {
-    if (
-      ready &&
-      authenticated &&
-      user?.email?.address &&
-      !isSignedUp &&
-      !isLoading
-    ) {
-      if (!isSignedUp) {
+    if (ready && authenticated && user?.email?.address) {
+      void checkSignupStatus();
+    }
+  }, [ready, authenticated, user?.email?.address, checkSignupStatus]);
+
+  // Handle email linking success
+  useEffect(() => {
+    if (user?.email?.address && !hasCheckedSignup) {
+      // Update session when email is linked
+      void updateSession().then(() => {
         void checkSignupStatus();
-      }
+      });
     }
   }, [
-    ready,
-    user,
+    user?.email?.address,
+    hasCheckedSignup,
     checkSignupStatus,
-    isSignedUp,
-    handleSignup,
-    authenticated,
-    isLoading,
+    updateSession,
   ]);
 
+  // Handle session errors gracefully
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      // If it's a session error but we're already signed up, ignore it
+      if (isSignedUp && event.error?.toString().includes("session")) {
+        event.preventDefault();
+        return;
+      }
+    };
+
+    window.addEventListener("error", handleError);
+    return () => window.removeEventListener("error", handleError);
+  }, [isSignedUp]);
+
+  // Clear refresh flag when component unmounts
+  useEffect(() => {
+    return () => {
+      sessionStorage.removeItem(REFRESH_KEY);
+    };
+  }, []);
+
   return (
-    <main className="flex-grow  flex flex-col items-center justify-center p-4 text-center">
+    <main className="flex-grow flex flex-col items-center justify-center p-4 text-center">
       <Card className={cn("w-full max-w-lg", isLoading && "animate-pulse")}>
         <CardHeader>
           <CardTitle className="text-2xl sm:text-4xl">
@@ -109,9 +168,13 @@ export default function HomePage() {
             <p className="text-xl sm:text-2xl max-w-2xl text-amber-500">
               Please connect your email to sign up for early access.
             </p>
+          ) : !hasCheckedSignup ? (
+            <p className="text-xl sm:text-2xl max-w-2xl">
+              Checking signup status...
+            </p>
           ) : (
             <p className="text-xl sm:text-2xl max-w-2xl">
-              Signing you up for early access. Please wait...
+              Ready to sign up for early access!
             </p>
           )}
         </CardContent>
@@ -120,9 +183,13 @@ export default function HomePage() {
             <Button size="lg" onClick={login} disabled={isLoading}>
               Sign In
             </Button>
-          ) : !user?.email?.address ? (
+          ) : !user || !user.email?.address ? (
             <Button size="lg" onClick={linkEmail} disabled={isLoading}>
               Connect Email
+            </Button>
+          ) : !isSignedUp && hasCheckedSignup ? (
+            <Button size="lg" onClick={handleSignup} disabled={isLoading}>
+              Sign Up for Early Access
             </Button>
           ) : null}
         </CardFooter>

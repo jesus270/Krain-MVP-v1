@@ -16,7 +16,12 @@ export async function signupForEarlyAccess(input: { userId: string }) {
     { headers: headers() },
     "default",
   );
-  if (protectionResponse) throw new Error(protectionResponse.statusText);
+  if (protectionResponse !== null) {
+    throw new Error(
+      protectionResponse.statusText ||
+        "Protection check failed or unauthorized",
+    );
+  }
 
   return withAuth(input.userId, async (session) => {
     const user = session.get("user");
@@ -54,7 +59,12 @@ export async function checkEarlyAccessSignup(input: { userId: string }) {
     { headers: headers() },
     "default",
   );
-  if (protectionResponse) throw new Error(protectionResponse.statusText);
+  if (protectionResponse !== null) {
+    throw new Error(
+      protectionResponse.statusText ||
+        "Protection check failed or unauthorized",
+    );
+  }
 
   return withAuth(input.userId, async (session) => {
     const user = session.get("user");
