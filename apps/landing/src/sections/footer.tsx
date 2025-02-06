@@ -21,15 +21,17 @@ const footerLinks: {
 } = {
   resources: [
     { href: "#", label: "Partners" },
+    { href: "#preview", label: "Preview" },
     { href: "#features", label: "Features" },
-    { href: "https://krain.gitbook.io/krain/roadmap", label: "Roadmap" },
+    { href: "#roadmap", label: "Roadmap" },
     { href: "#faq", label: "FAQs" },
-    { href: "https://t.me/krainofficial", label: "Community" },
+    { href: "#token", label: "Token" },
+    { href: "#community", label: "Community" },
   ],
   company: [
     { href: "https://krain.gitbook.io/krain", label: "Docs" },
     { href: "/brand-kit", label: "Brand Kit" },
-    { href: "https://early.krain.ai", label: "Launch app" },
+    { href: "https://early.krain.ai", label: "Early Access" },
     { href: "mailto:contact@krain.ai", label: "Contact" },
   ],
 };
@@ -41,7 +43,7 @@ export function Footer() {
       <div className="relative">
         {/* Background Image */}
         <div
-          className="absolute inset-0 bg-[#04030C] bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-[#04030C] bg-fit bg-center bg-no-repeat"
           style={{
             backgroundImage: `url('/bg-footer.svg')`,
           }}
@@ -49,9 +51,9 @@ export function Footer() {
 
         {/* Content */}
         <div className="relative">
-          <div className="flex flex-col lg:flex-row justify-between">
+          <div className="flex flex-col lg:flex-row items-center justify-between p-12 pt-24 pb-18 md:p-24 pr-24 md:pt-48 md:pb-36 md:pr-48 md:gap-24 gap-12">
             <p
-              className="text-[96px] font-thin leading-[115.2px] p-4 md:p-20 pt-20"
+              className="text-[36px] md:text-6xl lg:text-8xl font-thin leading-[43.2px] md:leading-tight lg:leading-[115.2px] text-left"
               style={{
                 background:
                   "linear-gradient(90deg, #8781BB 0%, #3E3B55 82.14%)",
@@ -60,16 +62,15 @@ export function Footer() {
                 backgroundClip: "text",
               }}
             >
-              The infrastructure
+              <span className="whitespace-nowrap">The infrastructure</span>
               <br />
-              layer fueling the
+              <span className="whitespace-nowrap">layer fueling the</span>
               <br />
-              AI agent economy.
+              <span className="whitespace-nowrap">AI agent economy</span>
             </p>
 
-            <div className="grid grid-cols-2 gap-8 p-4 md:p-20">
+            <div className="grid grid-cols-2 gap-8">
               <div className="space-y-4">
-                <h3 className="text-white font-medium">Resources</h3>
                 {footerLinks.resources.map((link) => (
                   <div key={link.label}>
                     {link.tooltip ? (
@@ -94,13 +95,12 @@ export function Footer() {
                 ))}
               </div>
               <div className="space-y-4">
-                <h3 className="text-white font-medium">Company</h3>
                 {footerLinks.company.map((link) => (
                   <div key={link.label}>
                     <FooterLink href={link.href}>{link.label}</FooterLink>
                   </div>
                 ))}
-                <div className="flex items-center gap-2 bg-gray-900/50 backdrop-blur rounded-full px-4 py-2">
+                {/* <div className="flex items-center gap-2 bg-gray-900/50 backdrop-blur rounded-full px-4 py-2">
                   <code className="text-sm text-white blur-sm">
                     0×0000...0000
                   </code>
@@ -111,7 +111,7 @@ export function Footer() {
                   >
                     <Copy className="w-4 h-4" />
                   </Button>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
