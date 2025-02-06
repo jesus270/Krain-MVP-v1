@@ -19,14 +19,14 @@ export function FeatureCard({
   return (
     <div className={`relative  ${className} border border-[#272442]`}>
       <div
-        className={`relative ${imageClassName} pt-4 flex items-center justify-center`}
+        className={`relative ${imageClassName} flex items-center justify-center`}
       >
         <Image
-          src={image || "https://placehold.co/400x300"}
+          src={image}
           alt={title}
-          width={400}
-          height={300}
-          className="w-[400px] h-[300px] object-contain"
+          width={1280}
+          height={960}
+          className="object-cover"
         />
       </div>
       <div className="p-6">
