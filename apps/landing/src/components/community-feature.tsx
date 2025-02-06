@@ -22,7 +22,9 @@ export function CommunityFeature({
             "0 0 10px rgba(145, 91, 240, 0.5), 0 0 20px rgba(31, 197, 214, 0.3)",
         }}
       />
-      <p className="text-sm text-[#EFF0F3] uppercase tracking-wider">{title}</p>
+      <p className="text-xs text-[#EFF0F3] uppercase tracking-wider leading-[19.6px] text-left underline-offset-[from-font] decoration-skip-ink-none">
+        {title}
+      </p>
     </div>
   );
 }
