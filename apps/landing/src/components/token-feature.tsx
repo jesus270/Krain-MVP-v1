@@ -14,9 +14,7 @@ export function TokenFeature({
   className = "",
 }: TokenFeatureProps) {
   return (
-    <div
-      className={`flex flex-col items-center text-center space-y-3 ${className}`}
-    >
+    <div className={`flex flex-col text-left space-y-3 ${className}`}>
       <Image
         src={iconPath || ""}
         alt={title}

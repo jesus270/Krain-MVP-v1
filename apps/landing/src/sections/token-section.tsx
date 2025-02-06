@@ -23,17 +23,21 @@ export function TokenSection() {
   return (
     <section
       id="token"
-      className="relative flex flex-col w-full py-24 bg-[#04030C]"
+      className="relative flex flex-col py-24 bg-[#04030C] w-full items-center justify-center"
     >
-      <div className="absolute inset-0">
-        <VideoBackground
-          videoSrc="/bg-token.mp4"
-          posterSrc="/bg-token.webp"
-          className="w-full h-full object-cover"
-        />
+      <div className="absolute inset-0 overflow-hidden flex items-center md:items-start">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-[50%] -translate-y-16 object-cover md:translate-y-8 md:h-full"
+        >
+          <source src="/bg-token.mp4" type="video/mp4" />
+        </video>
       </div>
-      <div className="flex flex-col items-center w-full max-w-7xl px-4 z-10">
-        <div className="flex flex-col items-center text-center space-y-6 mb-12">
+      <div className="flex flex-col items-center w-full px-4 z-10">
+        <div className="flex flex-col items-center text-center space-y-6 mb-6">
           <h2 className="text-4xl md:text-6xl font-bold text-white">$KRAIN</h2>
           <p className="text-gray-400 text-lg md:text-xl max-w-3xl">
             The Krain ecosystem is powered by the $KRAIN token, built to enhance
@@ -45,9 +49,9 @@ export function TokenSection() {
 
         <ContractDisplay address="0×000000000000000000000000" />
 
-        <div className="h-96" />
+        <div className="h-[24rem] md:h-[48rem]" />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 w-full">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 w-full max-w-7xl px-4">
           {tokenFeatures.map((feature) => (
             <TokenFeature
               key={feature.title.replace(/\s+/g, "-").toLowerCase()}
