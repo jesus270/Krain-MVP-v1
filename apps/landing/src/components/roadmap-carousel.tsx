@@ -13,7 +13,7 @@ const phases = [
     features: [
       "Launch of the $KRAIN Token to power the AI Agent Economy",
       "Introduction of the AI Agent Discovery Engine with NLP-powered search",
-      "Comprehensive AI Agent Directory with performance metrics",
+      "Comprehensive AI Agent Portal with performance metrics",
       "Community-driven Reputation and Review System",
     ],
   },

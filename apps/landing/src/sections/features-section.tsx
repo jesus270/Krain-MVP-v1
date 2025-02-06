@@ -2,7 +2,7 @@ import { FeatureCard } from "@/components/feature-card";
 
 export const features = [
   {
-    title: "AI Agent Directory",
+    title: "AI Agent Portal",
     description:
       "An aggregated comprehensive, user-friendly repository of AI agents organized by categories, use cases, and performance metrics.",
     image: "/feature-ai-agent-portal.webp",
