@@ -36,6 +36,7 @@ export function TokenSection() {
           <source src="/bg-token.mp4" type="video/mp4" />
         </video>
       </div>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#04030C] via-transparent via-50% to-[#04030C]" />
       <div className="flex flex-col items-center w-full px-4 z-10">
         <div className="flex flex-col items-center text-center space-y-6 mb-6">
           <h2 className="text-4xl md:text-6xl font-bold text-white">$KRAIN</h2>
