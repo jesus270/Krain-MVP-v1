@@ -93,7 +93,7 @@ const CustomAccordionTrigger = React.forwardRef<
             className="w-full hidden md:block"
           />
         </div>
-        <div className="hidden md:block group-data-[state=closed]:hidden group-data-[state=open]:block text-[#8781BB] text-sm max-w-[40%] mx-auto">
+        <div className="hidden md:block group-data-[state=closed]:hidden group-data-[state=open]:block text-[#8781BB] text-sm max-w-[40%] mx-auto text-left">
           {answer}
         </div>
       </div>
