@@ -40,18 +40,35 @@ export function useSession({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ user }),
+        body: JSON.stringify({
+          user,
+          // Add additional context for debugging
+          context: {
+            host: window.location.host,
+            origin: window.location.origin,
+            pathname: window.location.pathname,
+          },
+        }),
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
         throw new Error(
-          `Session validation failed with status: ${response.status}`,
+          `Session validation failed with status: ${response.status}, error: ${errorText}`,
         );
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error("Failed to parse session validation response");
+      }
+
       if (!data.success) {
-        throw new Error("Session validation response indicated failure");
+        throw new Error(
+          data.error || "Session validation response indicated failure",
+        );
       }
 
       setSessionValidated(true);
@@ -63,6 +80,7 @@ export function useSession({
         entity: "CLIENT",
         operation: "validate_session",
         userId: user.id,
+        host: window.location.host,
       });
     } catch (error) {
       log.error(error, {
@@ -70,6 +88,7 @@ export function useSession({
         operation: "validate_session",
         userId: user.id,
         retryCount,
+        host: window.location.host,
       });
 
       setRetryCount((prev) => prev + 1);
@@ -78,7 +97,7 @@ export function useSession({
       if (retryCount < maxRetries - 1) {
         setTimeout(() => void validateSession(), retryDelay * (retryCount + 1));
       } else {
-        setError("Session validation failed");
+        setError("Failed to validate session. Please try refreshing the page.");
         // Reset validation state to allow future retries
         setRetryCount(0);
       }
