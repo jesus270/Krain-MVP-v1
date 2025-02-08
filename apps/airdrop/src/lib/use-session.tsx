@@ -22,9 +22,19 @@ export function useSession({
   const [retryCount, setRetryCount] = useState(0);
 
   const validateSession = useCallback(async () => {
-    if (!user?.id || retryCount >= maxRetries) return;
+    if (!user?.id || retryCount >= maxRetries) {
+      setIsValidatingSession(false);
+      return;
+    }
 
     try {
+      // Only validate session if we have a user ID and we're authenticated
+      if (!authenticated) {
+        setSessionValidated(false);
+        setIsValidatingSession(false);
+        return;
+      }
+
       const response = await fetch("/api/auth/callback", {
         method: "POST",
         headers: {
@@ -63,16 +73,26 @@ export function useSession({
       });
 
       setRetryCount((prev) => prev + 1);
+      setSessionValidated(false);
 
       if (retryCount < maxRetries - 1) {
         setTimeout(() => void validateSession(), retryDelay * (retryCount + 1));
       } else {
         setError("Session validation failed");
+        // Reset validation state to allow future retries
+        setRetryCount(0);
       }
     } finally {
       setIsValidatingSession(false);
     }
-  }, [user, retryCount, maxRetries, retryDelay, onSessionValidated]);
+  }, [
+    user,
+    authenticated,
+    retryCount,
+    maxRetries,
+    retryDelay,
+    onSessionValidated,
+  ]);
 
   useEffect(() => {
     if (
@@ -94,12 +114,22 @@ export function useSession({
     validateSession,
   ]);
 
+  // If not authenticated, consider session not validated
+  useEffect(() => {
+    if (!authenticated) {
+      setSessionValidated(false);
+      setIsValidatingSession(false);
+      setError(undefined);
+      setRetryCount(0);
+    }
+  }, [authenticated]);
+
   return {
     ready,
     authenticated,
     user,
     isValidatingSession,
-    sessionValidated,
+    sessionValidated: authenticated && sessionValidated,
     error,
   };
 }
