@@ -22,53 +22,26 @@ export function useSession({
   const [retryCount, setRetryCount] = useState(0);
 
   const validateSession = useCallback(async () => {
-    if (!user?.id || retryCount >= maxRetries) {
-      setIsValidatingSession(false);
-      return;
-    }
+    if (!user?.id || retryCount >= maxRetries) return;
 
     try {
-      // Only validate session if we have a user ID and we're authenticated
-      if (!authenticated) {
-        setSessionValidated(false);
-        setIsValidatingSession(false);
-        return;
-      }
-
       const response = await fetch("/api/auth/callback", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          user,
-          // Add additional context for debugging
-          context: {
-            host: window.location.host,
-            origin: window.location.origin,
-            pathname: window.location.pathname,
-          },
-        }),
+        body: JSON.stringify({ user }),
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
         throw new Error(
-          `Session validation failed with status: ${response.status}, error: ${errorText}`,
+          `Session validation failed with status: ${response.status}`,
         );
       }
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (e) {
-        throw new Error("Failed to parse session validation response");
-      }
-
+      const data = await response.json();
       if (!data.success) {
-        throw new Error(
-          data.error || "Session validation response indicated failure",
-        );
+        throw new Error("Session validation response indicated failure");
       }
 
       setSessionValidated(true);
@@ -80,7 +53,6 @@ export function useSession({
         entity: "CLIENT",
         operation: "validate_session",
         userId: user.id,
-        host: window.location.host,
       });
     } catch (error) {
       log.error(error, {
@@ -88,30 +60,19 @@ export function useSession({
         operation: "validate_session",
         userId: user.id,
         retryCount,
-        host: window.location.host,
       });
 
       setRetryCount((prev) => prev + 1);
-      setSessionValidated(false);
 
       if (retryCount < maxRetries - 1) {
         setTimeout(() => void validateSession(), retryDelay * (retryCount + 1));
       } else {
-        setError("Failed to validate session. Please try refreshing the page.");
-        // Reset validation state to allow future retries
-        setRetryCount(0);
+        setError("Session validation failed");
       }
     } finally {
       setIsValidatingSession(false);
     }
-  }, [
-    user,
-    authenticated,
-    retryCount,
-    maxRetries,
-    retryDelay,
-    onSessionValidated,
-  ]);
+  }, [user, retryCount, maxRetries, retryDelay, onSessionValidated]);
 
   useEffect(() => {
     if (
@@ -133,22 +94,12 @@ export function useSession({
     validateSession,
   ]);
 
-  // If not authenticated, consider session not validated
-  useEffect(() => {
-    if (!authenticated) {
-      setSessionValidated(false);
-      setIsValidatingSession(false);
-      setError(undefined);
-      setRetryCount(0);
-    }
-  }, [authenticated]);
-
   return {
     ready,
     authenticated,
     user,
     isValidatingSession,
-    sessionValidated: authenticated && sessionValidated,
+    sessionValidated,
     error,
   };
 }

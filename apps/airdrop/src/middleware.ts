@@ -13,13 +13,7 @@ import {
 const PROTECTED_PATHS = ["/api/wallet", "/api/referral", "/"];
 
 // Public paths that don't require authentication
-const PUBLIC_PATHS = [
-  "/api/auth",
-  "/terms",
-  "/login",
-  "/api/auth/callback",
-  "/blocked",
-];
+const PUBLIC_PATHS = ["/api/auth", "/terms", "/api/auth/callback", "/blocked"];
 
 // Security headers
 const securityHeaders = {
@@ -32,40 +26,6 @@ const securityHeaders = {
   "Permissions-Policy":
     "camera=(), microphone=(), geolocation=(), interest-cohort=()",
 };
-
-// Helper function to validate origin
-function isValidOrigin(request: NextRequest) {
-  const host = request.headers.get("host") || "";
-  const origin = request.headers.get("origin");
-  const referer = request.headers.get("referer");
-
-  // Allow localhost for development
-  if (host.includes("localhost")) {
-    return true;
-  }
-
-  // Allow Vercel preview domains
-  if (host.includes(".vercel.app")) {
-    return true;
-  }
-
-  // For production, validate against expected domain
-  const expectedDomain = "airdrop.krain.ai";
-  if (host === expectedDomain) {
-    return true;
-  }
-
-  // Log validation details for debugging
-  log.info("Origin validation details", {
-    entity: "MIDDLEWARE",
-    operation: "validate_origin",
-    host,
-    origin,
-    referer,
-  });
-
-  return false;
-}
 
 export async function middleware(request: NextRequest) {
   try {
@@ -85,17 +45,6 @@ export async function middleware(request: NextRequest) {
 
     if (skipGeoCheck) {
       return NextResponse.next();
-    }
-
-    // Validate origin
-    if (!isValidOrigin(request)) {
-      log.error("Invalid origin", {
-        entity: "MIDDLEWARE",
-        operation: "validate_origin",
-        host: request.headers.get("host"),
-        origin: request.headers.get("origin"),
-      });
-      return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
     }
 
     // Perform geolocation check
