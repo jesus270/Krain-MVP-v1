@@ -21,6 +21,7 @@ import {
 } from "@krain/ui/components/ui/card";
 import { Button } from "@krain/ui/components/ui/button";
 import { log } from "@krain/utils";
+import { useSession } from "@/lib/use-session";
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2 seconds
@@ -39,7 +40,7 @@ export function Dashboard({
 }: {
   referredByCode: string | undefined;
 }) {
-  const { user, ready, authenticated } = usePrivy();
+  const { user, ready, authenticated, sessionValidated } = useSession();
   const [wallet, setWallet] = useState<Wallet | undefined>(undefined);
   const [referralsCount, setReferralsCount] = useState<number>(0);
   const [isLoadingWallet, setIsLoadingWallet] = useState(true);
@@ -47,94 +48,17 @@ export function Dashboard({
   const [error, setError] = useState<string | undefined>(undefined);
   const locale = useLocale();
 
-  // Add a new state to track session updates
-  const [hasUpdatedSession, setHasUpdatedSession] = useState(false);
-
-  // Add retry count state and constants
-  const [sessionRetryCount, setSessionRetryCount] = useState(0);
-  const MAX_SESSION_RETRIES = 3;
-  const SESSION_RETRY_DELAY = 2000;
-
   const userEmailAddress = user?.email?.address ?? undefined;
   const userWalletAddress = user?.wallet?.address ?? undefined;
   const userTwitterUsername = user?.twitter?.username ?? undefined;
 
-  // Modified updateSession function with retry limit
-  const updateSession = useCallback(async () => {
-    if (
-      !user?.id ||
-      !userWalletAddress ||
-      sessionRetryCount >= MAX_SESSION_RETRIES
-    )
-      return;
-
-    try {
-      await fetch("/api/auth/callback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user }),
-      });
-      setHasUpdatedSession(true);
-      setSessionRetryCount(0); // Reset count on success
-    } catch (error) {
-      log.error(error, {
-        entity: "CLIENT",
-        operation: "update_session",
-        walletAddress: userWalletAddress,
-        userId: user.id,
-        retryCount: sessionRetryCount,
-      });
-
-      // Increment retry count
-      setSessionRetryCount((prev) => prev + 1);
-
-      // Schedule retry with delay
-      if (sessionRetryCount < MAX_SESSION_RETRIES) {
-        setTimeout(() => void updateSession(), SESSION_RETRY_DELAY);
-      }
-    }
-  }, [user, userWalletAddress, sessionRetryCount]);
-
-  // Modified session update effect
-  useEffect(() => {
-    if (
-      authenticated &&
-      ready &&
-      user?.id &&
-      !hasUpdatedSession &&
-      sessionRetryCount < MAX_SESSION_RETRIES
-    ) {
-      void updateSession();
-    }
-  }, [
-    authenticated,
-    ready,
-    user?.id,
-    hasUpdatedSession,
-    updateSession,
-    sessionRetryCount,
-  ]);
-
   // Modified data loading effect
   useEffect(() => {
     let isDataMounted = true;
-    let retryCount = 0;
     let retryTimeout: ReturnType<typeof setTimeout> | undefined;
 
-    // Early return if not ready or session update failed
-    if (!authenticated || !ready || sessionRetryCount >= MAX_SESSION_RETRIES) {
-      setIsLoadingWallet(false);
-      setIsLoadingReferrals(false);
-      if (sessionRetryCount >= MAX_SESSION_RETRIES) {
-        setError("Failed to update session. Please refresh the page.");
-      }
-      return;
-    }
-
-    // Early return if session not updated yet
-    if (!hasUpdatedSession) {
+    // Early return if not ready or session not validated
+    if (!authenticated || !ready || !sessionValidated) {
       setIsLoadingWallet(false);
       setIsLoadingReferrals(false);
       return;
@@ -213,23 +137,6 @@ export function Dashboard({
               walletAddress: userWalletAddress,
             });
 
-            // Modify the session error handling section:
-            if (error.message.includes("No user in session")) {
-              log.info("Session error detected", {
-                entity: "CLIENT",
-                operation: "handle_session_error",
-                retryCount,
-              });
-
-              if (retryCount < MAX_RETRIES) {
-                retryCount++;
-                retryTimeout = setTimeout(loadData, RETRY_DELAY);
-              } else {
-                setError("Session error persists. Please refresh the page.");
-              }
-              return;
-            }
-
             setError(`${error.message}. Please try again.`);
 
             // Retry after delay if it's a network error
@@ -271,11 +178,10 @@ export function Dashboard({
   }, [
     authenticated,
     ready,
-    hasUpdatedSession,
+    sessionValidated,
     userWalletAddress,
     user?.id,
     referredByCode,
-    sessionRetryCount, // Add sessionRetryCount to dependencies
   ]);
 
   // Show connect wallet card if not authenticated or not ready

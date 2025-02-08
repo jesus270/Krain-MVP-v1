@@ -153,10 +153,8 @@ export async function middleware(request: NextRequest) {
             { status: 401 },
           );
         }
-        // For pages, redirect to login
-        const loginUrl = new URL("/login", request.url);
-        loginUrl.searchParams.set("returnTo", pathname);
-        return NextResponse.redirect(loginUrl);
+        // For pages, return the current page (ConnectWalletCard will handle the UI)
+        return response;
       }
 
       // Get Redis client and verify session
@@ -170,10 +168,8 @@ export async function middleware(request: NextRequest) {
             { status: 401 },
           );
         }
-        // For pages, redirect to login
-        const loginUrl = new URL("/login", request.url);
-        loginUrl.searchParams.set("returnTo", pathname);
-        return NextResponse.redirect(loginUrl);
+        // For pages, return the current page (ConnectWalletCard will handle the UI)
+        return response;
       }
 
       // Add user ID to headers for downstream use
