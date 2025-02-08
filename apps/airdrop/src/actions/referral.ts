@@ -91,29 +91,63 @@ export const getReferralCount = async (input: {
 }) => {
   try {
     // Get headers safely
-    const headersList = headers();
+    const headersList = await headers();
+    const headerObj = Object.fromEntries(headersList.entries());
 
     log.info("Getting referral count", {
       entity: "REFERRAL",
       operation: "get_referral_count_start",
       referralCode: input.referralCode,
       userId: input.userId,
+      headers: {
+        origin: headersList.get("origin"),
+        host: headersList.get("host"),
+        referer: headersList.get("referer"),
+        "next-action": headersList.get("next-action"),
+      },
+      timestamp: new Date().toISOString(),
     });
 
     // Validate origin and apply rate limiting
-    const protectionResponse = await withServerActionProtection(
-      { headers: headersList },
-      "default",
-    );
+    try {
+      const protectionResponse = await withServerActionProtection(
+        { headers: headersList },
+        "default",
+      );
 
-    if (protectionResponse) {
-      log.error("Protection check failed", {
+      if (protectionResponse) {
+        log.error("Protection check failed", {
+          entity: "REFERRAL",
+          operation: "get_referral_count",
+          error: protectionResponse.statusText,
+          status: protectionResponse.status,
+          headers: {
+            origin: headersList.get("origin"),
+            host: headersList.get("host"),
+            referer: headersList.get("referer"),
+            "next-action": headersList.get("next-action"),
+          },
+          timestamp: new Date().toISOString(),
+        });
+        throw new Error(
+          `Protection check failed: ${protectionResponse.status} ${protectionResponse.statusText}`,
+        );
+      }
+    } catch (error) {
+      log.error("Protection check threw error", {
         entity: "REFERRAL",
         operation: "get_referral_count",
-        error: protectionResponse.statusText,
-        status: protectionResponse.status,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        headers: {
+          origin: headersList.get("origin"),
+          host: headersList.get("host"),
+          referer: headersList.get("referer"),
+          "next-action": headersList.get("next-action"),
+        },
+        timestamp: new Date().toISOString(),
       });
-      throw new Error(protectionResponse.statusText);
+      throw error;
     }
 
     return withAuth(input.userId, async (session) => {
