@@ -13,13 +13,7 @@ import {
 const PROTECTED_PATHS = ["/api/wallet", "/api/referral", "/"];
 
 // Public paths that don't require authentication
-const PUBLIC_PATHS = [
-  "/api/auth",
-  "/terms",
-  "/login",
-  "/api/auth/callback",
-  "/blocked",
-];
+const PUBLIC_PATHS = ["/api/auth", "/terms", "/api/auth/callback", "/blocked"];
 
 // Security headers
 const securityHeaders = {
@@ -153,10 +147,8 @@ export async function middleware(request: NextRequest) {
             { status: 401 },
           );
         }
-        // For pages, redirect to login
-        const loginUrl = new URL("/login", request.url);
-        loginUrl.searchParams.set("returnTo", pathname);
-        return NextResponse.redirect(loginUrl);
+        // For pages, return the current page (ConnectWalletCard will handle the UI)
+        return response;
       }
 
       // Get Redis client and verify session
@@ -170,10 +162,8 @@ export async function middleware(request: NextRequest) {
             { status: 401 },
           );
         }
-        // For pages, redirect to login
-        const loginUrl = new URL("/login", request.url);
-        loginUrl.searchParams.set("returnTo", pathname);
-        return NextResponse.redirect(loginUrl);
+        // For pages, return the current page (ConnectWalletCard will handle the UI)
+        return response;
       }
 
       // Add user ID to headers for downstream use

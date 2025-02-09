@@ -25,6 +25,7 @@ import { XLogo } from "@krain/ui/components/icons/XLogo";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
 import { log } from "@krain/utils";
+import { cn } from "@krain/ui/lib/utils";
 
 export default function Profile() {
   const {
@@ -67,7 +68,7 @@ export default function Profile() {
   if (!ready) {
     return (
       <main className="container mx-auto py-8 px-4">
-        <Card className="w-full max-w-2xl mx-auto">
+        <Card className="w-full max-w-2xl mx-auto border-2 backdrop-blur-sm bg-background/95 border-border/50">
           <CardHeader className="space-y-2">
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-4 w-full" />
@@ -104,53 +105,67 @@ export default function Profile() {
 
   return (
     <main className="container mx-auto p-4">
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardHeader className="space-y-2">
+      <Card className="w-full max-w-2xl mx-auto border-2 relative overflow-hidden backdrop-blur-sm bg-background/95 border-border/50">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x" />
+        <CardHeader className="space-y-2 relative">
           <div className="flex items-center justify-between">
             <CardTitle className="text-3xl font-bold">
-              Account Integrations
+              <span className="bg-gradient-to-r from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent">
+                Account Integrations
+              </span>
             </CardTitle>
             <Badge
               variant="secondary"
-              className="text-lg px-4 py-2 text-center"
+              className={cn(
+                "text-lg px-4 py-2 text-center relative overflow-hidden",
+                "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0",
+              )}
             >
               {totalPoints.toLocaleString()} Points
             </Badge>
           </div>
-          <CardDescription>
+          <CardDescription className="text-muted-foreground/90">
             Connect your accounts to earn points and unlock features
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="rounded-lg border bg-card p-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+        <CardContent className="space-y-6 relative">
+          <div className="rounded-lg border bg-card/50 p-6 space-y-6 relative overflow-hidden backdrop-blur-sm">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x" />
+            <div className="flex items-center justify-between relative">
+              <div className="flex items-center gap-2 group">
+                <User className="h-5 w-5 text-primary/80 group-hover:text-primary transition-colors group-hover:scale-110 duration-300" />
                 <div>
-                  <h3 className="font-semibold">Account</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="font-semibold bg-gradient-to-r from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent">
+                    Account
+                  </h3>
+                  <p className="text-sm text-muted-foreground/90">
                     Account successfully created
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="whitespace-nowrap">
+                <Badge
+                  variant="secondary"
+                  className="whitespace-nowrap bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
+                >
                   +5,000 points
                 </Badge>
                 <div className="min-w-[100px] flex justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                  <CheckCircle2 className="h-5 w-5 text-green-500 hover:scale-110 transition-transform duration-300" />
                 </div>
               </div>
             </div>
 
-            <Separator />
+            <Separator className="bg-border/50" />
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Wallet className="h-5 w-5" />
+            <div className="flex items-center justify-between relative">
+              <div className="flex items-center gap-2 group">
+                <Wallet className="h-5 w-5 text-primary/80 group-hover:text-primary transition-colors group-hover:scale-110 duration-300" />
                 <div>
-                  <h3 className="font-semibold">Wallet</h3>
-                  <p className="text-sm text-muted-foreground font-mono">
+                  <h3 className="font-semibold bg-gradient-to-r from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent">
+                    Wallet
+                  </h3>
+                  <p className="text-sm text-muted-foreground/90 font-mono">
                     {wallet?.address ? (
                       <>
                         {wallet.address.slice(0, 6)}...
@@ -165,12 +180,17 @@ export default function Profile() {
               <div className="flex items-center gap-2">
                 <Badge
                   variant={wallet ? "secondary" : "outline"}
-                  className="whitespace-nowrap"
+                  className={cn(
+                    "whitespace-nowrap",
+                    wallet
+                      ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
+                      : "border border-border/50",
+                  )}
                 >
                   {wallet ? "+1,000 points" : "+1,000 points available"}
                 </Badge>
                 <Button
-                  variant={wallet ? "outline" : "default"}
+                  variant={wallet ? "destructive" : "default"}
                   size="sm"
                   onClick={
                     wallet
@@ -178,16 +198,20 @@ export default function Profile() {
                       : handleConnectWallet
                   }
                   disabled={wallet && !canRemoveAccount}
-                  className="min-w-[100px] justify-center"
+                  className={cn(
+                    "min-w-[100px] justify-center group relative overflow-hidden",
+                    !wallet &&
+                      "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0",
+                  )}
                 >
                   {wallet ? (
                     <>
-                      <XCircle className="h-4 w-4 mr-2" />
+                      <XCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
                       Unlink
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      <CheckCircle2 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
                       Connect
                     </>
                   )}
@@ -195,19 +219,21 @@ export default function Profile() {
               </div>
             </div>
 
-            <Separator />
+            <Separator className="bg-border/50" />
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <XLogo className="h-5 w-5" />
+            <div className="flex items-center justify-between relative">
+              <div className="flex items-center gap-2 group">
+                <XLogo className="h-5 w-5 text-primary/80 group-hover:text-primary transition-colors group-hover:scale-110 duration-300" />
                 <div>
-                  <h3 className="font-semibold">X Account</h3>
+                  <h3 className="font-semibold bg-gradient-to-r from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent">
+                    X Account
+                  </h3>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground/90">
                       {user?.twitter?.username || "Not connected"}
                     </p>
                     {!user?.twitter?.username && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground/80">
                         Required for X Engagement Actions
                       </p>
                     )}
@@ -219,13 +245,20 @@ export default function Profile() {
                   variant={
                     typeof twitterSubject === "string" ? "secondary" : "outline"
                   }
-                  className="whitespace-nowrap"
+                  className={cn(
+                    "whitespace-nowrap",
+                    typeof twitterSubject === "string"
+                      ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
+                      : "border border-border/50",
+                  )}
                 >
                   {twitterSubject ? "+2,000 points" : "+2,000 points available"}
                 </Badge>
                 <Button
                   variant={
-                    typeof twitterSubject === "string" ? "outline" : "default"
+                    typeof twitterSubject === "string"
+                      ? "destructive"
+                      : "default"
                   }
                   size="sm"
                   onClick={
@@ -236,16 +269,20 @@ export default function Profile() {
                   disabled={
                     typeof twitterSubject === "string" && !canRemoveAccount
                   }
-                  className="min-w-[100px] justify-center"
+                  className={cn(
+                    "min-w-[100px] justify-center group relative overflow-hidden",
+                    !twitterSubject &&
+                      "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0",
+                  )}
                 >
                   {twitterSubject ? (
                     <>
-                      <XCircle className="h-4 w-4 mr-2" />
+                      <XCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
                       Unlink
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      <CheckCircle2 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
                       Connect
                     </>
                   )}
@@ -253,57 +290,73 @@ export default function Profile() {
               </div>
             </div>
 
-            <Separator />
+            <Separator className="bg-border/50" />
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-5 w-5" />
-                  <div>
-                    <h3 className="font-semibold">Email</h3>
-                    <p className="text-sm text-muted-foreground">
+            <div className="flex items-center justify-between relative">
+              <div className="flex items-center gap-2 group">
+                <Mail className="h-5 w-5 text-primary/80 group-hover:text-primary transition-colors group-hover:scale-110 duration-300" />
+                <div>
+                  <h3 className="font-semibold bg-gradient-to-r from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent">
+                    Email
+                  </h3>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground/90">
                       {email?.address || "Not connected"}
                     </p>
+                    {!email && (
+                      <p className="text-xs text-muted-foreground/80">
+                        Required for important updates
+                      </p>
+                    )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant={email ? "secondary" : "outline"}
-                    className="whitespace-nowrap"
-                  >
-                    {email ? "+3,000 points" : "+3,000 points available"}
-                  </Badge>
-                  <Button
-                    variant={email ? "outline" : "default"}
-                    size="sm"
-                    onClick={
-                      email ? () => unlinkEmail(email.address) : linkEmail
-                    }
-                    disabled={email && !canRemoveAccount}
-                    className="min-w-[100px] justify-center"
-                  >
-                    {email ? (
-                      <>
-                        <XCircle className="h-4 w-4 mr-2" />
-                        Unlink
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="h-4 w-4 mr-2" />
-                        Connect
-                      </>
-                    )}
-                  </Button>
-                </div>
               </div>
-              {!email && (
-                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <AlertCircle className="h-3 w-3" />
-                  By connecting email, you agree to receive marketing updates
-                  from us
-                </p>
-              )}
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant={email ? "secondary" : "outline"}
+                  className={cn(
+                    "whitespace-nowrap",
+                    email
+                      ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
+                      : "border border-border/50",
+                  )}
+                >
+                  {email ? "+3,000 points" : "+3,000 points available"}
+                </Badge>
+                <Button
+                  variant={email ? "destructive" : "default"}
+                  size="sm"
+                  onClick={email ? () => unlinkEmail(email.address) : linkEmail}
+                  disabled={email && !canRemoveAccount}
+                  className={cn(
+                    "min-w-[100px] justify-center group relative overflow-hidden",
+                    !email &&
+                      "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0",
+                  )}
+                >
+                  {email ? (
+                    <>
+                      <XCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                      Unlink
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                      Connect
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
+
+            {!canRemoveAccount && (
+              <div className="mt-4 flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                <AlertCircle className="h-5 w-5 text-yellow-500 flex-shrink-0" />
+                <p className="text-sm text-yellow-500">
+                  At least one account must remain connected
+                </p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

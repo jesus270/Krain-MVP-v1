@@ -89,40 +89,128 @@ export const getReferralCount = async (input: {
   referralCode: string;
   userId: string;
 }) => {
-  // Validate origin and apply rate limiting
-  const protectionResponse = await withServerActionProtection(
-    { headers: headers() } as any,
-    "default",
-  );
-  if (protectionResponse) throw new Error(protectionResponse.statusText);
+  try {
+    // Get headers safely
+    const headersList = await headers();
+    const headerObj = Object.fromEntries(headersList.entries());
 
-  return withAuth(input.userId, async (session) => {
+    log.info("Getting referral count", {
+      entity: "REFERRAL",
+      operation: "get_referral_count_start",
+      referralCode: input.referralCode,
+      userId: input.userId,
+      headers: {
+        origin: headersList.get("origin"),
+        host: headersList.get("host"),
+        referer: headersList.get("referer"),
+        "next-action": headersList.get("next-action"),
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+    // Validate origin and apply rate limiting
     try {
-      const user = session.get("user");
-      if (!user) throw new Error("No user in session");
+      const protectionResponse = await withServerActionProtection(
+        { headers: headersList },
+        "default",
+      );
 
-      const parsed = referralCodeSchema.parse(input);
-
-      const result = await db
-        .select({ value: count() })
-        .from(referralTable)
-        .where(eq(referralTable.referredByCode, parsed.referralCode));
-
-      return result[0]?.value || 0;
+      if (protectionResponse) {
+        log.error("Protection check failed", {
+          entity: "REFERRAL",
+          operation: "get_referral_count",
+          error: protectionResponse.statusText,
+          status: protectionResponse.status,
+          headers: {
+            origin: headersList.get("origin"),
+            host: headersList.get("host"),
+            referer: headersList.get("referer"),
+            "next-action": headersList.get("next-action"),
+          },
+          timestamp: new Date().toISOString(),
+        });
+        throw new Error(
+          `Protection check failed: ${protectionResponse.status} ${protectionResponse.statusText}`,
+        );
+      }
     } catch (error) {
-      log.error(error, {
+      log.error("Protection check threw error", {
         entity: "REFERRAL",
         operation: "get_referral_count",
-        input,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        headers: {
+          origin: headersList.get("origin"),
+          host: headersList.get("host"),
+          referer: headersList.get("referer"),
+          "next-action": headersList.get("next-action"),
+        },
+        timestamp: new Date().toISOString(),
       });
-
-      if (error instanceof z.ZodError) {
-        throw new Error("String must contain exactly 6 character(s)");
-      }
-
-      throw new Error(
-        `Failed to get referrals count: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      throw error;
     }
-  });
+
+    return withAuth(input.userId, async (session) => {
+      try {
+        const user = session.get("user");
+        if (!user) {
+          log.error("No user in session", {
+            entity: "REFERRAL",
+            operation: "get_referral_count",
+            userId: input.userId,
+          });
+          throw new Error("No user in session");
+        }
+
+        const parsed = referralCodeSchema.parse(input);
+
+        log.info("Querying referral count", {
+          entity: "REFERRAL",
+          operation: "get_referral_count_query",
+          referralCode: parsed.referralCode,
+        });
+
+        const result = await db
+          .select({ value: count() })
+          .from(referralTable)
+          .where(eq(referralTable.referredByCode, parsed.referralCode));
+
+        const referralCount = result[0]?.value || 0;
+
+        log.info("Referral count retrieved", {
+          entity: "REFERRAL",
+          operation: "get_referral_count_success",
+          referralCode: parsed.referralCode,
+          count: referralCount,
+        });
+
+        return referralCount;
+      } catch (error) {
+        log.error("Failed in auth context", {
+          entity: "REFERRAL",
+          operation: "get_referral_count",
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          input,
+        });
+
+        if (error instanceof z.ZodError) {
+          throw new Error("String must contain exactly 6 character(s)");
+        }
+
+        throw new Error(
+          `Failed to get referrals count: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    });
+  } catch (error) {
+    log.error("Top level error in getReferralCount", {
+      entity: "REFERRAL",
+      operation: "get_referral_count",
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      input,
+    });
+    throw error;
+  }
 };

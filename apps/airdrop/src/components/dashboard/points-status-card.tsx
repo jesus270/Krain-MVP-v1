@@ -18,6 +18,7 @@ import { ReferralPointsSection } from "./referral-points-section";
 import { ProfilePointsSection } from "./profile-points-section";
 import { ProfileCompletionMessage } from "./profile-completion-message";
 import { AdditionalPointsMessage } from "./additional-points-message";
+import { cn } from "@krain/ui/lib/utils";
 
 interface PointsStatusCardProps {
   totalPoints: number;
@@ -49,19 +50,27 @@ export function PointsStatusCard({
   isLoadingReferrals,
 }: PointsStatusCardProps) {
   return (
-    <Card className="border-2 max-w-2xl mx-auto">
-      <CardHeader className="space-y-4">
+    <Card className="border-2 max-w-2xl mx-auto relative overflow-hidden backdrop-blur-sm bg-background/95 border-border/50">
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x" />
+      <CardHeader className="space-y-4 relative">
         <div className="flex items-center justify-between">
           <CardTitle className="text-3xl font-bold">
-            <h2>$KRAIN Airdrop Status</h2>
+            <h2 className="bg-gradient-to-r from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent">
+              $KRAIN Airdrop Status
+            </h2>
           </CardTitle>
           <Badge
             variant={
               totalPoints < 0 || isLoadingReferrals ? "outline" : "secondary"
             }
-            className={`text-lg px-4 py-2 text-center ${
-              isLoadingReferrals ? "animate-pulse bg-muted" : ""
-            }`}
+            className={cn(
+              "text-lg px-4 py-2 text-center relative overflow-hidden transition-colors",
+              isLoadingReferrals
+                ? "animate-pulse bg-muted"
+                : totalPoints > 0
+                  ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
+                  : "border border-border/50",
+            )}
           >
             {isLoadingReferrals
               ? "Loading..."
@@ -77,7 +86,7 @@ export function PointsStatusCard({
           </div>
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 relative">
         <BasePointsSection
           userWalletAddress={userWalletAddress}
           locale={locale}
@@ -98,16 +107,19 @@ export function PointsStatusCard({
           locale={locale}
         />
       </CardContent>
-      <CardFooter className="flex flex-col gap-3">
-        {(!userEmailAddress || !userTwitterUsername) && (
-          <Button className="w-full" asChild>
-            <Link href="/profile">
+      {userWalletAddress && (
+        <CardFooter className="relative">
+          <Button
+            asChild
+            className="w-full group relative overflow-hidden bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
+          >
+            <Link href="/profile" className="flex items-center justify-center">
               Complete Your Profile
-              <ArrowRight className="h-4 w-4 ml-2" />
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:scale-110 duration-300" />
             </Link>
           </Button>
-        )}
-      </CardFooter>
+        </CardFooter>
+      )}
     </Card>
   );
 }

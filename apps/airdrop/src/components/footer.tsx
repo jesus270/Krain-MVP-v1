@@ -7,7 +7,10 @@ const Footer = () => {
         © {new Date().getFullYear()} Krain
       </p>
       <nav>
-        <Link href="/terms" className="text-blue-300 hover:text-blue-800">
+        <Link
+          href="https://krain.gitbook.io/krain/legal"
+          className="text-blue-300 hover:text-blue-800"
+        >
           Terms and Conditions
         </Link>
       </nav>

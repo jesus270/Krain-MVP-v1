@@ -4,34 +4,34 @@
 
 @layer base {
   :root {
-    --destructive-foreground: 60 30% 96%; /* #F7F6F2 - rgb(247, 246, 242) */
-    --secondary-foreground: 242 53% 40%; /* #3B3D99 - rgb(59, 61, 153) */
-    --popover-foreground: 60 30% 96%; /* #F7F6F2 - rgb(247, 246, 242) */
-    --primary-foreground: 60 30% 96%; /* #F7F6F2 - rgb(247, 246, 242) */
-    --accent-foreground: 60 30% 96%; /* #F7F6F2 - rgb(247, 246, 242) */
-    --muted-foreground: 60 30% 96%; /* #F7F6F2 - rgb(247, 246, 242) */
-    --card-foreground: 60 30% 96%; /* #F7F6F2 - rgb(247, 246, 242) */
-    --destructive: 330 35% 45%; /* #A25B7B - rgb(162, 91, 123) */
-    --background: 245 80% 23%; /* #1A1B4D - rgb(26, 27, 77) */
-    --foreground: 60 30% 96%; /* #F7F6F2 - rgb(247, 246, 242) */
-    --secondary: 242 50% 70%; /* #9597D9 - rgb(149, 151, 217) */
-    --popover: 245 80% 24%; /* #1C1D51 - rgb(28, 29, 81) */
-    --primary: 242 53% 52%; /* #4C4FC6 - rgb(76, 79, 198) */
-    --border: 245 80% 68%; /* #9FA1E6 - rgb(159, 161, 230) */
-    --accent: 242 40% 60%; /* #6668C6 - rgb(102, 104, 198) */
-    --muted: 245 40% 30%; /* #2D2F66 - rgb(45, 47, 102) */
-    --input: 245 80% 41%; /* #2F3187 - rgb(47, 49, 135) */
-    --card: 245 80% 24%; /* #1C1D51 - rgb(28, 29, 81) */
-    --ring: 242 53% 52%; /* #4C4FC6 - rgb(76, 79, 198) */
+    --destructive-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
+    --secondary-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
+    --popover-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
+    --primary-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
+    --accent-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
+    --muted-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist - at 80% */
+    --card-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
+    --destructive: 0 70% 50%; /* Keeping a distinct destructive color for errors */
+    --background: 250 43% 3%; /* #04030c - Eight Ball */
+    --foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
+    --secondary: 192 65% 25%; /* #175c68 - Tropical Skies */
+    --popover: 252 29% 20%; /* #272442 - Midnight Velvet */
+    --primary: 261 70% 36%; /* #431c9d - Eggplant Tint */
+    --border: 252 29% 20%; /* #272442 - Midnight Velvet */
+    --accent: 261 70% 36%; /* #431c9d - Eggplant Tint */
+    --muted: 252 29% 20%; /* #272442 - Midnight Velvet - at 40% */
+    --input: 252 29% 20%; /* #272442 - Midnight Velvet */
+    --card: 252 29% 20%; /* #272442 - Midnight Velvet - at 20% */
+    --ring: 261 70% 36%; /* #431c9d - Eggplant Tint */
     --radius: 0.5rem;
-    --sidebar-background: 245 80% 23%; /* #1A1B4D - rgb(26, 27, 77) */
-    --sidebar-foreground: 60 30% 96%; /* #F7F6F2 - rgb(247, 246, 242) */
-    --sidebar-primary: 242 53% 52%; /* #4C4FC6 - rgb(76, 79, 198) */
-    --sidebar-primary-foreground: 60 30% 96%; /* #F7F6F2 - rgb(247, 246, 242) */
-    --sidebar-accent: 242 40% 60%; /* #6668C6 - rgb(102, 104, 198) */
-    --sidebar-accent-foreground: 60 30% 96%; /* #F7F6F2 - rgb(247, 246, 242) */
-    --sidebar-border: 245 80% 68%; /* #9FA1E6 - rgb(159, 161, 230) */
-    --sidebar-ring: 242 53% 52%; /* #4C4FC6 - rgb(76, 79, 198) */
+    --sidebar-background: 250 43% 3%; /* #04030c - Eight Ball */
+    --sidebar-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
+    --sidebar-primary: 261 70% 36%; /* #431c9d - Eggplant Tint */
+    --sidebar-primary-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
+    --sidebar-accent: 192 65% 25%; /* #175c68 - Tropical Skies */
+    --sidebar-accent-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
+    --sidebar-border: 252 29% 20%; /* #272442 - Midnight Velvet */
+    --sidebar-ring: 261 70% 36%; /* #431c9d - Eggplant Tint */
   }
 }
 
@@ -42,7 +42,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-red-hat-mono);
+    font-family: var(--font-inter);
   }
 
   h1,
@@ -51,6 +51,25 @@
   h4,
   h5,
   h6 {
-    font-family: var(--font-manrope);
+    font-family: var(--font-inter);
+  }
+}
+
+@layer utilities {
+  @keyframes gradient-x {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .animate-gradient-x {
+    animation: gradient-x 15s ease infinite;
+    background-size: 400% 400%;
   }
 }
