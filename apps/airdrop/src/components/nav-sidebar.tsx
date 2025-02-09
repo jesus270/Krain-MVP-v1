@@ -66,7 +66,7 @@ export function SidebarNav() {
               src={
                 state === "collapsed"
                   ? "/icon-square-krain-token.png"
-                  : "/logo-krain.svg"
+                  : "/logo.svg"
               }
               alt="Logo"
               width={state === "collapsed" ? 24 : 116}

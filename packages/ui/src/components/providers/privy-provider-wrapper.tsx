@@ -77,7 +77,7 @@ export function PrivyProviderWrapper({
           showWalletLoginFirst: true,
           logo: (
             <img
-              src="/logo.png"
+              src="/logo.svg"
               alt="Logo"
               width={150}
               height={40}
