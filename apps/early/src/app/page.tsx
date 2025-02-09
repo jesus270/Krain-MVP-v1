@@ -161,7 +161,7 @@ export default function HomePage() {
             </p>
           ) : !user ? (
             <p className="text-xl sm:text-2xl max-w-2xl">
-              Sign in with your wallet or email to get early access to KRAiN's
+              Sign in with your wallet or email to get early access to KRAIN's
               revolutionary AI Agent Hub & AI Agent Builder.
             </p>
           ) : !user.email?.address ? (
