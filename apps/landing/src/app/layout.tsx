@@ -10,24 +10,27 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "KRAIN AI",
-  description: "The Infrastructure Layer Fueling the AI Agent Economy",
+  title: "Krain AI - Infrastracture for the AI Economy",
+  description:
+    "From discovery to creation, we are accelerating the AI Agent ecosystem with intelligent infrastructure.",
   openGraph: {
-    title: "KRAIN AI",
-    description: "The Infrastructure Layer Fueling the AI Agent Economy",
+    title: "Krain AI - Infrastracture for the AI Economy",
+    description:
+      "From discovery to creation, we are accelerating the AI Agent ecosystem with intelligent infrastructure.",
     images: [
       {
         url: "/social-share-image.webp",
         width: 1200,
         height: 630,
-        alt: "KRAIN AI - The Infrastructure Layer Fueling the AI Agent Economy",
+        alt: "Krain AI - Infrastracture for the AI Economy - From discovery to creation, we are accelerating the AI Agent ecosystem with intelligent infrastructure.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "KRAIN AI",
-    description: "The Infrastructure Layer Fueling the AI Agent Economy",
+    title: "Krain AI - Infrastracture for the AI Economy",
+    description:
+      "From discovery to creation, we are accelerating the AI Agent ecosystem with intelligent infrastructure.",
     images: ["/social-share-image.webp"],
   },
 };
