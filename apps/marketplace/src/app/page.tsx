@@ -80,8 +80,22 @@ export default function Home() {
       return (a[sortValue] - b[sortValue]) * multiplier;
     });
 
-  // Add this new constant for featured agents
-  const featuredAgents = agents.sort((a, b) => b.rating - a.rating).slice(0, 5); // Show top 5 featured agents
+  // Add these new constants for different agent lists
+  const featuredAgents = agents.sort((a, b) => b.rating - a.rating).slice(0, 5); // Top rated agents
+  const trendingAgents = agents
+    .sort((a, b) => b.reviewsCount - a.reviewsCount)
+    .slice(0, 5); // Most reviewed agents
+  const topRatedAgents = agents
+    .filter((agent) => agent.reviewsCount >= 100) // Only consider agents with significant reviews
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 5); // Highest rated agents with sufficient reviews
+
+  // Check if any filters are active
+  const hasActiveFilters =
+    searchQuery.trim() !== "" ||
+    filters.categories.length > 0 ||
+    filters.tags.length > 0 ||
+    filters.industries.length > 0;
 
   const handleRemoveFilter = useCallback(
     (key: keyof FilterState, value: string) => {
@@ -117,9 +131,9 @@ export default function Home() {
   return (
     <div className="min-h-screen p-4 sm:p-6 lg:p-8 flex flex-col gap-6 lg:gap-8">
       <header className="flex flex-col items-center gap-4 lg:gap-6">
-        <div className="flex flex-col items-center gap-2">
+        {/* <div className="flex flex-col items-center gap-2">
           <h1 className="text-2xl sm:text-3xl font-bold">Discover AI Agents</h1>
-        </div>
+        </div> */}
         <SearchBar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
@@ -129,18 +143,30 @@ export default function Home() {
         <ActiveFilters filters={filters} onRemove={handleRemoveFilter} />
       </header>
 
-      {featuredAgents.length > 0 && (
-        <section className="w-full max-w-7xl mx-auto">
-          <h2 className="text-xl font-semibold mb-4">Featured Agents</h2>
-          <FeaturedCarousel agents={featuredAgents} onFilter={handleFilter} />
-        </section>
-      )}
+      {!hasActiveFilters ? (
+        <>
+          <section className="w-full max-w-7xl mx-auto">
+            <h2 className="text-xl font-semibold mb-4">Featured Agents</h2>
+            <FeaturedCarousel agents={featuredAgents} onFilter={handleFilter} />
+          </section>
 
-      <main className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 auto-rows-max max-w-7xl mx-auto">
-        {filteredAgents.map((agent) => (
-          <AgentCard key={agent.id} agent={agent} onFilter={handleFilter} />
-        ))}
-      </main>
+          <section className="w-full max-w-7xl mx-auto">
+            <h2 className="text-xl font-semibold mb-4">Trending Agents</h2>
+            <FeaturedCarousel agents={trendingAgents} onFilter={handleFilter} />
+          </section>
+
+          <section className="w-full max-w-7xl mx-auto">
+            <h2 className="text-xl font-semibold mb-4">Top Rated Agents</h2>
+            <FeaturedCarousel agents={topRatedAgents} onFilter={handleFilter} />
+          </section>
+        </>
+      ) : (
+        <main className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 auto-rows-max max-w-7xl mx-auto">
+          {filteredAgents.map((agent) => (
+            <AgentCard key={agent.id} agent={agent} onFilter={handleFilter} />
+          ))}
+        </main>
+      )}
     </div>
   );
 }

@@ -86,7 +86,7 @@ export function SearchBar({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="resize-none text-foreground placeholder:text-muted-foreground min-h-[60px] pr-20 border rounded-xl bg-muted/50"
-          placeholder="Use natural language to find the perfect AI agent for your needs. Try saying 'free chatbot with API'"
+          placeholder="Use natural language to find the perfect AI agent for your needs"
           rows={2}
         />
         <div className="absolute right-2 bottom-1.5 flex gap-2">

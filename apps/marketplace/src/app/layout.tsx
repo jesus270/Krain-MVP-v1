@@ -1,10 +1,15 @@
+"use client";
+
 import type { Metadata } from "next";
 import { RootLayout } from "@krain/ui/layouts/root-layout";
+import { SidebarNav } from "./components/nav-sidebar";
+import Header from "./components/header";
+import { SidebarInset, SidebarProvider } from "@krain/ui/components/ui/sidebar";
 
-export const metadata: Metadata = {
-  title: "Krain AI - Agent Portal",
-  description: "Krain AI Agent Portal",
-};
+// export const metadata: Metadata = {
+//   title: "Krain AI - Agent Portal",
+//   description: "Krain AI Agent Portal",
+// };
 
 export default function Layout({
   children,
@@ -21,7 +26,15 @@ export default function Layout({
       }}
       intercomAppId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID}
     >
-      {children}
+      <SidebarProvider>
+        <>
+          <SidebarNav />
+          <SidebarInset>
+            <Header />
+            <div className="flex flex-grow flex-col">{children}</div>
+          </SidebarInset>
+        </>
+      </SidebarProvider>
     </RootLayout>
   );
 }
