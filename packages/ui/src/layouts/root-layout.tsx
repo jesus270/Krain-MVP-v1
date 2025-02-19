@@ -29,7 +29,9 @@ export function RootLayout({
         )}
       >
         <Providers authConfig={authConfig} intercomAppId={intercomAppId}>
-          <div className="flex flex-col h-screen w-screen">{children}</div>
+          <div className="flex flex-col h-screen w-screen overflow-x-hidden">
+            {children}
+          </div>
         </Providers>
       </body>
     </html>

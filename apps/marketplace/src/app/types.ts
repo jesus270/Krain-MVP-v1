@@ -1,84 +1,46 @@
 export interface Pricing {
-  monthly: number;
-  yearly: number;
-  freeTier: boolean;
+  name: string; // Package description
+  interval: string; // e.g., "monthly", "yearly", "one-time"
+  amount: string; // Text to allow for "Free", "Contact Us", etc.
+  currency: string; // e.g., "USD", "USDC", etc.
 }
 
-export interface PerformanceMetrics {
-  responseTime: number; // Average response time in milliseconds
-  accuracyScore: number; // Score from 0-1
-  reliabilityScore: number; // Score from 0-1
-  uptime: number; // Percentage uptime
-}
-
-export interface ReputationMetrics {
-  overallScore: number; // Weighted score from 0-5
-  reviewsCount: number;
-  verifiedReviewsCount: number;
-  ratings: {
-    five: number;
-    four: number;
-    three: number;
-    two: number;
-    one: number;
-  };
-  expertScore?: number; // Optional expert review score
-}
-
-export interface UseCase {
-  title: string;
-  description: string;
-  industry?: string;
-  successMetrics?: string[];
-  testimonials?: string[];
+export interface SocialMedia {
+  x?: string;
+  farcaster?: string;
+  discord?: string;
+  youtube?: string;
+  linkedin?: string;
+  instagram?: string;
 }
 
 export interface AIAgent {
   id: string;
   name: string;
-  shortDescription: string;
-  description: string;
+  rating: number; // Star rating (0-5)
+  reviewsCount: number;
   category: string;
-  subcategories: string[]; // For more granular categorization
-  tags: string[];
-  developer: string;
-  imageUrl: string;
+  tags: string[]; // Comma separated list stored as array
+  description?: string;
 
-  // Core capabilities and technical details
-  capabilities: string[];
-  integrationPlatforms: string[];
-  apiEndpoint: string;
-  supportedLanguages: string[];
-  technicalRequirements?: string[];
+  // Blockchain & Token Info
+  blockchainsSupported: string[];
+  tokenSymbol?: string;
+  tokenName?: string;
+  cmcTokenLink?: string;
 
-  // Use cases and examples
-  useCases: UseCase[];
-  featuredUseCases?: string[]; // IDs of highlighted use cases
+  // Contact & Company Info
+  websiteUrl: string;
+  supportEmail: string;
+  companyName: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
 
-  // Pricing and licensing
-  pricing: Pricing;
-  licenseType: "open-source" | "commercial" | "subscription" | "free";
-  enterpriseOptions?: boolean;
+  // Pricing
+  pricing: Pricing[]; // Array to support multiple pricing tiers
 
-  // Performance and reputation
-  performanceMetrics: PerformanceMetrics;
-  reputationMetrics: ReputationMetrics;
-  popularityScore: number;
-
-  // Discovery and comparison metrics
-  similarAgents?: string[]; // IDs of similar agents
-  competitiveAdvantages?: string[];
-  limitations?: string[];
-  bestSuitedFor?: string[];
-
-  // Dates and versioning
-  releaseDate: string; // ISO 8601 format (YYYY-MM-DD)
-  lastUpdated: string; // ISO 8601 format (YYYY-MM-DD)
-  version?: string;
-
-  // Resources and links
-  documentationURL: string;
-  demoURL?: string;
-  communityURL?: string;
-  supportURL?: string;
+  // Industry & Social
+  industryFocus: string[]; // Comma separated list stored as array
+  socialMedia: SocialMedia;
 }

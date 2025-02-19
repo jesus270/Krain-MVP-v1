@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import useEmblaCarousel from "embla-carousel-react";
-import Image from "next/image";
+import { CustomCarousel } from "@krain/ui/components/ui/custom-carousel";
 import { PhaseCard } from "./phase-card";
 
 const phases = [
@@ -61,55 +60,18 @@ const phases = [
 ];
 
 export function RoadmapCarousel() {
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "start",
-    loop: true,
-    containScroll: "trimSnaps",
-  });
-
-  const scrollPrev = React.useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev();
-  }, [emblaApi]);
-
-  const scrollNext = React.useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext();
-  }, [emblaApi]);
-
   return (
     <div>
-      <div className="flex justify-between items-center mb-16">
-        <h2 className="text-3xl md:text-5xl font-bold text-white">Roadmap</h2>
-        <div className="flex gap-2">
-          <button onClick={scrollPrev} className="group">
-            <Image
-              src="/button-carousel.svg"
-              alt="Previous"
-              width={80}
-              height={49}
-              className="rotate-180 opacity-50 transition-opacity hover:opacity-100"
-            />
-          </button>
-          <button onClick={scrollNext} className="group">
-            <Image
-              src="/button-carousel.svg"
-              alt="Next"
-              width={80}
-              height={49}
-              className="opacity-50 transition-opacity hover:opacity-100"
-            />
-          </button>
-        </div>
-      </div>
-
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="grid grid-flow-col auto-cols-[90vw] sm:auto-cols-[80vw] md:auto-cols-[420px] gap-6">
-          {phases.map((phase, index) => (
-            <div key={index} className="w-full">
-              <PhaseCard {...phase} />
-            </div>
-          ))}
-        </div>
-      </div>
+      <h2 className="text-3xl md:text-5xl font-bold text-white mb-16">
+        Roadmap
+      </h2>
+      <CustomCarousel controlsClassName="flex justify-end gap-2 mb-16">
+        {phases.map((phase, index) => (
+          <div key={index} className="w-full">
+            <PhaseCard {...phase} />
+          </div>
+        ))}
+      </CustomCarousel>
     </div>
   );
 }

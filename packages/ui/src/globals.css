@@ -9,7 +9,7 @@
     --popover-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
     --primary-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
     --accent-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
-    --muted-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist - at 80% */
+    --muted-foreground: 246 31% 62%; /* #8781BB */
     --card-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
     --destructive: 0 70% 50%; /* Keeping a distinct destructive color for errors */
     --background: 250 43% 3%; /* #04030c - Eight Ball */

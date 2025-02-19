@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { RootLayout } from "@krain/ui/layouts/root-layout";
 
 export const metadata: Metadata = {
-  title: "Krain Agent Hub",
-  description: "Krain Agent Hub",
+  title: "Krain AI - Agent Portal",
+  description: "Krain AI Agent Portal",
 };
 
 export default function Layout({
@@ -15,13 +15,13 @@ export default function Layout({
     <RootLayout
       authConfig={{
         privyAppId: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
-        loadingTitle: "Welcome to the $KRAIN Agent Hub",
+        loadingTitle: "Welcome to the $KRAIN Agent Portal",
         loadingDescription: "Please wait while we validate your session...",
         validateSession: false,
       }}
       intercomAppId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID}
     >
-      <div className="flex flex-grow flex-col">{children}</div>
+      {children}
     </RootLayout>
   );
 }
