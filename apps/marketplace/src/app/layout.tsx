@@ -29,9 +29,9 @@ export default function Layout({
       <SidebarProvider>
         <>
           <SidebarNav />
-          <SidebarInset>
+          <SidebarInset className="overflow-y-auto overflow-x-hidden">
             <Header />
-            <div className="flex flex-grow flex-col">{children}</div>
+            {children}
           </SidebarInset>
         </>
       </SidebarProvider>

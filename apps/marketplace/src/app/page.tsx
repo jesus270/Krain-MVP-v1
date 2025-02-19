@@ -129,7 +129,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-8 flex flex-col gap-6 lg:gap-8">
+    <div className="p-4 sm:p-6 lg:p-8 flex flex-col gap-6 lg:gap-8">
       <header className="flex flex-col items-center gap-4 lg:gap-6">
         {/* <div className="flex flex-col items-center gap-2">
           <h1 className="text-2xl sm:text-3xl font-bold">Discover AI Agents</h1>
