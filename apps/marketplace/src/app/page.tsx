@@ -145,23 +145,23 @@ export default function Home() {
 
       {!hasActiveFilters ? (
         <>
-          <section className="w-full max-w-7xl mx-auto">
+          <section className="w-full mx-auto">
             <h2 className="text-xl font-semibold mb-4">Featured Agents</h2>
             <FeaturedCarousel agents={featuredAgents} onFilter={handleFilter} />
           </section>
 
-          <section className="w-full max-w-7xl mx-auto">
+          <section className="w-full mx-auto">
             <h2 className="text-xl font-semibold mb-4">Trending Agents</h2>
             <FeaturedCarousel agents={trendingAgents} onFilter={handleFilter} />
           </section>
 
-          <section className="w-full max-w-7xl mx-auto">
+          <section className="w-full mx-auto">
             <h2 className="text-xl font-semibold mb-4">Top Rated Agents</h2>
             <FeaturedCarousel agents={topRatedAgents} onFilter={handleFilter} />
           </section>
         </>
       ) : (
-        <main className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 auto-rows-max max-w-7xl mx-auto">
+        <main className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 auto-rows-maxmx-auto">
           {filteredAgents.map((agent) => (
             <AgentCard key={agent.id} agent={agent} onFilter={handleFilter} />
           ))}
