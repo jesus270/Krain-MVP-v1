@@ -34,7 +34,9 @@ export function CustomCarousel({
     ...options,
     align: showPartialSlides ? "center" : options.align,
     loop: true,
-    startIndex: 0,
+    startIndex: 1,
+    inViewThreshold: 0,
+    skipSnaps: false,
   });
 
   const [selectedIndex, setSelectedIndex] = React.useState(0);
