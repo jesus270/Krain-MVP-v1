@@ -146,7 +146,7 @@ export function SidebarNav() {
         <SidebarGroup>
           <SidebarMenu>
             {routes.map((item) => (
-              <SidebarMenuItem key={item.url} className="relative group">
+              <SidebarMenuItem key={item.name} className="relative group">
                 {/* <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x rounded-md" />
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" /> */}
                 <SidebarMenuButton asChild className="rounded-none">
