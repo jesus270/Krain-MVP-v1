@@ -10,6 +10,7 @@ import {
   MonitorSmartphone,
   Megaphone,
   Magnet,
+  Crown,
 } from "lucide-react";
 import {
   Sidebar,
@@ -203,54 +204,83 @@ export function SidebarNav() {
         <div className="relative space-y-4">
           <div className="absolute inset-0 bg-[url('/bg-gradient-ellipsis.svg')] bg-no-repeat bg-cover opacity-30" />
 
-          <Link href="#" className="block relative p-2">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold">Buy $KRAIN</h3>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-muted-foreground"
-              >
-                <path
-                  d="M7 17L17 7M17 7H7M17 7V17"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Premium features, post bounties and much more with $KRAIN.
-            </p>
-          </Link>
-          <Separator className="bg-border/50 w-full" />
-          <div className="relative p-2">
-            <h3 className="font-semibold mb-3">Level Up with Premium</h3>
-            <ul className="space-y-2 mb-4">
-              <li className="text-sm text-muted-foreground flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" />
-                Workflow Creator
-              </li>
-              <li className="text-sm text-muted-foreground flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" />
-                Get Paid for Tasks
-              </li>
-              <li className="text-sm text-muted-foreground flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" />
-                Staking Bonuses
-              </li>
-            </ul>
-            <Link
-              href="#"
-              className="block w-full text-center py-2 px-4 rounded-md bg-gradient-to-r from-purple-500 to-blue-500 text-white font-medium hover:from-purple-600 hover:to-blue-600 transition-all"
-            >
-              Get premium now
-            </Link>
-          </div>
+          {state === "collapsed" ? (
+            <SidebarMenu>
+              <SidebarMenuItem className="relative group">
+                <SidebarMenuButton asChild className="rounded-none">
+                  <Link
+                    href="#"
+                    onClick={handleClick}
+                    className="relative z-10 transition-all group bg-gradient-to-r hover:from-purple-500/10 hover:to-blue-500/10"
+                  >
+                    <DollarSign className="transition-transform group-hover:scale-110 text-primary/80 group-hover:text-primary" />
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem className="relative group">
+                <SidebarMenuButton asChild className="rounded-none">
+                  <Link
+                    href="#"
+                    onClick={handleClick}
+                    className="relative z-10 transition-all group bg-gradient-to-r hover:from-purple-500/10 hover:to-blue-500/10"
+                  >
+                    <Crown className="transition-transform group-hover:scale-110 text-primary/80 group-hover:text-primary" />
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          ) : (
+            <>
+              <Link href="#" className="block relative p-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">Buy $KRAIN</h3>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="text-muted-foreground"
+                  >
+                    <path
+                      d="M7 17L17 7M17 7H7M17 7V17"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Premium features, post bounties and much more with $KRAIN.
+                </p>
+              </Link>
+              <Separator className="bg-border/50 w-full" />
+              <div className="relative p-2">
+                <h3 className="font-semibold mb-3">Level Up with Premium</h3>
+                <ul className="space-y-2 mb-4">
+                  <li className="text-sm text-muted-foreground flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" />
+                    Workflow Creator
+                  </li>
+                  <li className="text-sm text-muted-foreground flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" />
+                    Get Paid for Tasks
+                  </li>
+                  <li className="text-sm text-muted-foreground flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" />
+                    Staking Bonuses
+                  </li>
+                </ul>
+                <Link
+                  href="#"
+                  className="block w-full text-center py-2 px-4 rounded-md bg-gradient-to-r from-purple-500 to-blue-500 text-white font-medium hover:from-purple-600 hover:to-blue-600 transition-all"
+                >
+                  Get premium now
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </SidebarFooter>
       <SidebarRail className="bg-gradient-to-b from-background/80 via-background to-background/80 border-r border-r-border/50 backdrop-blur-sm" />
