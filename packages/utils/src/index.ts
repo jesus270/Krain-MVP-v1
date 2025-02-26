@@ -1,4 +1,5 @@
 export { isValidSolanaAddress } from "./solana";
+export { isValidEthereumAddress } from "./ethereum";
 export { generateReferralCode } from "./referral";
 export { capitalize, capitalizeEachWord } from "./string";
 export { useMediaQuery, useLocale } from "./hooks";

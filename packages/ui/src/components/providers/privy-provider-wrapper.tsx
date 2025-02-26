@@ -84,7 +84,7 @@ export function PrivyProviderWrapper({
               style={{ width: "150px", height: "auto" }}
             />
           ),
-          walletChainType: "solana-only",
+          walletChainType: "ethereum-and-solana",
           walletList: [
             "phantom",
             "detected_wallets",
@@ -93,6 +93,20 @@ export function PrivyProviderWrapper({
             "rainbow",
             "wallet_connect",
           ],
+        },
+        defaultChain: {
+          id: 8453, // Base Mainnet
+          name: "Base",
+          rpcUrls: {
+            default: {
+              http: ["https://mainnet.base.org"],
+            },
+          },
+          nativeCurrency: {
+            name: "Ether",
+            symbol: "ETH",
+            decimals: 18,
+          },
         },
         externalWallets: {
           solana: {
@@ -107,6 +121,36 @@ export function PrivyProviderWrapper({
         mfa: {
           noPromptOnMfaRequired: false,
         },
+        supportedChains: [
+          {
+            name: "Base",
+            id: 8453,
+            rpcUrls: {
+              default: {
+                http: ["https://mainnet.base.org"],
+              },
+            },
+            nativeCurrency: {
+              name: "Ether",
+              symbol: "ETH",
+              decimals: 18,
+            },
+          },
+          {
+            name: "Base Sepolia",
+            id: 84532,
+            rpcUrls: {
+              default: {
+                http: ["https://sepolia.base.org"],
+              },
+            },
+            nativeCurrency: {
+              name: "Sepolia Ether",
+              symbol: "ETH",
+              decimals: 18,
+            },
+          },
+        ],
       }}
     >
       {validateSession ? (

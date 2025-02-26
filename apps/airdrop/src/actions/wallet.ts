@@ -10,15 +10,26 @@ import {
 } from "@krain/session";
 import { defaultSessionConfig as sessionOptions } from "@krain/session";
 import { eq } from "drizzle-orm";
-import { generateReferralCode, isValidSolanaAddress } from "@krain/utils";
+import {
+  generateReferralCode,
+  isValidSolanaAddress,
+  isValidEthereumAddress,
+} from "@krain/utils";
 import { createReferral } from "./referral";
 import { log, AppError, ErrorCodes } from "@krain/utils";
 import { headers } from "next/headers";
 
 const walletAddressSchema = z.object({
-  address: z.string().refine((address) => isValidSolanaAddress(address), {
-    message: "Invalid Solana address",
-  }),
+  address: z
+    .string()
+    .refine(
+      (address) =>
+        isValidSolanaAddress(address) || isValidEthereumAddress(address),
+      {
+        message:
+          "Invalid wallet address. Must be a valid Solana or Ethereum address.",
+      },
+    ),
 });
 
 const referralCodeSchema = z.object({
@@ -183,7 +194,9 @@ export async function getWallet(input: {
       });
 
       if (error instanceof z.ZodError) {
-        throw new Error("Invalid Solana address");
+        throw new Error(
+          "Invalid wallet address. Must be a valid Solana or Ethereum address.",
+        );
       }
 
       throw new Error(
@@ -351,7 +364,9 @@ export async function handleSubmitWallet(input: {
       });
 
       if (error instanceof z.ZodError) {
-        throw new Error("Invalid Solana address");
+        throw new Error(
+          "Invalid wallet address. Must be a valid Solana or Ethereum address.",
+        );
       }
 
       throw new Error(
