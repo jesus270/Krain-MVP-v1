@@ -11,6 +11,15 @@ const nextConfig = {
     KV_REST_API_URL: process.env.KV_REST_API_URL,
     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
   },
+  async redirects() {
+    return [
+      {
+        source: "/terms",
+        destination: "https://krain.gitbook.io/krain/legal",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
