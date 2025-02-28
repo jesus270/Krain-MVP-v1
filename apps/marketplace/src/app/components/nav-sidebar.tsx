@@ -111,11 +111,11 @@ export function SidebarNav() {
         <Link
           href="/"
           onClick={handleClick}
-          className="flex items-center justify-center w-full group"
+          className="flex items-center w-full group"
         >
           <div
             className={cn(
-              "transition-all duration-300 relative",
+              "transition-all duration-300 relative ml-2.5",
               state === "collapsed" ? "p-1" : "",
             )}
           >
@@ -133,8 +133,8 @@ export function SidebarNav() {
                   : "/logo.svg"
               }
               alt="Logo"
-              width={state === "collapsed" ? 24 : 116}
-              height={24}
+              width={state === "collapsed" ? 19 : 93}
+              height={state === "collapsed" ? 19 : 19}
               className={cn(
                 "transition-all duration-300 relative",
                 state === "collapsed" ? "rounded-full" : "",
