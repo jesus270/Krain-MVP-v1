@@ -155,6 +155,13 @@ export async function middleware(request: NextRequest) {
       const session = await getSession(userId);
 
       if (!session?.get("isLoggedIn")) {
+        log.info("Session not logged in or invalid", {
+          entity: "MIDDLEWARE",
+          operation: "auth_check",
+          userId,
+          path: pathname,
+        });
+
         // For API routes, return JSON error
         if (pathname.startsWith("/api/")) {
           return NextResponse.json(
@@ -162,8 +169,14 @@ export async function middleware(request: NextRequest) {
             { status: 401 },
           );
         }
-        // For pages, return the current page (ConnectWalletCard will handle the UI)
-        return response;
+
+        // For pages, clear the invalid cookie and return to home page
+        // This will force a re-authentication
+        const redirectResponse = NextResponse.redirect(
+          new URL("/", request.url),
+        );
+        redirectResponse.cookies.delete("user_id");
+        return redirectResponse;
       }
 
       // Add user ID to headers for downstream use

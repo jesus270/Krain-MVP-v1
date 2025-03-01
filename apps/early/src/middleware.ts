@@ -102,6 +102,27 @@ export async function middleware(request: NextRequest) {
 
     // Check if this is a protected route
     if (PROTECTED_PATHS.some((p) => pathname.startsWith(p))) {
+      // Check for user authentication
+      const userId = request.cookies.get("user_id")?.value;
+      if (!userId) {
+        log.info("No user ID cookie for protected path", {
+          entity: "MIDDLEWARE",
+          operation: "auth_check",
+          path: pathname,
+        });
+
+        // For API routes, return JSON error
+        if (pathname.startsWith("/api/")) {
+          return NextResponse.json(
+            { error: "Authentication required" },
+            { status: 401 },
+          );
+        }
+
+        // For pages, redirect to home page
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+
       // Add protection headers
       const response = NextResponse.next();
       const rateLimit = await withRateLimit(request.headers, "api");

@@ -8,6 +8,7 @@ import {
   MAX_LOGIN_ATTEMPTS,
   LOGIN_BLOCK_DURATION,
 } from "./types";
+import { log } from "@krain/utils";
 
 export class Session {
   private store: RedisSessionStore;
@@ -106,10 +107,34 @@ export class Session {
   // Session security methods
   async checkActivity(): Promise<boolean> {
     const lastActivity = this.get("lastActivity");
-    if (lastActivity && Date.now() - lastActivity > SESSION_ACTIVITY_TIMEOUT) {
+
+    // If lastActivity is missing, this is likely a new session or one that hasn't been properly initialized
+    // Instead of destroying it, update the timestamp and continue
+    if (!lastActivity) {
+      log.info("Session missing lastActivity timestamp, initializing", {
+        operation: "check_activity",
+        entity: "SESSION",
+        userId: this.userId,
+      });
+      this.set("lastActivity", Date.now());
+      this.isModified = true;
+      return true;
+    }
+
+    const timeSinceLastActivity = Date.now() - lastActivity;
+    if (timeSinceLastActivity > SESSION_ACTIVITY_TIMEOUT) {
+      log.info("Session expired due to inactivity", {
+        operation: "check_activity",
+        entity: "SESSION",
+        userId: this.userId,
+        lastActivity,
+        timeSinceLastActivity,
+        timeout: SESSION_ACTIVITY_TIMEOUT,
+      });
       await this.destroy();
       return false;
     }
+
     this.set("lastActivity", Date.now());
     this.isModified = true;
     return true;

@@ -11,6 +11,7 @@ export async function getSession(userId: string): Promise<Session | null> {
   if (session) {
     const isActive = await session.checkActivity();
     if (isActive) {
+      await session.save();
       return session;
     }
   }
