@@ -24,6 +24,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@krain/ui/components/ui/sidebar";
+import { GradientButton } from "@krain/ui/components/ui/gradient-button";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@krain/ui/lib/utils";
@@ -45,11 +46,11 @@ const routes = [
     url: "#",
     icon: Users,
   },
-  {
-    name: "Discounts",
-    url: "#",
-    icon: Percent,
-  },
+  // {
+  //   name: "Discounts",
+  //   url: "#",
+  //   icon: Percent,
+  // },
   {
     name: "Bounties",
     url: "#",
@@ -147,21 +148,25 @@ export function SidebarNav() {
         <SidebarGroup>
           <SidebarMenu>
             {routes.map((item) => (
-              <SidebarMenuItem key={item.name} className="relative group">
-                {/* <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x rounded-md" />
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" /> */}
-                <SidebarMenuButton asChild className="rounded-none">
+              <SidebarMenuItem
+                key={item.name}
+                className="relative hover:bg-transparent data-[state=open]:bg-transparent data-[highlighted]:bg-transparent"
+              >
+                <SidebarMenuButton
+                  asChild
+                  className="rounded-none hover:bg-transparent data-[state=open]:bg-transparent"
+                >
                   <Link
                     href={item.url}
                     onClick={handleClick}
-                    className="relative z-10 transition-all group bg-gradient-to-r hover:from-purple-500/10 hover:to-blue-500/10"
+                    className="relative z-10 transition-all hover:bg-transparent [&:hover>span]:font-bold [&:hover>svg]:scale-110"
                   >
-                    <item.icon className="transition-transform group-hover:scale-110 text-primary/80 group-hover:text-primary" />
-                    <span className="bg-gradient-to-r from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent group-hover:from-purple-500 group-hover:to-blue-500 transition-all">
+                    <item.icon className="transition-transform text-foreground" />
+                    <span className="text-foreground transition-all">
                       {item.name}
                     </span>
                     {item.premium && (
-                      <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-white">
+                      <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-foreground">
                         PREMIUM
                       </span>
                     )}
@@ -180,17 +185,21 @@ export function SidebarNav() {
           </div>
           <SidebarMenu>
             {manageRoutes.map((item) => (
-              <SidebarMenuItem key={item.name} className="relative group">
-                {/* <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x rounded-md" />
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-md" /> */}
-                <SidebarMenuButton asChild className="rounded-none">
+              <SidebarMenuItem
+                key={item.name}
+                className="relative hover:bg-transparent data-[state=open]:bg-transparent data-[highlighted]:bg-transparent"
+              >
+                <SidebarMenuButton
+                  asChild
+                  className="rounded-none hover:bg-transparent data-[state=open]:bg-transparent"
+                >
                   <Link
                     href={item.url}
                     onClick={handleClick}
-                    className="relative z-10 transition-all group bg-gradient-to-r hover:from-purple-500/10 hover:to-blue-500/10"
+                    className="relative z-10 transition-all hover:bg-transparent [&:hover>span]:font-bold [&:hover>svg]:scale-110"
                   >
-                    <item.icon className="transition-transform group-hover:scale-110 text-primary/80 group-hover:text-primary" />
-                    <span className="bg-gradient-to-r from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent group-hover:from-purple-500 group-hover:to-blue-500 transition-all">
+                    <item.icon className="transition-transform text-foreground" />
+                    <span className="text-foreground transition-all">
                       {item.name}
                     </span>
                   </Link>
@@ -206,78 +215,85 @@ export function SidebarNav() {
 
           {state === "collapsed" ? (
             <SidebarMenu>
-              <SidebarMenuItem className="relative group">
-                <SidebarMenuButton asChild className="rounded-none">
+              <SidebarMenuItem className="relative hover:bg-transparent data-[state=open]:bg-transparent data-[highlighted]:bg-transparent">
+                <SidebarMenuButton
+                  asChild
+                  className="rounded-none hover:bg-transparent data-[state=open]:bg-transparent"
+                >
                   <Link
                     href="#"
                     onClick={handleClick}
-                    className="relative z-10 transition-all group bg-gradient-to-r hover:from-purple-500/10 hover:to-blue-500/10"
+                    className="relative z-10 transition-all hover:bg-transparent [&:hover>svg]:scale-110"
                   >
-                    <DollarSign className="transition-transform group-hover:scale-110 text-primary/80 group-hover:text-primary" />
+                    <DollarSign className="transition-transform text-foreground" />
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem className="relative group">
-                <SidebarMenuButton asChild className="rounded-none">
+              <SidebarMenuItem className="relative hover:bg-transparent data-[state=open]:bg-transparent data-[highlighted]:bg-transparent">
+                <SidebarMenuButton
+                  asChild
+                  className="rounded-none hover:bg-transparent data-[state=open]:bg-transparent"
+                >
                   <Link
                     href="#"
                     onClick={handleClick}
-                    className="relative z-10 transition-all group bg-gradient-to-r hover:from-purple-500/10 hover:to-blue-500/10"
+                    className="relative z-10 transition-all hover:bg-transparent [&:hover>svg]:scale-110"
                   >
-                    <Crown className="transition-transform group-hover:scale-110 text-primary/80 group-hover:text-primary" />
+                    <Crown className="transition-transform text-foreground" />
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           ) : (
             <>
-              <Link href="#" className="block relative p-2">
+              <Link
+                href="#"
+                className="block relative p-4 group/krain"
+                onClick={handleClick}
+              >
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold">Buy $KRAIN</h3>
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="text-muted-foreground"
-                  >
-                    <path
-                      d="M7 17L17 7M17 7H7M17 7V17"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <h3 className="text-foreground font-medium">Buy $KRAIN</h3>
+                  <Image
+                    src="/icon-arrow.svg"
+                    alt="Arrow"
+                    width={24}
+                    height={22}
+                    className="transition-all duration-300 group-hover/krain:scale-125"
+                  />
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Premium features, post bounties and much more with $KRAIN.
+                <p className="text-xs text-foreground/80 mt-2">
+                  Premium features, post bounties
+                  <br />
+                  and much more with $KRAIN.
                 </p>
               </Link>
               <Separator className="bg-border/50 w-full" />
               <div className="relative p-2">
-                <h3 className="font-semibold mb-3">Level Up with Premium</h3>
+                <h3 className="font-medium mb-3">Level Up with Premium</h3>
                 <ul className="space-y-2 mb-4">
-                  <li className="text-sm text-muted-foreground flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" />
+                  <li className="text-sm text-foreground flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#EFF0F3]" />
                     Workflow Creator
                   </li>
-                  <li className="text-sm text-muted-foreground flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" />
+                  <li className="text-sm text-foreground flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#EFF0F3]" />
                     Get Paid for Tasks
                   </li>
-                  <li className="text-sm text-muted-foreground flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" />
+                  <li className="text-sm text-foreground flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#EFF0F3]" />
                     Staking Bonuses
                   </li>
                 </ul>
-                <Link
-                  href="#"
-                  className="block w-full text-center py-2 px-4 rounded-md bg-gradient-to-r from-purple-500 to-blue-500 text-white font-medium hover:from-purple-600 hover:to-blue-600 transition-all"
+                <GradientButton
+                  size="default"
+                  className="w-full rounded-full"
+                  onClick={() => {
+                    handleClick();
+                    window.location.href = "#"; // Replace with actual premium page URL
+                  }}
                 >
                   Get premium now
-                </Link>
+                </GradientButton>
               </div>
             </>
           )}
