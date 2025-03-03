@@ -178,11 +178,13 @@ export function SidebarNav() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <div className="px-3 py-2">
-            <h4 className="text-xs font-medium text-muted-foreground">
-              Manage
-            </h4>
-          </div>
+          {state !== "collapsed" && (
+            <div className="px-3 py-2">
+              <h4 className="text-xs font-medium text-muted-foreground">
+                Manage
+              </h4>
+            </div>
+          )}
           <SidebarMenu>
             {manageRoutes.map((item) => (
               <SidebarMenuItem
@@ -213,38 +215,7 @@ export function SidebarNav() {
         <div className="relative space-y-4">
           <div className="absolute inset-0 bg-[url('/bg-gradient-ellipsis.svg')] bg-no-repeat bg-cover opacity-30" />
 
-          {state === "collapsed" ? (
-            <SidebarMenu>
-              <SidebarMenuItem className="relative hover:bg-transparent data-[state=open]:bg-transparent data-[highlighted]:bg-transparent">
-                <SidebarMenuButton
-                  asChild
-                  className="rounded-none hover:bg-transparent data-[state=open]:bg-transparent"
-                >
-                  <Link
-                    href="#"
-                    onClick={handleClick}
-                    className="relative z-10 transition-all hover:bg-transparent [&:hover>svg]:scale-110"
-                  >
-                    <DollarSign className="transition-transform text-foreground" />
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem className="relative hover:bg-transparent data-[state=open]:bg-transparent data-[highlighted]:bg-transparent">
-                <SidebarMenuButton
-                  asChild
-                  className="rounded-none hover:bg-transparent data-[state=open]:bg-transparent"
-                >
-                  <Link
-                    href="#"
-                    onClick={handleClick}
-                    className="relative z-10 transition-all hover:bg-transparent [&:hover>svg]:scale-110"
-                  >
-                    <Crown className="transition-transform text-foreground" />
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          ) : (
+          {state !== "collapsed" && (
             <>
               <Link
                 href="#"
