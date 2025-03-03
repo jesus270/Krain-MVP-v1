@@ -85,21 +85,22 @@ export function SearchBar({
         <Textarea
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="resize-none text-foreground placeholder:text-muted-foreground min-h-[60px] pr-20 border rounded-xl bg-muted/50"
-          placeholder="Use natural language to find the perfect AI agent for your needs"
-          rows={2}
+          className="resize-none text-foreground placeholder:text-muted-foreground placeholder:text-xs min-h-[36px] pr-20 border rounded-full bg-muted/50 leading-none"
+          style={{ paddingTop: "10px", paddingBottom: "10px" }}
+          placeholder="What are you looking for? Use the mic to say it."
+          rows={1}
         />
-        <div className="absolute right-2 bottom-1.5 flex gap-2">
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex">
           <Button
             onClick={handleVoiceInput}
             variant="ghost"
             size="icon"
             title={listening ? "Stop recording" : "Search with voice"}
-            className="h-8 w-8 hover:bg-muted"
+            className="h-8 w-8 hover:bg-muted rounded-full"
             disabled={!browserSupportsSpeechRecognition}
           >
             <MicIcon
-              className={`w-4 h-4 ${listening ? "text-red-500" : ""} ${!browserSupportsSpeechRecognition ? "opacity-50" : ""}`}
+              className={`w-4 h-4 text-muted-foreground rounded-full ${listening ? "text-red-500" : ""} ${!browserSupportsSpeechRecognition ? "opacity-50" : ""}`}
             />
           </Button>
           <Sheet>
@@ -108,9 +109,9 @@ export function SearchBar({
                 variant="ghost"
                 size="icon"
                 title="Filters"
-                className="h-8 w-8 hover:bg-muted"
+                className="h-8 w-8 hover:bg-muted rounded-full"
               >
-                <SlidersHorizontal className="w-4 h-4" />
+                <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
               </Button>
             </SheetTrigger>
             <FilterSheet filters={filters} setFilters={setFilters} />
