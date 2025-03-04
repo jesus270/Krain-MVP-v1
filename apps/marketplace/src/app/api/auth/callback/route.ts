@@ -4,12 +4,13 @@ import { createSessionConfig } from "@krain/session";
 
 export async function POST(request: NextRequest) {
   try {
-    const sessionConfig = createSessionConfig({
-      cookieName: "krain-marketplace-session",
-      password: process.env.SESSION_SECRET || "marketplace-dev-secret",
-    });
+    // Create session config with just the password string
+    const sessionSecret =
+      process.env.SESSION_SECRET || "marketplace-dev-secret";
+    const sessionConfig = createSessionConfig(sessionSecret);
 
-    const response = await handleAuthCallback(request, sessionConfig);
+    // Pass the request to the handleAuthCallback function
+    const response = await handleAuthCallback(request);
     return response;
   } catch (error) {
     console.error("Error in auth callback:", error);
