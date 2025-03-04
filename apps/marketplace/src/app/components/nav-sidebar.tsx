@@ -107,7 +107,7 @@ export function SidebarNav() {
   };
 
   return (
-    <Sidebar collapsible="icon" rail="none">
+    <Sidebar collapsible="icon">
       <SidebarHeader className="mt-3">
         <Link
           href="/"
