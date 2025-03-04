@@ -66,15 +66,17 @@ export function FilterSheet({ filters, setFilters }: FilterSheetProps) {
   return (
     <SheetContent className="w-[400px] overflow-y-auto">
       <SheetHeader>
-        <SheetTitle>Filters</SheetTitle>
-        <SheetDescription>
+        <SheetTitle className="text-foreground text-base">Filters</SheetTitle>
+        <SheetDescription className="text-foreground text-xs">
           Refine your search with specific criteria
         </SheetDescription>
       </SheetHeader>
 
-      <div className="py-4 space-y-4">
+      <Separator className="my-8" />
+
+      <div className=" space-y-4">
         <div>
-          <h3 className="mb-2 text-sm font-medium">Sort By</h3>
+          <h3 className="mb-2 font-medium">Sort By</h3>
           <div className="flex gap-2">
             <Select
               value={filters.sortBy}
@@ -91,6 +93,7 @@ export function FilterSheet({ filters, setFilters }: FilterSheetProps) {
                 <SelectItem value="reviewsCount">Reviews</SelectItem>
               </SelectContent>
             </Select>
+
             <Select
               value={filters.sortOrder}
               onValueChange={(value: "asc" | "desc") =>
@@ -110,8 +113,8 @@ export function FilterSheet({ filters, setFilters }: FilterSheetProps) {
 
         {availableFilters.map((filter, index) => (
           <div key={filter.key}>
-            {index > 0 && <Separator className="my-4" />}
-            <h3 className="mb-2 text-sm font-medium">{filter.label}</h3>
+            <Separator className="my-8" />
+            <h3 className="mb-2 font-medium">{filter.label}</h3>
             <MultiSelectFilter
               options={filter.options}
               selected={filter.values}
