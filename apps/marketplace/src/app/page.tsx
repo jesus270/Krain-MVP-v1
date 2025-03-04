@@ -9,6 +9,7 @@ import { ActiveFilters } from "./components/active-filters";
 import { agents } from "./agent-data";
 import { processSearchQuery } from "./utils/search";
 import { FeaturedCarousel } from "./components/featured-carousel";
+import { AgentListGrid } from "./components/agent-list-grid";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -156,8 +157,11 @@ export default function Home() {
           </section>
 
           <section className="w-full mx-auto">
-            <h2 className="text-xl font-semibold mb-4">Top Rated Agents</h2>
-            <FeaturedCarousel agents={topRatedAgents} onFilter={handleFilter} />
+            <AgentListGrid
+              agents={topRatedAgents}
+              onFilter={handleFilter}
+              title="Top Rated Agents"
+            />
           </section>
         </>
       ) : (

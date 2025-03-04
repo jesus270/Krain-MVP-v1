@@ -18,7 +18,7 @@ interface AgentCardProps {
   featured?: boolean;
 }
 
-export function AgentCard({
+export function FeaturedAgentCard({
   agent,
   onFilter,
   featured = false,
@@ -47,27 +47,26 @@ export function AgentCard({
           <BotIcon className="h-12 w-12 text-white" />
         </div>
       </div>
-      <div className="flex-1 flex flex-col p-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="font-semibold">{agent.name}</h3>
-            <div className="flex items-center gap-2 mt-1">
+      <div className="flex flex-col p-4 w-full">
+        <div className="flex items-center justify-between w-full">
+          <div className="w-full">
+            <h3 className="font-semibold text-xl">{agent.name}</h3>
+            <div className="flex justify-between gap-2 mt-1">
               <p className="text-sm text-muted-foreground">{agent.category}</p>
-              <span className="text-sm text-muted-foreground">•</span>
-              <p className="text-sm text-muted-foreground">
+              <div className="flex items-center justify-start gap-1">
+                <StarIcon className="w-4 h-4 text-primary fill-primary" />
+                <span className="text-sm font-medium text-foreground">
+                  {agent.rating.toFixed(1)}
+                </span>
+              </div>
+              <p className="text-sm text-foreground flex-1">
                 {workflowCount} workflows
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <StarIcon className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-            <span className="text-sm font-medium">
-              {agent.rating.toFixed(1)}
-            </span>
-          </div>
         </div>
 
-        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+        <p className="mt-2 text-sm text-foreground line-clamp-2">
           {agent.description}
         </p>
 
@@ -75,8 +74,14 @@ export function AgentCard({
           {agent.tags.map((tag) => (
             <Badge
               key={tag}
-              variant="secondary"
-              className="text-xs font-normal cursor-pointer hover:bg-secondary/80"
+              variant="outline"
+              style={{
+                background:
+                  "linear-gradient(to right, rgba(31, 197, 214, 0.4), transparent)",
+                borderColor: "rgba(31, 197, 214, 0.8)",
+                borderWidth: "1px",
+              }}
+              className="text-xs font-normal cursor-pointer hover:opacity-80 transition-all"
               onClick={() => onFilter("tag", tag)}
             >
               {tag}
@@ -85,7 +90,11 @@ export function AgentCard({
         </div>
 
         <div className="mt-auto pt-4 flex justify-end">
-          <Button size="sm" asChild className="w-[120px]">
+          <Button
+            size="sm"
+            asChild
+            className="bg-muted hover:bg-muted/60 text-foreground rounded-full shadow-sm border-muted-foreground/20 border transition-colors"
+          >
             <Link href={`/agent/${agent.id}`}>Learn more</Link>
           </Button>
         </div>
@@ -93,3 +102,6 @@ export function AgentCard({
     </Card>
   );
 }
+
+// For backward compatibility, export the FeaturedAgentCard as AgentCard as well
+export { FeaturedAgentCard as AgentCard };
