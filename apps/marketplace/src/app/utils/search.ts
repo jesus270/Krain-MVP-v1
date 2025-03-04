@@ -86,6 +86,8 @@ export const stopWords = new Set([
   "will",
   "agent",
   "agents",
+  "need",
+  "ai",
 ]);
 
 // Process natural language query into search terms
