@@ -20,7 +20,7 @@ export default function Layout({
     <RootLayout
       authConfig={{
         privyAppId: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
-        loadingTitle: "Welcome to the $KRAIN Agent Portal",
+        loadingTitle: "Welcome to the Krain Marketplace",
         loadingDescription: "Please wait while we validate your session...",
         validateSession: false,
       }}

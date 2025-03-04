@@ -3,6 +3,7 @@ import { Separator } from "@krain/ui/components/ui/separator";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@krain/ui/lib/utils";
+import { ProfileSection } from "./profile-section";
 
 export default function Header() {
   return (
@@ -14,7 +15,7 @@ export default function Header() {
         <Separator orientation="vertical" className="mr-2 h-4 bg-border/50" />
       </div>
       <div className="flex items-center gap-2 px-4 relative">
-        {/* Add user profile/login button here if needed */}
+        <ProfileSection />
       </div>
     </header>
   );
