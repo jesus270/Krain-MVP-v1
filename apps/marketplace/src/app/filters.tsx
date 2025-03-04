@@ -1,3 +1,4 @@
+import React from "react";
 import { Badge } from "@krain/ui/components/ui/badge";
 import { Button } from "@krain/ui/components/ui/button";
 import {
@@ -23,6 +24,8 @@ export interface FilterState {
   minAccuracyScore: number;
   minReliabilityScore: number;
   maxResponseTime: number;
+  sortBy: "rating" | "reviewsCount" | "name";
+  sortOrder: "asc" | "desc";
 }
 
 export type FilterKey = keyof FilterState;
@@ -39,6 +42,8 @@ export const defaultFilterState: FilterState = {
   minAccuracyScore: 0,
   minReliabilityScore: 0,
   maxResponseTime: 5000,
+  sortBy: "rating",
+  sortOrder: "desc",
 };
 
 interface MultiSelectFilterProps<T extends string> {

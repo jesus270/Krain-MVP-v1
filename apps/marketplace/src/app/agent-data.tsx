@@ -4,982 +4,501 @@ export const agents: AIAgent[] = [
   {
     id: "agent_001",
     name: "AutoGPT",
-    shortDescription:
-      "Autonomous AI agent that breaks down and executes complex tasks.",
-    description:
-      "An autonomous AI agent that attempts to achieve goals by breaking them into sub-tasks and using available tools in an automatic loop.",
-    imageUrl:
-      "https://raw.githubusercontent.com/Significant-Gravitas/AutoGPT/master/docs/content/imgs/AutoGPT_logo.png",
-    category: "Automation",
-    subcategories: ["Task Automation", "Workflow Optimization", "AI Agents"],
+    rating: 4.7,
+    reviewsCount: 3200,
+    category: "AI Agent Framework",
     tags: [
       "workflow automation",
       "productivity",
       "task automation",
       "autonomous AI",
     ],
-    developer: "Open Source Community",
-    capabilities: [
-      "task automation",
-      "internet browsing",
-      "self-improvement",
-      "goal decomposition",
-      "autonomous decision making",
-    ],
-    integrationPlatforms: ["Windows", "MacOS", "Linux", "Docker"],
-    apiEndpoint: "https://github.com/Torantulino/Auto-GPT",
-    supportedLanguages: ["English"],
-    technicalRequirements: [
-      "Python 3.10 or later",
-      "OpenAI API key",
-      "8GB RAM minimum",
-    ],
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Polygon"],
+    tokenSymbol: "AUTO",
+    tokenName: "AutoGPT Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/autogpt",
+
+    // Contact & Company Info
+    websiteUrl: "https://autogpt.net",
+    supportEmail: "support@autogpt.net",
+    companyName: "AutoGPT Labs",
+    contactName: "John Smith",
+    contactEmail: "john@autogpt.net",
+    contactPhone: "+1-555-0123",
+
+    // Pricing
+    pricing: [
       {
-        title: "Automated Market Research",
-        description:
-          "Conducts comprehensive market research by autonomously gathering and analyzing data from multiple sources",
-        industry: "Business Intelligence",
-        successMetrics: [
-          "Research completion time reduced by 70%",
-          "Data from 10+ sources aggregated automatically",
-        ],
-        testimonials: [
-          "Reduced our research time from days to hours - TechCorp Analytics",
-        ],
+        name: "Basic",
+        interval: "monthly",
+        amount: "10",
+        currency: "USD",
       },
       {
-        title: "Content Creation Pipeline",
-        description:
-          "Automates the process of generating, reviewing, and publishing content across multiple platforms",
-        industry: "Digital Marketing",
-        successMetrics: [
-          "90% reduction in manual content tasks",
-          "Consistent posting schedule achieved",
-        ],
+        name: "Pro",
+        interval: "monthly",
+        amount: "49",
+        currency: "USD",
+      },
+      {
+        name: "Enterprise",
+        interval: "monthly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Automated Market Research"],
 
-    pricing: { monthly: 0, yearly: 0, freeTier: true },
-    licenseType: "open-source",
-    enterpriseOptions: false,
-
-    performanceMetrics: {
-      responseTime: 2500, // ms
-      accuracyScore: 0.85,
-      reliabilityScore: 0.9,
-      uptime: 99.9,
+    // Industry & Social
+    industryFocus: ["AI Development", "Automation", "Business Intelligence"],
+    socialMedia: {
+      x: "https://x.com/autogpt",
+      discord: "https://discord.gg/autogpt",
+      youtube: "https://youtube.com/@autogpt",
+      linkedin: "https://linkedin.com/company/autogpt",
+      instagram: "https://instagram.com/autogpt",
     },
 
-    reputationMetrics: {
-      overallScore: 4.7,
-      reviewsCount: 3200,
-      verifiedReviewsCount: 2800,
-      ratings: {
-        five: 2000,
-        four: 800,
-        three: 250,
-        two: 100,
-        one: 50,
-      },
-      expertScore: 4.5,
-    },
-
-    popularityScore: 4.7,
-
-    similarAgents: ["agent_011", "agent_015"], // IDs of similar autonomous agents
-    competitiveAdvantages: [
-      "Fully autonomous operation",
-      "Extensive plugin ecosystem",
-      "Active open-source community",
-    ],
-    limitations: [
-      "Requires technical setup",
-      "API costs can accumulate quickly",
-      "Limited to English language",
-    ],
-    bestSuitedFor: [
-      "Developers",
-      "Automation enthusiasts",
-      "Research teams",
-      "Content creators",
-    ],
-
-    releaseDate: "2023-03-30",
-    lastUpdated: "2024-01-01",
-    version: "1.0.0",
-
-    documentationURL: "https://docs.agpt.co/",
-    demoURL: "https://www.youtube.com/watch?v=6UjlDG8oK9I",
-    communityURL: "https://github.com/Significant-Gravitas/AutoGPT/discussions",
-    supportURL: "https://discord.gg/autogpt",
+    description:
+      "An autonomous AI agent that attempts to achieve goals by breaking them into sub-tasks and using available tools in an automatic loop.",
   },
   {
     id: "agent_002",
     name: "Character.ai",
-    shortDescription:
-      "Create and chat with AI characters for learning and entertainment.",
+    rating: 4.5,
+    reviewsCount: 4500,
+    category: "AI Gateway",
+    tags: ["chatbot", "entertainment", "interactive AI", "roleplay"],
     description:
       "A conversational AI that allows users to create and interact with AI characters, both fictional and real.",
-    imageUrl:
-      "https://play-lh.googleusercontent.com/Bi_yZnAHkBQnKyEFeW6VE8tA3QnP-vVuGNHUzHJ_fLVWa_3EoQaGCE5Vc3f_2YPRLw",
-    category: "Conversational AI",
-    subcategories: ["Entertainment", "Role-playing", "Character Creation"],
-    tags: ["chatbot", "entertainment", "interactive AI", "roleplay"],
-    developer: "Character Technologies Inc.",
-    capabilities: [
-      "text-based conversation",
-      "character customization",
-      "memory retention",
-      "personality adaptation",
-    ],
-    integrationPlatforms: ["Web", "Mobile (iOS, Android)"],
-    apiEndpoint: "https://beta.character.ai/",
-    supportedLanguages: ["English", "Spanish", "French"],
-    technicalRequirements: ["Modern web browser", "Internet connection"],
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum"],
+    tokenSymbol: "CHAR",
+    tokenName: "Character Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/character-ai",
+
+    // Contact & Company Info
+    websiteUrl: "https://character.ai",
+    supportEmail: "support@character.ai",
+    companyName: "Character Technologies Inc.",
+    contactName: "Sarah Johnson",
+    contactEmail: "sarah@character.ai",
+    contactPhone: "+1-555-0124",
+
+    // Pricing
+    pricing: [
       {
-        title: "Language Learning",
-        description:
-          "Practice conversations with AI characters in different languages",
-        industry: "Education",
-        successMetrics: [
-          "Increased user engagement",
-          "Improved language proficiency",
-        ],
-        testimonials: [
-          "Made learning Spanish fun and interactive - Language Learner",
-        ],
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
       },
       {
-        title: "Creative Writing",
-        description:
-          "Develop stories and characters through interactive dialogue",
-        industry: "Entertainment",
-        successMetrics: [
-          "Average session length of 45 minutes",
-          "High user retention",
-        ],
+        name: "Premium",
+        interval: "monthly",
+        amount: "10",
+        currency: "USD",
+      },
+      {
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Language Learning"],
 
-    pricing: { monthly: 10, yearly: 100, freeTier: true },
-    licenseType: "subscription",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 800,
-      accuracyScore: 0.9,
-      reliabilityScore: 0.95,
-      uptime: 99.8,
+    // Industry & Social
+    industryFocus: ["Entertainment", "Education", "Gaming"],
+    socialMedia: {
+      x: "https://x.com/character_ai",
+      discord: "https://discord.gg/character-ai",
+      youtube: "https://youtube.com/@character_ai",
+      linkedin: "https://linkedin.com/company/character-ai",
+      instagram: "https://instagram.com/character_ai",
     },
-
-    reputationMetrics: {
-      overallScore: 4.5,
-      reviewsCount: 4500,
-      verifiedReviewsCount: 3800,
-      ratings: {
-        five: 2500,
-        four: 1500,
-        three: 300,
-        two: 150,
-        one: 50,
-      },
-    },
-
-    popularityScore: 4.5,
-
-    similarAgents: ["agent_012", "agent_014"],
-    competitiveAdvantages: [
-      "Advanced character customization",
-      "Natural conversation flow",
-      "Multi-language support",
-    ],
-    limitations: [
-      "Limited to text-only interactions",
-      "Requires internet connection",
-      "Some features behind paywall",
-    ],
-    bestSuitedFor: [
-      "Language learners",
-      "Creative writers",
-      "Role-playing enthusiasts",
-      "Entertainment seekers",
-    ],
-
-    releaseDate: "2022-09-01",
-    lastUpdated: "2024-01-01",
-    version: "2.5.0",
-
-    documentationURL: "https://docs.character.ai/",
-    demoURL: "https://beta.character.ai/",
-    communityURL: "https://discord.gg/character-ai",
-    supportURL: "https://help.character.ai/",
   },
   {
     id: "agent_003",
     name: "Claude",
-    shortDescription:
-      "Thoughtful AI assistant with strong reasoning and analysis capabilities.",
+    rating: 4.8,
+    reviewsCount: 5200,
+    category: "AI Gateway",
+    tags: ["chatbot", "assistant", "text generation", "reasoning", "analysis"],
     description:
       "An AI chatbot designed for conversational assistance, offering thoughtful and helpful responses with strong reasoning capabilities.",
-    imageUrl: "https://claude.ai/favicon.svg",
-    category: "Conversational AI",
-    subcategories: ["Assistant", "Text Generation", "Analysis"],
-    tags: ["chatbot", "assistant", "text generation", "reasoning", "analysis"],
-    developer: "Anthropic",
-    capabilities: [
-      "multi-turn conversation",
-      "context retention",
-      "code analysis",
-      "document analysis",
-      "task decomposition",
-    ],
-    integrationPlatforms: ["Web", "Slack", "API"],
-    apiEndpoint: "https://claude.ai",
-    supportedLanguages: ["English"],
-    technicalRequirements: ["Modern web browser", "Internet connection"],
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Solana"],
+    tokenSymbol: "CLAUD",
+    tokenName: "Claude Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/claude",
+
+    // Contact & Company Info
+    websiteUrl: "https://claude.ai",
+    supportEmail: "support@anthropic.com",
+    companyName: "Anthropic",
+    contactName: "Michael Chen",
+    contactEmail: "michael@anthropic.com",
+    contactPhone: "+1-555-0125",
+
+    // Pricing
+    pricing: [
       {
-        title: "Content Creation and Editing",
-        description:
-          "Assists with writing, editing, and improving various types of content",
-        industry: "Content Creation",
-        successMetrics: [
-          "30% faster content production",
-          "Higher quality outputs",
-        ],
-        testimonials: [
-          "Helped streamline our content workflow significantly - Digital Agency",
-        ],
+        name: "Basic",
+        interval: "monthly",
+        amount: "20",
+        currency: "USD",
       },
       {
-        title: "Code Analysis and Development",
-        description:
-          "Reviews code, suggests improvements, and helps with debugging",
-        industry: "Software Development",
-        successMetrics: [
-          "50% faster code review process",
-          "Improved code quality",
-        ],
-        testimonials: [
-          "Invaluable for code review and documentation - Tech Lead",
-        ],
+        name: "Pro",
+        interval: "monthly",
+        amount: "35",
+        currency: "USD",
       },
       {
-        title: "Research and Analysis",
-        description:
-          "Helps analyze complex documents and synthesize information",
-        industry: "Research",
-        successMetrics: [
-          "Reduced research time by 40%",
-          "More comprehensive analysis",
-        ],
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: [
-      "Content Creation and Editing",
-      "Code Analysis and Development",
+
+    // Industry & Social
+    industryFocus: [
+      "Research",
+      "Content Creation",
+      "Software Development",
+      "Business Analysis",
+      "Education",
     ],
-
-    pricing: { monthly: 20, yearly: 200, freeTier: true },
-    licenseType: "subscription",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 1200,
-      accuracyScore: 0.95,
-      reliabilityScore: 0.98,
-      uptime: 99.9,
+    socialMedia: {
+      x: "https://x.com/anthropic",
+      discord: "https://discord.gg/anthropic",
+      youtube: "https://youtube.com/@anthropic",
+      linkedin: "https://linkedin.com/company/anthropic",
     },
-
-    reputationMetrics: {
-      overallScore: 4.8,
-      reviewsCount: 5200,
-      verifiedReviewsCount: 4800,
-      ratings: {
-        five: 3500,
-        four: 1200,
-        three: 300,
-        two: 150,
-        one: 50,
-      },
-      expertScore: 4.9,
-    },
-
-    popularityScore: 4.8,
-
-    similarAgents: ["agent_004", "agent_002"],
-    competitiveAdvantages: [
-      "Advanced reasoning capabilities",
-      "Strong safety measures",
-      "Comprehensive API access",
-      "Enterprise-grade security",
-    ],
-    limitations: [
-      "English-only support",
-      "No image generation",
-      "May be overly cautious",
-    ],
-    bestSuitedFor: [
-      "Content creators",
-      "Developers",
-      "Researchers",
-      "Business professionals",
-    ],
-
-    releaseDate: "2023-03-15",
-    lastUpdated: "2024-02-01",
-    version: "3.0",
-
-    documentationURL: "https://docs.anthropic.com/claude/",
-    demoURL: "https://claude.ai/chat",
-    communityURL: "https://community.anthropic.com/",
-    supportURL: "https://help.anthropic.com/",
   },
   {
     id: "agent_004",
     name: "Gemini",
-    shortDescription:
-      "Google's multimodal AI for text, code, and image understanding.",
+    rating: 4.6,
+    reviewsCount: 6100,
+    category: "AI Gateway",
+    tags: ["chatbot", "multimodal", "code", "image analysis", "math"],
     description:
       "Google's most capable AI model that combines language understanding, multimodal processing, and problem-solving abilities.",
-    imageUrl:
-      "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg",
-    category: "Multimodal AI",
-    subcategories: ["Conversational AI", "Image Analysis", "Code Generation"],
-    tags: ["chatbot", "multimodal", "code", "image analysis", "math"],
-    developer: "Google",
-    capabilities: [
-      "text generation",
-      "image analysis",
-      "code generation",
-      "mathematical reasoning",
-      "multimodal understanding",
-    ],
-    integrationPlatforms: ["Web", "Android", "API", "Google Workspace"],
-    apiEndpoint: "https://ai.google.dev/",
-    supportedLanguages: [
-      "English",
-      "Japanese",
-      "Korean",
-      "German",
-      "French",
-      "Spanish",
-    ],
-    technicalRequirements: ["Modern web browser", "Google account"],
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Polygon", "Solana"],
+    tokenSymbol: "GMNI",
+    tokenName: "Gemini Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/gemini-ai",
+
+    // Contact & Company Info
+    websiteUrl: "https://gemini.google.com",
+    supportEmail: "support@gemini.google.com",
+    companyName: "Google",
+    contactName: "David Kim",
+    contactEmail: "david@google.com",
+    contactPhone: "+1-555-0126",
+
+    // Pricing
+    pricing: [
       {
-        title: "Multimodal Analysis",
-        description:
-          "Analyzes text, images, and code together to provide comprehensive insights",
-        industry: "Data Analysis",
-        successMetrics: [
-          "60% faster data interpretation",
-          "Enhanced multimodal understanding",
-        ],
-        testimonials: [
-          "Game-changing for our multimedia content analysis - Media Corp",
-        ],
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
       },
       {
-        title: "Code Development",
-        description:
-          "Assists with coding tasks across multiple programming languages",
-        industry: "Software Development",
-        successMetrics: [
-          "40% faster code generation",
-          "Reduced debugging time",
-        ],
-        testimonials: [
-          "Excellent for quick prototyping and problem-solving - Senior Developer",
-        ],
+        name: "Pro",
+        interval: "monthly",
+        amount: "19.99",
+        currency: "USD",
       },
       {
-        title: "Educational Support",
-        description: "Helps explain complex concepts with text and visual aids",
-        industry: "Education",
-        successMetrics: [
-          "Improved student comprehension",
-          "More engaging learning experience",
-        ],
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Multimodal Analysis", "Code Development"],
 
-    pricing: { monthly: 0, yearly: 0, freeTier: true },
-    licenseType: "free",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 1000,
-      accuracyScore: 0.92,
-      reliabilityScore: 0.94,
-      uptime: 99.8,
+    // Industry & Social
+    industryFocus: [
+      "Software Development",
+      "Education",
+      "Research",
+      "Content Creation",
+      "Data Analysis",
+    ],
+    socialMedia: {
+      x: "https://x.com/GoogleAI",
+      youtube: "https://youtube.com/@Google",
+      linkedin: "https://linkedin.com/company/google",
     },
-
-    reputationMetrics: {
-      overallScore: 4.6,
-      reviewsCount: 6100,
-      verifiedReviewsCount: 5500,
-      ratings: {
-        five: 3800,
-        four: 1500,
-        three: 500,
-        two: 200,
-        one: 100,
-      },
-      expertScore: 4.7,
-    },
-
-    popularityScore: 4.6,
-
-    similarAgents: ["agent_003", "agent_005"],
-    competitiveAdvantages: [
-      "Advanced multimodal capabilities",
-      "Free access",
-      "Google Workspace integration",
-      "Strong mathematical abilities",
-    ],
-    limitations: [
-      "Requires Google account",
-      "Variable response quality",
-      "Limited customization options",
-    ],
-    bestSuitedFor: [
-      "Students",
-      "Developers",
-      "Content creators",
-      "Data analysts",
-      "Educators",
-    ],
-
-    releaseDate: "2023-12-06",
-    lastUpdated: "2024-02-15",
-    version: "1.5",
-
-    documentationURL: "https://ai.google.dev/docs",
-    demoURL: "https://gemini.google.com/",
-    communityURL: "https://www.reddit.com/r/GoogleGemini/",
-    supportURL: "https://support.google.com/gemini",
   },
   {
     id: "agent_005",
     name: "GitHub Copilot",
-    shortDescription: "AI pair programmer for faster, smarter code completion.",
-    description:
-      "An AI-powered coding assistant that helps developers write code faster with intelligent suggestions and whole-function completions.",
-    imageUrl:
-      "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
-    category: "Development Tools",
-    subcategories: ["Code Generation", "Pair Programming", "Developer Tools"],
+    rating: 4.7,
+    reviewsCount: 8500,
+    category: "Coding Assistants",
     tags: [
       "code completion",
       "developer tool",
       "productivity",
       "AI programming",
     ],
-    developer: "GitHub & OpenAI",
-    capabilities: [
-      "code generation",
-      "autocomplete",
-      "error detection",
-      "test generation",
-      "documentation generation",
-      "natural language to code",
-    ],
-    integrationPlatforms: [
-      "VS Code",
-      "Visual Studio",
-      "JetBrains IDEs",
-      "Neovim",
-      "GitHub.com",
-    ],
-    apiEndpoint: "https://copilot.github.com/",
-    supportedLanguages: [
-      "Python",
-      "JavaScript",
-      "TypeScript",
-      "Java",
-      "C++",
-      "C#",
-      "Ruby",
-      "Go",
-      "PHP",
-    ],
-    technicalRequirements: [
-      "Supported IDE",
-      "GitHub account",
-      "Active subscription",
-    ],
+    description:
+      "An AI-powered coding assistant that helps developers write code faster with intelligent suggestions and whole-function completions.",
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum"],
+    tokenSymbol: "GHCP",
+    tokenName: "Copilot Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/github-copilot",
+
+    // Contact & Company Info
+    websiteUrl: "https://github.com/features/copilot",
+    supportEmail: "copilot-support@github.com",
+    companyName: "GitHub",
+    contactName: "Alex Turner",
+    contactEmail: "alex@github.com",
+    contactPhone: "+1-555-0127",
+
+    // Pricing
+    pricing: [
       {
-        title: "Rapid Prototyping",
-        description: "Quickly generate code for new features and prototypes",
-        industry: "Software Development",
-        successMetrics: [
-          "55% faster code writing",
-          "Reduced boilerplate code by 70%",
-        ],
-        testimonials: ["Cut our development time in half - Tech Startup CTO"],
+        name: "Individual",
+        interval: "monthly",
+        amount: "10",
+        currency: "USD",
       },
       {
-        title: "Code Documentation",
-        description: "Automatically generate and improve code documentation",
-        industry: "Software Development",
-        successMetrics: [
-          "80% faster documentation writing",
-          "Improved documentation quality",
-        ],
-        testimonials: [
-          "Dramatically improved our documentation process - Senior Developer",
-        ],
+        name: "Business",
+        interval: "monthly",
+        amount: "19",
+        currency: "USD",
       },
       {
-        title: "Test Generation",
-        description: "Generate unit tests and test cases automatically",
-        industry: "Software Development",
-        successMetrics: ["60% faster test writing", "Increased test coverage"],
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Rapid Prototyping", "Code Documentation"],
 
-    pricing: { monthly: 10, yearly: 100, freeTier: false },
-    licenseType: "subscription",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 200,
-      accuracyScore: 0.88,
-      reliabilityScore: 0.92,
-      uptime: 99.95,
+    // Industry & Social
+    industryFocus: [
+      "Software Development",
+      "DevOps",
+      "Web Development",
+      "Application Development",
+    ],
+    socialMedia: {
+      x: "https://x.com/github",
+      discord: "https://discord.gg/github",
+      youtube: "https://youtube.com/@GitHub",
+      linkedin: "https://linkedin.com/company/github",
     },
-
-    reputationMetrics: {
-      overallScore: 4.7,
-      reviewsCount: 8500,
-      verifiedReviewsCount: 7200,
-      ratings: {
-        five: 5500,
-        four: 2000,
-        three: 600,
-        two: 250,
-        one: 150,
-      },
-      expertScore: 4.8,
-    },
-
-    popularityScore: 4.9,
-
-    similarAgents: ["agent_013", "agent_004"],
-    competitiveAdvantages: [
-      "Deep IDE integration",
-      "Context-aware suggestions",
-      "Multi-language support",
-      "GitHub integration",
-    ],
-    limitations: [
-      "Requires subscription",
-      "May suggest outdated patterns",
-      "Network dependency",
-      "Limited to supported IDEs",
-    ],
-    bestSuitedFor: [
-      "Software developers",
-      "Web developers",
-      "DevOps engineers",
-      "Students",
-    ],
-
-    releaseDate: "2021-06-29",
-    lastUpdated: "2024-02-01",
-    version: "2.0",
-
-    documentationURL: "https://docs.github.com/copilot",
-    demoURL: "https://github.com/features/copilot",
-    communityURL:
-      "https://github.com/community/community/discussions/categories/copilot",
-    supportURL: "https://support.github.com/products/copilot",
   },
   {
     id: "agent_006",
     name: "Midjourney",
-    shortDescription: "Create stunning AI-generated artwork and illustrations.",
+    rating: 4.7,
+    reviewsCount: 12000,
+    category: "Content Generation",
+    tags: ["AI art", "image synthesis", "creative tool", "visual generation"],
     description:
       "A powerful AI image generation system that creates high-quality, artistic visuals from text descriptions, known for its distinctive aesthetic style.",
-    imageUrl:
-      "https://assets-global.website-files.com/6364b6fd26e298b11fb9391f/6364b6fd26e2983b6ab93b80_favicon.png",
-    category: "Image Generation",
-    subcategories: ["Art Creation", "Visual Design", "Digital Art"],
-    tags: ["AI art", "image synthesis", "creative tool", "visual generation"],
-    developer: "Midjourney, Inc.",
-    capabilities: [
-      "text-to-image generation",
-      "image variation creation",
-      "style mixing",
-      "upscaling",
-      "selective image refinement",
-    ],
-    integrationPlatforms: ["Discord", "Web UI", "API (Beta)"],
-    apiEndpoint: "https://api.midjourney.com",
-    supportedLanguages: ["English"],
-    technicalRequirements: [
-      "Discord account",
-      "Active subscription",
-      "Internet connection",
-    ],
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Polygon"],
+    tokenSymbol: "MJ",
+    tokenName: "Midjourney Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/midjourney",
+
+    // Contact & Company Info
+    websiteUrl: "https://www.midjourney.com",
+    supportEmail: "support@midjourney.com",
+    companyName: "Midjourney, Inc.",
+    contactName: "Emily Chen",
+    contactEmail: "emily@midjourney.com",
+    contactPhone: "+1-555-0128",
+
+    // Pricing
+    pricing: [
       {
-        title: "Concept Art Creation",
-        description:
-          "Generate concept art for games, films, and creative projects",
-        industry: "Entertainment",
-        successMetrics: [
-          "80% reduction in concept art time",
-          "Increased creative exploration",
-        ],
-        testimonials: [
-          "Revolutionized our concept art pipeline - Game Studio Art Director",
-        ],
+        name: "Basic",
+        interval: "monthly",
+        amount: "10",
+        currency: "USD",
       },
       {
-        title: "Marketing Visual Content",
-        description:
-          "Create unique visuals for marketing campaigns and social media",
-        industry: "Marketing",
-        successMetrics: [
-          "3x faster visual content creation",
-          "Higher engagement rates",
-        ],
-        testimonials: [
-          "Transformed our social media content strategy - Marketing Manager",
-        ],
+        name: "Standard",
+        interval: "monthly",
+        amount: "30",
+        currency: "USD",
       },
       {
-        title: "Architectural Visualization",
-        description: "Generate architectural concepts and visualizations",
-        industry: "Architecture",
-        successMetrics: [
-          "Faster client presentations",
-          "More design iterations",
-        ],
-        testimonials: [
-          "Essential tool for quick architectural concepts - Design Firm",
-        ],
+        name: "Pro",
+        interval: "monthly",
+        amount: "60",
+        currency: "USD",
+      },
+      {
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Concept Art Creation", "Marketing Visual Content"],
 
-    pricing: { monthly: 10, yearly: 96, freeTier: false },
-    licenseType: "subscription",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 15000, // 15 seconds average
-      accuracyScore: 0.85,
-      reliabilityScore: 0.95,
-      uptime: 99.8,
+    // Industry & Social
+    industryFocus: [
+      "Digital Art",
+      "Design",
+      "Marketing",
+      "Entertainment",
+      "Gaming",
+    ],
+    socialMedia: {
+      x: "https://x.com/midjourney",
+      discord: "https://discord.gg/midjourney",
+      instagram: "https://instagram.com/midjourney",
+      linkedin: "https://linkedin.com/company/midjourney",
     },
-
-    reputationMetrics: {
-      overallScore: 4.7,
-      reviewsCount: 12000,
-      verifiedReviewsCount: 9500,
-      ratings: {
-        five: 7500,
-        four: 3000,
-        three: 1000,
-        two: 300,
-        one: 200,
-      },
-      expertScore: 4.8,
-    },
-
-    popularityScore: 4.8,
-
-    similarAgents: ["agent_014", "agent_016"],
-    competitiveAdvantages: [
-      "Distinctive artistic style",
-      "High-quality outputs",
-      "Active community",
-      "Regular model improvements",
-    ],
-    limitations: [
-      "Queue-based processing",
-      "Limited control over outputs",
-      "English-only prompts",
-      "No direct editing capabilities",
-    ],
-    bestSuitedFor: [
-      "Artists",
-      "Designers",
-      "Marketing professionals",
-      "Game developers",
-      "Architects",
-    ],
-
-    releaseDate: "2022-07-15",
-    lastUpdated: "2024-02-15",
-    version: "6.0",
-
-    documentationURL: "https://docs.midjourney.com",
-    demoURL: "https://www.midjourney.com/showcase",
-    communityURL: "https://discord.gg/midjourney",
-    supportURL: "https://support.midjourney.com",
   },
   {
     id: "agent_007",
     name: "Penny",
-    shortDescription:
-      "AI travel assistant for personalized booking and planning.",
+    rating: 4.5,
+    reviewsCount: 15000,
+    category: "Travel",
+    tags: ["travel", "booking", "hotels", "flights", "customer support"],
     description:
       "An AI travel assistant that helps users find and book flights, hotels, and rental cars while providing personalized travel recommendations.",
-    imageUrl: "https://www.priceline.com/favicon.ico",
-    category: "Travel",
-    subcategories: ["Travel Booking", "Travel Planning", "Customer Service"],
-    tags: ["travel", "booking", "hotels", "flights", "customer support"],
-    developer: "Priceline",
-    capabilities: [
-      "flight booking",
-      "hotel reservations",
-      "car rentals",
-      "travel recommendations",
-      "price tracking",
-      "itinerary management",
-    ],
-    integrationPlatforms: ["Web", "iOS", "Android", "WhatsApp"],
-    apiEndpoint: "https://api.priceline.com/penny",
-    supportedLanguages: ["English"],
-    technicalRequirements: ["Modern web browser or mobile device"],
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Binance Smart Chain"],
+    tokenSymbol: "PENNY",
+    tokenName: "Penny Travel Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/penny-travel",
+
+    // Contact & Company Info
+    websiteUrl: "https://www.priceline.com/penny",
+    supportEmail: "support@priceline.com",
+    companyName: "Priceline",
+    contactName: "Rachel Torres",
+    contactEmail: "rachel@priceline.com",
+    contactPhone: "+1-555-0129",
+
+    // Pricing
+    pricing: [
       {
-        title: "Travel Planning",
-        description: "Help users plan and book complete travel itineraries",
-        industry: "Travel & Tourism",
-        successMetrics: [
-          "40% faster booking process",
-          "25% better deals found",
-        ],
-        testimonials: ["Saved me hours of travel planning - Frequent Traveler"],
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
       },
       {
-        title: "Business Travel Management",
-        description: "Streamline corporate travel booking and management",
-        industry: "Business Services",
-        successMetrics: ["50% reduction in booking time", "20% cost savings"],
-        testimonials: [
-          "Simplified our corporate travel process - Travel Manager",
-        ],
+        name: "Premium",
+        interval: "monthly",
+        amount: "9.99",
+        currency: "USD",
       },
       {
-        title: "Last-minute Travel Solutions",
-        description: "Find and book last-minute travel accommodations",
-        industry: "Travel & Tourism",
-        successMetrics: [
-          "90% success rate for same-day bookings",
-          "High customer satisfaction",
-        ],
+        name: "Business",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Travel Planning", "Last-minute Travel Solutions"],
 
-    pricing: { monthly: 0, yearly: 0, freeTier: true },
-    licenseType: "free",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 1500,
-      accuracyScore: 0.92,
-      reliabilityScore: 0.94,
-      uptime: 99.9,
+    // Industry & Social
+    industryFocus: [
+      "Travel & Tourism",
+      "Hospitality",
+      "Business Travel",
+      "Customer Service",
+    ],
+    socialMedia: {
+      x: "https://x.com/priceline",
+      instagram: "https://instagram.com/priceline",
+      linkedin: "https://linkedin.com/company/priceline",
+      youtube: "https://youtube.com/@priceline",
     },
-
-    reputationMetrics: {
-      overallScore: 4.5,
-      reviewsCount: 15000,
-      verifiedReviewsCount: 12000,
-      ratings: {
-        five: 8000,
-        four: 4500,
-        three: 1500,
-        two: 600,
-        one: 400,
-      },
-      expertScore: 4.6,
-    },
-
-    popularityScore: 4.4,
-
-    similarAgents: ["agent_008", "agent_012"],
-    competitiveAdvantages: [
-      "Access to exclusive deals",
-      "Real-time price tracking",
-      "Integration with major travel providers",
-      "24/7 customer support",
-    ],
-    limitations: [
-      "Limited to supported travel providers",
-      "English-only support",
-      "Some features require account",
-      "Region-specific availability",
-    ],
-    bestSuitedFor: [
-      "Travelers",
-      "Travel agents",
-      "Business travelers",
-      "Travel managers",
-    ],
-
-    releaseDate: "2023-06-15",
-    lastUpdated: "2024-02-10",
-    version: "2.1",
-
-    documentationURL: "https://www.priceline.com/penny/help",
-    demoURL: "https://www.priceline.com/penny",
-    communityURL: "https://community.priceline.com",
-    supportURL: "https://www.priceline.com/support",
   },
   {
     id: "agent_008",
     name: "Bosh",
-    shortDescription: "AI-powered workplace safety and compliance management.",
+    rating: 4.8,
+    reviewsCount: 3500,
+    category: "Business Automation",
+    tags: ["safety", "compliance", "audits", "inspections", "workplace"],
     description:
       "An AI assistant focused on workplace safety and compliance, helping organizations manage inspections, audits, and safety protocols.",
-    imageUrl: "https://safetyculture.com/favicon.ico",
-    category: "Business Operations",
-    subcategories: ["Safety Management", "Compliance", "Workplace Operations"],
-    tags: ["safety", "compliance", "audits", "inspections", "workplace"],
-    developer: "SafetyCulture",
-    capabilities: [
-      "safety audits",
-      "compliance checking",
-      "incident reporting",
-      "risk assessment",
-      "protocol management",
-      "scheduling assistance",
-    ],
-    integrationPlatforms: ["Web", "iOS", "Android", "API"],
-    apiEndpoint: "https://api.safetyculture.com/bosh",
-    supportedLanguages: ["English", "Spanish", "French", "German"],
-    technicalRequirements: [
-      "SafetyCulture account",
-      "Internet-connected device",
-      "Compatible mobile device for field use",
-    ],
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Polygon"],
+    tokenSymbol: "BOSH",
+    tokenName: "Bosh Safety Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/bosh-safety",
+
+    // Contact & Company Info
+    websiteUrl: "https://safetyculture.com/bosh",
+    supportEmail: "support@safetyculture.com",
+    companyName: "SafetyCulture",
+    contactName: "Mark Wilson",
+    contactEmail: "mark@safetyculture.com",
+    contactPhone: "+1-555-0130",
+
+    // Pricing
+    pricing: [
       {
-        title: "Safety Inspections",
-        description: "Automate and streamline workplace safety inspections",
-        industry: "Workplace Safety",
-        successMetrics: ["70% faster inspections", "95% compliance rate"],
-        testimonials: [
-          "Transformed our safety inspection process - Safety Manager",
-        ],
+        name: "Starter",
+        interval: "monthly",
+        amount: "15",
+        currency: "USD",
       },
       {
-        title: "Compliance Management",
-        description:
-          "Monitor and maintain regulatory compliance across operations",
-        industry: "Regulatory Compliance",
-        successMetrics: [
-          "50% reduction in compliance issues",
-          "Real-time monitoring",
-        ],
-        testimonials: [
-          "Significantly improved our compliance tracking - Operations Director",
-        ],
+        name: "Professional",
+        interval: "monthly",
+        amount: "49",
+        currency: "USD",
       },
       {
-        title: "Incident Response",
-        description: "Streamline incident reporting and response procedures",
-        industry: "Risk Management",
-        successMetrics: [
-          "60% faster incident response",
-          "Improved documentation",
-        ],
-        testimonials: [
-          "Critical for our incident management - HSE Coordinator",
-        ],
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Safety Inspections", "Compliance Management"],
 
-    pricing: { monthly: 15, yearly: 150, freeTier: true },
-    licenseType: "subscription",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 800,
-      accuracyScore: 0.96,
-      reliabilityScore: 0.98,
-      uptime: 99.95,
+    // Industry & Social
+    industryFocus: [
+      "Manufacturing",
+      "Construction",
+      "Healthcare",
+      "Logistics",
+      "Facility Management",
+    ],
+    socialMedia: {
+      x: "https://x.com/safetyculture",
+      linkedin: "https://linkedin.com/company/safetyculture",
+      youtube: "https://youtube.com/@SafetyCulture",
+      instagram: "https://instagram.com/safetyculture",
     },
-
-    reputationMetrics: {
-      overallScore: 4.8,
-      reviewsCount: 3500,
-      verifiedReviewsCount: 3000,
-      ratings: {
-        five: 2500,
-        four: 700,
-        three: 200,
-        two: 50,
-        one: 50,
-      },
-      expertScore: 4.9,
-    },
-
-    popularityScore: 4.6,
-
-    similarAgents: ["agent_007", "agent_009"],
-    competitiveAdvantages: [
-      "Industry-specific compliance knowledge",
-      "Mobile-first approach",
-      "Real-time monitoring",
-      "Comprehensive reporting",
-    ],
-    limitations: [
-      "Industry-specific focus",
-      "Requires integration setup",
-      "Learning curve for complex features",
-      "Enterprise features need subscription",
-    ],
-    bestSuitedFor: [
-      "Safety managers",
-      "Compliance officers",
-      "Operations managers",
-      "Field inspectors",
-      "HSE professionals",
-    ],
-
-    releaseDate: "2023-03-01",
-    lastUpdated: "2024-02-20",
-    version: "2.3",
-
-    documentationURL: "https://support.safetyculture.com/bosh",
-    demoURL: "https://safetyculture.com/bosh-demo",
-    communityURL: "https://community.safetyculture.com",
-    supportURL: "https://support.safetyculture.com",
   },
   {
     id: "agent_009",
     name: "Aomni",
-    shortDescription: "Automated research and analysis for sales teams.",
-    description:
-      "An AI-powered business intelligence platform that automates research and analysis for sales and business development teams.",
-    imageUrl: "https://aomni.com/favicon.ico",
+    rating: 4.6,
+    reviewsCount: 2800,
     category: "Business Intelligence",
-    subcategories: ["Sales Intelligence", "Market Research", "Lead Generation"],
     tags: [
       "research",
       "sales",
@@ -987,128 +506,64 @@ export const agents: AIAgent[] = [
       "lead generation",
       "market analysis",
     ],
-    developer: "Aomni Inc.",
-    capabilities: [
-      "prospect research",
-      "market analysis",
-      "competitive intelligence",
-      "lead qualification",
-      "sales insights generation",
-      "company profiling",
-    ],
-    integrationPlatforms: ["Web", "CRM Integration", "API", "Chrome Extension"],
-    apiEndpoint: "https://api.aomni.com",
-    supportedLanguages: ["English"],
-    technicalRequirements: [
-      "Modern web browser",
-      "CRM system for integration",
-      "Active subscription",
-    ],
+    description:
+      "An AI-powered business intelligence platform that automates research and analysis for sales and business development teams.",
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Polygon"],
+    tokenSymbol: "AOMNI",
+    tokenName: "Aomni Intelligence Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/aomni",
+
+    // Contact & Company Info
+    websiteUrl: "https://aomni.com",
+    supportEmail: "support@aomni.com",
+    companyName: "Aomni Inc.",
+    contactName: "Lisa Park",
+    contactEmail: "lisa@aomni.com",
+    contactPhone: "+1-555-0131",
+
+    // Pricing
+    pricing: [
       {
-        title: "Sales Intelligence",
-        description: "Automate prospect research and generate sales insights",
-        industry: "Sales",
-        successMetrics: [
-          "75% reduction in research time",
-          "2x increase in qualified leads",
-        ],
-        testimonials: ["Transformed our sales research process - VP of Sales"],
+        name: "Starter",
+        interval: "monthly",
+        amount: "50",
+        currency: "USD",
       },
       {
-        title: "Market Analysis",
-        description: "Generate comprehensive market and competitor analysis",
-        industry: "Business Development",
-        successMetrics: [
-          "60% faster market analysis",
-          "More comprehensive insights",
-        ],
-        testimonials: [
-          "Invaluable for understanding market dynamics - Strategy Director",
-        ],
+        name: "Professional",
+        interval: "monthly",
+        amount: "149",
+        currency: "USD",
       },
       {
-        title: "Lead Qualification",
-        description: "Automatically qualify and prioritize sales leads",
-        industry: "Sales",
-        successMetrics: ["40% higher conversion rate", "Improved lead quality"],
-        testimonials: [
-          "Significantly improved our lead qualification accuracy - Sales Manager",
-        ],
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Sales Intelligence", "Market Analysis"],
 
-    pricing: { monthly: 50, yearly: 500, freeTier: false },
-    licenseType: "subscription",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 2000,
-      accuracyScore: 0.93,
-      reliabilityScore: 0.95,
-      uptime: 99.8,
+    // Industry & Social
+    industryFocus: [
+      "Sales",
+      "Business Development",
+      "Market Research",
+      "Consulting",
+    ],
+    socialMedia: {
+      x: "https://x.com/aomni",
+      linkedin: "https://linkedin.com/company/aomni",
+      youtube: "https://youtube.com/@Aomni",
     },
-
-    reputationMetrics: {
-      overallScore: 4.6,
-      reviewsCount: 2800,
-      verifiedReviewsCount: 2200,
-      ratings: {
-        five: 1500,
-        four: 800,
-        three: 300,
-        two: 150,
-        one: 50,
-      },
-      expertScore: 4.7,
-    },
-
-    popularityScore: 4.5,
-
-    similarAgents: ["agent_010", "agent_008"],
-    competitiveAdvantages: [
-      "Automated research capabilities",
-      "Deep business insights",
-      "CRM integration",
-      "Real-time market intelligence",
-    ],
-    limitations: [
-      "English-only support",
-      "Requires data access permissions",
-      "Limited historical data",
-      "Industry coverage varies",
-    ],
-    bestSuitedFor: [
-      "Sales teams",
-      "Business development professionals",
-      "Market researchers",
-      "Strategy consultants",
-    ],
-
-    releaseDate: "2023-01-15",
-    lastUpdated: "2024-02-15",
-    version: "2.4",
-
-    documentationURL: "https://docs.aomni.com",
-    demoURL: "https://aomni.com/demo",
-    communityURL: "https://community.aomni.com",
-    supportURL: "https://support.aomni.com",
   },
   {
     id: "agent_010",
     name: "Kore.ai",
-    shortDescription: "Enterprise virtual assistants for business automation.",
-    description:
-      "An enterprise-grade conversational AI platform for building and deploying intelligent virtual assistants and chatbots across multiple channels.",
-    imageUrl: "https://kore.ai/wp-content/themes/kore/images/favicon.ico",
-    category: "Enterprise AI",
-    subcategories: [
-      "Conversational AI",
-      "Process Automation",
-      "Customer Service",
-    ],
+    rating: 4.7,
+    reviewsCount: 5000,
+    category: "Customer Service",
     tags: [
       "chatbot",
       "enterprise",
@@ -1116,143 +571,65 @@ export const agents: AIAgent[] = [
       "customer service",
       "virtual assistant",
     ],
-    developer: "Kore.ai",
-    capabilities: [
-      "natural language understanding",
-      "dialog management",
-      "process automation",
-      "multi-channel deployment",
-      "enterprise system integration",
-      "analytics and reporting",
-    ],
-    integrationPlatforms: [
-      "Web",
-      "Mobile",
-      "Slack",
-      "Microsoft Teams",
-      "WhatsApp",
-      "Facebook Messenger",
-    ],
-    apiEndpoint: "https://api.kore.ai",
-    supportedLanguages: [
-      "English",
-      "Spanish",
-      "French",
-      "German",
-      "Italian",
-      "Portuguese",
-      "Japanese",
-    ],
-    technicalRequirements: [
-      "Enterprise subscription",
-      "Development resources",
-      "System integration capabilities",
-    ],
+    description:
+      "An enterprise-grade conversational AI platform for building and deploying intelligent virtual assistants and chatbots across multiple channels.",
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Polygon", "Hyperledger"],
+    tokenSymbol: "KORE",
+    tokenName: "Kore Enterprise Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/kore-ai",
+
+    // Contact & Company Info
+    websiteUrl: "https://kore.ai",
+    supportEmail: "support@kore.ai",
+    companyName: "Kore.ai",
+    contactName: "James Wilson",
+    contactEmail: "james@kore.ai",
+    contactPhone: "+1-555-0132",
+
+    // Pricing
+    pricing: [
       {
-        title: "Customer Service Automation",
-        description:
-          "Deploy AI-powered virtual assistants for customer support",
-        industry: "Customer Service",
-        successMetrics: [
-          "70% reduction in support tickets",
-          "24/7 customer support coverage",
-        ],
-        testimonials: [
-          "Revolutionized our customer service operations - Customer Service Director",
-        ],
+        name: "Professional",
+        interval: "monthly",
+        amount: "100",
+        currency: "USD",
       },
       {
-        title: "Employee Support",
-        description: "Automate internal IT and HR support processes",
-        industry: "Enterprise Operations",
-        successMetrics: [
-          "85% faster query resolution",
-          "Improved employee satisfaction",
-        ],
-        testimonials: [
-          "Significantly reduced IT support workload - IT Manager",
-        ],
+        name: "Business",
+        interval: "monthly",
+        amount: "250",
+        currency: "USD",
       },
       {
-        title: "Process Automation",
-        description: "Streamline and automate business processes",
-        industry: "Business Operations",
-        successMetrics: [
-          "50% process automation achieved",
-          "Reduced operational costs",
-        ],
-        testimonials: ["Transformed our business processes - Operations Head"],
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Customer Service Automation", "Process Automation"],
 
-    pricing: { monthly: 100, yearly: 1000, freeTier: false },
-    licenseType: "subscription",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 500,
-      accuracyScore: 0.94,
-      reliabilityScore: 0.96,
-      uptime: 99.99,
+    // Industry & Social
+    industryFocus: [
+      "Enterprise Software",
+      "Customer Service",
+      "Banking",
+      "Healthcare",
+      "Retail",
+    ],
+    socialMedia: {
+      x: "https://x.com/kore_ai",
+      linkedin: "https://linkedin.com/company/kore-ai",
+      youtube: "https://youtube.com/@KoreAI",
     },
-
-    reputationMetrics: {
-      overallScore: 4.7,
-      reviewsCount: 5000,
-      verifiedReviewsCount: 4200,
-      ratings: {
-        five: 3000,
-        four: 1500,
-        three: 300,
-        two: 150,
-        one: 50,
-      },
-      expertScore: 4.8,
-    },
-
-    popularityScore: 4.6,
-
-    similarAgents: ["agent_003", "agent_008"],
-    competitiveAdvantages: [
-      "Enterprise-grade security",
-      "Extensive integration capabilities",
-      "Multi-channel support",
-      "Advanced analytics",
-    ],
-    limitations: [
-      "Complex implementation",
-      "Requires technical expertise",
-      "Higher cost",
-      "Enterprise focus",
-    ],
-    bestSuitedFor: [
-      "Large enterprises",
-      "IT departments",
-      "Customer service teams",
-      "Operations managers",
-    ],
-
-    releaseDate: "2019-06-15",
-    lastUpdated: "2024-02-01",
-    version: "8.5",
-
-    documentationURL: "https://developer.kore.ai/docs",
-    demoURL: "https://kore.ai/request-demo",
-    communityURL: "https://community.kore.ai",
-    supportURL: "https://support.kore.ai",
   },
   {
     id: "agent_011",
     name: "Jasper",
-    shortDescription: "AI content creation optimized for marketing and SEO.",
-    description:
-      "An AI content creation platform specializing in marketing copy, blog posts, and social media content with built-in SEO optimization and brand voice customization.",
-    imageUrl: "https://www.jasper.ai/images/favicon.svg",
-    category: "Content Creation",
-    subcategories: ["Marketing", "Copywriting", "Social Media"],
+    rating: 4.6,
+    reviewsCount: 10000,
+    category: "Content Generation",
     tags: [
       "content creation",
       "marketing",
@@ -1260,279 +637,132 @@ export const agents: AIAgent[] = [
       "SEO",
       "social media",
     ],
-    developer: "Jasper.ai",
-    capabilities: [
-      "blog writing",
-      "marketing copy",
-      "social media posts",
-      "SEO optimization",
-      "brand voice customization",
-      "content repurposing",
-    ],
-    integrationPlatforms: [
-      "Web",
-      "Chrome Extension",
-      "Surfer SEO",
-      "Grammarly",
-      "WordPress",
-    ],
-    apiEndpoint: "https://api.jasper.ai",
-    supportedLanguages: [
-      "English",
-      "Spanish",
-      "French",
-      "German",
-      "Portuguese",
-      "Italian",
-      "Dutch",
-    ],
-    technicalRequirements: [
-      "Modern web browser",
-      "Active subscription",
-      "Internet connection",
-    ],
+    description:
+      "An AI content creation platform specializing in marketing copy, blog posts, and social media content with built-in SEO optimization and brand voice customization.",
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Polygon"],
+    tokenSymbol: "JSPR",
+    tokenName: "Jasper Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/jasper-ai",
+
+    // Contact & Company Info
+    websiteUrl: "https://www.jasper.ai",
+    supportEmail: "support@jasper.ai",
+    companyName: "Jasper.ai",
+    contactName: "Sarah Miller",
+    contactEmail: "sarah@jasper.ai",
+    contactPhone: "+1-555-0133",
+
+    // Pricing
+    pricing: [
       {
-        title: "Marketing Content Creation",
-        description: "Generate high-converting marketing copy and campaigns",
-        industry: "Marketing",
-        successMetrics: [
-          "65% faster content creation",
-          "40% higher engagement rates",
-        ],
-        testimonials: [
-          "Revolutionized our content marketing strategy - Marketing Director",
-        ],
+        name: "Starter",
+        interval: "monthly",
+        amount: "49",
+        currency: "USD",
       },
       {
-        title: "Blog Content Production",
-        description: "Create SEO-optimized blog posts and articles",
-        industry: "Content Marketing",
-        successMetrics: [
-          "3x more content output",
-          "50% improvement in SEO rankings",
-        ],
-        testimonials: [
-          "Doubled our blog output with better quality - Content Manager",
-        ],
+        name: "Pro",
+        interval: "monthly",
+        amount: "99",
+        currency: "USD",
       },
       {
-        title: "Social Media Management",
-        description: "Generate engaging social media content across platforms",
-        industry: "Social Media Marketing",
-        successMetrics: [
-          "80% time saved on social posts",
-          "Higher engagement rates",
-        ],
-        testimonials: [
-          "Perfect for consistent social media presence - Social Media Manager",
-        ],
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Marketing Content Creation", "Blog Content Production"],
 
-    pricing: { monthly: 49, yearly: 468, freeTier: false },
-    licenseType: "subscription",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 1000,
-      accuracyScore: 0.89,
-      reliabilityScore: 0.93,
-      uptime: 99.9,
+    // Industry & Social
+    industryFocus: [
+      "Marketing",
+      "Content Creation",
+      "Digital Marketing",
+      "E-commerce",
+      "SEO",
+    ],
+    socialMedia: {
+      x: "https://x.com/jasper_ai",
+      linkedin: "https://linkedin.com/company/jasper-ai",
+      youtube: "https://youtube.com/@JasperAI",
+      instagram: "https://instagram.com/jasper_ai",
     },
-
-    reputationMetrics: {
-      overallScore: 4.6,
-      reviewsCount: 10000,
-      verifiedReviewsCount: 8500,
-      ratings: {
-        five: 6000,
-        four: 2500,
-        three: 1000,
-        two: 300,
-        one: 200,
-      },
-      expertScore: 4.7,
-    },
-
-    popularityScore: 4.7,
-
-    similarAgents: ["agent_003", "agent_013"],
-    competitiveAdvantages: [
-      "Advanced content optimization",
-      "Brand voice consistency",
-      "Multi-language support",
-      "SEO integration",
-    ],
-    limitations: [
-      "Learning curve for advanced features",
-      "Premium pricing",
-      "Quality varies by language",
-      "Template limitations",
-    ],
-    bestSuitedFor: [
-      "Content marketers",
-      "Digital marketing agencies",
-      "Social media managers",
-      "Blog writers",
-      "Marketing teams",
-    ],
-
-    releaseDate: "2021-01-15",
-    lastUpdated: "2024-02-15",
-    version: "3.5",
-
-    documentationURL: "https://help.jasper.ai",
-    demoURL: "https://www.jasper.ai/demo",
-    communityURL: "https://community.jasper.ai",
-    supportURL: "https://support.jasper.ai",
   },
   {
     id: "agent_012",
     name: "Synthesia",
-    shortDescription: "Create professional videos with AI avatars and voices.",
-    description:
-      "An AI video generation platform that creates professional videos using synthetic avatars and voices, enabling quick production of training, marketing, and educational content.",
-    imageUrl: "https://www.synthesia.io/favicon.ico",
-    category: "Video Production",
-    subcategories: ["Content Creation", "Video Generation", "Training"],
+    rating: 4.5,
+    reviewsCount: 3000,
+    category: "Video",
     tags: [
       "video creation",
       "AI avatars",
       "synthetic media",
       "video production",
     ],
-    developer: "Synthesia Ltd.",
-    capabilities: [
-      "AI avatar generation",
-      "text-to-speech synthesis",
-      "video customization",
-      "multi-language video creation",
-      "template management",
-      "script generation",
-    ],
-    integrationPlatforms: ["Web", "API", "LMS Integration", "Zapier"],
-    apiEndpoint: "https://api.synthesia.io",
-    supportedLanguages: [
-      "English",
-      "Spanish",
-      "French",
-      "German",
-      "Italian",
-      "Portuguese",
-      "Chinese",
-      "Japanese",
-    ],
-    technicalRequirements: [
-      "Modern web browser",
-      "Active subscription",
-      "Stable internet connection",
-    ],
+    description:
+      "An AI video generation platform that creates professional videos using synthetic avatars and voices, enabling quick production of training, marketing, and educational content.",
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Polygon"],
+    tokenSymbol: "SYNTH",
+    tokenName: "Synthesia Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/synthesia",
+
+    // Contact & Company Info
+    websiteUrl: "https://www.synthesia.io",
+    supportEmail: "support@synthesia.io",
+    companyName: "Synthesia Ltd.",
+    contactName: "Thomas Brown",
+    contactEmail: "thomas@synthesia.io",
+    contactPhone: "+1-555-0134",
+
+    // Pricing
+    pricing: [
       {
-        title: "Corporate Training",
-        description: "Create engaging training videos with AI presenters",
-        industry: "Corporate Learning",
-        successMetrics: [
-          "90% reduction in video production time",
-          "60% cost savings",
-        ],
-        testimonials: [
-          "Transformed our training content creation - L&D Director",
-        ],
+        name: "Personal",
+        interval: "monthly",
+        amount: "29",
+        currency: "USD",
       },
       {
-        title: "Marketing Videos",
-        description: "Generate multilingual marketing content at scale",
-        industry: "Marketing",
-        successMetrics: ["75% faster video production", "Global market reach"],
-        testimonials: ["Game-changer for our international marketing - CMO"],
+        name: "Professional",
+        interval: "monthly",
+        amount: "99",
+        currency: "USD",
       },
       {
-        title: "Product Demonstrations",
-        description: "Create product demos and tutorials efficiently",
-        industry: "Product Marketing",
-        successMetrics: ["85% time saved on demos", "Increased engagement"],
-        testimonials: [
-          "Streamlined our product demo process - Product Manager",
-        ],
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Corporate Training", "Marketing Videos"],
 
-    pricing: { monthly: 30, yearly: 300, freeTier: false },
-    licenseType: "subscription",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 3000,
-      accuracyScore: 0.91,
-      reliabilityScore: 0.94,
-      uptime: 99.8,
+    // Industry & Social
+    industryFocus: [
+      "Education",
+      "Corporate Training",
+      "Marketing",
+      "E-learning",
+      "Internal Communications",
+    ],
+    socialMedia: {
+      x: "https://x.com/synthesia",
+      linkedin: "https://linkedin.com/company/synthesia-io",
+      youtube: "https://youtube.com/@Synthesia",
+      instagram: "https://instagram.com/synthesia.io",
     },
-
-    reputationMetrics: {
-      overallScore: 4.5,
-      reviewsCount: 3000,
-      verifiedReviewsCount: 2500,
-      ratings: {
-        five: 1800,
-        four: 500,
-        three: 400,
-        two: 200,
-        one: 100,
-      },
-      expertScore: 4.6,
-    },
-
-    popularityScore: 4.4,
-
-    similarAgents: ["agent_014", "agent_016"],
-    competitiveAdvantages: [
-      "Quick video production",
-      "Multi-language support",
-      "Professional AI avatars",
-      "Customizable templates",
-    ],
-    limitations: [
-      "Limited animation options",
-      "Avatar customization constraints",
-      "Internet-dependent",
-      "Processing time for long videos",
-    ],
-    bestSuitedFor: [
-      "Training departments",
-      "Marketing teams",
-      "Educational institutions",
-      "Content creators",
-      "Sales teams",
-    ],
-
-    releaseDate: "2021-03-01",
-    lastUpdated: "2024-02-10",
-    version: "4.0",
-
-    documentationURL: "https://docs.synthesia.io",
-    demoURL: "https://www.synthesia.io/demo",
-    communityURL: "https://community.synthesia.io",
-    supportURL: "https://support.synthesia.io",
   },
   {
     id: "agent_013",
     name: "Hyperwrite",
-    shortDescription: "Advanced AI writing assistant for better content.",
-    description:
-      "An AI writing assistant that helps users create high-quality content with advanced grammar checking, style suggestions, and content optimization features.",
-    imageUrl: "https://hyperwrite.ai/favicon.ico",
-    category: "Writing Assistant",
-    subcategories: [
-      "Content Creation",
-      "Grammar Checking",
-      "Writing Enhancement",
-    ],
+    rating: 4.7,
+    reviewsCount: 5000,
+    category: "Content Generation",
     tags: [
       "writing",
       "grammar",
@@ -1540,136 +770,64 @@ export const agents: AIAgent[] = [
       "productivity",
       "editing",
     ],
-    developer: "OthersideAI",
-    capabilities: [
-      "grammar checking",
-      "style enhancement",
-      "content suggestions",
-      "tone adjustment",
-      "sentence rewriting",
-      "vocabulary enhancement",
-    ],
-    integrationPlatforms: [
-      "Web",
-      "Chrome Extension",
-      "Google Docs",
-      "Microsoft Word Online",
-    ],
-    apiEndpoint: "https://api.hyperwrite.ai",
-    supportedLanguages: ["English"],
-    technicalRequirements: [
-      "Modern web browser",
-      "Internet connection",
-      "Active subscription for premium features",
-    ],
+    description:
+      "An AI writing assistant that helps users create high-quality content with advanced grammar checking, style suggestions, and content optimization features.",
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Polygon"],
+    tokenSymbol: "HWR",
+    tokenName: "Hyperwrite Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/hyperwrite",
+
+    // Contact & Company Info
+    websiteUrl: "https://hyperwrite.ai",
+    supportEmail: "support@hyperwrite.ai",
+    companyName: "OthersideAI",
+    contactName: "Jennifer Lee",
+    contactEmail: "jennifer@hyperwrite.ai",
+    contactPhone: "+1-555-0135",
+
+    // Pricing
+    pricing: [
       {
-        title: "Academic Writing",
-        description:
-          "Help students and researchers write better academic papers",
-        industry: "Education",
-        successMetrics: [
-          "30% improvement in writing quality",
-          "Reduced editing time",
-        ],
-        testimonials: [
-          "Significantly improved my research papers - PhD Student",
-        ],
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
       },
       {
-        title: "Professional Communication",
-        description: "Enhance business emails and professional documents",
-        industry: "Business",
-        successMetrics: [
-          "40% faster email composition",
-          "Higher response rates",
-        ],
-        testimonials: [
-          "Essential tool for our business communications - Business Executive",
-        ],
+        name: "Pro",
+        interval: "monthly",
+        amount: "20",
+        currency: "USD",
       },
       {
-        title: "Content Creation",
-        description: "Assist in creating engaging blog posts and articles",
-        industry: "Digital Media",
-        successMetrics: [
-          "50% faster content production",
-          "Improved engagement",
-        ],
-        testimonials: [
-          "Streamlined our content creation process - Content Manager",
-        ],
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Academic Writing", "Professional Communication"],
 
-    pricing: { monthly: 20, yearly: 190, freeTier: true },
-    licenseType: "subscription",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 300,
-      accuracyScore: 0.95,
-      reliabilityScore: 0.97,
-      uptime: 99.9,
+    // Industry & Social
+    industryFocus: [
+      "Education",
+      "Business",
+      "Content Creation",
+      "Professional Services",
+    ],
+    socialMedia: {
+      x: "https://x.com/hyperwrite",
+      linkedin: "https://linkedin.com/company/hyperwrite",
+      youtube: "https://youtube.com/@Hyperwrite",
     },
-
-    reputationMetrics: {
-      overallScore: 4.7,
-      reviewsCount: 5000,
-      verifiedReviewsCount: 4200,
-      ratings: {
-        five: 3000,
-        four: 1000,
-        three: 600,
-        two: 300,
-        one: 100,
-      },
-      expertScore: 4.8,
-    },
-
-    popularityScore: 4.5,
-
-    similarAgents: ["agent_011", "agent_003"],
-    competitiveAdvantages: [
-      "Advanced grammar analysis",
-      "Context-aware suggestions",
-      "Real-time feedback",
-      "Integration with popular platforms",
-    ],
-    limitations: [
-      "English-only support",
-      "Some advanced features require subscription",
-      "Limited formatting options",
-      "Internet connection required",
-    ],
-    bestSuitedFor: [
-      "Students",
-      "Academics",
-      "Business professionals",
-      "Content creators",
-      "Non-native English speakers",
-    ],
-
-    releaseDate: "2022-05-01",
-    lastUpdated: "2024-02-15",
-    version: "2.8",
-
-    documentationURL: "https://docs.hyperwrite.ai",
-    demoURL: "https://hyperwrite.ai/demo",
-    communityURL: "https://community.hyperwrite.ai",
-    supportURL: "https://support.hyperwrite.ai",
   },
   {
     id: "agent_014",
     name: "Runway",
-    shortDescription: "AI-powered video editing and visual effects creation.",
-    description:
-      "A creative suite powered by AI that enables video editing, visual effects, and motion graphics creation with advanced generative capabilities.",
-    imageUrl: "https://runway.com/favicon.ico",
-    category: "Creative Tools",
-    subcategories: ["Video Editing", "Visual Effects", "Motion Graphics"],
+    rating: 4.6,
+    reviewsCount: 4000,
+    category: "Video",
     tags: [
       "video editing",
       "AI effects",
@@ -1677,127 +835,66 @@ export const agents: AIAgent[] = [
       "creative tools",
       "visual effects",
     ],
-    developer: "Runway AI, Inc.",
-    capabilities: [
-      "video editing",
-      "motion graphics generation",
-      "visual effects creation",
-      "green screen removal",
-      "motion tracking",
-      "text-to-video generation",
-      "image-to-video generation",
-    ],
-    integrationPlatforms: ["Web", "Desktop App", "API", "Adobe Premiere Pro"],
-    apiEndpoint: "https://api.runway.com",
-    supportedLanguages: ["English"],
-    technicalRequirements: [
-      "Modern web browser",
-      "High-speed internet connection",
-      "GPU recommended for desktop app",
-      "Active subscription",
-    ],
+    description:
+      "A creative suite powered by AI that enables video editing, visual effects, and motion graphics creation with advanced generative capabilities.",
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Polygon"],
+    tokenSymbol: "RWY",
+    tokenName: "Runway Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/runway",
+
+    // Contact & Company Info
+    websiteUrl: "https://runway.com",
+    supportEmail: "support@runway.com",
+    companyName: "Runway AI, Inc.",
+    contactName: "Michael Roberts",
+    contactEmail: "michael@runway.com",
+    contactPhone: "+1-555-0136",
+
+    // Pricing
+    pricing: [
       {
-        title: "Video Content Creation",
-        description: "Create professional-quality videos with AI-powered tools",
-        industry: "Media Production",
-        successMetrics: [
-          "70% faster video production",
-          "Reduced post-production costs",
-        ],
-        testimonials: ["Revolutionized our video workflow - Production Studio"],
+        name: "Creator",
+        interval: "monthly",
+        amount: "35",
+        currency: "USD",
       },
       {
-        title: "Visual Effects Generation",
-        description: "Generate and apply complex visual effects using AI",
-        industry: "Film & Video",
-        successMetrics: ["80% time saved on VFX", "Higher quality outputs"],
-        testimonials: [
-          "Game-changing VFX capabilities - Independent Filmmaker",
-        ],
+        name: "Professional",
+        interval: "monthly",
+        amount: "75",
+        currency: "USD",
       },
       {
-        title: "Motion Graphics Design",
-        description: "Create dynamic motion graphics with AI assistance",
-        industry: "Design",
-        successMetrics: [
-          "60% faster motion graphics creation",
-          "Expanded creative possibilities",
-        ],
-        testimonials: [
-          "Transformed our motion design process - Creative Agency",
-        ],
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Video Content Creation", "Visual Effects Generation"],
 
-    pricing: { monthly: 35, yearly: 336, freeTier: true },
-    licenseType: "subscription",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 2000,
-      accuracyScore: 0.9,
-      reliabilityScore: 0.93,
-      uptime: 99.8,
+    // Industry & Social
+    industryFocus: [
+      "Film & Video",
+      "Motion Design",
+      "Visual Effects",
+      "Content Creation",
+      "Advertising",
+    ],
+    socialMedia: {
+      x: "https://x.com/runwayml",
+      instagram: "https://instagram.com/runwayml",
+      youtube: "https://youtube.com/@RunwayML",
+      linkedin: "https://linkedin.com/company/runwayml",
     },
-
-    reputationMetrics: {
-      overallScore: 4.6,
-      reviewsCount: 4000,
-      verifiedReviewsCount: 3500,
-      ratings: {
-        five: 2500,
-        four: 800,
-        three: 400,
-        two: 200,
-        one: 100,
-      },
-      expertScore: 4.7,
-    },
-
-    popularityScore: 4.5,
-
-    similarAgents: ["agent_012", "agent_016"],
-    competitiveAdvantages: [
-      "Advanced AI video tools",
-      "Professional-grade outputs",
-      "Intuitive interface",
-      "Regular feature updates",
-    ],
-    limitations: [
-      "Resource-intensive processing",
-      "Learning curve for advanced features",
-      "Limited export options in free tier",
-      "Some features require powerful hardware",
-    ],
-    bestSuitedFor: [
-      "Video editors",
-      "Motion designers",
-      "Content creators",
-      "Filmmakers",
-      "Marketing teams",
-    ],
-
-    releaseDate: "2022-01-15",
-    lastUpdated: "2024-02-20",
-    version: "3.2",
-
-    documentationURL: "https://docs.runway.com",
-    demoURL: "https://runway.com/demo",
-    communityURL: "https://community.runway.com",
-    supportURL: "https://support.runway.com",
   },
   {
     id: "agent_015",
     name: "Tome",
-    shortDescription: "AI-generated dynamic presentations and storytelling.",
-    description:
-      "An AI-powered presentation platform that generates dynamic, narrative-driven presentations with automated design and content suggestions.",
-    imageUrl: "https://tome.app/favicon.ico",
-    category: "Presentation Tools",
-    subcategories: ["Content Creation", "Design", "Storytelling"],
+    rating: 4.5,
+    reviewsCount: 2000,
+    category: "Documents",
     tags: [
       "presentations",
       "storytelling",
@@ -1805,127 +902,65 @@ export const agents: AIAgent[] = [
       "content creation",
       "slides",
     ],
-    developer: "Tome, Inc.",
-    capabilities: [
-      "presentation generation",
-      "design automation",
-      "content suggestions",
-      "narrative structuring",
-      "image generation",
-      "responsive layouts",
-    ],
-    integrationPlatforms: ["Web", "Mobile", "API", "Figma"],
-    apiEndpoint: "https://api.tome.app",
-    supportedLanguages: ["English"],
-    technicalRequirements: [
-      "Modern web browser",
-      "Internet connection",
-      "Active subscription for premium features",
-    ],
+    description:
+      "An AI-powered presentation platform that generates dynamic, narrative-driven presentations with automated design and content suggestions.",
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Polygon"],
+    tokenSymbol: "TOME",
+    tokenName: "Tome Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/tome",
+
+    // Contact & Company Info
+    websiteUrl: "https://tome.app",
+    supportEmail: "support@tome.app",
+    companyName: "Tome, Inc.",
+    contactName: "Amanda White",
+    contactEmail: "amanda@tome.app",
+    contactPhone: "+1-555-0137",
+
+    // Pricing
+    pricing: [
       {
-        title: "Sales Presentations",
-        description: "Create compelling sales decks and proposals",
-        industry: "Sales",
-        successMetrics: ["60% faster deck creation", "Higher conversion rates"],
-        testimonials: [
-          "Revolutionized our sales pitch process - Sales Director",
-        ],
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
       },
       {
-        title: "Startup Pitches",
-        description: "Generate professional investor pitch decks",
-        industry: "Startups",
-        successMetrics: [
-          "75% time saved on deck design",
-          "Improved pitch success rate",
-        ],
-        testimonials: [
-          "Essential tool for our fundraising efforts - Startup Founder",
-        ],
+        name: "Pro",
+        interval: "monthly",
+        amount: "25",
+        currency: "USD",
       },
       {
-        title: "Educational Content",
-        description: "Create engaging educational presentations",
-        industry: "Education",
-        successMetrics: [
-          "50% faster content creation",
-          "Increased student engagement",
-        ],
-        testimonials: [
-          "Transformed our lesson presentations - Education Professional",
-        ],
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Sales Presentations", "Startup Pitches"],
 
-    pricing: { monthly: 25, yearly: 240, freeTier: true },
-    licenseType: "subscription",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 1500,
-      accuracyScore: 0.88,
-      reliabilityScore: 0.92,
-      uptime: 99.8,
+    // Industry & Social
+    industryFocus: [
+      "Business",
+      "Education",
+      "Sales",
+      "Marketing",
+      "Consulting",
+    ],
+    socialMedia: {
+      x: "https://x.com/tomeapp",
+      linkedin: "https://linkedin.com/company/tomeapp",
+      youtube: "https://youtube.com/@TomeApp",
     },
-
-    reputationMetrics: {
-      overallScore: 4.5,
-      reviewsCount: 2000,
-      verifiedReviewsCount: 1800,
-      ratings: {
-        five: 1200,
-        four: 400,
-        three: 250,
-        two: 100,
-        one: 50,
-      },
-      expertScore: 4.6,
-    },
-
-    popularityScore: 4.4,
-
-    similarAgents: ["agent_011", "agent_013"],
-    competitiveAdvantages: [
-      "AI-powered design automation",
-      "Narrative-first approach",
-      "Dynamic content generation",
-      "Modern design templates",
-    ],
-    limitations: [
-      "Limited offline capabilities",
-      "Some advanced features require subscription",
-      "English-only support",
-      "Template customization constraints",
-    ],
-    bestSuitedFor: [
-      "Sales professionals",
-      "Startup founders",
-      "Educators",
-      "Marketing teams",
-      "Business professionals",
-    ],
-
-    releaseDate: "2022-08-15",
-    lastUpdated: "2024-02-18",
-    version: "2.5",
-
-    documentationURL: "https://help.tome.app",
-    demoURL: "https://tome.app/demo",
-    communityURL: "https://community.tome.app",
-    supportURL: "https://support.tome.app",
   },
   {
     id: "agent_016",
     name: "Descript",
-    shortDescription: "Text-based video and audio editing with AI tools.",
-    description:
-      "An AI-powered video and audio editing platform that enables text-based editing, voice cloning, and automated transcription for content creators.",
-    imageUrl: "https://www.descript.com/favicon.ico",
-    category: "Media Production",
-    subcategories: ["Video Editing", "Audio Editing", "Content Creation"],
+    rating: 4.7,
+    reviewsCount: 3500,
+    category: "Video",
     tags: [
       "video editing",
       "audio editing",
@@ -1933,113 +968,944 @@ export const agents: AIAgent[] = [
       "voice cloning",
       "podcast production",
     ],
-    developer: "Descript, Inc.",
-    capabilities: [
-      "text-based video editing",
-      "audio transcription",
-      "voice cloning",
-      "filler word removal",
-      "automated editing",
-      "screen recording",
-      "multitrack editing",
-    ],
-    integrationPlatforms: ["Desktop App", "Web", "API", "Cloud Storage"],
-    apiEndpoint: "https://api.descript.com",
-    supportedLanguages: ["English"],
-    technicalRequirements: [
-      "Modern computer",
-      "High-speed internet",
-      "Active subscription",
-      "Storage space for media files",
-    ],
+    description:
+      "An AI-powered video and audio editing platform that enables text-based editing, voice cloning, and automated transcription for content creators.",
 
-    useCases: [
+    // Blockchain & Token Info
+    blockchainsSupported: ["Ethereum", "Polygon"],
+    tokenSymbol: "DESC",
+    tokenName: "Descript Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/descript",
+
+    // Contact & Company Info
+    websiteUrl: "https://www.descript.com",
+    supportEmail: "support@descript.com",
+    companyName: "Descript, Inc.",
+    contactName: "Robert Chang",
+    contactEmail: "robert@descript.com",
+    contactPhone: "+1-555-0138",
+
+    // Pricing
+    pricing: [
       {
-        title: "Podcast Production",
-        description: "Streamline podcast editing and production workflow",
-        industry: "Media & Entertainment",
-        successMetrics: ["70% faster editing time", "Improved audio quality"],
-        testimonials: [
-          "Revolutionized our podcast workflow - Professional Podcaster",
-        ],
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
       },
       {
-        title: "Video Content Creation",
-        description: "Create and edit professional video content efficiently",
-        industry: "Content Creation",
-        successMetrics: [
-          "65% faster video production",
-          "Seamless editing experience",
-        ],
-        testimonials: ["Game-changing for our video content - YouTuber"],
+        name: "Creator",
+        interval: "monthly",
+        amount: "15",
+        currency: "USD",
       },
       {
-        title: "Corporate Communications",
-        description: "Produce internal and external video communications",
-        industry: "Corporate",
-        successMetrics: ["80% faster turnaround time", "Professional results"],
-        testimonials: [
-          "Essential for our corporate videos - Communications Director",
-        ],
+        name: "Pro",
+        interval: "monthly",
+        amount: "30",
+        currency: "USD",
+      },
+      {
+        name: "Enterprise",
+        interval: "yearly",
+        amount: "Contact Us",
+        currency: "USD",
       },
     ],
-    featuredUseCases: ["Podcast Production", "Video Content Creation"],
 
-    pricing: { monthly: 15, yearly: 144, freeTier: true },
-    licenseType: "subscription",
-    enterpriseOptions: true,
-
-    performanceMetrics: {
-      responseTime: 1800,
-      accuracyScore: 0.92,
-      reliabilityScore: 0.94,
-      uptime: 99.8,
+    // Industry & Social
+    industryFocus: [
+      "Media Production",
+      "Podcasting",
+      "Video Creation",
+      "Education",
+      "Corporate Communications",
+    ],
+    socialMedia: {
+      x: "https://x.com/descript",
+      youtube: "https://youtube.com/@Descript",
+      linkedin: "https://linkedin.com/company/descript",
+      instagram: "https://instagram.com/descript",
     },
+  },
+  {
+    id: "agent_017",
+    name: "Bankr Bot",
+    rating: 4.5,
+    reviewsCount: 500,
+    category: "Crypto",
+    tags: ["investing", "automation", "crypto investment automation"],
+    description:
+      "Your Friendly AI-Powered Crypto Companion. Buy, sell, swap, place limit orders, and manage your wallet effortlessly—just by sending a message.",
 
-    reputationMetrics: {
-      overallScore: 4.7,
-      reviewsCount: 3500,
-      verifiedReviewsCount: 3000,
-      ratings: {
-        five: 2200,
-        four: 800,
-        three: 300,
-        two: 150,
-        one: 50,
+    // Blockchain & Token Info
+    blockchainsSupported: ["BASE"],
+    tokenSymbol: "NA",
+    tokenName: "No Token",
+    cmcTokenLink: "",
+
+    // Contact & Company Info
+    websiteUrl: "https://bankr.bot/",
+    supportEmail: "support@bankr.bot",
+    companyName: "Bankr",
+    contactName: "Bankr Team",
+    contactEmail: "contact@bankr.bot",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
       },
-      expertScore: 4.8,
+    ],
+
+    // Industry & Social
+    industryFocus: ["Crypto Investment Automation"],
+    socialMedia: {
+      x: "bankrbot",
     },
-
-    popularityScore: 4.6,
-
-    similarAgents: ["agent_012", "agent_014"],
-    competitiveAdvantages: [
-      "Text-based editing",
-      "Advanced voice cloning",
-      "Integrated transcription",
-      "Collaborative features",
+  },
+  {
+    id: "agent_018",
+    name: "Thumb Genie",
+    rating: 4.6,
+    reviewsCount: 1200,
+    category: "Content",
+    tags: [
+      "content generation",
+      "ai image generation",
+      "thumbnails",
+      "youtube",
     ],
-    limitations: [
-      "Resource-intensive processing",
-      "Limited offline capabilities",
-      "Storage space requirements",
-      "Learning curve for advanced features",
-    ],
-    bestSuitedFor: [
-      "Podcasters",
-      "Video creators",
-      "Content producers",
-      "Corporate communications",
-      "Educators",
+    description:
+      "ThumbGenie is the #1 AI thumbnail maker for creating high-converting, personalized YouTube thumbnails automatically. Our powerful thumbnail generator customizes designs to match your channel's unique style, boosting click-through rates while saving you time and money.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: [],
+    tokenSymbol: "NA",
+    tokenName: "No Token",
+    cmcTokenLink: "",
+
+    // Contact & Company Info
+    websiteUrl: "https://yougenie.co/thumb-genie",
+    supportEmail: "support@yougenie.co",
+    companyName: "YouGenie",
+    contactName: "YouGenie Team",
+    contactEmail: "contact@yougenie.co",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
+      },
     ],
 
-    releaseDate: "2019-09-01",
-    lastUpdated: "2024-02-15",
-    version: "5.0",
+    // Industry & Social
+    industryFocus: ["Social Media"],
+    socialMedia: {
+      instagram: "https://www.instagram.com/yougenie.co/",
+    },
+  },
+  {
+    id: "agent_019",
+    name: "Griffain",
+    rating: 4.4,
+    reviewsCount: 800,
+    category: "Agent Platform",
+    tags: ["platform", "solana", "ai agents"],
+    description:
+      "Griffain is a Solana-based AI agent, designed to assist users in a range of on-chain tasks. With a range of functionalities—ranging from searching for information to executing swaps—Griffain's network of agents abstracts away the complexities involved with blockchain-based interactions.",
 
-    documentationURL: "https://help.descript.com",
-    demoURL: "https://www.descript.com/demo",
-    communityURL: "https://community.descript.com",
-    supportURL: "https://support.descript.com",
+    // Blockchain & Token Info
+    blockchainsSupported: ["Solana"],
+    tokenSymbol: "GRIFFAIN",
+    tokenName: "Griffain Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/griffain/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/",
+    supportEmail: "support@griffain.com",
+    companyName: "Griffain",
+    contactName: "Griffain Team",
+    contactEmail: "contact@griffain.com",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["AI Agent Platform"],
+    socialMedia: {
+      x: "@griffaindotcom",
+    },
+  },
+  {
+    id: "agent_020",
+    name: "DORA AI",
+    rating: 4.7,
+    reviewsCount: 2500,
+    category: "Travel",
+    tags: ["automation", "travel", "research", "itinerary planning"],
+    description:
+      "DORA AI is your personal travel assistant, powered by cutting-edge AI technology. From creating personalized itineraries to offering instant bookings and tailored travel tips, DORA AI revolutionizes how you explore the world.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["BASE"],
+    tokenSymbol: "DORA",
+    tokenName: "DORA Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/dora-ai-by-virtuals/",
+
+    // Contact & Company Info
+    websiteUrl:
+      "https://apps.apple.com/us/app/dora-ai-travel-experiences/id6740629516",
+    supportEmail: "support@dora.ai",
+    companyName: "DORA AI",
+    contactName: "DORA Team",
+    contactEmail: "contact@dora.ai",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Travel Research", "Travel Automation"],
+    socialMedia: {
+      x: "@xDora_ai",
+      instagram: "xdora_ai",
+    },
+  },
+  {
+    id: "agent_021",
+    name: "Company Research Agent",
+    rating: 4.5,
+    reviewsCount: 1000,
+    category: "Business",
+    tags: ["automation", "research", "sales", "market research"],
+    description:
+      "Does deep research on a company and creates a report that includes demographic information, funding data, web traffic trends and competitor analysis.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: [],
+    tokenSymbol: "NA",
+    tokenName: "No Token",
+    cmcTokenLink: "",
+
+    // Contact & Company Info
+    websiteUrl: "https://agent.ai/profile/companyresearch",
+    supportEmail: "support@agent.ai",
+    companyName: "Agent.ai",
+    contactName: "Agent.ai Team",
+    contactEmail: "contact@agent.ai",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Market Research"],
+    socialMedia: {
+      x: "@agentdotai",
+    },
+  },
+  {
+    id: "agent_022",
+    name: "Flux Image Generator",
+    rating: 4.4,
+    reviewsCount: 800,
+    category: "Content",
+    tags: ["image generation", "marketing", "AI image generation"],
+    description: "Generates an image using the new Flux AI model.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: [],
+    tokenSymbol: "NA",
+    tokenName: "No Token",
+    cmcTokenLink: "",
+
+    // Contact & Company Info
+    websiteUrl: "https://agent.ai/profile/1a4g81x0bfsc5dpi",
+    supportEmail: "support@agent.ai",
+    companyName: "Agent.ai",
+    contactName: "Agent.ai Team",
+    contactEmail: "contact@agent.ai",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["AI Image Generation"],
+    socialMedia: {
+      x: "@agentdotai",
+    },
+  },
+  {
+    id: "agent_023",
+    name: "HubSpot App Marketplace Listing Grader",
+    rating: 4.6,
+    reviewsCount: 600,
+    category: "Marketing",
+    tags: ["Hubspot", "automation", "grading", "outsourcing"],
+    description:
+      "This agent evaluates your HubSpot App Marketplace listing and provides guidance and tips to improve install growth and engagement. It leverages benchmark data from AppMarketplace.com to assess how your listing stacks up against others.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: [],
+    tokenSymbol: "NA",
+    tokenName: "No Token",
+    cmcTokenLink: "",
+
+    // Contact & Company Info
+    websiteUrl: "https://agent.ai/profile/5lmdg0q0fbms39sd",
+    supportEmail: "support@agent.ai",
+    companyName: "Agent.ai",
+    contactName: "Agent.ai Team",
+    contactEmail: "contact@agent.ai",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Hubspot"],
+    socialMedia: {
+      x: "@agentdotai",
+    },
+  },
+  {
+    id: "agent_024",
+    name: "Airdrop",
+    rating: 4.3,
+    reviewsCount: 600,
+    category: "Research",
+    tags: ["airdrop", "solana", "base", "research"],
+    description:
+      "Put the AI in airdrop. Airdrop tokens to holders of your favorite token or NFT collection.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["Solana"],
+    tokenSymbol: "GRIFFAIN",
+    tokenName: "Griffain Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/griffain/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/agents",
+    supportEmail: "support@griffain.com",
+    companyName: "Griffain",
+    contactName: "Griffain Team",
+    contactEmail: "contact@griffain.com",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Market Research"],
+    socialMedia: {
+      x: "@griffaindotcom",
+    },
+  },
+  {
+    id: "agent_025",
+    name: "Backpack",
+    rating: 4.4,
+    reviewsCount: 800,
+    category: "Crypto",
+    tags: ["tracking", "support", "crypto exchange"],
+    description: "Trade and manage your orders on Backpack Exchange",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["Solana"],
+    tokenSymbol: "GRIFFAIN",
+    tokenName: "Griffain Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/griffain/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/agents",
+    supportEmail: "support@griffain.com",
+    companyName: "Griffain",
+    contactName: "Griffain Team",
+    contactEmail: "contact@griffain.com",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Crypto Exchange"],
+    socialMedia: {
+      x: "@backpack",
+    },
+  },
+  {
+    id: "agent_026",
+    name: "Baxus",
+    rating: 4.5,
+    reviewsCount: 700,
+    category: "E-commerce",
+    tags: ["shopping", "whiskey", "support", "marketplace"],
+    description:
+      "A global marketplace for the world's most collectible whiskeys. Buy special edition whiskeys with Agent Baxus.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["Solana"],
+    tokenSymbol: "GRIFFAIN",
+    tokenName: "Griffain Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/griffain/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/agents",
+    supportEmail: "support@griffain.com",
+    companyName: "Griffain",
+    contactName: "Griffain Team",
+    contactEmail: "contact@griffain.com",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Marketplace"],
+    socialMedia: {
+      x: "@baxusco",
+    },
+  },
+  {
+    id: "agent_027",
+    name: "Blink",
+    rating: 4.4,
+    reviewsCount: 650,
+    category: "Crypto",
+    tags: ["automation", "onchain", "strategies", "crypto"],
+    description: "Take action on-chain with just a blink",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["Solana"],
+    tokenSymbol: "GRIFFAIN",
+    tokenName: "Griffain Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/griffain/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/agents",
+    supportEmail: "support@griffain.com",
+    companyName: "Griffain",
+    contactName: "Griffain Team",
+    contactEmail: "contact@griffain.com",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Onchain Strategies"],
+    socialMedia: {
+      x: "@griffaindotcom",
+    },
+  },
+  {
+    id: "agent_028",
+    name: "Deep Research",
+    rating: 4.6,
+    reviewsCount: 900,
+    category: "Crypto",
+    tags: ["research", "automation", "strategy", "crypto"],
+    description:
+      "Synthesize token reports from various data sources like X, cookie.fun, & Whale Watch.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["Solana"],
+    tokenSymbol: "GRIFFAIN",
+    tokenName: "Griffain Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/griffain/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/agents",
+    supportEmail: "support@griffain.com",
+    companyName: "Griffain",
+    contactName: "Griffain Team",
+    contactEmail: "contact@griffain.com",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Crypto Research"],
+    socialMedia: {
+      x: "@griffaindotcom",
+    },
+  },
+  {
+    id: "agent_029",
+    name: "DeepSeek",
+    rating: 4.5,
+    reviewsCount: 750,
+    category: "Research",
+    tags: ["research", "automation", "strategy", "crypto"],
+    description: "DeepSeek inside the Agent Engine",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["Solana"],
+    tokenSymbol: "GRIFFAIN",
+    tokenName: "Griffain Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/griffain/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/agents",
+    supportEmail: "support@griffain.com",
+    companyName: "Griffain",
+    contactName: "Griffain Team",
+    contactEmail: "contact@griffain.com",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Research"],
+    socialMedia: {
+      x: "@griffaindotcom",
+    },
+  },
+  {
+    id: "agent_030",
+    name: "Dev",
+    rating: 4.4,
+    reviewsCount: 600,
+    category: "Crypto",
+    tags: ["pump.fun", "crypto", "tokenization", "token", "automation"],
+    description: "Launch a memecoin on pump.fun",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["Solana"],
+    tokenSymbol: "GRIFFAIN",
+    tokenName: "Griffain Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/griffain/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/agents",
+    supportEmail: "support@griffain.com",
+    companyName: "Griffain",
+    contactName: "Griffain Team",
+    contactEmail: "contact@griffain.com",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["DevOps"],
+    socialMedia: {
+      x: "@griffaindotcom",
+    },
+  },
+  {
+    id: "agent_031",
+    name: "Dora",
+    rating: 4.5,
+    reviewsCount: 850,
+    category: "Crypto",
+    tags: ["research", "automation", "strategy", "crypto"],
+    description:
+      "Google for tokens. Search for a token and swap it just by typing.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["Solana"],
+    tokenSymbol: "GRIFFAIN",
+    tokenName: "Griffain Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/griffain/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/agents",
+    supportEmail: "support@griffain.com",
+    companyName: "Griffain",
+    contactName: "Griffain Team",
+    contactEmail: "contact@griffain.com",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Crypto Research"],
+    socialMedia: {
+      x: "@griffaindotcom",
+    },
+  },
+  {
+    id: "agent_032",
+    name: "Incinerator",
+    rating: 4.3,
+    reviewsCount: 550,
+    category: "Crypto",
+    tags: ["Token burning", "tokenization", "automation"],
+    description: "Burn spam tokens and close empty token accounts",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["Solana"],
+    tokenSymbol: "GRIFFAIN",
+    tokenName: "Griffain Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/griffain/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/agents",
+    supportEmail: "support@griffain.com",
+    companyName: "Griffain",
+    contactName: "Griffain Team",
+    contactEmail: "contact@griffain.com",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["DevOps"],
+    socialMedia: {
+      x: "@griffaindotcom",
+    },
+  },
+  {
+    id: "agent_033",
+    name: "Jupiter",
+    rating: 4.7,
+    reviewsCount: 2000,
+    category: "Crypto",
+    tags: ["Investing", "solana", "research", "dex"],
+    description: "Swap tokens on Solana.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["Solana"],
+    tokenSymbol: "JUP",
+    tokenName: "Jupiter Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/jupiter-ag/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/agents",
+    supportEmail: "support@jup.ag",
+    companyName: "Jupiter",
+    contactName: "Jupiter Team",
+    contactEmail: "contact@jup.ag",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Crypto Exchange"],
+    socialMedia: {
+      x: "@jup.ag",
+    },
+  },
+  {
+    id: "agent_034",
+    name: "Kitsune",
+    rating: 4.5,
+    reviewsCount: 750,
+    category: "E-commerce",
+    tags: ["e-commerce", "solana", "research", "shop"],
+    description:
+      "Shop hundreds of everyday products right onchain with Kitsune. Pioneering agentic commerce with every interaction.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["Solana"],
+    tokenSymbol: "KIT",
+    tokenName: "Kitsune Token",
+    cmcTokenLink:
+      "https://coinmarketcap.com/dexscan/solana/BMitYTmKwCVNwmf47Zwpa7VdLaBbvAivDxCCZL2RJZTo/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/agents",
+    supportEmail: "support@kitsune.com",
+    companyName: "Kitsune",
+    contactName: "Kitsune Team",
+    contactEmail: "contact@kitsune.com",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["E-commerce"],
+    socialMedia: {
+      x: "@agent_kitsune",
+    },
+  },
+  {
+    id: "agent_035",
+    name: "Lulo",
+    rating: 4.4,
+    reviewsCount: 650,
+    category: "Finance",
+    tags: ["crypto portfolio", "wallet", "automation", "liquidity pools"],
+    description: "Diversify your portfolio with sustainable DeFi Yield",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["Solana"],
+    tokenSymbol: "GRIFFAIN",
+    tokenName: "Griffain Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/griffain/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/agents",
+    supportEmail: "support@griffain.com",
+    companyName: "Griffain",
+    contactName: "Griffain Team",
+    contactEmail: "contact@griffain.com",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Crypto Wallet"],
+    socialMedia: {
+      x: "@uselulo",
+    },
+  },
+  {
+    id: "agent_036",
+    name: "Mindshare by Cookie",
+    rating: 4.5,
+    reviewsCount: 800,
+    category: "Research",
+    tags: ["mindshare", "crypto portfolio", "data"],
+    description:
+      "Analyze agents, providing insights on market stats, community influence, and emerging trends. Powered by Cookie DataSwarm.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: ["BASE", "BNB"],
+    tokenSymbol: "COOKIE",
+    tokenName: "Cookie Token",
+    cmcTokenLink: "https://coinmarketcap.com/currencies/cookie/",
+
+    // Contact & Company Info
+    websiteUrl: "https://griffain.com/agents",
+    supportEmail: "support@cookie.com",
+    companyName: "Cookie",
+    contactName: "Cookie Team",
+    contactEmail: "contact@cookie.com",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Basic",
+        interval: "monthly",
+        amount: "1",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Crypto Research"],
+    socialMedia: {
+      x: "@cookie3_com",
+    },
+  },
+  {
+    id: "agent_037",
+    name: "Competitor Analyst",
+    rating: 4.6,
+    reviewsCount: 950,
+    category: "Marketing",
+    tags: ["market research", "analysis", "task automation"],
+    description:
+      "Automates the process of collecting and analyzing data on rival companies, providing insights into their market position, strengths, weaknesses, and strategies. It tracks competitors' activities over time, performs SWOT analyses, and benchmarks your company's performance against theirs.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: [],
+    tokenSymbol: "NA",
+    tokenName: "No Token",
+    cmcTokenLink: "",
+
+    // Contact & Company Info
+    websiteUrl: "https://agent.ai/profile/competitoranalyst",
+    supportEmail: "support@agent.ai",
+    companyName: "Agent.ai",
+    contactName: "Agent.ai Team",
+    contactEmail: "contact@agent.ai",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Market Research"],
+    socialMedia: {
+      x: "@agentdotai",
+    },
+  },
+  {
+    id: "agent_038",
+    name: "Web Page Copy Editor",
+    rating: 4.4,
+    reviewsCount: 700,
+    category: "Content",
+    tags: ["task automation", "copywriting"],
+    description:
+      "Reviews all the text on a web page and offers tips to enhance clarity and effectiveness, helping you refine your content for better communication and impact.",
+
+    // Blockchain & Token Info
+    blockchainsSupported: [],
+    tokenSymbol: "NA",
+    tokenName: "No Token",
+    cmcTokenLink: "",
+
+    // Contact & Company Info
+    websiteUrl: "https://agent.ai/profile/lb00zv6ygo4kmt38",
+    supportEmail: "support@agent.ai",
+    companyName: "Agent.ai",
+    contactName: "Agent.ai Team",
+    contactEmail: "contact@agent.ai",
+    contactPhone: "",
+
+    // Pricing
+    pricing: [
+      {
+        name: "Free",
+        interval: "monthly",
+        amount: "0",
+        currency: "USD",
+      },
+    ],
+
+    // Industry & Social
+    industryFocus: ["Copywriting"],
+    socialMedia: {
+      x: "@agentdotai",
+    },
   },
 ];
