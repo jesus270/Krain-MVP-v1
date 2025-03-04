@@ -107,7 +107,7 @@ export function SidebarNav() {
   };
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" rail="none">
       <SidebarHeader className="mt-3">
         <Link
           href="/"
@@ -211,15 +211,15 @@ export function SidebarNav() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <div className="relative space-y-4">
+      <SidebarFooter className="px-0">
+        <div className="relative space-y-4 w-full">
           <div className="absolute inset-0 bg-[url('/bg-gradient-ellipsis.svg')] bg-no-repeat bg-cover opacity-30" />
 
           {state !== "collapsed" && (
             <>
               <Link
                 href="#"
-                className="block relative p-4 group/krain"
+                className="block relative p-4 group/krain w-full"
                 onClick={handleClick}
               >
                 <div className="flex items-center justify-between">
@@ -239,7 +239,7 @@ export function SidebarNav() {
                 </p>
               </Link>
               <Separator className="bg-border/50 w-full" />
-              <div className="relative p-2">
+              <div className="relative p-4 w-full">
                 <h3 className="font-medium mb-3">Level Up with Premium</h3>
                 <ul className="space-y-2 mb-4">
                   <li className="text-sm text-foreground flex items-center gap-2">
@@ -270,7 +270,6 @@ export function SidebarNav() {
           )}
         </div>
       </SidebarFooter>
-      <SidebarRail className="bg-gradient-to-b from-background/80 via-background to-background/80 border-r border-r-border/50 backdrop-blur-sm" />
     </Sidebar>
   );
 }
