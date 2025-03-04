@@ -10,6 +10,8 @@ import { agents } from "./agent-data";
 import { processSearchQuery } from "./utils/search";
 import { FeaturedCarousel } from "./components/featured-carousel";
 import { AgentListGrid } from "./components/agent-list-grid";
+import { TrendingSection } from "./components/trending-section";
+import { CategoriesGrid } from "./components/categories-grid";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -152,16 +154,11 @@ export default function Home() {
           </section>
 
           <section className="w-full mx-auto">
-            <h2 className="text-xl font-semibold mb-4">Trending Agents</h2>
-            <FeaturedCarousel agents={trendingAgents} onFilter={handleFilter} />
+            <TrendingSection agents={agents} onFilter={handleFilter} />
           </section>
 
           <section className="w-full mx-auto">
-            <AgentListGrid
-              agents={topRatedAgents}
-              onFilter={handleFilter}
-              title="Top Rated Agents"
-            />
+            <CategoriesGrid agents={agents} onFilter={handleFilter} />
           </section>
         </>
       ) : (
