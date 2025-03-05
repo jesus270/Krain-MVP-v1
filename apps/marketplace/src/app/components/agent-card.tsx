@@ -53,45 +53,75 @@ export function FeaturedAgentCard({
           containerRef={containerRef as React.RefObject<HTMLDivElement>}
         />
       </div>
-      <div className="flex flex-col p-4 w-full items-start">
-        <h3 className="font-semibold text-xl">{agent.name}</h3>
-        <div className="flex justify-between gap-2 mt-1">
-          <p className="text-sm text-muted-foreground">{agent.category}</p>
-          <div className="flex items-center justify-start gap-1">
-            <StarIcon className="w-4 h-4 text-primary fill-primary" />
-            <span className="text-sm font-medium text-foreground">
-              {agent.rating.toFixed(1)}
-            </span>
+      <div className="flex flex-col w-full h-full justify-between">
+        <div className="flex flex-col p-4 w-full h-full items-start">
+          <h3 className="font-semibold text-xl">{agent.name}</h3>
+          <div className="flex justify-between gap-2 mt-1">
+            <p className="text-sm text-muted-foreground">{agent.category}</p>
+            <div className="flex items-center justify-start gap-1">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4"
+              >
+                <path
+                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                  fill="url(#starGradient)"
+                  stroke="url(#starGradient)"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <defs>
+                  <linearGradient
+                    id="starGradient"
+                    x1="12"
+                    y1="2"
+                    x2="12"
+                    y2="21.02"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop offset="0%" stopColor="#B793F5" />
+                    <stop offset="100%" stopColor="#915BF0" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <span className="text-sm font-medium text-foreground">
+                {agent.rating.toFixed(1)}
+              </span>
+            </div>
+            <p className="text-sm text-foreground flex-1">
+              {workflowCount} workflows
+            </p>
           </div>
-          <p className="text-sm text-foreground flex-1">
-            {workflowCount} workflows
+
+          <p className="mt-2 text-sm text-foreground line-clamp-2">
+            {agent.description}
           </p>
+
+          <div className="mt-4 flex flex-wrap gap-1 line-clamp-2">
+            {agent.tags.map((tag) => (
+              <Badge
+                key={tag}
+                variant="outline"
+                style={{
+                  background:
+                    "linear-gradient(to right, rgba(31, 197, 214, 0.4), transparent)",
+                  borderColor: "rgba(31, 197, 214, 0.8)",
+                  borderWidth: "1px",
+                }}
+                className="text-xs font-normal cursor-pointer hover:opacity-80 transition-all"
+                onClick={() => onFilter("tag", tag)}
+              >
+                {tag}
+              </Badge>
+            ))}
+          </div>
         </div>
-
-        <p className="mt-2 text-sm text-foreground line-clamp-2">
-          {agent.description}
-        </p>
-
-        <div className="mt-4 flex flex-wrap gap-1 line-clamp-2">
-          {agent.tags.map((tag) => (
-            <Badge
-              key={tag}
-              variant="outline"
-              style={{
-                background:
-                  "linear-gradient(to right, rgba(31, 197, 214, 0.4), transparent)",
-                borderColor: "rgba(31, 197, 214, 0.8)",
-                borderWidth: "1px",
-              }}
-              className="text-xs font-normal cursor-pointer hover:opacity-80 transition-all"
-              onClick={() => onFilter("tag", tag)}
-            >
-              {tag}
-            </Badge>
-          ))}
-        </div>
-
-        <div className="pt-4 flex justify-end w-full">
+        <div className="flex justify-end w-full h-full mt-auto flex-grow-1 p-4">
           <Button
             size="sm"
             asChild

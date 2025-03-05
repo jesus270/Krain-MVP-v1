@@ -166,8 +166,31 @@ export function SidebarNav() {
                       {item.name}
                     </span>
                     {item.premium && (
-                      <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-foreground">
-                        PREMIUM
+                      <span className="relative ml-auto text-xs px-2 py-0.5 rounded-full text-white">
+                        <div
+                          className="absolute inset-0 rounded-full opacity-50"
+                          style={{
+                            background: `linear-gradient(120deg,
+                              #1FC5D6 0%,
+                              #915BF0 50%,
+                              rgb(47, 45, 64) 75%
+                            )`,
+                          }}
+                        />
+                        <div
+                          className="absolute inset-0 rounded-full opacity-50"
+                          style={{
+                            padding: "1px",
+                            background: `linear-gradient(120deg,
+                              #1FC5D6 0%,
+                              rgba(31, 196, 214, 0.50) 50%,
+                              rgba(31, 196, 214, 0.25) 75%
+                            )`,
+                            mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                            maskComposite: "exclude",
+                          }}
+                        />
+                        <span className="relative z-10 block">PREMIUM</span>
                       </span>
                     )}
                   </Link>

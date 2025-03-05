@@ -127,7 +127,7 @@ export const agents: AIAgent[] = [
   },
   {
     id: "agent_023",
-    name: "DORA AI - AI TRAVEL AGENT",
+    name: "DORA AI",
     rating: 4.4,
     reviewsCount: 980,
     category: "Travel",
@@ -171,7 +171,7 @@ export const agents: AIAgent[] = [
   },
   {
     id: "agent_024",
-    name: "Company Research Agent by Agent.ai",
+    name: "Company Research Agent",
     rating: 4.2,
     reviewsCount: 750,
     category: "Business",
@@ -212,7 +212,7 @@ export const agents: AIAgent[] = [
   },
   {
     id: "agent_025",
-    name: "Flux Image Generator by Agent.ai",
+    name: "Flux Image Generator",
     rating: 4.5,
     reviewsCount: 1100,
     category: "Content",
@@ -252,7 +252,7 @@ export const agents: AIAgent[] = [
   },
   {
     id: "agent_026",
-    name: "HubSpot App Marketplace Listing Grader by Agent.ai",
+    name: "HubSpot App Marketplace Listing Grader",
     rating: 4.1,
     reviewsCount: 620,
     category: "Marketing",
@@ -294,7 +294,7 @@ export const agents: AIAgent[] = [
   },
   {
     id: "agent_027",
-    name: "Competitor Analyst by Agent.ai",
+    name: "Competitor Analyst",
     rating: 4.6,
     reviewsCount: 950,
     category: "Marketing",
@@ -335,7 +335,7 @@ export const agents: AIAgent[] = [
   },
   {
     id: "agent_028",
-    name: "Web Page Copy Editor by Agent.ai",
+    name: "Web Page Copy Editor",
     rating: 4.2,
     reviewsCount: 650,
     category: "Content",
@@ -376,7 +376,7 @@ export const agents: AIAgent[] = [
   },
   {
     id: "agent_042",
-    name: "Travel AI - AI agent for Travel",
+    name: "Travel AI",
     rating: 4.5,
     reviewsCount: 920,
     category: "Travel",
@@ -424,7 +424,7 @@ export const agents: AIAgent[] = [
   },
   {
     id: "agent_043",
-    name: "Victorai - by Victory Chain",
+    name: "Victorai",
     rating: 4.7,
     reviewsCount: 1500,
     category: "Sports",

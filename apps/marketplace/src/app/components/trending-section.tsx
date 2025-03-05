@@ -31,7 +31,7 @@ function TrendingCategory({
             className="block w-full no-underline"
           >
             <Card className="relative overflow-hidden flex flex-row h-[60px] w-full text-foreground cursor-pointer hover:opacity-90 transition-opacity">
-              <div className="relative aspect-square w-[60px] h-full flex items-center justify-center bg-muted">
+              <div className="relative aspect-square w-[60px] h-full flex items-center justify-center p-2">
                 <AgentImage
                   imageUrl={agent.imageUrl || ""}
                   name={agent.name}
@@ -42,15 +42,42 @@ function TrendingCategory({
               <div className="flex-1 flex flex-col justify-center p-2">
                 <div className="flex items-center">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-sm truncate">
-                      {agent.name}
-                    </h3>
+                    <h3 className="font-semibold text-sm">{agent.name}</h3>
                     <div className="flex items-center gap-1 mt-0.5">
-                      <p className="text-xs truncate text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {agent.category}
                       </p>
                       <div className="flex items-center gap-0.5">
-                        <StarIcon className="w-2.5 h-2.5 text-primary fill-primary" />
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="w-4 h-4"
+                        >
+                          <path
+                            d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                            fill="url(#starGradient)"
+                            stroke="url(#starGradient)"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <defs>
+                            <linearGradient
+                              id="starGradient"
+                              x1="12"
+                              y1="2"
+                              x2="12"
+                              y2="21.02"
+                              gradientUnits="userSpaceOnUse"
+                            >
+                              <stop offset="0%" stopColor="#B793F5" />
+                              <stop offset="100%" stopColor="#915BF0" />
+                            </linearGradient>
+                          </defs>
+                        </svg>
                         <span className="text-xs text-foreground/70 font-medium">
                           {agent.rating.toFixed(1)}
                         </span>
@@ -103,28 +130,25 @@ export function TrendingSection({ agents, onFilter }: TrendingSectionProps) {
     .sort((a, b) => b.rating - a.rating);
 
   return (
-    <div className="w-full mb-8 bg-black/90 rounded-lg max-w-6xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-white">Trending Agents</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <TrendingCategory
-          title="Crypto"
-          agents={cryptoAgents}
-          onFilter={onFilter}
-          className="text-white"
-        />
-        <TrendingCategory
-          title="Business"
-          agents={businessAgents}
-          onFilter={onFilter}
-          className="text-white"
-        />
-        <TrendingCategory
-          title="Travel"
-          agents={travelAgents}
-          onFilter={onFilter}
-          className="text-white"
-        />
-      </div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 w-full">
+      <TrendingCategory
+        title="Crypto"
+        agents={cryptoAgents}
+        onFilter={onFilter}
+        className="text-white"
+      />
+      <TrendingCategory
+        title="Business"
+        agents={businessAgents}
+        onFilter={onFilter}
+        className="text-white"
+      />
+      <TrendingCategory
+        title="Travel"
+        agents={travelAgents}
+        onFilter={onFilter}
+        className="text-white"
+      />
     </div>
   );
 }
