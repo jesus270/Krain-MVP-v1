@@ -42,7 +42,7 @@ export function FeaturedAgentCard({
     <Card className={`flex flex-col lg:flex-row`}>
       <div
         ref={containerRef}
-        className="aspect-square w-full h-full bg-muted flex"
+        className="aspect-square w-full h-full lg:h-auto lg:w-auto bg-muted flex"
       >
         <AgentImage
           imageUrl={agent.imageUrl || ""}
@@ -53,7 +53,7 @@ export function FeaturedAgentCard({
           containerRef={containerRef}
         />
       </div>
-      <div className="flex flex-col p-4 w-full justify-between items-start">
+      <div className="flex flex-col p-4 w-full items-start">
         <h3 className="font-semibold text-xl">{agent.name}</h3>
         <div className="flex justify-between gap-2 mt-1">
           <p className="text-sm text-muted-foreground">{agent.category}</p>

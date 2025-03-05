@@ -103,7 +103,7 @@ export function TrendingSection({ agents, onFilter }: TrendingSectionProps) {
     .sort((a, b) => b.rating - a.rating);
 
   return (
-    <div className="w-full mb-8 bg-black/90 rounded-lg p-6">
+    <div className="w-full mb-8 bg-black/90 rounded-lg max-w-6xl mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-white">Trending Agents</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <TrendingCategory
