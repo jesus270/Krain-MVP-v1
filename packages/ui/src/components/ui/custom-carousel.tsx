@@ -92,8 +92,8 @@ export function CustomCarousel({
             <Image
               src="/button-carousel.svg"
               alt="Previous"
-              width={80}
-              height={49}
+              width={28}
+              height={28}
               className="rotate-180 opacity-50 transition-opacity hover:opacity-100"
             />
           </button>
@@ -101,8 +101,8 @@ export function CustomCarousel({
             <Image
               src="/button-carousel.svg"
               alt="Next"
-              width={80}
-              height={49}
+              width={28}
+              height={28}
               className="opacity-50 transition-opacity hover:opacity-100"
             />
           </button>

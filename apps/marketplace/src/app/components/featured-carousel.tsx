@@ -13,7 +13,7 @@ interface FeaturedCarouselProps {
 export function FeaturedCarousel({
   agents,
   onFilter,
-  showControls = false,
+  showControls = true,
 }: FeaturedCarouselProps) {
   return (
     <div className="relative w-full mx-auto mb-8">

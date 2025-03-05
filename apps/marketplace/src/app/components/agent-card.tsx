@@ -42,7 +42,7 @@ export function FeaturedAgentCard({
     <Card className={`flex flex-col lg:flex-row`}>
       <div
         ref={containerRef}
-        className="aspect-square w-full h-full bg-muted flex"
+        className="aspect-square w-full lg:w-auto bg-muted flex"
       >
         <AgentImage
           imageUrl={agent.imageUrl || ""}
@@ -53,8 +53,8 @@ export function FeaturedAgentCard({
           containerRef={containerRef as React.RefObject<HTMLDivElement>}
         />
       </div>
-      <div className="flex flex-col w-full h-full justify-between">
-        <div className="flex flex-col p-4 w-full h-full items-start">
+      <div className="flex flex-col w-full justify-between">
+        <div className="flex flex-col p-4 w-full items-start">
           <h3 className="font-semibold text-xl">{agent.name}</h3>
           <div className="flex justify-between gap-2 mt-1">
             <p className="text-sm text-muted-foreground">{agent.category}</p>
@@ -121,7 +121,7 @@ export function FeaturedAgentCard({
             ))}
           </div>
         </div>
-        <div className="flex justify-end w-full h-full mt-auto flex-grow-1 p-4">
+        <div className="flex justify-end w-full p-4">
           <Button
             size="sm"
             asChild
