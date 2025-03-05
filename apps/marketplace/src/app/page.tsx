@@ -167,7 +167,7 @@ export default function Home() {
           </section>
         </>
       ) : (
-        <main className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 auto-rows-maxmx-auto">
+        <main className="grid grid-cols-1 xs:grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 auto-rows-maxmx-auto">
           {filteredAgents.map((agent) => (
             <AgentCard key={agent.id} agent={agent} onFilter={handleFilter} />
           ))}
