@@ -50,7 +50,7 @@ export function FeaturedAgentCard({
           size="lg"
           shape="rounded"
           className=""
-          containerRef={containerRef}
+          containerRef={containerRef as React.RefObject<HTMLDivElement>}
         />
       </div>
       <div className="flex flex-col p-4 w-full items-start">
