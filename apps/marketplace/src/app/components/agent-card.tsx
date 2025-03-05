@@ -11,6 +11,8 @@ import { Badge } from "@krain/ui/components/ui/badge";
 import { Button } from "@krain/ui/components/ui/button";
 import { BotIcon, StarIcon, CheckCircle2Icon, XCircleIcon } from "lucide-react";
 import Link from "next/link";
+import { AgentImage } from "../agent/[id]/components/agent-image";
+import { useRef } from "react";
 
 interface AgentCardProps {
   agent: AIAgent;
@@ -33,44 +35,44 @@ export function FeaturedAgentCard({
     (price) => price.amount === "Contact Us",
   );
 
-  const cardClassName = `relative overflow-hidden ${
-    featured ? "shadow-lg" : ""
-  }`;
-
   // Generate random number of workflows (under 1000)
   const workflowCount = Math.floor(Math.random() * 999) + 1;
-
+  const containerRef = useRef<HTMLDivElement>(null);
   return (
-    <Card className={`${cardClassName} flex flex-col md:flex-row md:h-[240px]`}>
-      <div className="relative aspect-square w-full md:w-[240px] md:h-full shrink-0 bg-primary">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <BotIcon className="h-12 w-12 text-white" />
-        </div>
+    <Card className={`flex flex-col lg:flex-row`}>
+      <div
+        ref={containerRef}
+        className="aspect-square w-full h-full bg-muted flex"
+      >
+        <AgentImage
+          imageUrl={agent.imageUrl || ""}
+          name={agent.name}
+          size="lg"
+          shape="rounded"
+          className=""
+          containerRef={containerRef}
+        />
       </div>
-      <div className="flex flex-col p-4 w-full">
-        <div className="flex items-center justify-between w-full">
-          <div className="w-full">
-            <h3 className="font-semibold text-xl">{agent.name}</h3>
-            <div className="flex justify-between gap-2 mt-1">
-              <p className="text-sm text-muted-foreground">{agent.category}</p>
-              <div className="flex items-center justify-start gap-1">
-                <StarIcon className="w-4 h-4 text-primary fill-primary" />
-                <span className="text-sm font-medium text-foreground">
-                  {agent.rating.toFixed(1)}
-                </span>
-              </div>
-              <p className="text-sm text-foreground flex-1">
-                {workflowCount} workflows
-              </p>
-            </div>
+      <div className="flex flex-col p-4 w-full justify-between items-start">
+        <h3 className="font-semibold text-xl">{agent.name}</h3>
+        <div className="flex justify-between gap-2 mt-1">
+          <p className="text-sm text-muted-foreground">{agent.category}</p>
+          <div className="flex items-center justify-start gap-1">
+            <StarIcon className="w-4 h-4 text-primary fill-primary" />
+            <span className="text-sm font-medium text-foreground">
+              {agent.rating.toFixed(1)}
+            </span>
           </div>
+          <p className="text-sm text-foreground flex-1">
+            {workflowCount} workflows
+          </p>
         </div>
 
         <p className="mt-2 text-sm text-foreground line-clamp-2">
           {agent.description}
         </p>
 
-        <div className="mt-4 flex flex-wrap gap-1">
+        <div className="mt-4 flex flex-wrap gap-1 line-clamp-2">
           {agent.tags.map((tag) => (
             <Badge
               key={tag}
@@ -89,7 +91,7 @@ export function FeaturedAgentCard({
           ))}
         </div>
 
-        <div className="mt-auto pt-4 flex justify-end">
+        <div className="pt-4 flex justify-end w-full">
           <Button
             size="sm"
             asChild

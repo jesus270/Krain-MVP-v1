@@ -22,9 +22,13 @@ export function AgentDetailsContent({ agent }: AgentDetailsContentProps) {
     <div className="space-y-8">
       {/* Header Section */}
       <div className="flex items-center gap-4">
-        <div className="relative h-16 w-16 overflow-hidden rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center">
-          <BotIcon className="h-8 w-8 text-white" />
-        </div>
+        <AgentImage
+          imageUrl={agent.imageUrl || ""}
+          name={agent.name}
+          size="lg"
+          shape="circle"
+          className="w-[80px] h-[80px]"
+        />
         <div>
           <h1 className="text-3xl font-bold">{agent.name}</h1>
           <p className="text-muted-foreground">by {agent.companyName}</p>

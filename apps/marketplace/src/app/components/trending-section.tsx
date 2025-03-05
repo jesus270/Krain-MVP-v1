@@ -6,7 +6,7 @@ import { Card } from "@krain/ui/components/ui/card";
 import { Star as StarIcon } from "lucide-react";
 import { cn } from "@krain/ui/lib/utils";
 import Link from "next/link";
-
+import { AgentImage } from "../agent/[id]/components/agent-image";
 interface TrendingCategoryProps {
   title: string;
   agents: AIAgent[];
@@ -31,8 +31,13 @@ function TrendingCategory({
             className="block w-full no-underline"
           >
             <Card className="relative overflow-hidden flex flex-row h-[60px] w-full text-foreground cursor-pointer hover:opacity-90 transition-opacity">
-              <div className="relative aspect-square w-[60px] h-full shrink-0 flex items-center justify-center bg-primary">
-                <StarIcon className="h-5 w-5 text-foreground" />
+              <div className="relative aspect-square w-[60px] h-full flex items-center justify-center bg-muted">
+                <AgentImage
+                  imageUrl={agent.imageUrl || ""}
+                  name={agent.name}
+                  size="md"
+                  shape="square"
+                />
               </div>
               <div className="flex-1 flex flex-col justify-center p-2">
                 <div className="flex items-center">

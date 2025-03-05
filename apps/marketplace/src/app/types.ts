@@ -22,6 +22,7 @@ export interface AIAgent {
   category: string;
   tags: string[]; // Comma separated list stored as array
   description?: string;
+  imageUrl?: string; // URL to the agent's image
 
   // Blockchain & Token Info
   blockchainsSupported: string[];

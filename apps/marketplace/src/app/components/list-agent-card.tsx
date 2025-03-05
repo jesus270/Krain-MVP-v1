@@ -2,6 +2,7 @@ import { AIAgent } from "../types";
 import { Card } from "@krain/ui/components/ui/card";
 import { BotIcon, StarIcon } from "lucide-react";
 import Link from "next/link";
+import { AgentImage } from "../agent/[id]/components/agent-image";
 
 interface ListAgentCardProps {
   agent: AIAgent;
@@ -18,8 +19,14 @@ export function ListAgentCard({ agent, onFilter }: ListAgentCardProps) {
       className="block w-[350px] h-[60px] no-underline"
     >
       <Card className="relative overflow-hidden flex flex-row h-full w-full text-foreground cursor-pointer hover:opacity-90 transition-opacity">
-        <div className="relative aspect-square w-[60px] h-full shrink-0 flex items-center justify-center bg-primary">
-          <BotIcon className="h-5 w-5 text-foreground" />
+        <div className="relative aspect-square w-[60px] h-full shrink-0 flex items-center justify-center bg-muted">
+          <AgentImage
+            imageUrl={agent.imageUrl || ""}
+            name={agent.name}
+            size="sm"
+            shape="square"
+            className="w-[40px] h-[40px]"
+          />
         </div>
         <div className="flex-1 flex flex-col justify-center p-2">
           <div className="flex items-center">

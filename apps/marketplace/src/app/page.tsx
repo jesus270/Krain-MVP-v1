@@ -12,6 +12,7 @@ import { FeaturedCarousel } from "./components/featured-carousel";
 import { AgentListGrid } from "./components/agent-list-grid";
 import { TrendingSection } from "./components/trending-section";
 import { CategoriesGrid } from "./components/categories-grid";
+import featuredAgentIds from "./featured-agents.json";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -83,8 +84,12 @@ export default function Home() {
       return (a[sortValue] - b[sortValue]) * multiplier;
     });
 
-  // Add these new constants for different agent lists
-  const featuredAgents = agents.sort((a, b) => b.rating - a.rating).slice(0, 5); // Top rated agents
+  const featuredAgents = agents
+    .filter((agent) => featuredAgentIds.includes(agent.id))
+    // sort by featuredAgentIds order
+    .sort(
+      (a, b) => featuredAgentIds.indexOf(a.id) - featuredAgentIds.indexOf(b.id),
+    );
   const trendingAgents = agents
     .sort((a, b) => b.reviewsCount - a.reviewsCount)
     .slice(0, 5); // Most reviewed agents
