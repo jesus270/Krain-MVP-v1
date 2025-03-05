@@ -42,7 +42,7 @@ export function FeaturedAgentCard({
     <Card className={`flex flex-col lg:flex-row`}>
       <div
         ref={containerRef}
-        className="aspect-square w-full h-full bg-muted flex"
+        className="aspect-square w-full lg:w-auto bg-muted flex"
       >
         <AgentImage
           imageUrl={agent.imageUrl || ""}
