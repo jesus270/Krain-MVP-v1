@@ -31,7 +31,7 @@ function TrendingCategory({
             className="block w-full no-underline"
           >
             <Card className="relative overflow-hidden flex flex-row h-[60px] w-full text-foreground cursor-pointer hover:opacity-90 transition-opacity">
-              <div className="relative aspect-square w-[60px] h-full flex items-center justify-center p-2">
+              <div className="relative aspect-square w-[60px] h-full flex items-center justify-center pl-4 p-3">
                 <AgentImage
                   imageUrl={agent.imageUrl || ""}
                   name={agent.name}
