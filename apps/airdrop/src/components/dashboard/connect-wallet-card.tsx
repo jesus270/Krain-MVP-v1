@@ -20,7 +20,7 @@ export function ConnectWalletCard() {
   }
 
   return (
-    <Card className="border-2 max-w-2xl mx-auto relative overflow-hidden backdrop-blur-sm bg-background/95 border-border/50">
+    <Card className="border-2 max-w-2xl mx-auto relative overflow-hidden backdrop-blur-xs bg-background/95 border-border/50">
       <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x" />
       <CardHeader className="space-y-4 relative">
         <div className="flex items-center gap-2">

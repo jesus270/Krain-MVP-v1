@@ -7,6 +7,8 @@ import { Star as StarIcon } from "lucide-react";
 import { cn } from "@krain/ui/lib/utils";
 import Link from "next/link";
 import { AgentImage } from "../agent/[id]/components/agent-image";
+import { useRef } from "react";
+
 interface TrendingCategoryProps {
   title: string;
   agents: AIAgent[];
@@ -24,74 +26,81 @@ function TrendingCategory({
     <div className={cn("flex flex-col gap-2", className)}>
       <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
       <div className="flex flex-col">
-        {agents.slice(0, 5).map((agent) => (
-          <Link
-            key={agent.id}
-            href={`/agent/${agent.id}`}
-            className="block w-full no-underline"
-          >
-            <Card className="relative overflow-hidden flex flex-row h-[60px] w-full text-foreground cursor-pointer hover:opacity-90 transition-opacity">
-              <div className="relative aspect-square w-[60px] h-full flex items-center justify-center pl-4 p-3">
-                <AgentImage
-                  imageUrl={agent.imageUrl || ""}
-                  name={agent.name}
-                  size="md"
-                  shape="square"
-                />
-              </div>
-              <div className="flex-1 flex flex-col justify-center p-2">
-                <div className="flex items-center">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-sm">{agent.name}</h3>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <p className="text-xs text-muted-foreground">
-                        {agent.category}
-                      </p>
-                      <div className="flex items-center gap-0.5">
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="w-4 h-4"
-                        >
-                          <path
-                            d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                            fill="url(#starGradient)"
-                            stroke="url(#starGradient)"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <defs>
-                            <linearGradient
-                              id="starGradient"
-                              x1="12"
-                              y1="2"
-                              x2="12"
-                              y2="21.02"
-                              gradientUnits="userSpaceOnUse"
-                            >
-                              <stop offset="0%" stopColor="#B793F5" />
-                              <stop offset="100%" stopColor="#915BF0" />
-                            </linearGradient>
-                          </defs>
-                        </svg>
-                        <span className="text-xs text-foreground/70 font-medium">
-                          {agent.rating.toFixed(1)}
-                        </span>
-                        <span className="text-xs text-foreground/70">
-                          ({agent.reviewsCount})
-                        </span>
+        {agents.slice(0, 5).map((agent) => {
+          const imageContainerRef = useRef<HTMLDivElement>(null);
+          return (
+            <Link
+              key={agent.id}
+              href={`/agent/${agent.id}`}
+              className="block w-full no-underline"
+            >
+              <Card className="overflow-hidden flex flex-row py-3 px-5 w-full text-foreground cursor-pointer hover:bg-muted/50 transition-colors shadow-xs gap-3">
+                <div
+                  ref={imageContainerRef}
+                  className="size-[36px] flex items-center justify-center"
+                >
+                  <AgentImage
+                    imageUrl={agent.imageUrl || ""}
+                    name={agent.name}
+                    size="md"
+                    shape="square"
+                    containerRef={imageContainerRef}
+                  />
+                </div>
+                <div className="flex-1 flex flex-col justify-center">
+                  <div className="flex items-center">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-sm">{agent.name}</h3>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <p className="text-xs text-muted-foreground">
+                          {agent.category}
+                        </p>
+                        <div className="flex items-center gap-0.5">
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="size-4"
+                          >
+                            <path
+                              d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                              fill="url(#starGradient)"
+                              stroke="url(#starGradient)"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <defs>
+                              <linearGradient
+                                id="starGradient"
+                                x1="12"
+                                y1="2"
+                                x2="12"
+                                y2="21.02"
+                                gradientUnits="userSpaceOnUse"
+                              >
+                                <stop offset="0%" stopColor="#B793F5" />
+                                <stop offset="100%" stopColor="#915BF0" />
+                              </linearGradient>
+                            </defs>
+                          </svg>
+                          <span className="text-xs text-foreground/70 font-medium">
+                            {agent.rating.toFixed(1)}
+                          </span>
+                          <span className="text-xs text-foreground/70">
+                            ({agent.reviewsCount})
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </Card>
-          </Link>
-        ))}
+              </Card>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

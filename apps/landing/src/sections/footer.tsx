@@ -110,7 +110,7 @@ export function Footer() {
                   </div>
                 ))}
                 {/* <div className="flex items-center gap-2 bg-gray-900/50 backdrop-blur rounded-full px-4 py-2">
-                  <code className="text-sm text-white blur-sm">
+                  <code className="text-sm text-white blur-xs">
                     0×0000...0000
                   </code>
                   <Button

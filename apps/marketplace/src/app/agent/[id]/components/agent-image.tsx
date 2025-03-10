@@ -64,7 +64,7 @@ export function AgentImage({
 
   // Size classes for the icon
   const iconSizeClass =
-    size === "sm" ? "w-6 h-6" : size === "md" ? "w-10 h-10" : "w-16 h-16";
+    size === "sm" ? "size-6" : size === "md" ? "size-10" : "size-16";
 
   // Check if the imageUrl is valid
   const isValidImageUrl =
@@ -83,7 +83,7 @@ export function AgentImage({
       width={dimensions.width || fallbackWidth}
       height={dimensions.height || fallbackHeight}
       className={cn(
-        "w-full h-full object-cover",
+        "size-full object-cover",
         shape === "rounded" && "rounded-md",
         shape === "circle" && "rounded-full",
         className,
@@ -91,16 +91,19 @@ export function AgentImage({
       onError={() => setFailedImage(true)}
       unoptimized={true}
       priority={true}
+      style={{ display: "block", width: "100%", height: "100%" }}
     />
   ) : (
-    <BotIcon
-      className={cn(
-        "text-white",
-        iconSizeClass,
-        shape === "rounded" && "rounded-md",
-        shape === "circle" && "rounded-full",
-        iconClassName,
-      )}
-    />
+    <div className="flex items-center justify-center size-full bg-muted">
+      <BotIcon
+        className={cn(
+          "text-white",
+          iconSizeClass,
+          shape === "rounded" && "rounded-md",
+          shape === "circle" && "rounded-full",
+          iconClassName,
+        )}
+      />
+    </div>
   );
 }

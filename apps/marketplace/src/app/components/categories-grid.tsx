@@ -37,20 +37,18 @@ export function CategoriesGrid({
     .sort((a, b) => b.count - a.count);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 w-full mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 w-full mb-8">
       {categories.map((category) => (
         <Card
           key={category.name}
-          className="cursor-pointer hover:opacity-90 transition-opacity"
+          className="cursor-pointer hover:opacity-90 transition-opacity p-4"
           onClick={() => onFilter("category", category.name)}
         >
-          <div className="p-4 w-full h-full">
-            <div className="flex items-center justify-between w-full h-full">
-              <h3 className="font-semibold text-lg">{category.name}</h3>
-              <div className="flex items-center gap-1 rounded-full px-2.5 py-1 bg-muted text-muted-foreground">
-                <Zap className="h-3.5 w-3.5" />
-                <span className="text-xs font-medium">{category.count}</span>
-              </div>
+          <div className="flex items-center justify-between w-full h-full">
+            <h3 className="font-semibold text-lg">{category.name}</h3>
+            <div className="flex items-center gap-1 rounded-full px-2.5 py-1 bg-muted text-muted-foreground">
+              <Zap className="h-3.5 w-3.5" />
+              <span className="text-xs font-medium">{category.count}</span>
             </div>
           </div>
         </Card>

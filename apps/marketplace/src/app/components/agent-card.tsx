@@ -39,7 +39,7 @@ export function FeaturedAgentCard({
   const workflowCount = Math.floor(Math.random() * 999) + 1;
   const containerRef = useRef<HTMLDivElement>(null);
   return (
-    <Card className={`flex flex-col lg:flex-row`}>
+    <Card className={`flex flex-col lg:flex-row p-0`}>
       <div
         ref={containerRef}
         className="aspect-square w-full lg:w-auto bg-muted flex"
@@ -125,7 +125,7 @@ export function FeaturedAgentCard({
           <Button
             size="sm"
             asChild
-            className="bg-muted hover:bg-muted/60 text-foreground rounded-full shadow-sm border-muted-foreground/20 border transition-colors"
+            className="bg-muted hover:bg-muted/60 text-foreground rounded-full shadow-xs border-muted-foreground/20 border transition-colors"
           >
             <Link href={`/agent/${agent.id}`}>Learn more</Link>
           </Button>

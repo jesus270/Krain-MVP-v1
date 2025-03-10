@@ -68,7 +68,7 @@ export default function Profile() {
   if (!ready) {
     return (
       <main className="container mx-auto py-8 px-4">
-        <Card className="w-full max-w-2xl mx-auto border-2 backdrop-blur-sm bg-background/95 border-border/50">
+        <Card className="w-full max-w-2xl mx-auto border-2 backdrop-blur-xs bg-background/95 border-border/50">
           <CardHeader className="space-y-2">
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-4 w-full" />
@@ -105,7 +105,7 @@ export default function Profile() {
 
   return (
     <main className="container mx-auto p-4">
-      <Card className="w-full max-w-2xl mx-auto border-2 relative overflow-hidden backdrop-blur-sm bg-background/95 border-border/50">
+      <Card className="w-full max-w-2xl mx-auto border-2 relative overflow-hidden backdrop-blur-xs bg-background/95 border-border/50">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x" />
         <CardHeader className="space-y-2 relative">
           <div className="flex items-center justify-between">
@@ -129,7 +129,7 @@ export default function Profile() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 relative">
-          <div className="rounded-lg border bg-card/50 p-6 space-y-6 relative overflow-hidden backdrop-blur-sm">
+          <div className="rounded-lg border bg-card/50 p-6 space-y-6 relative overflow-hidden backdrop-blur-xs">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x" />
             <div className="flex items-center justify-between relative">
               <div className="flex items-center gap-2 group">
@@ -351,7 +351,7 @@ export default function Profile() {
 
             {!canRemoveAccount && (
               <div className="mt-4 flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                <AlertCircle className="h-5 w-5 text-yellow-500 flex-shrink-0" />
+                <AlertCircle className="h-5 w-5 text-yellow-500 shrink-0" />
                 <p className="text-sm text-yellow-500">
                   At least one account must remain connected
                 </p>
