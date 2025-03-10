@@ -15,11 +15,11 @@ alwaysApply: false
 - Next.js (v15+) for frontend applications
 - React (v19+) for UI components
 - TypeScript (v5+) for type safety
-- Tailwind CSS for styling
+- Tailwind (v4) CSS for styling
 - Drizzle ORM for database operations
 - Privy for authentication
 - Solana Web3.js for blockchain interactions
-- Radix UI for accessible UI components
+- Shadcn/ui in the local `packages/ui` for UI components
 - Vercel for deployment
 
 ## Coding Standards

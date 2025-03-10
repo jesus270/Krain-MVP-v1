@@ -3,7 +3,6 @@ import { NextRequest } from "next/server";
 import { RateLimiter } from "./rate-limit";
 import { getRedisClient } from "./redis";
 import { AppError, ErrorCodes, log } from "@krain/utils";
-import { headers as NextHeaders } from "next/headers";
 
 type HeadersLike =
   | Headers
@@ -23,13 +22,15 @@ async function getHeaderValue(
 
 function getAllowedOrigins(): string[] {
   const domain = process.env.DOMAIN;
-  if (!domain) {
-    throw new Error("DOMAIN environment variable must be set");
+
+  // In development mode, allow localhost even if DOMAIN is not set
+  if (process.env.NODE_ENV === "development") {
+    return domain ? [domain, "localhost"] : ["localhost"];
   }
 
-  // Include localhost for development
-  if (process.env.NODE_ENV === "development") {
-    return [domain, "localhost"];
+  // In production, DOMAIN is required
+  if (!domain) {
+    throw new Error("DOMAIN environment variable must be set");
   }
 
   return [domain];

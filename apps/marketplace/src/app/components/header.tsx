@@ -1,3 +1,5 @@
+"use client";
+
 import { SidebarTrigger } from "@krain/ui/components/ui/sidebar";
 import { Separator } from "@krain/ui/components/ui/separator";
 import Image from "next/image";

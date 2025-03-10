@@ -15,7 +15,7 @@
     "KV_URL",
     "NEXT_PUBLIC_INTERCOM_APP_ID"
   ],
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]

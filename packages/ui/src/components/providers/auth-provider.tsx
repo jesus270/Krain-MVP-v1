@@ -1,6 +1,6 @@
 "use client";
 
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivyAuth } from "../../hooks/use-privy-auth";
 import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { PrivyProviderWrapper } from "./privy-provider-wrapper";
 
@@ -18,7 +18,7 @@ interface AuthProviderProps {
     user,
   }: {
     authenticated: boolean;
-    user: ReturnType<typeof usePrivy>["user"];
+    user: ReturnType<typeof usePrivyAuth>["user"];
   }) => React.ReactNode;
   config: AuthConfig;
 }
@@ -48,11 +48,11 @@ function AuthStateManager({
     user,
   }: {
     authenticated: boolean;
-    user: ReturnType<typeof usePrivy>["user"];
+    user: ReturnType<typeof usePrivyAuth>["user"];
   }) => React.ReactNode;
   config: AuthConfig;
 }) {
-  const { authenticated, ready, user } = usePrivy();
+  const { authenticated, ready, user } = usePrivyAuth();
   if (!ready) {
     return (
       <main className="flex flex-grow justify-center items-center min-h-[400px]">

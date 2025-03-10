@@ -13,6 +13,7 @@ export interface User {
   email: {
     address: string;
   };
+  role?: string;
 }
 
 export interface Session {
@@ -43,6 +44,7 @@ export const sessionDataSchema = z.object({
       email: z.object({
         address: z.string(),
       }),
+      role: z.string().optional(),
     })
     .optional(),
   csrfToken: z.string().optional(),

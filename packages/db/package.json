@@ -12,22 +12,22 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.10.0",
     "@krain/utils": "workspace:",
-    "drizzle-orm": "^0.38.3",
+    "@neondatabase/serverless": "^0.10.0",
+    "drizzle-orm": "^0.40.0",
     "postgresql": "^0.0.1"
   },
   "devDependencies": {
     "@krain/eslint-config": "workspace:",
     "@krain/typescript-config": "workspace:",
-    "@types/node": "^20",
+    "@types/node": "^22.13.10",
     "@types/pg": "^8.10.9",
     "dotenv": "^16.3.1",
     "drizzle-kit": "^0.30.1",
-    "eslint": "^9",
+    "eslint": "^9.22.0",
     "pg": "^8.11.3",
     "ts-node": "^10.9.2",
-    "tsup": "^8.0.2",
-    "typescript": "^5"
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.2"
   }
 }

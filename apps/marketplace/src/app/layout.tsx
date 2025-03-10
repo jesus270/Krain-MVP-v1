@@ -1,23 +1,18 @@
-"use client";
-
 import type { Metadata } from "next";
-import { RootLayout } from "@krain/ui/layouts/root-layout";
+import { RootLayout as AppRootLayout } from "@krain/ui/layouts/root-layout";
 import { SidebarNav } from "./components/nav-sidebar";
 import Header from "./components/header";
 import { SidebarInset, SidebarProvider } from "@krain/ui/components/ui/sidebar";
+import "./globals.css";
 
-// export const metadata: Metadata = {
-//   title: "Krain AI - Agent Portal",
-//   description: "Krain AI Agent Portal",
-// };
+export const metadata: Metadata = {
+  title: "Krain AI - Agent Portal",
+  description: "Krain AI Agent Portal",
+};
 
-export default function Layout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <RootLayout
+    <AppRootLayout
       authConfig={{
         privyAppId: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
         loadingTitle: "Welcome to the Krain Marketplace",
@@ -35,6 +30,6 @@ export default function Layout({
           </SidebarInset>
         </>
       </SidebarProvider>
-    </RootLayout>
+    </AppRootLayout>
   );
 }
