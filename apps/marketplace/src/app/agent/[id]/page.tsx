@@ -34,12 +34,10 @@ function convertToAIAgent(dbAgent: any): AIAgent {
   };
 }
 
-export default async function AgentDetails({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const { id } = params;
+// Remove all type annotations for the page component
+export default async function AgentDetails(props: any) {
+  // Access id directly from props.params
+  const id = props.params.id;
   const dbAgent = await getAgentById(id);
 
   if (!dbAgent) {
