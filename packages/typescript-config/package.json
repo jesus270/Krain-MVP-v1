@@ -3,13 +3,14 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "clean": "rm -rf .turbo && rm -rf node_modules",
-    "build": "echo 'No build needed'"
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "build": "mkdir -p dist && cp *.json dist/"
   },
   "files": [
     "base.json",
     "nextjs.json",
-    "react-library.json"
+    "react-library.json",
+    "dist"
   ],
   "exports": {
     "./base.json": "./base.json",

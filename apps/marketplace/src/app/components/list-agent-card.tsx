@@ -3,7 +3,7 @@ import { Card } from "@krain/ui/components/ui/card";
 import { BotIcon, StarIcon } from "lucide-react";
 import Link from "next/link";
 import { AgentImage } from "../agent/[id]/components/agent-image";
-import { useRef } from "react";
+import { useRef, RefObject } from "react";
 
 interface ListAgentCardProps {
   agent: AIAgent;
@@ -32,7 +32,7 @@ export function ListAgentCard({ agent, onFilter }: ListAgentCardProps) {
             size="sm"
             shape="square"
             className="size-full object-cover"
-            containerRef={imageContainerRef}
+            containerRef={imageContainerRef as RefObject<HTMLDivElement>}
           />
         </div>
         <div className="flex-1 flex flex-col justify-center p-2">
