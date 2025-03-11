@@ -34,11 +34,11 @@ function convertToAIAgent(dbAgent: any): AIAgent {
   };
 }
 
-type PageParams = {
-  id: string;
-};
-
-export default async function AgentDetails({ params }: { params: PageParams }) {
+export default async function AgentDetails({
+  params,
+}: {
+  params: { id: string };
+}) {
   const { id } = params;
   const dbAgent = await getAgentById(id);
 
