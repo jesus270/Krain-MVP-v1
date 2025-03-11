@@ -7,12 +7,6 @@ import { ReviewsSection } from "./components/reviews-section";
 import { AIAgent } from "@/app/types";
 import { Toaster } from "sonner";
 
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
 // Convert database Agent to AIAgent type
 function convertToAIAgent(dbAgent: any): AIAgent {
   return {
@@ -40,7 +34,11 @@ function convertToAIAgent(dbAgent: any): AIAgent {
   };
 }
 
-export default async function AgentDetails({ params }: PageProps) {
+type PageParams = {
+  id: string;
+};
+
+export default async function AgentDetails({ params }: { params: PageParams }) {
   const { id } = params;
   const dbAgent = await getAgentById(id);
 
