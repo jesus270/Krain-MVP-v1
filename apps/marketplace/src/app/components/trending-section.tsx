@@ -7,7 +7,7 @@ import { Star as StarIcon } from "lucide-react";
 import { cn } from "@krain/ui/lib/utils";
 import Link from "next/link";
 import { AgentImage } from "../agent/[id]/components/agent-image";
-import { useRef } from "react";
+import { RefObject, useRef } from "react";
 
 interface TrendingCategoryProps {
   title: string;
@@ -44,7 +44,9 @@ function TrendingCategory({
                     name={agent.name}
                     size="md"
                     shape="square"
-                    containerRef={imageContainerRef}
+                    containerRef={
+                      imageContainerRef as RefObject<HTMLDivElement>
+                    }
                   />
                 </div>
                 <div className="flex-1 flex flex-col justify-center">
