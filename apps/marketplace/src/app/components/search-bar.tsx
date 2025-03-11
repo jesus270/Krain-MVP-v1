@@ -18,6 +18,9 @@ interface SearchBarProps {
   setFilters: (
     filters: FilterState | ((prev: FilterState) => FilterState),
   ) => void;
+  agents: any[];
+  categories: string[];
+  tags: string[];
 }
 
 export function SearchBar({
@@ -25,6 +28,9 @@ export function SearchBar({
   setSearchQuery,
   filters,
   setFilters,
+  agents,
+  categories,
+  tags,
 }: SearchBarProps) {
   const commands = [
     {
@@ -114,7 +120,13 @@ export function SearchBar({
                 <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
               </Button>
             </SheetTrigger>
-            <FilterSheet filters={filters} setFilters={setFilters} />
+            <FilterSheet
+              filters={filters}
+              setFilters={setFilters}
+              allAgents={agents}
+              categories={categories}
+              tags={tags}
+            />
           </Sheet>
         </div>
       </div>

@@ -1,20 +1,48 @@
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
-import { agents } from "@/app/agent-data";
+import { getAgentById } from "@/app/actions/agents";
 import { AgentDetailsContent } from "./components/agent-details-content";
 import { AgentPricing } from "./components/agent-pricing";
+import { AIAgent } from "@/app/types";
 
 interface PageProps {
-  params: Promise<{
+  params: {
     id: string;
-  }>;
+  };
+}
+
+// Convert database Agent to AIAgent type
+function convertToAIAgent(dbAgent: any): AIAgent {
+  return {
+    id: dbAgent.id.toString(),
+    name: dbAgent.name,
+    rating: dbAgent.rating || 0,
+    reviewsCount: dbAgent.reviewsCount || 0,
+    category: dbAgent.category,
+    tags: dbAgent.tags || [],
+    description: dbAgent.description || "",
+    imageUrl: dbAgent.imageUrl || "",
+    blockchainsSupported: dbAgent.blockchainsSupported || [],
+    tokenSymbol: dbAgent.tokenSymbol || "",
+    tokenName: dbAgent.tokenName || "",
+    cmcTokenLink: dbAgent.cmcTokenLink || "",
+    websiteUrl: dbAgent.websiteUrl || "",
+    supportEmail: dbAgent.supportEmail || "",
+    companyName: dbAgent.companyName || "",
+    contactName: dbAgent.contactName || "",
+    contactEmail: dbAgent.contactEmail || "",
+    contactPhone: dbAgent.contactPhone || "",
+    pricing: dbAgent.pricing || [],
+    industryFocus: dbAgent.industryFocus || [],
+    socialMedia: dbAgent.socialMedia || {},
+  };
 }
 
 export default async function AgentDetails({ params }: PageProps) {
-  const { id } = await params;
-  const agent = agents.find((a) => a.id === id);
+  const { id } = params;
+  const dbAgent = await getAgentById(id);
 
-  if (!agent) {
+  if (!dbAgent) {
     return (
       <div className="min-h-screen p-8">
         <h1 className="text-2xl font-bold">Agent not found</h1>
@@ -24,6 +52,9 @@ export default async function AgentDetails({ params }: PageProps) {
       </div>
     );
   }
+
+  // Convert db agent to AIAgent type
+  const agent = convertToAIAgent(dbAgent);
 
   return (
     <div className="min-h-screen p-8 max-w-5xl mx-auto">

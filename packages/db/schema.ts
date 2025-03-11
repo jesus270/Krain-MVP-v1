@@ -342,3 +342,25 @@ export const agentTagRelations = relations(agentTagTable, ({ many }) => ({
     relationName: "agent",
   }),
 }));
+
+export const featuredAgentTable = pgTable("featuredAgent", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agentId")
+    .references(() => agentTable.id)
+    .notNull(),
+  order: integer("order").default(0), // Controls display order
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type FeaturedAgent = typeof featuredAgentTable.$inferSelect;
+
+export const featuredAgentRelations = relations(
+  featuredAgentTable,
+  ({ one }) => ({
+    agent: one(agentTable, {
+      fields: [featuredAgentTable.agentId],
+      references: [agentTable.id],
+      relationName: "featured_agent",
+    }),
+  }),
+);

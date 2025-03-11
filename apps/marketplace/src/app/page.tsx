@@ -1,22 +1,90 @@
 "use client";
 
 import "regenerator-runtime/runtime";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { FilterState, defaultFilterState } from "./filters";
 import { AgentCard } from "./components/agent-card";
 import { SearchBar } from "./components/search-bar";
 import { ActiveFilters } from "./components/active-filters";
-import { agents } from "./agent-data";
 import { processSearchQuery } from "./utils/search";
 import { FeaturedCarousel } from "./components/featured-carousel";
 import { AgentListGrid } from "./components/agent-list-grid";
 import { TrendingSection } from "./components/trending-section";
 import { CategoriesGrid } from "./components/categories-grid";
-import featuredAgentIds from "./featured-agents.json";
+import {
+  getAllAgents as fetchAllAgents,
+  getFeaturedAgents as fetchFeaturedAgents,
+  getAllCategories as fetchAllCategories,
+  getAllTags as fetchAllTags,
+} from "./actions/agents";
+import { Agent } from "@krain/db/schema";
+import { AIAgent } from "./types";
+
+function convertToAIAgent(dbAgent: Agent): AIAgent {
+  return {
+    id: dbAgent.id.toString(),
+    name: dbAgent.name,
+    rating: dbAgent.rating || 0,
+    reviewsCount: dbAgent.reviewsCount || 0,
+    category: dbAgent.category,
+    tags: dbAgent.tags || [],
+    description: dbAgent.description || "",
+    imageUrl: dbAgent.imageUrl || "",
+    blockchainsSupported: dbAgent.blockchainsSupported || [],
+    tokenSymbol: dbAgent.tokenSymbol || "",
+    tokenName: dbAgent.tokenName || "",
+    cmcTokenLink: dbAgent.cmcTokenLink || "",
+    websiteUrl: dbAgent.websiteUrl || "",
+    supportEmail: dbAgent.supportEmail || "",
+    companyName: dbAgent.companyName || "",
+    contactName: dbAgent.contactName || "",
+    contactEmail: dbAgent.contactEmail || "",
+    contactPhone: dbAgent.contactPhone || "",
+    pricing: dbAgent.pricing || [],
+    industryFocus: dbAgent.industryFocus || [],
+    socialMedia: dbAgent.socialMedia || {},
+  };
+}
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>(() => defaultFilterState);
+  const [agents, setAgents] = useState<AIAgent[]>([]);
+  const [featuredAgents, setFeaturedAgents] = useState<AIAgent[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch agents from the database
+  useEffect(() => {
+    const fetchAgents = async () => {
+      setIsLoading(true);
+      try {
+        const [allAgents, featured, categoriesData, tagsData] =
+          await Promise.all([
+            fetchAllAgents(),
+            fetchFeaturedAgents(),
+            fetchAllCategories(),
+            fetchAllTags(),
+          ]);
+
+        // Convert database agents to AIAgent format
+        const convertedAgents = allAgents.map(convertToAIAgent);
+        const convertedFeaturedAgents = featured.map(convertToAIAgent);
+
+        setAgents(convertedAgents);
+        setFeaturedAgents(convertedFeaturedAgents);
+        setCategories(categoriesData);
+        setTags(tagsData);
+      } catch (error) {
+        console.error("Failed to fetch agents:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAgents();
+  }, []);
 
   // Filter agents based on search query and filters
   const filteredAgents = agents
@@ -32,7 +100,7 @@ export default function Home() {
           ...(agent.tags || []),
           agent.category,
           agent.companyName,
-          ...agent.industryFocus,
+          ...(agent.industryFocus || []),
         ]
           .filter(
             (item): item is string =>
@@ -58,7 +126,7 @@ export default function Home() {
       // Tag filters
       if (
         filters.tags.length > 0 &&
-        !agent.tags.some((tag) => filters.tags.includes(tag))
+        !agent.tags?.some((tag) => filters.tags.includes(tag))
       ) {
         return false;
       }
@@ -66,7 +134,7 @@ export default function Home() {
       // Industry filters
       if (
         filters.industries.length > 0 &&
-        !agent.industryFocus.some((ind) => filters.industries.includes(ind))
+        !agent.industryFocus?.some((ind) => filters.industries.includes(ind))
       ) {
         return false;
       }
@@ -81,21 +149,16 @@ export default function Home() {
       }
       const sortValue = filters.sortBy === "rating" ? "rating" : "reviewsCount";
       const multiplier = filters.sortOrder === "desc" ? -1 : 1;
-      return (a[sortValue] - b[sortValue]) * multiplier;
+      return ((a[sortValue] || 0) - (b[sortValue] || 0)) * multiplier;
     });
 
-  const featuredAgents = agents
-    .filter((agent) => featuredAgentIds.includes(agent.id))
-    // sort by featuredAgentIds order
-    .sort(
-      (a, b) => featuredAgentIds.indexOf(a.id) - featuredAgentIds.indexOf(b.id),
-    );
-  const trendingAgents = agents
-    .sort((a, b) => b.reviewsCount - a.reviewsCount)
+  const trendingAgents = [...agents]
+    .sort((a, b) => (b.reviewsCount || 0) - (a.reviewsCount || 0))
     .slice(0, 5); // Most reviewed agents
-  const topRatedAgents = agents
-    .filter((agent) => agent.reviewsCount >= 100) // Only consider agents with significant reviews
-    .sort((a, b) => b.rating - a.rating)
+
+  const topRatedAgents = [...agents]
+    .filter((agent) => (agent.reviewsCount || 0) >= 100) // Only consider agents with significant reviews
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0))
     .slice(0, 5); // Highest rated agents with sufficient reviews
 
   // Check if any filters are active
@@ -136,6 +199,14 @@ export default function Home() {
     });
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 px-16 flex flex-col">
       <header className="flex flex-col items-center gap-4 lg:gap-8">
@@ -147,6 +218,9 @@ export default function Home() {
           setSearchQuery={setSearchQuery}
           filters={filters}
           setFilters={setFilters}
+          agents={agents}
+          categories={categories}
+          tags={tags}
         />
         <ActiveFilters filters={filters} onRemove={handleRemoveFilter} />
       </header>

@@ -35,12 +35,12 @@ import { Separator } from "@krain/ui/components/ui/separator";
 const routes = [
   {
     name: "Discover",
-    url: "#",
+    url: "/",
     icon: Compass,
   },
   {
     name: "Favourites",
-    url: "#",
+    url: "/favorites",
     icon: Star,
   },
   {
