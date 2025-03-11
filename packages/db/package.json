@@ -7,6 +7,7 @@
   "scripts": {
     "lint": "eslint .",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "build": "npx tsup index.ts --format esm,cjs --dts",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
@@ -15,7 +16,8 @@
     "@krain/utils": "workspace:",
     "@neondatabase/serverless": "^0.10.0",
     "drizzle-orm": "^0.40.0",
-    "postgresql": "^0.0.1"
+    "postgresql": "^0.0.1",
+    "tsup": "^8.4.0"
   },
   "devDependencies": {
     "@krain/eslint-config": "workspace:",
@@ -27,7 +29,6 @@
     "eslint": "^9.22.0",
     "pg": "^8.11.3",
     "ts-node": "^10.9.2",
-    "tsup": "^8.4.0",
     "typescript": "^5.8.2"
   }
 }
