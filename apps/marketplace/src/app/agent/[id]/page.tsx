@@ -3,7 +3,9 @@ import Link from "next/link";
 import { getAgentById } from "@/app/actions/agents";
 import { AgentDetailsContent } from "./components/agent-details-content";
 import { AgentPricing } from "./components/agent-pricing";
+import { ReviewsSection } from "./components/reviews-section";
 import { AIAgent } from "@/app/types";
+import { Toaster } from "sonner";
 
 interface PageProps {
   params: {
@@ -55,9 +57,11 @@ export default async function AgentDetails({ params }: PageProps) {
 
   // Convert db agent to AIAgent type
   const agent = convertToAIAgent(dbAgent);
+  const agentId = parseInt(agent.id);
 
   return (
     <div className="min-h-screen p-8 max-w-5xl mx-auto">
+      <Toaster />
       <Link
         href="/"
         className="inline-flex items-center gap-2 mb-8 hover:text-blue-500"
@@ -67,7 +71,10 @@ export default async function AgentDetails({ params }: PageProps) {
       </Link>
 
       <div className="grid md:grid-cols-[2fr_1fr] gap-8">
-        <AgentDetailsContent agent={agent} />
+        <div>
+          <AgentDetailsContent agent={agent} />
+          <ReviewsSection agentId={agentId} />
+        </div>
         <AgentPricing agent={agent} />
       </div>
     </div>
