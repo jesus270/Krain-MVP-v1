@@ -1,7 +1,7 @@
 import { createSessionConfig } from "@krain/session";
+import { SESSION_SECRET } from "./constants";
 
-// Create session config with a fallback for production
-const sessionSecret =
-  process.env.SESSION_SECRET || "marketplace-production-secret";
-// This will be used by any components that need the session config
-export const sessionConfig = createSessionConfig(sessionSecret);
+// Export the createSessionConfig function for direct usage
+export function getSessionConfig() {
+  return createSessionConfig(SESSION_SECRET);
+}

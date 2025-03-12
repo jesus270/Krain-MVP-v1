@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sessionConfig } from "../../../lib/session";
+import { SESSION_SECRET } from "../../../lib/constants";
 
 export async function GET(request: NextRequest) {
   // Only allow this in development for security
@@ -12,8 +12,9 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     sessionConfigured: true,
-    // Don't return the actual password, just check if it's using fallback
+    // Don't return the actual secret, just check if it's using fallback
     usingFallback: !process.env.SESSION_SECRET,
+    secretLength: SESSION_SECRET.length,
     nodeEnv: process.env.NODE_ENV,
   });
 }

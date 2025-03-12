@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { handleAuthCallback } from "@krain/session";
-import { sessionConfig } from "../../../../lib/session";
 
 export async function POST(request: NextRequest) {
   try {
-    // Pass the request to the handleAuthCallback function
-    // The handleAuthCallback function will use the defaultSessionConfig if no config is passed
+    // Simply pass the request to the handleAuthCallback function
+    // It will use the default session config internally
     const response = await handleAuthCallback(request);
     return response;
   } catch (error) {

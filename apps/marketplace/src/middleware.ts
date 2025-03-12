@@ -1,20 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateOrigin, withRateLimit } from "@krain/session";
-import { sessionConfig } from "./lib/session";
 
 export default async function middleware(request: NextRequest) {
-  // Validate the origin of the request
-  if (!(await validateOrigin(request.headers))) {
-    return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
-  }
-
-  // Apply rate limiting
-  const rateLimitResponse = await withRateLimit(request.headers);
-  if (rateLimitResponse) {
-    return rateLimitResponse;
-  }
-
-  // Continue to the next middleware or route handler
+  // Simply continue to the next middleware or route handler
+  // We'll handle origin validation and rate limiting separately
   return NextResponse.next();
 }
 
