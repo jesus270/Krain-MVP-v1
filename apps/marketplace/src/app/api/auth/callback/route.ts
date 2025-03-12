@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { handleAuthCallback } from "@krain/session";
-import { createSessionConfig } from "@krain/session";
+import { sessionConfig } from "../../layout";
 
 export async function POST(request: NextRequest) {
   try {
-    // Create session config with just the password string
-    const sessionSecret =
-      process.env.SESSION_SECRET || "marketplace-dev-secret";
-    const sessionConfig = createSessionConfig(sessionSecret);
-
-    // Pass the request to the handleAuthCallback function
+    // Use the shared session config from layout
     const response = await handleAuthCallback(request);
     return response;
   } catch (error) {
