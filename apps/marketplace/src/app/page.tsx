@@ -209,7 +209,7 @@ export default function Home() {
 
   return (
     <div className="p-8 px-16 flex flex-col">
-      <header className="flex flex-col items-center gap-4 lg:gap-8">
+      <header className="flex flex-col items-center gap-4 lg:gap-8 mb-4">
         {/* <div className="flex flex-col items-center gap-2">
           <h1 className="text-2xl sm:text-3xl font-bold">Discover AI Agents</h1>
         </div> */}
@@ -222,7 +222,9 @@ export default function Home() {
           categories={categories}
           tags={tags}
         />
-        <ActiveFilters filters={filters} onRemove={handleRemoveFilter} />
+        {hasActiveFilters && (
+          <ActiveFilters filters={filters} onRemove={handleRemoveFilter} />
+        )}
       </header>
 
       {!hasActiveFilters ? (
