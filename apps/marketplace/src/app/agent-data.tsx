@@ -805,4 +805,18 @@ export const agents: AIAgent[] = [
       x: "@AskBillyBets",
     },
   },
-];
+].map((agent) => {
+  // Ensure all required properties have valid values
+  return {
+    ...agent,
+    tags: Array.isArray(agent.tags) ? agent.tags : [],
+    blockchainsSupported: Array.isArray(agent.blockchainsSupported)
+      ? agent.blockchainsSupported
+      : [],
+    industryFocus: Array.isArray(agent.industryFocus)
+      ? agent.industryFocus
+      : [],
+    pricing: Array.isArray(agent.pricing) ? agent.pricing : [],
+    socialMedia: agent.socialMedia || {},
+  };
+});

@@ -34,7 +34,7 @@ export function BasePointsSection({
         </Label>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-lg border border-border/50 bg-card/50 p-3 relative overflow-hidden group backdrop-blur-sm">
+        <div className="rounded-lg border border-border/50 bg-card p-3 relative overflow-hidden group backdrop-blur-xs">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x" />
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="flex items-center justify-between relative z-10">
@@ -74,7 +74,7 @@ export function BasePointsSection({
             )}
           </div>
         </div>
-        <div className="rounded-lg border border-border/50 bg-card/50 p-3 relative overflow-hidden group backdrop-blur-sm">
+        <div className="rounded-lg border border-border/50 bg-card p-3 relative overflow-hidden group backdrop-blur-xs">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x" />
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="flex items-center justify-between relative z-10">

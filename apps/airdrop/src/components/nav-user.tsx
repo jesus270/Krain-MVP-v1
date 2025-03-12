@@ -46,7 +46,7 @@ export function NavUser() {
           <Avatar className="h-8 w-8 rounded-lg relative">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-lg" />
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300" />
-            <AvatarFallback className="rounded-lg backdrop-blur-sm bg-background/80 relative">
+            <AvatarFallback className="rounded-lg backdrop-blur-xs bg-background/80 relative">
               {user?.email?.address ? (
                 <span className="bg-gradient-to-br from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent group-hover:from-purple-500 group-hover:to-blue-500 transition-all">
                   {capitalize(user?.email?.address?.charAt(0) ?? "")}
@@ -69,7 +69,7 @@ export function NavUser() {
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg backdrop-blur-sm bg-background/95 border-border/50"
+        className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-56 rounded-lg backdrop-blur-xs bg-background/95 border-border/50"
         side={isMobile ? "bottom" : "right"}
         align="end"
         sideOffset={4}
@@ -79,7 +79,7 @@ export function NavUser() {
             <Avatar className="h-8 w-8 rounded-lg relative">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-lg" />
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300" />
-              <AvatarFallback className="rounded-lg backdrop-blur-sm bg-background/80 relative">
+              <AvatarFallback className="rounded-lg backdrop-blur-xs bg-background/80 relative">
                 {user?.email?.address ? (
                   <span className="bg-gradient-to-br from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent group-hover:from-purple-500 group-hover:to-blue-500 transition-all">
                     {capitalize(user?.email?.address?.charAt(0) ?? "")}

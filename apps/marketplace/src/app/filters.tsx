@@ -86,7 +86,7 @@ export function MultiSelectFilter<T extends string>({
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-[400px] p-0 flex flex-col">
-        <div className="border-b px-4 py-3 flex-shrink-0">
+        <div className="border-b px-4 py-3 shrink-0">
           <input
             className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
             placeholder={`Search ${label.toLowerCase()}...`}

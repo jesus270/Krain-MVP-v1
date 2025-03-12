@@ -1,5 +1,6 @@
 "use client";
 
+import "@krain/ui/globals.css";
 import { RootLayout } from "@krain/ui/layouts/root-layout";
 import { Toaster } from "@krain/ui/components/ui/sonner";
 import Footer from "@/components/footer";
@@ -7,8 +8,7 @@ import { SidebarNav } from "@/components/nav-sidebar";
 import { SidebarInset, SidebarProvider } from "@krain/ui/components/ui/sidebar";
 import Header from "@/components/header";
 import { ErrorBoundary } from "@/components/error-boundary";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/react";
+
 import { usePathname } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
 
@@ -27,8 +27,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex flex-grow flex-col">
             {children}
             <Toaster richColors />
-            <SpeedInsights />
-            <Analytics />
           </div>
           <Footer />
         </SidebarInset>
@@ -53,6 +51,7 @@ export default function Layout({
           privyAppId: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
           loadingTitle: "Welcome to the $KRAIN Airdrop",
           loadingDescription: "Please wait while we validate your session...",
+          validateSession: false,
         }}
         intercomAppId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID}
       >

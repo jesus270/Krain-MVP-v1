@@ -1,3 +1,5 @@
+"use client";
+
 import { AIAgent } from "../types";
 import {
   Card,
@@ -13,6 +15,7 @@ import { BotIcon, StarIcon, CheckCircle2Icon, XCircleIcon } from "lucide-react";
 import Link from "next/link";
 import { AgentImage } from "../agent/[id]/components/agent-image";
 import { useRef } from "react";
+import { FavoriteButton } from "./favorite-button";
 
 interface AgentCardProps {
   agent: AIAgent;
@@ -39,7 +42,12 @@ export function FeaturedAgentCard({
   const workflowCount = Math.floor(Math.random() * 999) + 1;
   const containerRef = useRef<HTMLDivElement>(null);
   return (
-    <Card className={`flex flex-col lg:flex-row`}>
+    <Card className={`flex flex-col lg:flex-row p-0 relative`}>
+      {/* Favorite Button */}
+      <div className="absolute top-2 right-2 z-10">
+        <FavoriteButton agentId={parseInt(agent.id)} size="sm" />
+      </div>
+
       <div
         ref={containerRef}
         className="aspect-square w-full lg:w-auto bg-muted flex"
@@ -125,7 +133,7 @@ export function FeaturedAgentCard({
           <Button
             size="sm"
             asChild
-            className="bg-muted hover:bg-muted/60 text-foreground rounded-full shadow-sm border-muted-foreground/20 border transition-colors"
+            className="bg-muted hover:bg-muted/60 text-foreground rounded-full shadow-xs border-muted-foreground/20 border transition-colors"
           >
             <Link href={`/agent/${agent.id}`}>Learn more</Link>
           </Button>

@@ -29,3 +29,6 @@ export { RateLimiter } from "./rate-limit";
 
 // Callback handler
 export { handleAuthCallback } from "./routes/callback";
+
+// Auth handler for Privy
+export { handlePrivyAuth, type PrivyUserData } from "./auth-handler";

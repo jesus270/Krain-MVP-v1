@@ -3,6 +3,7 @@ import { Card } from "@krain/ui/components/ui/card";
 import { BotIcon, StarIcon } from "lucide-react";
 import Link from "next/link";
 import { AgentImage } from "../agent/[id]/components/agent-image";
+import { useRef, RefObject } from "react";
 
 interface ListAgentCardProps {
   agent: AIAgent;
@@ -12,20 +13,26 @@ interface ListAgentCardProps {
 export function ListAgentCard({ agent, onFilter }: ListAgentCardProps) {
   // Generate random number of workflows (under 1000)
   const workflowCount = Math.floor(Math.random() * 999) + 1;
+  const imageContainerRef = useRef<HTMLDivElement>(null);
 
   return (
     <Link
       href={`/agent/${agent.id}`}
       className="block w-[350px] h-[60px] no-underline"
     >
-      <Card className="relative overflow-hidden flex flex-row h-full w-full text-foreground cursor-pointer hover:opacity-90 transition-opacity">
-        <div className="relative aspect-square w-[60px] h-full shrink-0 flex items-center justify-center bg-muted">
+      <Card className="relative overflow-hidden flex flex-row h-full w-full text-foreground cursor-pointer hover:bg-muted/50 transition-colors shadow-xs">
+        <div
+          ref={imageContainerRef}
+          className="relative size-[60px] flex-shrink-0 flex items-center justify-center bg-muted/20"
+          style={{ minWidth: "60px" }}
+        >
           <AgentImage
             imageUrl={agent.imageUrl || ""}
             name={agent.name}
             size="sm"
             shape="square"
-            className="w-[40px] h-[40px]"
+            className="size-full object-cover"
+            containerRef={imageContainerRef as RefObject<HTMLDivElement>}
           />
         </div>
         <div className="flex-1 flex flex-col justify-center p-2">
@@ -43,7 +50,7 @@ export function ListAgentCard({ agent, onFilter }: ListAgentCardProps) {
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    className="w-2.5 h-2.5"
+                    className="size-2.5"
                   >
                     <path
                       d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"

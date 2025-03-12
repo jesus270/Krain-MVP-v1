@@ -9,9 +9,50 @@ import {
   text,
   real,
   jsonb,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { generateReferralCode } from "@krain/utils";
 import { relations } from "drizzle-orm";
+
+// Types for Privy user data
+export type WalletChainType = "solana" | string;
+export type WalletClientType = "phantom" | "solflare" | "unknown" | string;
+export type ConnectorType = "solana_adapter" | string;
+
+export interface BaseLinkedAccount {
+  type: string;
+  verified_at?: number;
+  first_verified_at?: number;
+  latest_verified_at?: number;
+}
+
+export interface WalletLinkedAccount extends BaseLinkedAccount {
+  type: "wallet";
+  address: string;
+  chain_type: WalletChainType;
+  wallet_client: string;
+  wallet_client_type: WalletClientType;
+  connector_type: ConnectorType;
+}
+
+export interface EmailLinkedAccount extends BaseLinkedAccount {
+  type: "email";
+  address: string;
+}
+
+export interface TwitterOAuthLinkedAccount extends BaseLinkedAccount {
+  type: "twitter_oauth";
+  subject: string;
+  name: string;
+  username: string;
+  profile_picture_url: string;
+}
+
+export type LinkedAccount =
+  | WalletLinkedAccount
+  | EmailLinkedAccount
+  | TwitterOAuthLinkedAccount
+  | BaseLinkedAccount;
 
 // wallets that signed up for the airdrop
 export const walletTable = pgTable(
@@ -40,6 +81,30 @@ export const walletRelations = relations(walletTable, ({ one, many }) => ({
   referrals: many(referralTable, {
     relationName: "walletReferrals",
   }),
+}));
+
+// Privy user wallets - separate from airdrop wallets
+export const privyWalletTable = pgTable(
+  "privyWallet",
+  {
+    address: varchar("address", { length: 255 }).notNull().primaryKey(),
+    chainType: varchar("chainType", { length: 50 }),
+    walletClient: varchar("walletClient", { length: 100 }),
+    walletClientType: varchar("walletClientType", { length: 50 }),
+    connectorType: varchar("connectorType", { length: 50 }),
+    verifiedAt: timestamp("verifiedAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt"),
+  },
+  (table) => [
+    index("idx_privyWallet_address").on(table.address),
+    index("idx_privyWallet_createdAt").on(table.createdAt),
+  ],
+);
+export type PrivyWallet = typeof privyWalletTable.$inferSelect;
+
+export const privyWalletRelations = relations(privyWalletTable, ({ many }) => ({
+  users: many(userTable, { relationName: "userWallets" }),
 }));
 
 export const referralTable = pgTable(
@@ -112,19 +177,36 @@ export type TokenSignup = typeof tokenSignupTable.$inferSelect;
 
 export const userTable = pgTable("user", {
   id: serial("id").primaryKey(),
-  walletAddress: varchar("walletAddress", { length: 255 }).notNull().unique(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
+  walletAddress: varchar("walletAddress", { length: 255 })
+    .$type<string>()
+    .unique(),
+  email: varchar("email", { length: 255 }).unique(),
   privyId: varchar("privyId", { length: 255 }).notNull().unique(),
   twitterHandle: varchar("twitterHandle", { length: 255 }).unique(),
+  twitterName: varchar("twitterName", { length: 255 }),
+  twitterProfilePictureUrl: varchar("twitterProfilePictureUrl", {
+    length: 1024,
+  }),
+  twitterSubject: varchar("twitterSubject", { length: 255 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
+  privyCreatedAt: timestamp("privyCreatedAt"),
+  isGuest: boolean("isGuest").default(false),
+  hasAcceptedTerms: boolean("hasAcceptedTerms").default(false),
+  linkedAccounts: jsonb("linkedAccounts").$type<LinkedAccount[]>(),
+  role: varchar("role", { length: 255 }).$type<string>().default("user"),
 });
 export type User = typeof userTable.$inferSelect;
 
 export const userRelations = relations(userTable, ({ one }) => ({
-  wallet: one(walletTable, {
+  privyWallet: one(privyWalletTable, {
+    fields: [userTable.walletAddress],
+    references: [privyWalletTable.address],
+    relationName: "userWallets",
+  }),
+  airdropWallet: one(walletTable, {
     fields: [userTable.walletAddress],
     references: [walletTable.address],
-    relationName: "wallet",
+    relationName: "airdropWallet",
   }),
 }));
 
@@ -203,6 +285,82 @@ export const favoriteAgentRelations = relations(
       fields: [favoriteAgentTable.agentId],
       references: [agentTable.id],
       relationName: "agent",
+    }),
+  }),
+);
+
+export const reviewTable = pgTable("review", {
+  id: serial("id").primaryKey(),
+  userId: integer("userId").references(() => userTable.id),
+  agentId: integer("agentId").references(() => agentTable.id),
+  rating: real("rating").notNull(),
+  review: text("review"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type Review = typeof reviewTable.$inferSelect;
+
+export const reviewRelations = relations(reviewTable, ({ one }) => ({
+  user: one(userTable, {
+    fields: [reviewTable.userId],
+    references: [userTable.id],
+    relationName: "user",
+  }),
+  agent: one(agentTable, {
+    fields: [reviewTable.agentId],
+    references: [agentTable.id],
+    relationName: "agent",
+  }),
+}));
+
+export const agentCategoryTable = pgTable("agentCategory", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AgentCategory = typeof agentCategoryTable.$inferSelect;
+
+export const agentCategoryRelations = relations(
+  agentCategoryTable,
+  ({ many }) => ({
+    agents: many(agentTable, {
+      relationName: "agent",
+    }),
+  }),
+);
+
+export const agentTagTable = pgTable("agentTag", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AgentTag = typeof agentTagTable.$inferSelect;
+
+export const agentTagRelations = relations(agentTagTable, ({ many }) => ({
+  agents: many(agentTable, {
+    relationName: "agent",
+  }),
+}));
+
+export const featuredAgentTable = pgTable("featuredAgent", {
+  id: serial("id").primaryKey(),
+  agentId: integer("agentId")
+    .references(() => agentTable.id)
+    .notNull(),
+  order: integer("order").default(0), // Controls display order
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type FeaturedAgent = typeof featuredAgentTable.$inferSelect;
+
+export const featuredAgentRelations = relations(
+  featuredAgentTable,
+  ({ one }) => ({
+    agent: one(agentTable, {
+      fields: [featuredAgentTable.agentId],
+      references: [agentTable.id],
+      relationName: "featured_agent",
     }),
   }),
 );

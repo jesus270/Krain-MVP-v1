@@ -6,7 +6,6 @@ import {
 } from "@krain/ui/components/ui/sheet";
 import { Separator } from "@krain/ui/components/ui/separator";
 import { FilterState } from "../filters";
-import { agents } from "../agent-data";
 import { MultiSelectFilter } from "../filters";
 import {
   Select,
@@ -15,33 +14,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@krain/ui/components/ui/select";
-
-// Extract unique values from agents
-const uniqueCategories = [
-  ...new Set(agents.map((agent) => agent.category)),
-].filter(Boolean);
-
-const uniqueTags = [...new Set(agents.flatMap((agent) => agent.tags))].filter(
-  Boolean,
-);
-
-const uniqueIndustries = [
-  ...new Set(agents.flatMap((agent) => agent.industryFocus)),
-].filter(Boolean);
+import { useState } from "react";
 
 interface FilterSheetProps {
   filters: FilterState;
   setFilters: (
     filters: FilterState | ((prev: FilterState) => FilterState),
   ) => void;
+  allAgents: any[]; // Using any to accommodate both AIAgent and DB Agent types
+  categories: string[];
+  tags: string[];
 }
 
-export function FilterSheet({ filters, setFilters }: FilterSheetProps) {
+export function FilterSheet({
+  filters,
+  setFilters,
+  allAgents,
+  categories,
+  tags,
+}: FilterSheetProps) {
+  // Extract unique industries from agents
+  const uniqueIndustries = [
+    ...new Set(allAgents.flatMap((agent) => agent.industryFocus || [])),
+  ].filter(Boolean);
+
   const availableFilters = [
     {
       key: "categories" as const,
       label: "Categories",
-      options: uniqueCategories,
+      options: categories,
       values: filters.categories,
       onChange: (values: string[]) =>
         setFilters({ ...filters, categories: values }),
@@ -49,7 +50,7 @@ export function FilterSheet({ filters, setFilters }: FilterSheetProps) {
     {
       key: "tags" as const,
       label: "Tags",
-      options: uniqueTags,
+      options: tags,
       values: filters.tags,
       onChange: (values: string[]) => setFilters({ ...filters, tags: values }),
     },
@@ -74,7 +75,7 @@ export function FilterSheet({ filters, setFilters }: FilterSheetProps) {
 
       <Separator className="my-8" />
 
-      <div className=" space-y-4">
+      <div className="space-y-4">
         <div>
           <h3 className="mb-2 font-medium">Sort By</h3>
           <div className="flex gap-2">
@@ -111,7 +112,7 @@ export function FilterSheet({ filters, setFilters }: FilterSheetProps) {
           </div>
         </div>
 
-        {availableFilters.map((filter, index) => (
+        {availableFilters.map((filter) => (
           <div key={filter.key}>
             <Separator className="my-8" />
             <h3 className="mb-2 font-medium">{filter.label}</h3>

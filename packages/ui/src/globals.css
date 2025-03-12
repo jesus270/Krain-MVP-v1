@@ -1,47 +1,105 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.ts";
 
-@layer base {
-  :root {
-    --destructive-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
-    --secondary-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
-    --popover-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
-    --primary-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
-    --accent-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
-    --muted-foreground: 246 31% 62%; /* #8781BB */
-    --card-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
-    --destructive: 0 70% 50%; /* Keeping a distinct destructive color for errors */
-    --background: 250 43% 3%; /* #04030c - Eight Ball */
-    --foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
-    --secondary: 192 65% 25%; /* #175c68 - Tropical Skies */
-    --popover: 252 29% 20%; /* #272442 - Midnight Velvet */
-    --primary: 261 70% 36%; /* #431c9d - Eggplant Tint */
-    --border: 252 29% 20%; /* #272442 - Midnight Velvet */
-    --accent: 261 70% 36%; /* #431c9d - Eggplant Tint */
-    --muted: 252 29% 20%; /* #272442 - Midnight Velvet - at 40% */
-    --input: 252 29% 20%; /* #272442 - Midnight Velvet */
-    --card: 252 29% 20%; /* #272442 - Midnight Velvet - at 20% */
-    --ring: 261 70% 36%; /* #431c9d - Eggplant Tint */
-    --radius: 0.5rem;
-    --sidebar-background: 250 43% 3%; /* #04030c - Eight Ball */
-    --sidebar-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
-    --sidebar-primary: 261 70% 36%; /* #431c9d - Eggplant Tint */
-    --sidebar-primary-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
-    --sidebar-accent: 192 65% 25%; /* #175c68 - Tropical Skies */
-    --sidebar-accent-foreground: 220 13% 95%; /* #eff0f3 - Maui Mist */
-    --sidebar-border: 252 29% 20%; /* #272442 - Midnight Velvet */
-    --sidebar-ring: 261 70% 36%; /* #431c9d - Eggplant Tint */
+@custom-variant dark (&:is(.dark *));
+
+/* Move variables out of @layer base */
+:root {
+  --background: hsl(250 43% 3%); /* #04030c - Eight Ball */
+  --foreground: hsl(220 13% 95%); /* #eff0f3 - Maui Mist */
+  --destructive-foreground: hsl(220 13% 95%); /* #eff0f3 - Maui Mist */
+  --secondary-foreground: hsl(220 13% 95%); /* #eff0f3 - Maui Mist */
+  --popover-foreground: hsl(220 13% 95%); /* #eff0f3 - Maui Mist */
+  --primary-foreground: hsl(220 13% 95%); /* #eff0f3 - Maui Mist */
+  --accent-foreground: hsl(220 13% 95%); /* #eff0f3 - Maui Mist */
+  --muted-foreground: hsl(246 31% 62%); /* #8781BB */
+  --card-foreground: hsl(220 13% 95%); /* #eff0f3 - Maui Mist */
+  --destructive: hsl(
+    0 70% 50%
+  ); /* Keeping a distinct destructive color for errors */
+  --secondary: hsl(192 65% 25%); /* #175c68 - Tropical Skies */
+  --popover: hsl(252 29% 20%); /* #272442 - Midnight Velvet */
+  --primary: hsl(261 70% 36%); /* #431c9d - Eggplant Tint */
+  --border: hsl(252 29% 20%); /* #272442 - Midnight Velvet */
+  --accent: hsl(261 70% 36%); /* #431c9d - Eggplant Tint */
+  --muted: hsl(252 29% 20%); /* #272442 - Midnight Velvet - at 40% */
+  --input: hsl(252 29% 20%); /* #272442 - Midnight Velvet */
+  --card: hsl(252 29% 20%); /* #272442 - Midnight Velvet - at 20% */
+  --ring: hsl(261 70% 36%); /* #431c9d - Eggplant Tint */
+  --radius: 0.5rem;
+  --sidebar-background: hsl(250 43% 3%); /* #04030c - Eight Ball */
+  --sidebar-foreground: hsl(220 13% 95%); /* #eff0f3 - Maui Mist */
+  --sidebar-primary: hsl(261 70% 36%); /* #431c9d - Eggplant Tint */
+  --sidebar-primary-foreground: hsl(220 13% 95%); /* #eff0f3 - Maui Mist */
+  --sidebar-accent: hsl(192 65% 25%); /* #175c68 - Tropical Skies */
+  --sidebar-accent-foreground: hsl(220 13% 95%); /* #eff0f3 - Maui Mist */
+  --sidebar-border: hsl(252 29% 20%); /* #272442 - Midnight Velvet */
+  --sidebar-ring: hsl(261 70% 36%); /* #431c9d - Eggplant Tint */
+  --sidebar: hsl(
+    250 43% 3%
+  ); /* #04030c - Eight Ball - Match sidebar-background */
+}
+
+/* Add theme inline directive */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius: var(--radius);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: var(--border);
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: var(--font-inter);
   }
 
@@ -71,5 +129,27 @@
   .animate-gradient-x {
     animation: gradient-x 15s ease infinite;
     background-size: 400% 400%;
+  }
+}
+
+.dark {
+  --sidebar: hsl(
+    250 43% 3%
+  ); /* #04030c - Eight Ball - Match sidebar-background */
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }

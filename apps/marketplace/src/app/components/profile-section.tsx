@@ -25,13 +25,19 @@ export function ProfileSection() {
     setIsLoggingIn(true);
     try {
       await login();
+    } catch (error) {
+      console.error("Login error:", error);
     } finally {
       setIsLoggingIn(false);
     }
   };
 
   const handleLogout = async () => {
-    await logout();
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   if (!authenticated) {
@@ -55,7 +61,9 @@ export function ProfileSection() {
 
   // Get profile image based on wallet address
   const getProfileImage = () => {
+    // Safely access wallet address
     const walletAddress = user?.wallet?.address;
+    if (!walletAddress) return undefined;
 
     // Check if the wallet address matches any of the specific addresses
     if (
@@ -67,6 +75,13 @@ export function ProfileSection() {
 
     // Return undefined instead of null to match the expected type
     return undefined;
+  };
+
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (user?.email?.address) return user.email.address;
+    if (user?.wallet?.address) return formatWalletAddress(user.wallet.address);
+    return "User";
   };
 
   return (
@@ -82,10 +97,7 @@ export function ProfileSection() {
 
       <DropdownMenuContent align="end" className="w-56">
         <div className="px-2 py-1.5 text-sm font-medium text-muted-foreground">
-          {user?.email?.address ||
-            (user?.wallet?.address
-              ? formatWalletAddress(user.wallet.address)
-              : "")}
+          {getUserDisplayName()}
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">

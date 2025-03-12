@@ -12,6 +12,7 @@ import {
   InstagramIcon,
   MessageCircleIcon,
 } from "lucide-react";
+import { FavoriteButton } from "@/app/components/favorite-button";
 
 interface AgentDetailsContentProps {
   agent: AIAgent;
@@ -29,8 +30,11 @@ export function AgentDetailsContent({ agent }: AgentDetailsContentProps) {
           shape="circle"
           className="w-[80px] h-[80px]"
         />
-        <div>
-          <h1 className="text-3xl font-bold">{agent.name}</h1>
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold">{agent.name}</h1>
+            <FavoriteButton agentId={parseInt(agent.id)} size="default" />
+          </div>
           <p className="text-muted-foreground">by {agent.companyName}</p>
           <div className="flex items-center gap-2 mt-1">
             <Badge variant="outline">{agent.category}</Badge>

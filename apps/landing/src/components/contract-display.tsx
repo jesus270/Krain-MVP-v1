@@ -56,7 +56,7 @@ export function ContractDisplay({ address }: ContractDisplayProps) {
               <span className="text-xs sm:text-sm text-[#8781BB]">
                 Contract address:
               </span>
-              <code className="text-xs sm:text-sm text-white blur-sm">
+              <code className="text-xs sm:text-sm text-white blur-xs">
                 <span className="sm:hidden">{formatAddress(address)}</span>
                 <span className="hidden sm:inline">{address}</span>
               </code>
