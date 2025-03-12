@@ -1,3 +1,39 @@
 @import "@krain/ui/globals.css";
 
 /* Additional app-specific styles can go here */
+:root {
+  --app-background: url("/bg-main.svg");
+}
+
+/* Ensure html and body take full viewport height */
+html,
+body {
+  min-height: 100vh;
+}
+
+/* Just target the background container and leave other styles alone */
+.marketplace-bg-container {
+  /* Styles are now inline in the layout component */
+}
+
+/* Make the SidebarInset transparent to show the background */
+main[data-slot="sidebar-inset"] {
+  background-color: transparent !important;
+}
+
+/* Handle different viewport sizes */
+@media screen and (max-height: 800px) {
+  .marketplace-bg-container {
+    height: 120vh !important; /* Even more extension for shorter screens */
+    top: -10vh !important;
+    bottom: -10vh !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .marketplace-bg-container {
+    width: 120vw !important; /* Even more extension for mobile screens */
+    left: -10vw !important;
+    right: -10vw !important;
+  }
+}
