@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { handleAuthCallback } from "@krain/session";
-import { sessionConfig } from "../../layout";
+import { sessionConfig } from "../../../../lib/session";
 
 export async function POST(request: NextRequest) {
   try {

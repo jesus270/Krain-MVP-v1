@@ -3,19 +3,12 @@ import { RootLayout as AppRootLayout } from "@krain/ui/layouts/root-layout";
 import { SidebarNav } from "./components/nav-sidebar";
 import Header from "./components/header";
 import { SidebarInset, SidebarProvider } from "@krain/ui/components/ui/sidebar";
-import { createSessionConfig } from "@krain/session";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Krain AI - Agent Portal",
   description: "Krain AI Agent Portal",
 };
-
-// Create session config with a fallback for production
-const sessionSecret =
-  process.env.SESSION_SECRET || "marketplace-production-secret";
-// This will be used by any components that need the session config
-export const sessionConfig = createSessionConfig(sessionSecret);
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

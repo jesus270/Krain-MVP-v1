@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateOrigin, withRateLimit } from "@krain/session";
-import { sessionConfig } from "./app/layout";
+import { sessionConfig } from "./lib/session";
 
 export default async function middleware(request: NextRequest) {
   // Validate the origin of the request

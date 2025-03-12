@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sessionConfig } from "../../layout";
+import { sessionConfig } from "../../../lib/session";
 
 export async function GET(request: NextRequest) {
   // Only allow this in development for security
