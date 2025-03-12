@@ -16,6 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         loadingTitle: "Welcome to the $KRAIN Early Access Signup",
         loadingDescription: "Please wait while we validate your session...",
         privyLoginMethods: ["email", "wallet"],
+        validateSession: false,
       }}
       intercomAppId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID}
     >
