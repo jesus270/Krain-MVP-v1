@@ -110,7 +110,7 @@ export function SidebarNav() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="mt-3">
+      <SidebarHeader className={cn(state === "collapsed" ? "mt-2" : "mt-4")}>
         <Link
           href="/"
           onClick={handleClick}
@@ -118,8 +118,8 @@ export function SidebarNav() {
         >
           <div
             className={cn(
-              "transition-all duration-300 relative ml-2.5",
-              state === "collapsed" ? "p-1" : "",
+              "transition-all duration-300 relative",
+              state === "collapsed" ? "mx-auto" : "ml-2.5",
             )}
           >
             {/* <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x" />
@@ -163,37 +163,46 @@ export function SidebarNav() {
                     onClick={handleClick}
                     className="relative z-10 transition-all hover:bg-transparent [&:hover>span]:font-bold [&:hover>svg]:scale-110"
                   >
-                    <item.icon className="transition-transform text-foreground" />
-                    <span className="text-foreground transition-all">
-                      {item.name}
-                    </span>
-                    {item.premium && (
-                      <span className="relative ml-auto text-xs px-2 py-0.5 rounded-full text-white">
-                        <div
-                          className="absolute inset-0 rounded-full opacity-50"
-                          style={{
-                            background: `linear-gradient(120deg,
-                              #1FC5D6 0%,
-                              #915BF0 50%,
-                              rgb(47, 45, 64) 75%
-                            )`,
-                          }}
-                        />
-                        <div
-                          className="absolute inset-0 rounded-full opacity-50"
-                          style={{
-                            padding: "1px",
-                            background: `linear-gradient(120deg,
-                              #1FC5D6 0%,
-                              rgba(31, 196, 214, 0.50) 50%,
-                              rgba(31, 196, 214, 0.25) 75%
-                            )`,
-                            mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-                            maskComposite: "exclude",
-                          }}
-                        />
-                        <span className="relative z-10 block">PREMIUM</span>
-                      </span>
+                    <item.icon
+                      className={cn(
+                        "transition-transform text-foreground",
+                        state === "collapsed" ? "mx-auto" : "",
+                      )}
+                    />
+                    {state !== "collapsed" && (
+                      <>
+                        <span className="text-foreground transition-all">
+                          {item.name}
+                        </span>
+                        {item.premium && (
+                          <span className="relative ml-auto text-xs px-2 py-0.5 rounded-full text-white">
+                            <div
+                              className="absolute inset-0 rounded-full opacity-50"
+                              style={{
+                                background: `linear-gradient(120deg,
+                                  #1FC5D6 0%,
+                                  #915BF0 50%,
+                                  rgb(47, 45, 64) 75%
+                                )`,
+                              }}
+                            />
+                            <div
+                              className="absolute inset-0 rounded-full opacity-50"
+                              style={{
+                                padding: "1px",
+                                background: `linear-gradient(120deg,
+                                  #1FC5D6 0%,
+                                  rgba(31, 196, 214, 0.50) 50%,
+                                  rgba(31, 196, 214, 0.25) 75%
+                                )`,
+                                mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                                maskComposite: "exclude",
+                              }}
+                            />
+                            <span className="relative z-10 block">PREMIUM</span>
+                          </span>
+                        )}
+                      </>
                     )}
                   </Link>
                 </SidebarMenuButton>
@@ -225,10 +234,17 @@ export function SidebarNav() {
                     onClick={handleClick}
                     className="relative z-10 transition-all hover:bg-transparent [&:hover>span]:font-bold [&:hover>svg]:scale-110"
                   >
-                    <item.icon className="transition-transform text-foreground" />
-                    <span className="text-foreground transition-all">
-                      {item.name}
-                    </span>
+                    <item.icon
+                      className={cn(
+                        "transition-transform text-foreground",
+                        state === "collapsed" ? "mx-auto" : "",
+                      )}
+                    />
+                    {state !== "collapsed" && (
+                      <span className="text-foreground transition-all">
+                        {item.name}
+                      </span>
+                    )}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
