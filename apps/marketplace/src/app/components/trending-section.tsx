@@ -128,12 +128,11 @@ export function TrendingSection({ agents, onFilter }: TrendingSectionProps) {
     )
     .sort((a, b) => b.rating - a.rating);
 
-  const businessAgents = agents
+  const sportsAgents = agents
     .filter(
       (agent) =>
-        agent.category === "Business" ||
-        agent.category === "Business Intelligence" ||
-        agent.category === "Business Automation",
+        agent.category === "Sports" ||
+        agent.tags.some((tag) => tag.toLowerCase().includes("sports")),
     )
     .sort((a, b) => b.rating - a.rating);
 
@@ -154,8 +153,8 @@ export function TrendingSection({ agents, onFilter }: TrendingSectionProps) {
         className="text-white"
       />
       <TrendingCategory
-        title="Business"
-        agents={businessAgents}
+        title="Sports"
+        agents={sportsAgents}
         onFilter={onFilter}
         className="text-white"
       />
