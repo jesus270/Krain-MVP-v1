@@ -128,6 +128,74 @@ export async function validateOrigin(headers: HeadersLike): Promise<boolean> {
     environment: process.env.NODE_ENV || "unknown",
   });
 
+  // Added special case: If the request seems to be an initial page load
+  // from a user navigating from our landing page, allow it without strict checks
+  if (referer) {
+    // Extract domain from referer
+    const refererDomain = parseOriginDomain(referer);
+
+    // Known domains we accept navigation from
+    const trustedReferers = ["krain.ai", "landing.krain.ai", "www.krain.ai"];
+
+    // If referer is from known domain, allow the request
+    if (trustedReferers.includes(refererDomain)) {
+      log.info("Allowing navigation from trusted referer", {
+        entity: "SESSION MIDDLEWARE",
+        operation: "validate_origin",
+        refererDomain,
+        host,
+      });
+      return true;
+    }
+  }
+
+  // If there's no origin, this is likely a direct browser navigation
+  // In production, we want to be more permissive with these
+  if (!origin) {
+    log.info("No origin - likely direct browser navigation", {
+      entity: "SESSION MIDDLEWARE",
+      operation: "validate_origin",
+      referer,
+      host,
+    });
+
+    // For direct navigation with no origin, rely on host validation
+    // This is typically the case for users loading the page directly
+    if (host) {
+      const hostDomain = host.split(":")[0] || ""; // Fix: Add empty string fallback
+      if (allowedOrigins.includes(hostDomain)) {
+        return true;
+      }
+
+      // For early.krain.ai host, just allow it explicitly
+      if (hostDomain === "early.krain.ai") {
+        return true;
+      }
+    }
+
+    // Allow the request if:
+    // 1. No origin header (typical for direct browser navigation)
+    // 2. Has a referer (indicating user clicked a link)
+    if (referer) {
+      // Add specific check for krain.ai referer format
+      if (
+        referer.startsWith("https://krain.ai/") ||
+        referer.startsWith("http://krain.ai/") ||
+        referer.includes("landing.krain.ai") ||
+        referer.includes("www.krain.ai")
+      ) {
+        log.info("Allowing link navigation from krain.ai landing page", {
+          entity: "SESSION MIDDLEWARE",
+          operation: "validate_origin",
+          referer,
+        });
+        return true;
+      }
+
+      return true; // Allow all referers when no origin for simplicity
+    }
+  }
+
   // Special case: Check if this is a browser navigation request (not an API call)
   // Browser navigations often have null origin with a referer
   if (!origin && referer) {
@@ -151,7 +219,7 @@ export async function validateOrigin(headers: HeadersLike): Promise<boolean> {
     }
   }
 
-  // Continue with regular validation...
+  // Continue with the rest of the validation...
 
   // If no origin/referer, use the host header
   if (!origin && !referer) {
@@ -231,7 +299,33 @@ export async function withServerActionProtection(
   request: { headers: HeadersLike },
   type: "default" | "auth" | "api" = "default",
 ) {
-  // First validate origin
+  // Extract the referer to check if this is a navigation from the landing page
+  const referer = await getHeaderValue(request.headers, "referer");
+
+  // If the referer is from krain.ai, we'll bypass origin validation
+  // This is crucial for links from the landing page to work
+  const bypassOriginCheck =
+    referer &&
+    (referer.startsWith("https://krain.ai/") ||
+      referer.startsWith("http://krain.ai/") ||
+      referer.includes("landing.krain.ai") ||
+      referer.includes("www.krain.ai"));
+
+  if (bypassOriginCheck) {
+    log.info("Bypassing origin check for request from landing page", {
+      entity: "SESSION MIDDLEWARE",
+      operation: "bypass_origin_check",
+      referer,
+    });
+
+    // Skip origin validation, but still apply rate limiting
+    const rateLimitResponse = await withRateLimit(request.headers, type);
+    if (rateLimitResponse) return rateLimitResponse;
+
+    return null; // Continue with the request
+  }
+
+  // First validate origin for all other requests
   if (!(await validateOrigin(request.headers))) {
     return NextResponse.json(
       {

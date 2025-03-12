@@ -6,6 +6,31 @@ import { geolocation } from "@vercel/functions";
 // Protected paths that require authentication
 const PROTECTED_PATHS = ["/api/wallet", "/api/referral"];
 
+// Function to handle CORS for specific origins
+function handleCors(request: NextRequest, response: NextResponse) {
+  const origin = request.headers.get("origin");
+
+  // List of allowed origins
+  const allowedOrigins = [
+    "https://krain.ai",
+    "https://www.krain.ai",
+    "https://landing.krain.ai",
+  ];
+
+  // Allow localhost in development
+  if (process.env.NODE_ENV === "development") {
+    allowedOrigins.push("http://localhost:3000");
+    allowedOrigins.push("http://localhost:3001");
+  }
+
+  // Set CORS headers if origin is allowed
+  if (origin && allowedOrigins.includes(origin)) {
+    response.headers.set("Access-Control-Allow-Origin", origin);
+  }
+
+  return response;
+}
+
 export async function middleware(request: NextRequest) {
   try {
     const pathname = request.nextUrl.pathname;
@@ -96,9 +121,42 @@ export async function middleware(request: NextRequest) {
       }
     }
 
-    // Apply rate limiting and origin validation
-    const protectionResponse = await withServerActionProtection(request, "api");
-    if (protectionResponse) return protectionResponse;
+    // Special handling for navigation from landing page
+    const referer = request.headers.get("referer");
+    const isNavigationFromLanding =
+      referer &&
+      (referer.startsWith("https://krain.ai/") ||
+        referer.startsWith("http://krain.ai/") ||
+        referer.includes("landing.krain.ai") ||
+        referer.includes("www.krain.ai"));
+
+    if (isNavigationFromLanding) {
+      log.info("Navigation from landing page detected", {
+        entity: "MIDDLEWARE",
+        operation: "landing_navigation",
+        referer,
+      });
+
+      // We'll allow this request and skip all further checks for any page request
+      // This ensures the initial page load from landing works without CORS issues
+      if (!pathname.startsWith("/api/")) {
+        // Allow navigation from landing page and add CORS headers
+        const response = NextResponse.next();
+        return handleCors(request, response);
+      }
+    }
+
+    // Apply rate limiting and origin validation for API routes
+    if (pathname.startsWith("/api/")) {
+      const protectionResponse = await withServerActionProtection(
+        request,
+        "api",
+      );
+      if (protectionResponse) {
+        // Add CORS headers even to error responses
+        return handleCors(request, protectionResponse);
+      }
+    }
 
     // Check if this is a protected route
     if (PROTECTED_PATHS.some((p) => pathname.startsWith(p))) {
@@ -127,13 +185,13 @@ export async function middleware(request: NextRequest) {
       const response = NextResponse.next();
       const rateLimit = await withRateLimit(request.headers, "api");
       if (rateLimit) {
-        return rateLimit;
+        return handleCors(request, rateLimit);
       }
-      return response;
+      return handleCors(request, response);
     }
 
-    // Not a protected route, continue
-    return NextResponse.next();
+    // Not a protected route, continue with CORS headers
+    return handleCors(request, NextResponse.next());
   } catch (error) {
     log.error(error, {
       entity: "MIDDLEWARE",
@@ -141,10 +199,12 @@ export async function middleware(request: NextRequest) {
       status: "error",
     });
 
-    return NextResponse.json(
+    const errorResponse = NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
     );
+
+    return handleCors(request, errorResponse);
   }
 }
 
