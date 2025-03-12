@@ -22,21 +22,47 @@ async function getHeaderValue(
 
 function getAllowedOrigins(): string[] {
   const domain = process.env.DOMAIN;
+  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN;
 
   // In development mode, allow localhost even if DOMAIN is not set
   if (process.env.NODE_ENV === "development") {
-    return domain ? [domain, "localhost"] : ["localhost"];
+    const domains = [
+      ...(domain ? [domain] : []),
+      ...(appDomain ? [appDomain] : []),
+      "localhost",
+    ];
+    return domains;
   }
 
-  // In production, DOMAIN is required
-  if (!domain) {
-    throw new Error("DOMAIN environment variable must be set");
+  // In production, use both DOMAIN and NEXT_PUBLIC_APP_DOMAIN if available
+  const domains = [];
+
+  if (domain) {
+    domains.push(domain);
   }
 
-  return [domain];
+  if (appDomain) {
+    domains.push(appDomain);
+  }
+
+  // Add specific domains we know should be allowed
+  domains.push("early.krain.ai");
+
+  // Add the landing page domain to allow navigation from landing to app
+  domains.push("krain.ai");
+  domains.push("landing.krain.ai");
+  domains.push("www.krain.ai");
+
+  // If still empty, log a warning
+  if (domains.length === 0) {
+    console.warn(
+      "WARNING: No domains set for CORS. This could cause issues with cross-origin requests.",
+    );
+    return ["early.krain.ai"]; // Fallback to known domain
+  }
+
+  return domains;
 }
-
-const ALLOWED_ORIGINS = getAllowedOrigins();
 
 function parseOriginDomain(url: string | null | undefined): string {
   if (!url) return "";
@@ -85,6 +111,10 @@ export async function validateOrigin(headers: HeadersLike): Promise<boolean> {
   const host = await getHeaderValue(headers, "host");
   const origin = await getHeaderValue(headers, "origin");
   const referer = await getHeaderValue(headers, "referer");
+  const userAgent = await getHeaderValue(headers, "user-agent");
+
+  // Get allowed origins for the current environment
+  const allowedOrigins = getAllowedOrigins();
 
   // Log headers for debugging
   log.info("Validating origin", {
@@ -93,7 +123,35 @@ export async function validateOrigin(headers: HeadersLike): Promise<boolean> {
     host,
     origin,
     referer,
+    userAgent: userAgent?.substring(0, 100), // Truncate for log readability
+    allowedOrigins,
+    environment: process.env.NODE_ENV || "unknown",
   });
+
+  // Special case: Check if this is a browser navigation request (not an API call)
+  // Browser navigations often have null origin with a referer
+  if (!origin && referer) {
+    const refererDomain = parseOriginDomain(referer);
+
+    // Check if this looks like a navigation from landing page to app
+    const isKnownRedirect = [
+      "krain.ai",
+      "landing.krain.ai",
+      "www.krain.ai",
+    ].includes(refererDomain);
+
+    if (isKnownRedirect) {
+      log.info("Allowing navigation from landing page to app", {
+        entity: "SESSION MIDDLEWARE",
+        operation: "validate_origin",
+        refererDomain,
+        host,
+      });
+      return true;
+    }
+  }
+
+  // Continue with regular validation...
 
   // If no origin/referer, use the host header
   if (!origin && !referer) {
@@ -105,27 +163,68 @@ export async function validateOrigin(headers: HeadersLike): Promise<boolean> {
       return false;
     }
     const hostDomain = host.split(":")[0] || ""; // Remove port if present
-    return ALLOWED_ORIGINS.includes(hostDomain);
+    const isAllowed = allowedOrigins.includes(hostDomain);
+
+    if (!isAllowed) {
+      log.error(`Host domain ${hostDomain} not in allowed origins list`, {
+        entity: "SESSION MIDDLEWARE",
+        operation: "validate_origin",
+        allowedOrigins,
+      });
+    }
+
+    return isAllowed;
   }
 
   // Check both origin and referer
   const originDomain = parseOriginDomain(origin);
   const refererDomain = parseOriginDomain(referer);
 
+  // Log detailed information about the domains
+  log.info("Parsed domains for validation", {
+    entity: "SESSION MIDDLEWARE",
+    operation: "validate_origin",
+    originDomain,
+    refererDomain,
+    allowedOrigins,
+  });
+
   // In development, be more lenient with localhost validation
   if (process.env.NODE_ENV === "development") {
-    return (
+    const isAllowed =
       originDomain === "localhost" ||
-      ALLOWED_ORIGINS.includes(originDomain) ||
+      allowedOrigins.includes(originDomain) ||
       refererDomain === "localhost" ||
-      ALLOWED_ORIGINS.includes(refererDomain)
-    );
+      allowedOrigins.includes(refererDomain);
+
+    if (!isAllowed) {
+      log.error("Development origin validation failed", {
+        entity: "SESSION MIDDLEWARE",
+        operation: "validate_origin",
+        originDomain,
+        refererDomain,
+        allowedOrigins,
+      });
+    }
+
+    return isAllowed;
   }
 
-  return (
-    ALLOWED_ORIGINS.includes(originDomain) ||
-    ALLOWED_ORIGINS.includes(refererDomain)
-  );
+  const isAllowed =
+    allowedOrigins.includes(originDomain) ||
+    allowedOrigins.includes(refererDomain);
+
+  if (!isAllowed) {
+    log.error("Production origin validation failed", {
+      entity: "SESSION MIDDLEWARE",
+      operation: "validate_origin",
+      originDomain,
+      refererDomain,
+      allowedOrigins,
+    });
+  }
+
+  return isAllowed;
 }
 
 export async function withServerActionProtection(
