@@ -4,7 +4,8 @@ import { sessionConfig } from "../../layout";
 
 export async function POST(request: NextRequest) {
   try {
-    // Use the shared session config from layout
+    // Pass the request to the handleAuthCallback function
+    // The handleAuthCallback function will use the defaultSessionConfig if no config is passed
     const response = await handleAuthCallback(request);
     return response;
   } catch (error) {
