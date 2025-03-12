@@ -3,7 +3,7 @@
 import { Button } from "@krain/ui/components/ui/button";
 import { Textarea } from "@krain/ui/components/ui/textarea";
 import { MicIcon, SlidersHorizontal } from "lucide-react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
@@ -32,6 +32,8 @@ export function SearchBar({
   categories,
   tags,
 }: SearchBarProps) {
+  const [isFocused, setIsFocused] = useState(false);
+
   const commands = [
     {
       command: "clear search",
@@ -93,8 +95,12 @@ export function SearchBar({
           onChange={(e) => setSearchQuery(e.target.value)}
           className="resize-none text-foreground placeholder:text-muted-foreground placeholder:text-xs min-h-[36px] pr-20 border rounded-full bg-muted/50 leading-none"
           style={{ paddingTop: "10px", paddingBottom: "10px" }}
-          placeholder="What are you looking for? Use the mic to say it."
+          placeholder={
+            isFocused ? "" : "What are you looking for? Use the mic to say it."
+          }
           rows={1}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(searchQuery.length > 0)}
         />
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex">
           <Button
