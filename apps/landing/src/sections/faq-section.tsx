@@ -29,7 +29,7 @@ const faqs = [
     id: "QA_3",
     question: "How do I use KRAIN?",
     answer:
-      "You can start using KRAIN by connecting your wallet, exploring the AI agent marketplace, and utilizing our discovery tools to find the perfect agents for your needs.",
+      "You can start using KRAIN by connecting your wallet, exploring the AI agent portal, and utilizing our discovery tools to find the perfect agents for your needs.",
   },
   {
     id: "QA_4",

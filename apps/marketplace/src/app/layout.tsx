@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <AppRootLayout
       authConfig={{
         privyAppId: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
-        loadingTitle: "Welcome to the Krain Marketplace",
+        loadingTitle: "Welcome to the Krain AI Agent Portal",
         loadingDescription: "Please wait while we validate your session...",
         validateSession: false,
       }}

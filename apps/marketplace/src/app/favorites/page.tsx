@@ -127,8 +127,8 @@ export default function FavoritesPage() {
             You haven't favorited any agents yet.
           </p>
           <p className="text-muted-foreground">
-            Browse the marketplace and click the star icon to add agents to your
-            favorites.
+            Browse the AI Agent Portal and click the star icon to add agents to
+            your favorites.
           </p>
         </div>
       ) : (
