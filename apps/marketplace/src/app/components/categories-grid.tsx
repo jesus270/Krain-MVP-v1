@@ -2,7 +2,7 @@
 
 import { AIAgent } from "../types";
 import { Card } from "@krain/ui/components/ui/card";
-import { Zap } from "lucide-react";
+import { BotIcon } from "lucide-react";
 import { cn } from "@krain/ui/lib/utils";
 
 interface CategoryItem {
@@ -47,8 +47,10 @@ export function CategoriesGrid({
           <div className="flex items-center justify-between w-full h-full">
             <h3 className="font-semibold text-lg">{category.name}</h3>
             <div className="flex items-center gap-1 rounded-full px-2.5 py-1 bg-muted text-muted-foreground">
-              <Zap className="h-3.5 w-3.5" />
-              <span className="text-xs font-medium">{category.count}</span>
+              <BotIcon className="h-5 w-5" />
+              <div className="text-sm font-medium leading-none flex items-center">
+                {category.count}
+              </div>
             </div>
           </div>
         </Card>
