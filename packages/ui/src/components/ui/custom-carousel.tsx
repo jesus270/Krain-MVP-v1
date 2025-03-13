@@ -86,8 +86,13 @@ export function CustomCarousel({
 
   return (
     <div className={containerClassName}>
-      {showControls && (
-        <div className={controlsClassName}>
+      <div className={className} ref={emblaRef} style={containerStyle}>
+        <div className={slideClassName}>{wrappedChildren}</div>
+      </div>
+
+      {/* Navigation and Dots indicator in a single flex container */}
+      <div className="flex items-center justify-center gap-4 mt-4">
+        {showControls && (
           <button onClick={scrollPrev} className="group">
             <Image
               src="/button-carousel.svg"
@@ -97,6 +102,23 @@ export function CustomCarousel({
               className="rotate-180 opacity-50 transition-opacity hover:opacity-100"
             />
           </button>
+        )}
+
+        {/* Dots indicator */}
+        <div className="flex justify-center gap-2">
+          {React.Children.map(children, (_, index) => (
+            <button
+              key={index}
+              className={`w-2 h-2 rounded-full transition-all ${
+                selectedIndex === index ? "bg-primary w-4" : "bg-muted"
+              }`}
+              onClick={() => scrollTo(index)}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        {showControls && (
           <button onClick={scrollNext} className="group">
             <Image
               src="/button-carousel.svg"
@@ -106,25 +128,7 @@ export function CustomCarousel({
               className="opacity-50 transition-opacity hover:opacity-100"
             />
           </button>
-        </div>
-      )}
-
-      <div className={className} ref={emblaRef} style={containerStyle}>
-        <div className={slideClassName}>{wrappedChildren}</div>
-      </div>
-
-      {/* Dots indicator */}
-      <div className="flex justify-center gap-2 mt-4">
-        {React.Children.map(children, (_, index) => (
-          <button
-            key={index}
-            className={`w-2 h-2 rounded-full transition-all ${
-              selectedIndex === index ? "bg-primary w-4" : "bg-muted"
-            }`}
-            onClick={() => scrollTo(index)}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
+        )}
       </div>
     </div>
   );

@@ -208,7 +208,7 @@ export default function Home() {
   }
 
   return (
-    <div className="p-8 px-16 flex flex-col">
+    <div className="p-2 lg:p-4 flex flex-col">
       <header className="flex flex-col items-center gap-4 lg:gap-8 mb-4">
         {/* <div className="flex flex-col items-center gap-2">
           <h1 className="text-2xl sm:text-3xl font-bold">Discover AI Agents</h1>
@@ -233,14 +233,14 @@ export default function Home() {
             <FeaturedCarousel agents={featuredAgents} onFilter={handleFilter} />
           </section>
 
-          <section className="w-full mx-auto max-w-7xl">
+          <section className="w-full mx-auto max-w-7xl px-8 lg:px-12">
             <h2 className="text-2xl font-bold mb-6 text-foreground">
               Trending Agents
             </h2>
             <TrendingSection agents={agents} onFilter={handleFilter} />
           </section>
 
-          <section className="w-full mx-auto max-w-7xl">
+          <section className="w-full mx-auto max-w-7xl px-8 lg:px-12">
             <h2 className="text-2xl font-bold mb-6 text-foreground">
               Categories
             </h2>
