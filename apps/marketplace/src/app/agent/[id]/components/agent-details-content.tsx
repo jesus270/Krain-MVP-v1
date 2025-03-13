@@ -22,7 +22,7 @@ export function AgentDetailsContent({ agent }: AgentDetailsContentProps) {
   return (
     <div className="space-y-8">
       {/* Header Section */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 h-[80px] w-[80px]">
         <AgentImage
           imageUrl={agent.imageUrl || ""}
           name={agent.name}
