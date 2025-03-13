@@ -39,7 +39,7 @@ const routes = [
     icon: Compass,
   },
   {
-    name: "Favourites",
+    name: "Favorites",
     url: "/favorites",
     icon: Star,
   },
