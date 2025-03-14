@@ -55,6 +55,36 @@ export default function Home() {
   const [tags, setTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Helper function to scroll to top with multiple approaches for reliability
+  const scrollToTop = useCallback(() => {
+    console.log("Page: Forcing scroll to top");
+
+    // Try multiple approaches
+    // 1. Standard window scroll
+    window.scrollTo(0, 0);
+
+    // 2. Alternative document scroll method
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0; // For Safari
+
+    // 3. Try scrolling the main element if it exists
+    const mainEl = document.querySelector("main");
+    if (mainEl) mainEl.scrollTop = 0;
+
+    // 4. Try scrolling the div with className "p-2 lg:p-4 flex flex-col"
+    const containerEl = document.querySelector(
+      "div.p-2.lg\\:p-4.flex.flex-col",
+    );
+    if (containerEl) containerEl.scrollTop = 0;
+  }, []);
+
+  // Check if any filters are active
+  const hasActiveFilters =
+    searchQuery.trim() !== "" ||
+    filters.categories.length > 0 ||
+    filters.tags.length > 0 ||
+    filters.industries.length > 0;
+
   // Fetch agents from the database
   useEffect(() => {
     const fetchAgents = async () => {
@@ -161,43 +191,48 @@ export default function Home() {
     .sort((a, b) => (b.rating || 0) - (a.rating || 0))
     .slice(0, 5); // Highest rated agents with sufficient reviews
 
-  // Check if any filters are active
-  const hasActiveFilters =
-    searchQuery.trim() !== "" ||
-    filters.categories.length > 0 ||
-    filters.tags.length > 0 ||
-    filters.industries.length > 0;
-
   const handleRemoveFilter = useCallback(
     (key: keyof FilterState, value: string) => {
+      console.log(`Filter removed: ${key} = ${value}`);
+
       setFilters((prev) => {
         const newFilters = { ...prev };
-        // Only handle the filters we have now: categories, tags, industries
         if (key === "categories" || key === "tags" || key === "industries") {
           newFilters[key] = prev[key].filter((v) => v !== value);
         }
         return newFilters;
       });
+
+      // Use a longer delay and call our dedicated scroll function
+      setTimeout(scrollToTop, 100);
     },
-    [],
+    [scrollToTop],
   );
 
-  const handleFilter = useCallback((type: string, value: string) => {
-    setFilters((prev) => {
-      const newFilters = { ...prev };
-      switch (type) {
-        case "category":
-          newFilters.categories = [value];
-          break;
-        case "tag":
-          if (!prev.tags.includes(value)) {
-            newFilters.tags = [...prev.tags, value];
-          }
-          break;
-      }
-      return newFilters;
-    });
-  }, []);
+  const handleFilter = useCallback(
+    (type: string, value: string) => {
+      console.log(`Filter applied: ${type} = ${value}`);
+
+      setFilters((prev) => {
+        const newFilters = { ...prev };
+        switch (type) {
+          case "category":
+            newFilters.categories = [value];
+            break;
+          case "tag":
+            if (!prev.tags.includes(value)) {
+              newFilters.tags = [...prev.tags, value];
+            }
+            break;
+        }
+        return newFilters;
+      });
+
+      // Use a longer delay and call our dedicated scroll function
+      setTimeout(scrollToTop, 100);
+    },
+    [scrollToTop],
+  );
 
   if (isLoading) {
     return (

@@ -81,9 +81,11 @@ export function FilterSheet({
           <div className="flex gap-2">
             <Select
               value={filters.sortBy}
-              onValueChange={(value: "rating" | "name" | "reviewsCount") =>
-                setFilters({ ...filters, sortBy: value })
-              }
+              onValueChange={(value: "rating" | "name" | "reviewsCount") => {
+                setFilters({ ...filters, sortBy: value });
+                // Scroll to top when filter changes
+                window.scrollTo(0, 0);
+              }}
             >
               <SelectTrigger className="flex-1">
                 <SelectValue />
@@ -97,9 +99,11 @@ export function FilterSheet({
 
             <Select
               value={filters.sortOrder}
-              onValueChange={(value: "asc" | "desc") =>
-                setFilters({ ...filters, sortOrder: value })
-              }
+              onValueChange={(value: "asc" | "desc") => {
+                setFilters({ ...filters, sortOrder: value });
+                // Scroll to top when filter changes
+                window.scrollTo(0, 0);
+              }}
             >
               <SelectTrigger className="w-[100px]">
                 <SelectValue />
@@ -119,7 +123,11 @@ export function FilterSheet({
             <MultiSelectFilter
               options={filter.options}
               selected={filter.values}
-              onChange={filter.onChange}
+              onChange={(values) => {
+                filter.onChange(values);
+                // Scroll to top when filter changes
+                window.scrollTo(0, 0);
+              }}
               placeholder={`Select ${filter.label.toLowerCase()}`}
               label={filter.label}
             />

@@ -42,7 +42,34 @@ export function CategoriesGrid({
         <Card
           key={category.name}
           className="cursor-pointer hover:opacity-90 transition-opacity p-4"
-          onClick={() => onFilter("category", category.name)}
+          onClick={(e) => {
+            // Prevent any default behavior
+            e.preventDefault();
+
+            // Log for debugging
+            console.log(`Category clicked: ${category.name}`);
+
+            // Call filter function
+            onFilter("category", category.name);
+
+            // Try multiple scroll approaches with increased delay
+            setTimeout(() => {
+              console.log("CategoriesGrid: Forcing scroll to top");
+
+              // Approach 1: Standard window scroll
+              window.scrollTo(0, 0);
+
+              // Approach 2: Alternative document scroll method
+              document.documentElement.scrollTop = 0;
+              document.body.scrollTop = 0; // For Safari
+
+              // Approach 3: Scroll the main container if it exists
+              const mainContainer = document.querySelector("main");
+              if (mainContainer) {
+                mainContainer.scrollTop = 0;
+              }
+            }, 50); // Longer delay to ensure state updates have completed
+          }}
         >
           <div className="flex items-center justify-between w-full h-full">
             <h3 className="font-semibold text-lg">{category.name}</h3>

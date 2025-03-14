@@ -34,6 +34,30 @@ export function SearchBar({
 }: SearchBarProps) {
   const [isFocused, setIsFocused] = useState(false);
 
+  // Helper function to force scroll to top with multiple approaches
+  const forceScrollToTop = useCallback(() => {
+    console.log("SearchBar: Forcing scroll to top");
+
+    // Try multiple approaches
+    // Standard window scroll
+    window.scrollTo(0, 0);
+
+    // Alternative document scroll method
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0; // For Safari
+
+    // Try scrolling other possible container elements
+    const containers = [
+      document.querySelector("main"),
+      document.querySelector("div.p-2.lg\\:p-4.flex.flex-col"),
+      document.querySelector("body"),
+    ];
+
+    containers.forEach((el) => {
+      if (el) el.scrollTop = 0;
+    });
+  }, []);
+
   const commands = [
     {
       command: "clear search",
@@ -84,15 +108,21 @@ export function SearchBar({
   useEffect(() => {
     if (transcript && !listening) {
       setSearchQuery(transcript);
+      // Use our new forceScrollToTop function with a delay
+      setTimeout(forceScrollToTop, 50);
     }
-  }, [transcript, listening, setSearchQuery]);
+  }, [transcript, listening, setSearchQuery, forceScrollToTop]);
 
   return (
     <div className="w-full max-w-2xl relative">
       <div className="relative flex items-end shadow-[0_0_10px_rgba(0,0,0,0.10)] rounded-lg">
         <Textarea
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            // Use our new forceScrollToTop function with a delay
+            setTimeout(forceScrollToTop, 50);
+          }}
           className="resize-none text-foreground placeholder:text-muted-foreground placeholder:text-xs min-h-[36px] pr-20 border rounded-full bg-muted/50 leading-none"
           style={{ paddingTop: "10px", paddingBottom: "10px" }}
           placeholder={
