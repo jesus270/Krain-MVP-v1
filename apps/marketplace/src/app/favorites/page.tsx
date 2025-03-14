@@ -117,7 +117,7 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto p-8 lg:p-16">
       <Toaster />
       <h1 className="text-3xl font-bold mb-8">Your Favorites</h1>
 
@@ -132,7 +132,7 @@ export default function FavoritesPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {favorites.map((favorite) => {
             if (!favorite.agent) return null;
 
