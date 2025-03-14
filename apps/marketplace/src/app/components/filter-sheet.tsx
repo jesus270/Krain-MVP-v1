@@ -65,8 +65,8 @@ export function FilterSheet({
   ];
 
   return (
-    <SheetContent className="w-[400px] overflow-y-auto">
-      <SheetHeader>
+    <SheetContent className="w-[400px] overflow-y-auto px-6 py-8">
+      <SheetHeader className="pb-2">
         <SheetTitle className="text-foreground text-base">Filters</SheetTitle>
         <SheetDescription className="text-foreground text-xs">
           Refine your search with specific criteria
@@ -75,9 +75,9 @@ export function FilterSheet({
 
       <Separator className="my-8" />
 
-      <div className="space-y-4">
-        <div>
-          <h3 className="mb-2 font-medium">Sort By</h3>
+      <div className="space-y-6">
+        <div className="px-2">
+          <h3 className="mb-4 font-medium">Sort By</h3>
           <div className="flex gap-2">
             <Select
               value={filters.sortBy}
@@ -117,9 +117,9 @@ export function FilterSheet({
         </div>
 
         {availableFilters.map((filter) => (
-          <div key={filter.key}>
+          <div key={filter.key} className="px-2">
             <Separator className="my-8" />
-            <h3 className="mb-2 font-medium">{filter.label}</h3>
+            <h3 className="mb-4 font-medium">{filter.label}</h3>
             <MultiSelectFilter
               options={filter.options}
               selected={filter.values}
