@@ -264,7 +264,7 @@ export default function Home() {
 
       {!hasActiveFilters ? (
         <>
-          <section className="w-full mx-auto max-w-7xl">
+          <section className="w-full mx-auto max-w-7xl mt-6">
             <FeaturedCarousel agents={featuredAgents} onFilter={handleFilter} />
           </section>
 
