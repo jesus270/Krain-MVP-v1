@@ -69,7 +69,7 @@ export function AgentDetailsContent({ agent }: AgentDetailsContentProps) {
                   </linearGradient>
                 </defs>
               </svg>
-              <span className="text-sm">
+              <span className="text-sm text-nowrap">
                 {agent.rating.toFixed(1)} ({agent.reviewsCount} reviews)
               </span>
             </div>
