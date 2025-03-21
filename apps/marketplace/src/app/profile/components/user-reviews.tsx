@@ -7,7 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 
 interface ExtendedReview extends Review {
-  agent: Agent;
+  agent: Agent | null;
 }
 
 interface UserReviewsProps {
@@ -35,25 +35,36 @@ export function UserReviews({ reviews, className }: UserReviewsProps) {
             className="p-4 bg-muted/30 rounded-lg space-y-2 border border-muted"
           >
             <div className="flex items-center justify-between">
-              <Link
-                href={`/agent/${review.agent.id}`}
-                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-              >
-                {review.agent.imageUrl ? (
-                  <img
-                    src={review.agent.imageUrl}
-                    alt={review.agent.name}
-                    className="h-10 w-10 rounded-md object-cover"
-                  />
-                ) : (
-                  <div className="h-10 w-10 bg-primary/20 rounded-md flex items-center justify-center text-sm font-medium">
-                    {review.agent.name.charAt(0).toUpperCase()}
+              {review.agent ? (
+                <Link
+                  href={`/agent/${review.agent.id}`}
+                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                >
+                  {review.agent.imageUrl ? (
+                    <img
+                      src={review.agent.imageUrl}
+                      alt={review.agent.name || ""}
+                      className="h-10 w-10 rounded-md object-cover"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 bg-primary/20 rounded-md flex items-center justify-center text-sm font-medium">
+                      {review.agent.name?.charAt(0)?.toUpperCase() || ""}
+                    </div>
+                  )}
+                  <span className="font-medium line-clamp-1">
+                    {review.agent.name || "Unknown Agent"}
+                  </span>
+                </Link>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div className="h-10 w-10 bg-muted rounded-md flex items-center justify-center text-sm font-medium">
+                    ?
                   </div>
-                )}
-                <span className="font-medium line-clamp-1">
-                  {review.agent.name}
-                </span>
-              </Link>
+                  <span className="font-medium line-clamp-1">
+                    Unknown Agent
+                  </span>
+                </div>
+              )}
               <StarRating rating={review.rating} disabled size="sm" />
             </div>
 
