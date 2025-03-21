@@ -10,16 +10,17 @@ import { getUserReviews } from "@/app/actions/reviews";
 import { UserReviews } from "../components/user-reviews";
 
 interface ProfilePageProps {
-  params: {
+  params: Promise<{
     username: string;
-  };
+  }>;
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 export async function generateMetadata({
   params,
 }: ProfilePageProps): Promise<Metadata> {
-  const username = params.username;
+  const resolvedParams = await params;
+  const username = resolvedParams.username;
 
   try {
     // Fetch user data
@@ -50,7 +51,8 @@ export async function generateMetadata({
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
-  const username = params.username;
+  const resolvedParams = await params;
+  const username = resolvedParams.username;
 
   // Get the current user ID from cookies
   const cookieStore = await cookies();
