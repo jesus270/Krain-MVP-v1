@@ -13,7 +13,6 @@ interface ProfilePageProps {
   params: Promise<{
     username: string;
   }>;
-  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 export async function generateMetadata({
