@@ -108,7 +108,8 @@ function getUserDisplayName(user?: User): string {
   if (!user) return "Anonymous";
 
   // Check for profile displayName first
-  if (user.profile?.displayName) return user.profile.displayName;
+  if ("profile" in user && user.profile?.displayName)
+    return user.profile.displayName;
 
   // Then try username
   if (user.username) return user.username;
