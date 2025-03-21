@@ -35,7 +35,7 @@ export function ReviewsSection({ agentId }: ReviewsSectionProps) {
           agentId,
           privyUserId: user.id,
         });
-        setUserReview(existingReview);
+        setUserReview(existingReview || null);
       } else {
         setUserReview(null);
       }
