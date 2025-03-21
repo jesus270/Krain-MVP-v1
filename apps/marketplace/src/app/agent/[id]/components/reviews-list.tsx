@@ -114,8 +114,9 @@ function getUserDisplayName(user?: User): string {
     typeof user.profile === "object" &&
     "displayName" in user.profile &&
     user.profile.displayName
-  )
-    return user.profile.displayName;
+  ) {
+    return user.profile.displayName as string;
+  }
 
   // Then try username
   if (user.username) return user.username;
