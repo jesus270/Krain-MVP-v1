@@ -22,13 +22,23 @@ export function ReviewsSection({ agentId }: ReviewsSectionProps) {
   const loadReviews = async () => {
     try {
       setLoading(true);
-      const { reviews, userReview } = await getAgentReviews({
+      const reviews = await getAgentReviews({
         agentId,
         privyUserId: user?.id,
       });
 
       setReviews(reviews);
-      setUserReview(userReview);
+
+      // If user is logged in, check if they have reviewed this agent separately
+      if (authenticated && user?.id) {
+        const existingReview = await hasUserReviewedAgent({
+          agentId,
+          privyUserId: user.id,
+        });
+        setUserReview(existingReview);
+      } else {
+        setUserReview(null);
+      }
     } catch (error) {
       console.error("Error loading reviews:", error);
     } finally {

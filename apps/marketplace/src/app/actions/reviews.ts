@@ -1,7 +1,12 @@
 "use server";
 
 import { db } from "@krain/db";
-import { reviewTable, userTable, agentTable } from "@krain/db/schema";
+import {
+  reviewTable,
+  userTable,
+  agentTable,
+  userProfileTable,
+} from "@krain/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 
 /**
@@ -235,142 +240,30 @@ export async function getAgentReviews({
   const reviews = await db.query.reviewTable.findMany({
     where: eq(reviewTable.agentId, agentId),
     with: {
-      user: true,
+      user: {
+        with: {
+          profile: true,
+        },
+      },
     },
     orderBy: desc(reviewTable.createdAt),
   });
 
-  // If user is logged in, find their review if any
-  let userReview = null;
-  if (privyUserId) {
-    const userId = await getUserIdFromPrivyId(privyUserId);
-    if (userId) {
-      userReview = reviews.find((review) => review.userId === userId) || null;
-    }
-  }
-
-  // Return the reviews and user review separately
-  return {
-    reviews,
-    userReview,
-  };
+  return reviews;
 }
 
 /**
- * Generate mock reviews for agents in the database
+ * Get reviews created by a specific user
  */
-export async function generateMockReviews() {
-  try {
-    // Get all agents
-    const agents = await db.query.agentTable.findMany();
-
-    let createdReviews = 0;
-    let updatedAgents = 0;
-
-    // Create a single mock user if it doesn't exist
-    const mockUserId = await ensureMockUser();
-
-    if (!mockUserId) {
-      throw new Error("Failed to create mock user");
-    }
-
-    // Sample comments
-    const comments = [
-      "This agent is incredibly helpful for my daily crypto tasks.",
-      "The response speed and accuracy are outstanding.",
-      "Saved me so much time with my blockchain operations.",
-      "Great interface and very intuitive to use.",
-      "The support team is responsive and resolves issues quickly.",
-      "Does the job but could be improved in some areas.",
-      "Solid performance overall but occasionally slow.",
-      "Had some issues with response time during peak hours.",
-      "The UI could be more intuitive.",
-    ];
-
-    // For each agent, create 3-5 reviews
-    for (const agent of agents) {
-      // Generate a random rating (3-5 stars)
-      const rating = 3 + Math.floor(Math.random() * 3);
-
-      // Select a random comment
-      const commentIndex = Math.floor(Math.random() * comments.length);
-      const review = comments[commentIndex];
-
-      try {
-        // Create a review
-        await db.insert(reviewTable).values({
-          userId: mockUserId,
-          agentId: agent.id,
-          rating,
-          review,
-          createdAt: new Date(),
-        });
-
-        createdReviews++;
-
-        // Update agent rating
-        await db
-          .update(agentTable)
-          .set({
-            rating,
-            reviewsCount: 1,
-          })
-          .where(eq(agentTable.id, agent.id));
-
-        updatedAgents++;
-      } catch (error) {
-        console.error(`Error creating review for agent ${agent.id}:`, error);
-      }
-    }
-
-    return {
-      success: true,
-      message: "Mock reviews generated successfully",
-      stats: {
-        createdReviews,
-        updatedAgents,
-      },
-    };
-  } catch (error) {
-    console.error("Error generating mock reviews:", error);
-    throw new Error("Failed to generate mock reviews");
-  }
-}
-
-// Helper function to ensure we have a mock user
-async function ensureMockUser(): Promise<number | null> {
-  const mockPrivyId = "mock_reviewer_id";
-
-  // Check if user exists
-  const existingUser = await db.query.userTable.findFirst({
-    where: eq(userTable.privyId, mockPrivyId),
+export async function getUserReviews({ userId }: { userId: number }) {
+  // Get all reviews written by this user
+  const reviews = await db.query.reviewTable.findMany({
+    where: eq(reviewTable.userId, userId),
+    with: {
+      agent: true,
+    },
+    orderBy: desc(reviewTable.createdAt),
   });
 
-  if (existingUser?.id) {
-    return existingUser.id;
-  }
-
-  // Create new user
-  try {
-    const result = await db
-      .insert(userTable)
-      .values({
-        privyId: mockPrivyId,
-        twitterName: "Mock Reviewer",
-        createdAt: new Date(),
-        privyCreatedAt: new Date(),
-        isGuest: false,
-        hasAcceptedTerms: true,
-        role: "user",
-      })
-      .returning({ id: userTable.id });
-
-    if (result && result.length > 0 && result[0]?.id !== undefined) {
-      return result[0].id;
-    }
-  } catch (error) {
-    console.error("Error creating mock user:", error);
-  }
-
-  return null;
+  return reviews;
 }

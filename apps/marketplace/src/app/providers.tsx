@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { PrivyProvider } from "@privy-io/react-auth";
-import { usePrivyAuth } from "@krain/ui";
+import { usePrivyAuth } from "./utils/use-privy-auth";
 
 // Privy configuration
 const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "";

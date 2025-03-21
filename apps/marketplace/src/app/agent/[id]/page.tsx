@@ -56,7 +56,7 @@ export default async function AgentDetails(props: any) {
   const agentId = parseInt(agent.id);
 
   return (
-    <div className="min-h-screen p-8 max-w-5xl mx-auto">
+    <div className="p-8 max-w-5xl mx-auto">
       <Toaster />
       <Link
         href="/"

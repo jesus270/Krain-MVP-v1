@@ -4,9 +4,15 @@ import { Review, User } from "@krain/db";
 import { StarRating } from "@/app/components/star-rating";
 import { cn } from "@krain/ui/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 
 interface ExtendedReview extends Review {
-  user: User;
+  user: User & {
+    profile?: {
+      displayName?: string;
+      profilePictureUrl?: string;
+    };
+  };
 }
 
 interface ReviewsListProps {
@@ -33,14 +39,25 @@ export function ReviewsList({ reviews, className }: ReviewsListProps) {
         {reviews.map((review) => (
           <div key={review.id} className="p-4 bg-muted/30 rounded-lg space-y-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 bg-primary/20 rounded-full flex items-center justify-center text-sm font-medium">
-                  {getUserInitials(review.user)}
-                </div>
+              <Link
+                href={`/profile/${review.user.username || review.user.id}`}
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              >
+                {review.user.profile?.profilePictureUrl ? (
+                  <img
+                    src={review.user.profile.profilePictureUrl}
+                    alt={getUserDisplayName(review.user)}
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="h-8 w-8 bg-primary/20 rounded-full flex items-center justify-center text-sm font-medium">
+                    {getUserInitials(review.user)}
+                  </div>
+                )}
                 <span className="font-medium">
                   {getUserDisplayName(review.user)}
                 </span>
-              </div>
+              </Link>
               <StarRating rating={review.rating} disabled size="sm" />
             </div>
 
@@ -90,6 +107,13 @@ function getUserInitials(user?: User): string {
 function getUserDisplayName(user?: User): string {
   if (!user) return "Anonymous";
 
+  // Check for profile displayName first
+  if (user.profile?.displayName) return user.profile.displayName;
+
+  // Then try username
+  if (user.username) return user.username;
+
+  // Fall back to existing options
   if (user.twitterName) return user.twitterName;
   if (user.twitterHandle) return `@${user.twitterHandle}`;
 

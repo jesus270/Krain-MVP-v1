@@ -181,6 +181,7 @@ export const userTable = pgTable("user", {
     .$type<string>()
     .unique(),
   email: varchar("email", { length: 255 }).unique(),
+  username: varchar("username", { length: 50 }).unique(),
   privyId: varchar("privyId", { length: 255 }).notNull().unique(),
   twitterHandle: varchar("twitterHandle", { length: 255 }).unique(),
   twitterName: varchar("twitterName", { length: 255 }),
@@ -197,7 +198,28 @@ export const userTable = pgTable("user", {
 });
 export type User = typeof userTable.$inferSelect;
 
-export const userRelations = relations(userTable, ({ one }) => ({
+export const userProfileTable = pgTable(
+  "userProfile",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("userId")
+      .references(() => userTable.id)
+      .notNull()
+      .unique(),
+    displayName: varchar("displayName", { length: 100 }),
+    bio: text("bio"),
+    location: varchar("location", { length: 100 }),
+    profilePictureUrl: varchar("profilePictureUrl", { length: 1024 }),
+    bannerPictureUrl: varchar("bannerPictureUrl", { length: 1024 }),
+    websiteUrl: varchar("websiteUrl", { length: 255 }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt"),
+  },
+  (table) => [index("idx_userProfile_userId").on(table.userId)],
+);
+export type UserProfile = typeof userProfileTable.$inferSelect;
+
+export const userRelations = relations(userTable, ({ one, many }) => ({
   privyWallet: one(privyWalletTable, {
     fields: [userTable.walletAddress],
     references: [privyWalletTable.address],
@@ -207,6 +229,19 @@ export const userRelations = relations(userTable, ({ one }) => ({
     fields: [userTable.walletAddress],
     references: [walletTable.address],
     relationName: "airdropWallet",
+  }),
+  profile: one(userProfileTable, {
+    fields: [userTable.id],
+    references: [userProfileTable.userId],
+    relationName: "userProfile",
+  }),
+}));
+
+export const userProfileRelations = relations(userProfileTable, ({ one }) => ({
+  user: one(userTable, {
+    fields: [userProfileTable.userId],
+    references: [userTable.id],
+    relationName: "userProfile",
   }),
 }));
 

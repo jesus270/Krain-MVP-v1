@@ -3,6 +3,7 @@ import { RootLayout as AppRootLayout } from "@krain/ui/layouts/root-layout";
 import { SidebarNav } from "./components/nav-sidebar";
 import Header from "./components/header";
 import { SidebarInset, SidebarProvider } from "@krain/ui/components/ui/sidebar";
+import { UsernameCheck } from "./components/username-check";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -43,6 +44,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         }}
         intercomAppId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID}
       >
+        {/* Username check component */}
+        <UsernameCheck />
+
         <SidebarProvider>
           <SidebarNav />
           <SidebarInset className="overflow-y-auto overflow-x-hidden">

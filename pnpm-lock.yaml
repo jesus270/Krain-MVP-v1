@@ -285,10 +285,10 @@ importers:
         version: 4.0.12
       '@vercel/analytics':
         specifier: ^1.4.1
-        version: 1.5.0(next@15.2.1(@babel/core@7.26.9)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
+        version: 1.5.0(next@15.2.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
       '@vercel/speed-insights':
         specifier: ^1.1.0
-        version: 1.2.0(next@15.2.1(@babel/core@7.26.9)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
+        version: 1.2.0(next@15.2.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -496,6 +496,9 @@ importers:
       '@krain/utils':
         specifier: workspace:*
         version: link:../utils
+      '@privy-io/server-auth':
+        specifier: ^1.19.0
+        version: 1.19.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@6.0.3)(viem@2.23.9(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@6.0.3)(zod@3.24.2))
       '@upstash/ratelimit':
         specifier: ^2.0.5
         version: 2.0.5(@upstash/redis@1.34.5)
@@ -630,10 +633,10 @@ importers:
         version: 1.98.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)
       '@vercel/analytics':
         specifier: ^1.4.1
-        version: 1.5.0(next@15.2.1(@babel/core@7.26.9)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
+        version: 1.5.0(next@15.2.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
       '@vercel/speed-insights':
         specifier: ^1.1.0
-        version: 1.2.0(next@15.2.1(@babel/core@7.26.9)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
+        version: 1.2.0(next@15.2.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -2458,6 +2461,14 @@ packages:
       permissionless:
         optional: true
 
+  '@privy-io/server-auth@1.19.0':
+    resolution: {integrity: sha512-kpKwuM6BzpYTJMRwPrOWSRyQsPvAxrtfRVRD5ODkyUkdJZALjdXcr7kMwi41XJhc738OwDzXFSTJJq6WwEW3DA==}
+    peerDependencies:
+      viem: ^2
+    peerDependenciesMeta:
+      viem:
+        optional: true
+
   '@radix-ui/number@1.1.0':
     resolution: {integrity: sha512-V3gRzhVNU1ldS5XhAPTom1fOIo4ccrjjJgmE+LI2h/WaFpHmx0MQApT+KZHnx8abG6Avtfcz4WoEciMnpFT3HQ==}
 
@@ -3503,6 +3514,9 @@ packages:
 
   '@solana/web3.js@1.98.0':
     resolution: {integrity: sha512-nz3Q5OeyGFpFCR+erX2f6JPt3sKhzhYcSycBCSPkWjzSVDh/Rr1FqTVMRe58FKO16/ivTUcuJjeS5MyBvpkbzA==}
+
+  '@stablelib/base64@1.0.1':
+    resolution: {integrity: sha512-1bnPQqSxSuc3Ii6MhBysoWCg58j97aUjuCSZrGSmDxNqtytIi0k8utUenAwTZN4V5mXXYGsVUI9zeBqy+jBOSQ==}
 
   '@standard-schema/utils@0.3.0':
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
@@ -4567,6 +4581,10 @@ packages:
   caniuse-lite@1.0.30001703:
     resolution: {integrity: sha512-kRlAGTRWgPsOj7oARC9m1okJEXdL/8fekFVcxA8Hl7GH4r/sN4OJn/i6Flde373T50KS7Y37oFbMwlE8+F42kQ==}
 
+  canonicalize@2.1.0:
+    resolution: {integrity: sha512-F705O3xrsUtgt98j7leetNhTWPe+5S72rlL5O4jA1pKqBVQ/dT1O1D6PFxmSXvc0SUOinWS57DKx0I3CHrXJHQ==}
+    hasBin: true
+
   chalk@2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
     engines: {node: '>=4'}
@@ -5557,6 +5575,9 @@ packages:
 
   fast-safe-stringify@2.1.1:
     resolution: {integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==}
+
+  fast-sha256@1.3.0:
+    resolution: {integrity: sha512-n11RGP/lrWEFI/bWdygLxhI+pVeo1ZYIVwvvPkW7azl/rOy+F3HYRZ2K5zeE9mmkhQppyv9sQFx0JM9UabnpPQ==}
 
   fast-stable-stringify@1.0.0:
     resolution: {integrity: sha512-wpYMUmFu5f00Sm0cj2pfivpmawLZ0NKdviQ4w9zJeR8JVtOpOxHmLaJuj0vxvGqMJQWyP/COUkF75/57OKyRag==}
@@ -7227,6 +7248,9 @@ packages:
     resolution: {integrity: sha512-hh2WYhq4fi8+b+/2Kg9CEge4fDPvHS534aOOvOZeQ3+Vf2mCFsaFBYj0i+iXcAq6I9Vzp5fjMFBlONvayDC1qg==}
     engines: {node: '>=6'}
 
+  querystringify@2.2.0:
+    resolution: {integrity: sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==}
+
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
@@ -7411,6 +7435,9 @@ packages:
       react: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
+  redaxios@0.5.1:
+    resolution: {integrity: sha512-FSD2AmfdbkYwl7KDExYQlVvIrFz6Yd83pGfaGjBzM9F6rpq8g652Q4Yq5QD4c+nf4g2AgeElv1y+8ajUPiOYMg==}
+
   reflect.getprototypeof@1.0.10:
     resolution: {integrity: sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw==}
     engines: {node: '>= 0.4'}
@@ -7467,6 +7494,9 @@ packages:
 
   require-main-filename@2.0.0:
     resolution: {integrity: sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==}
+
+  requires-port@1.0.0:
+    resolution: {integrity: sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==}
 
   resolve-from@3.0.0:
     resolution: {integrity: sha512-GnlH6vxLymXJNMBo7XP1fJIzBFbdYt49CuTwmB/6N53t+kMPRMFKz783LlQ4tv28XoQfMWinAJX6WCGf2IlaIw==}
@@ -7918,6 +7948,12 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
+  svix-fetch@3.0.0:
+    resolution: {integrity: sha512-rcADxEFhSqHbraZIsjyZNh4TF6V+koloX1OzZ+AQuObX9mZ2LIMhm1buZeuc5BIZPftZpJCMBsSiBaeszo9tRw==}
+
+  svix@1.62.0:
+    resolution: {integrity: sha512-Ia1s78JVcK0SXEzULNln4Vqi8LN3l+9rEs7d10XoOtg1c/dY2r59W4qRwd77BVbstW2v3HmsSqXkeZ6eZktnhA==}
+
   swap-case@1.1.2:
     resolution: {integrity: sha512-BAmWG6/bx8syfc6qXPprof3Mn5vQgf5dwdUNJhsNqU9WdPt5P+ES/wQ5bxfijy8zwZgZZHslC3iAsxsuQMCzJQ==}
 
@@ -8030,6 +8066,9 @@ packages:
     engines: {node: '>=18.12'}
     peerDependencies:
       typescript: '>=4.8.4'
+
+  ts-case-convert@2.1.0:
+    resolution: {integrity: sha512-Ye79el/pHYXfoew6kqhMwCoxp4NWjKNcm2kBzpmEMIU9dd9aBmHNNFtZ+WTm0rz1ngyDmfqDXDlyUnBXayiD0w==}
 
   ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
@@ -8157,6 +8196,10 @@ packages:
   type-fest@0.8.1:
     resolution: {integrity: sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==}
     engines: {node: '>=8'}
+
+  type-fest@3.13.1:
+    resolution: {integrity: sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==}
+    engines: {node: '>=14.16'}
 
   typed-array-buffer@1.0.3:
     resolution: {integrity: sha512-nAYYwfY3qnzX30IkA6AQZjVbtK6duGontcQm1WSG1MD94YLqK0515GNApXkoxKOWMusVssAHWLh9SeaoefYFGw==}
@@ -8304,6 +8347,9 @@ packages:
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
+
+  url-parse@1.5.10:
+    resolution: {integrity: sha512-WypcfiRhfeUP9vvF0j6rw0J3hrWrw6iZv3+22h6iRMJ/8z1Tj6XfLP4DsUix5MhMPnXpiHDoKyoZ/bdCkwBCiQ==}
 
   use-callback-ref@1.3.3:
     resolution: {integrity: sha512-jQL3lRnocaFtu3V00JToYz/4QkNWswxijDaCVNZRiRTO3HQDLsdu1ZtmIUvV4yPp+rvWm5j0y0TG/S61cuijTg==}
@@ -10594,6 +10640,26 @@ snapshots:
       - utf-8-validate
       - zod
 
+  '@privy-io/server-auth@1.19.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@6.0.3)(viem@2.23.9(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@6.0.3)(zod@3.24.2))':
+    dependencies:
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@solana/web3.js': 1.98.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@6.0.3)
+      canonicalize: 2.1.0
+      dotenv: 16.4.7
+      jose: 4.15.9
+      node-fetch-native: 1.6.6
+      redaxios: 0.5.1
+      svix: 1.62.0(encoding@0.1.13)
+      ts-case-convert: 2.1.0
+      type-fest: 3.13.1
+    optionalDependencies:
+      viem: 2.23.9(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@6.0.3)(zod@3.24.2)
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - utf-8-validate
+
   '@radix-ui/number@1.1.0': {}
 
   '@radix-ui/primitive@1.0.1':
@@ -11767,6 +11833,30 @@ snapshots:
       - encoding
       - utf-8-validate
 
+  '@solana/web3.js@1.98.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@6.0.3)':
+    dependencies:
+      '@babel/runtime': 7.26.9
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@solana/buffer-layout': 4.0.1
+      agentkeepalive: 4.6.0
+      bigint-buffer: 1.1.5
+      bn.js: 5.2.1
+      borsh: 0.7.0
+      bs58: 4.0.1
+      buffer: 6.0.3
+      fast-stable-stringify: 1.0.0
+      jayson: 4.1.3(bufferutil@4.0.9)(utf-8-validate@6.0.3)
+      node-fetch: 2.7.0(encoding@0.1.13)
+      rpc-websockets: 9.1.1
+      superstruct: 2.0.2
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - utf-8-validate
+
+  '@stablelib/base64@1.0.1': {}
+
   '@standard-schema/utils@0.3.0': {}
 
   '@swc/core-darwin-arm64@1.11.8':
@@ -12319,7 +12409,7 @@ snapshots:
     dependencies:
       crypto-js: 4.2.0
 
-  '@vercel/analytics@1.5.0(next@15.2.1(@babel/core@7.26.9)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)':
+  '@vercel/analytics@1.5.0(next@15.2.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)':
     optionalDependencies:
       next: 15.2.1(@babel/core@7.26.9)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
@@ -12343,7 +12433,7 @@ snapshots:
       - utf-8-validate
     optional: true
 
-  '@vercel/speed-insights@1.2.0(next@15.2.1(@babel/core@7.26.9)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)':
+  '@vercel/speed-insights@1.2.0(next@15.2.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)':
     optionalDependencies:
       next: 15.2.1(@babel/core@7.26.9)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
@@ -13262,6 +13352,8 @@ snapshots:
   camelize@1.0.1: {}
 
   caniuse-lite@1.0.30001703: {}
+
+  canonicalize@2.1.0: {}
 
   chalk@2.4.2:
     dependencies:
@@ -14443,6 +14535,8 @@ snapshots:
 
   fast-safe-stringify@2.1.1: {}
 
+  fast-sha256@1.3.0: {}
+
   fast-stable-stringify@1.0.0: {}
 
   fastq@1.19.1:
@@ -15093,6 +15187,10 @@ snapshots:
     dependencies:
       ws: 7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10)
 
+  isomorphic-ws@4.0.1(ws@7.5.10(bufferutil@4.0.9)(utf-8-validate@6.0.3)):
+    dependencies:
+      ws: 7.5.10(bufferutil@4.0.9)(utf-8-validate@6.0.3)
+
   isows@1.0.6(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)):
     dependencies:
       ws: 8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -15100,6 +15198,11 @@ snapshots:
   isows@1.0.6(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)):
     dependencies:
       ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+
+  isows@1.0.6(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.3)):
+    dependencies:
+      ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.3)
+    optional: true
 
   istanbul-lib-coverage@3.2.2:
     optional: true
@@ -15144,6 +15247,24 @@ snapshots:
       json-stringify-safe: 5.0.1
       uuid: 8.3.2
       ws: 7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  jayson@4.1.3(bufferutil@4.0.9)(utf-8-validate@6.0.3):
+    dependencies:
+      '@types/connect': 3.4.38
+      '@types/node': 12.20.55
+      '@types/ws': 7.4.7
+      JSONStream: 1.3.5
+      commander: 2.20.3
+      delay: 5.0.0
+      es6-promisify: 5.0.0
+      eyes: 0.1.8
+      isomorphic-ws: 4.0.1(ws@7.5.10(bufferutil@4.0.9)(utf-8-validate@6.0.3))
+      json-stringify-safe: 5.0.1
+      uuid: 8.3.2
+      ws: 7.5.10(bufferutil@4.0.9)(utf-8-validate@6.0.3)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -16420,6 +16541,8 @@ snapshots:
       split-on-first: 1.1.0
       strict-uri-encode: 2.0.0
 
+  querystringify@2.2.0: {}
+
   queue-microtask@1.2.3: {}
 
   queue@6.0.2:
@@ -16672,6 +16795,8 @@ snapshots:
       tiny-invariant: 1.3.3
       victory-vendor: 36.9.2
 
+  redaxios@0.5.1: {}
+
   reflect.getprototypeof@1.0.10:
     dependencies:
       call-bind: 1.0.8
@@ -16746,6 +16871,8 @@ snapshots:
   require-directory@2.1.1: {}
 
   require-main-filename@2.0.0: {}
+
+  requires-port@1.0.0: {}
 
   resolve-from@3.0.0:
     optional: true
@@ -17299,6 +17426,24 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
+  svix-fetch@3.0.0(encoding@0.1.13):
+    dependencies:
+      node-fetch: 2.7.0(encoding@0.1.13)
+      whatwg-fetch: 3.6.20
+    transitivePeerDependencies:
+      - encoding
+
+  svix@1.62.0(encoding@0.1.13):
+    dependencies:
+      '@stablelib/base64': 1.0.1
+      '@types/node': 22.13.10
+      es6-promise: 4.2.8
+      fast-sha256: 1.3.0
+      svix-fetch: 3.0.0(encoding@0.1.13)
+      url-parse: 1.5.10
+    transitivePeerDependencies:
+      - encoding
+
   swap-case@1.1.2:
     dependencies:
       lower-case: 1.1.4
@@ -17408,6 +17553,8 @@ snapshots:
   ts-api-utils@2.0.1(typescript@5.8.2):
     dependencies:
       typescript: 5.8.2
+
+  ts-case-convert@2.1.0: {}
 
   ts-interface-checker@0.1.13: {}
 
@@ -17533,6 +17680,8 @@ snapshots:
 
   type-fest@0.8.1: {}
 
+  type-fest@3.13.1: {}
+
   typed-array-buffer@1.0.3:
     dependencies:
       call-bound: 1.0.4
@@ -17644,6 +17793,11 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
+
+  url-parse@1.5.10:
+    dependencies:
+      querystringify: 2.2.0
+      requires-port: 1.0.0
 
   use-callback-ref@1.3.3(@types/react@19.0.10)(react@19.0.0):
     dependencies:
@@ -17765,6 +17919,24 @@ snapshots:
       - utf-8-validate
       - zod
 
+  viem@2.23.9(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@6.0.3)(zod@3.24.2):
+    dependencies:
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      abitype: 1.0.8(typescript@5.8.2)(zod@3.24.2)
+      isows: 1.0.6(ws@8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.3))
+      ox: 0.6.9(typescript@5.8.2)(zod@3.24.2)
+      ws: 8.18.1(bufferutil@4.0.9)(utf-8-validate@6.0.3)
+    optionalDependencies:
+      typescript: 5.8.2
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
+    optional: true
+
   vlq@1.0.1:
     optional: true
 
@@ -17781,8 +17953,7 @@ snapshots:
 
   webidl-conversions@4.0.2: {}
 
-  whatwg-fetch@3.6.20:
-    optional: true
+  whatwg-fetch@3.6.20: {}
 
   whatwg-url@5.0.0:
     dependencies:
@@ -17894,6 +18065,11 @@ snapshots:
     optionalDependencies:
       bufferutil: 4.0.9
       utf-8-validate: 5.0.10
+
+  ws@7.5.10(bufferutil@4.0.9)(utf-8-validate@6.0.3):
+    optionalDependencies:
+      bufferutil: 4.0.9
+      utf-8-validate: 6.0.3
 
   ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     optionalDependencies:

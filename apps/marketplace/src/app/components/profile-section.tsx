@@ -1,6 +1,6 @@
 "use client";
 
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivyAuth } from "../utils/use-privy-auth";
 import {
   Avatar,
   AvatarFallback,
@@ -16,10 +16,14 @@ import {
   DropdownMenuTrigger,
 } from "@krain/ui/components/ui/dropdown-menu";
 import { User } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function ProfileSection() {
-  const { authenticated, user, login, logout } = usePrivy();
+  const { authenticated, user, login, logout, dbUser, refreshUser } =
+    usePrivyAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const router = useRouter();
 
   const handleLogin = async () => {
     setIsLoggingIn(true);
@@ -84,6 +88,43 @@ export function ProfileSection() {
     return "User";
   };
 
+  // Debug logging to check why dbUser is null
+  console.log("User auth state:", {
+    authenticated,
+    userId: user?.id,
+    dbUser,
+  });
+
+  const goToProfile = async () => {
+    // If dbUser is null, try to refresh it first
+    if (!dbUser) {
+      console.log("dbUser is null, attempting to refresh");
+      const refreshedUser = await refreshUser();
+      if (refreshedUser) {
+        console.log("Successfully refreshed user data:", refreshedUser);
+        if (refreshedUser.username) {
+          router.push(`/profile/${refreshedUser.username}`);
+          return;
+        }
+      } else {
+        console.log("Failed to refresh user data, redirecting to edit");
+        router.push("/profile/edit");
+        return;
+      }
+    }
+
+    // Use dbUser if it exists after refresh attempt
+    const username = dbUser?.username;
+
+    if (username) {
+      router.push(`/profile/${username}`);
+    } else {
+      // If dbUser or username is missing, redirect to edit profile
+      console.log("No username found, redirecting to profile edit");
+      router.push("/profile/edit");
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -99,6 +140,10 @@ export function ProfileSection() {
         <div className="px-2 py-1.5 text-sm font-medium text-muted-foreground">
           {getUserDisplayName()}
         </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={goToProfile} className="cursor-pointer">
+          My Profile
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
           Logout
