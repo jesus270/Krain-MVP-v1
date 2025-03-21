@@ -123,7 +123,8 @@ export function usePrivyAuth() {
       const wallet = user?.wallet?.address
         ? {
             address: user.wallet.address,
-            chainId: user.wallet.chainId || "1",
+            chainId:
+              "chainId" in user.wallet ? String(user.wallet.chainId) : "1",
           }
         : undefined;
 
