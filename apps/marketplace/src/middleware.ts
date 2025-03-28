@@ -1,53 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getSession } from "@krain/session";
 
-export default async function middleware(request: NextRequest) {
-  // Get user ID from cookie
-  const userId = request.cookies.get("user_id")?.value;
-
-  // Debug cookies
-  console.log("[Middleware] All cookies:", request.cookies.getAll());
-  console.log("[Middleware] Auth status - userId:", userId);
-
-  // If user is not logged in, allow the request to proceed
-  // We'll let the authentication system handle redirects for protected pages
-  if (!userId) {
+export async function middleware(request: NextRequest) {
+  // Skip auth for public routes
+  if (request.nextUrl.pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
 
-  // Check if the request is already for the profile edit page or authentication-related paths
-  // We don't want to create an infinite redirect loop
-  const bypathPaths = [
-    "/profile/edit",
-    "/api/auth",
-    "/api/me",
-    "/api/session",
-    "/login",
-    "/auth",
-  ];
+  const sessionId = request.cookies.get("session")?.value;
+  const session = sessionId ? await getSession(sessionId) : null;
 
-  if (bypathPaths.some((path) => request.nextUrl.pathname.startsWith(path))) {
-    return NextResponse.next();
-  }
-
-  // Get username from cookie if available
-  // We'll add a separate cookie for the username to avoid DB queries in middleware
-  const username = request.cookies.get("username")?.value;
-
-  // If no username cookie exists, redirect to profile edit
-  if (!username) {
-    console.log(
-      "[Middleware] No username found in cookies, redirecting to profile edit",
-    );
-    return NextResponse.redirect(new URL("/profile/edit", request.url));
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   return NextResponse.next();
 }
 
-// Configure middleware to run on specific paths
 export const config = {
   matcher: [
-    // Apply to all routes except static files, api routes that don't need sessions, etc.
-    "/((?!_next/static|_next/image|favicon.ico|images|api/public).*)",
+    "/api/:path*",
+    "/((?!_next/static|_next/image|favicon.ico|logo.svg).*)",
   ],
 };

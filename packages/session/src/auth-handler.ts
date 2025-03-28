@@ -47,19 +47,47 @@ export async function handlePrivyAuth(privyData: PrivyUserData): Promise<User> {
     }
   }
 
-  // Create new user object
-  const user: User = {
-    id: privyData.id,
-    email: { address: privyData.email ?? "" },
-    wallet: { address: privyData.wallet?.address ?? "" },
-    createdAt: new Date(),
-  };
+  try {
+    // Create or update user via API
+    const response = await fetch("/api/auth/user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(privyData),
+    });
 
-  log.info("Created new user from Privy", {
-    operation: "handle_privy_auth",
-    entity: "AUTH",
-    userId: user.id,
-  });
+    if (!response.ok) {
+      throw new Error("Failed to create/update user");
+    }
 
-  return user;
+    const { user: dbUser } = await response.json();
+
+    if (!dbUser) {
+      throw new Error("No user data returned from API");
+    }
+
+    // Create user object for session
+    const user: User = {
+      id: dbUser.id.toString(),
+      email: { address: dbUser.email || "" },
+      wallet: { address: dbUser.walletAddress || "" },
+      createdAt: dbUser.createdAt || new Date(),
+    };
+
+    log.info("Created/updated user from Privy", {
+      operation: "handle_privy_auth",
+      entity: "AUTH",
+      userId: user.id,
+    });
+
+    return user;
+  } catch (error) {
+    log.error("Error in auth handler", {
+      operation: "handle_privy_auth",
+      entity: "AUTH",
+      error,
+    });
+    throw error;
+  }
 }
