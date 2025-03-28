@@ -32,3 +32,6 @@ export { handleAuthCallback } from "./routes/callback";
 
 // Auth handler for Privy
 export { handlePrivyAuth, type PrivyUserData } from "./auth-handler";
+
+// User service
+export { createOrUpdateUser } from "./user-service";

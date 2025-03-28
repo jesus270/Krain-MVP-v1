@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createOrUpdateUser } from "@krain/session/user-service";
+import { createOrUpdateUser } from "@krain/session";
 import { log } from "@krain/utils";
 
 export async function POST(request: Request) {
