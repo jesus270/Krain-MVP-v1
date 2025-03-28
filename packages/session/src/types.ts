@@ -7,13 +7,40 @@ export interface SessionOptions {
 export interface User {
   id: string;
   createdAt: Date;
-  wallet: {
+  wallet?: {
     address: string;
   };
-  email: {
+  email?: {
     address: string;
   };
   role?: string;
+  telegramUserId?: string;
+  telegramUsername?: string;
+  hasJoinedTelegramCommunity?: boolean;
+  hasJoinedTelegramAnnouncement?: boolean;
+  telegramCommunityMessageCount?: number;
+  hasJoinedCommunityChannel?: boolean;
+  hasJoinedAnnouncementChannel?: boolean;
+  communityMessageCount?: number;
+  announcementCommentCount?: number;
+  // Privy-specific properties
+  linkedAccounts?: any[];
+  twitter?: {
+    subject: string;
+    handle?: string;
+    name?: string;
+    profilePictureUrl?: string;
+    username?: string;
+  };
+  // Additional Privy properties
+  ready?: boolean;
+  authenticated?: boolean;
+  linkEmail?: () => Promise<void>;
+  connectWallet?: () => Promise<void>;
+  unlinkEmail?: (address: string) => Promise<void>;
+  unlinkWallet?: (address: string) => Promise<void>;
+  linkTwitter?: () => Promise<void>;
+  unlinkTwitter?: (subject: string) => Promise<void>;
 }
 
 export interface Session {

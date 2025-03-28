@@ -9,7 +9,7 @@ export function AdditionalPointsMessage() {
         <Construction className="h-5 w-5 shrink-0 text-yellow-500" />
         <p className="text-muted-foreground">
           Additional points opportunities will be added to the dashboard soon
-          for X Engagement Actions.
+          for X Engagement Actions and Telegram Community Participation.
         </p>
       </div>
     </div>

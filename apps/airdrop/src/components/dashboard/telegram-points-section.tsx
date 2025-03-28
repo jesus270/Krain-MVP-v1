@@ -3,34 +3,30 @@
 import { Badge } from "@krain/ui/components/ui/badge";
 import { Label } from "@krain/ui/components/ui/label";
 import { formatNumber } from "@krain/utils";
-import { XLogo } from "@krain/ui/components/icons/XLogo";
-import { AlertCircle, CheckCircle2, Mail, User } from "lucide-react";
+import { AlertCircle, CheckCircle2, MessageCircle } from "lucide-react";
 import { cn } from "@krain/ui/lib/utils";
 
-interface ProfilePointsSectionProps {
-  userTwitterUsername: string | undefined;
-  userEmailAddress: string | undefined;
-  twitterPoints: number;
-  emailPoints: number;
+interface TelegramPointsSectionProps {
+  hasJoinedCommunity: boolean;
+  hasJoinedAnnouncements: boolean;
+  communityPoints: number;
+  announcementPoints: number;
   locale: string;
 }
 
-export function ProfilePointsSection({
-  userTwitterUsername,
-  userEmailAddress,
-  twitterPoints,
-  emailPoints,
+export function TelegramPointsSection({
+  hasJoinedCommunity,
+  hasJoinedAnnouncements,
+  communityPoints,
+  announcementPoints,
   locale,
-}: ProfilePointsSectionProps) {
+}: TelegramPointsSectionProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 group">
-        <User
-          className="h-5 w-5 text-primary/80 group-hover:text-primary transition-colors group-hover:scale-110 duration-300"
-          key="profile-section-icon"
-        />
+        <MessageCircle className="h-5 w-5 text-primary/80 group-hover:text-primary transition-colors group-hover:scale-110 duration-300" />
         <Label className="font-medium bg-gradient-to-r from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent">
-          Profile Points
+          Telegram Points
         </Label>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
@@ -39,48 +35,36 @@ export function ProfilePointsSection({
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center gap-2">
-              <XLogo
-                className="h-4 w-4 text-primary/80 group-hover:text-primary transition-colors group-hover:scale-110 duration-300"
-                key="twitter-icon"
-              />
+              <MessageCircle className="h-4 w-4 text-primary/80 group-hover:text-primary transition-colors group-hover:scale-110 duration-300" />
               <span className="text-sm font-medium bg-gradient-to-r from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent">
-                X Account
+                Community Channel
               </span>
             </div>
             <Badge
-              variant={userTwitterUsername ? "secondary" : "outline"}
+              variant={hasJoinedCommunity ? "secondary" : "outline"}
               className={cn(
                 "text-center relative overflow-hidden transition-colors",
-                userTwitterUsername
+                hasJoinedCommunity
                   ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
                   : "border border-border/50",
               )}
             >
-              {formatNumber(twitterPoints, locale)} pts
+              {formatNumber(communityPoints, locale)} pts
             </Badge>
           </div>
           <div className="flex items-center gap-2 mt-2 relative z-10">
-            {userTwitterUsername ? (
-              <div key="twitter-connected" className="flex items-center gap-2">
-                <CheckCircle2
-                  className="h-4 w-4 text-green-500 group-hover:scale-110 transition-transform"
-                  key="twitter-check"
-                />
+            {hasJoinedCommunity ? (
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-500 group-hover:scale-110 transition-transform" />
                 <p className="text-xs text-muted-foreground/90 group-hover:text-muted-foreground transition-colors">
-                  X account connected
+                  Community channel joined
                 </p>
               </div>
             ) : (
-              <div
-                key="twitter-not-connected"
-                className="flex items-center gap-2"
-              >
-                <AlertCircle
-                  className="h-4 w-4 text-yellow-500 animate-pulse"
-                  key="twitter-alert"
-                />
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-yellow-500 animate-pulse" />
                 <p className="text-xs text-muted-foreground/90 group-hover:text-muted-foreground transition-colors">
-                  Connect X to earn 2,000 points
+                  Join community to earn 5,000 points
                 </p>
               </div>
             )}
@@ -91,48 +75,36 @@ export function ProfilePointsSection({
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center gap-2">
-              <Mail
-                className="h-4 w-4 text-primary/80 group-hover:text-primary transition-colors group-hover:scale-110 duration-300"
-                key="email-icon"
-              />
+              <MessageCircle className="h-4 w-4 text-primary/80 group-hover:text-primary transition-colors group-hover:scale-110 duration-300" />
               <span className="text-sm font-medium bg-gradient-to-r from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent">
-                Email
+                Announcements Channel
               </span>
             </div>
             <Badge
-              variant={userEmailAddress ? "secondary" : "outline"}
+              variant={hasJoinedAnnouncements ? "secondary" : "outline"}
               className={cn(
                 "text-center relative overflow-hidden transition-colors",
-                userEmailAddress
+                hasJoinedAnnouncements
                   ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
                   : "border border-border/50",
               )}
             >
-              {formatNumber(emailPoints, locale)} pts
+              {formatNumber(announcementPoints, locale)} pts
             </Badge>
           </div>
           <div className="flex items-center gap-2 mt-2 relative z-10">
-            {userEmailAddress ? (
-              <div key="email-connected" className="flex items-center gap-2">
-                <CheckCircle2
-                  className="h-4 w-4 text-green-500 group-hover:scale-110 transition-transform"
-                  key="email-check"
-                />
+            {hasJoinedAnnouncements ? (
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-500 group-hover:scale-110 transition-transform" />
                 <p className="text-xs text-muted-foreground/90 group-hover:text-muted-foreground transition-colors">
-                  Email address connected
+                  Announcements channel joined
                 </p>
               </div>
             ) : (
-              <div
-                key="email-not-connected"
-                className="flex items-center gap-2"
-              >
-                <AlertCircle
-                  className="h-4 w-4 text-yellow-500 animate-pulse"
-                  key="email-alert"
-                />
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-yellow-500 animate-pulse" />
                 <p className="text-xs text-muted-foreground/90 group-hover:text-muted-foreground transition-colors">
-                  Connect email to earn 3,000 points
+                  Join announcements to earn 5,000 points
                 </p>
               </div>
             )}

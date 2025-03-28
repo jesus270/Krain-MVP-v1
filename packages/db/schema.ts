@@ -189,6 +189,25 @@ export const userTable = pgTable("user", {
     length: 1024,
   }),
   twitterSubject: varchar("twitterSubject", { length: 255 }),
+  telegramUserId: varchar("telegramUserId", { length: 255 }).unique(),
+  telegramUsername: varchar("telegramUsername", { length: 255 }),
+  hasJoinedTelegramCommunity: boolean("hasJoinedTelegramCommunity").default(
+    false,
+  ),
+  hasJoinedTelegramAnnouncement: boolean(
+    "hasJoinedTelegramAnnouncement",
+  ).default(false),
+  telegramCommunityMessageCount: integer(
+    "telegramCommunityMessageCount",
+  ).default(0),
+  hasJoinedCommunityChannel: boolean("hasJoinedCommunityChannel").default(
+    false,
+  ),
+  hasJoinedAnnouncementChannel: boolean("hasJoinedAnnouncementChannel").default(
+    false,
+  ),
+  communityMessageCount: integer("communityMessageCount").default(0),
+  announcementCommentCount: integer("announcementCommentCount").default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   privyCreatedAt: timestamp("privyCreatedAt"),
   isGuest: boolean("isGuest").default(false),

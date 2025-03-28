@@ -2,6 +2,7 @@
 
 import { usePrivy } from "@privy-io/react-auth";
 import { useSolanaWallets } from "@privy-io/react-auth";
+import { useSession } from "@/lib/use-session";
 import {
   Card,
   CardContent,
@@ -14,12 +15,19 @@ import { Skeleton } from "@krain/ui/components/ui/skeleton";
 import { Badge } from "@krain/ui/components/ui/badge";
 import { Separator } from "@krain/ui/components/ui/separator";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@krain/ui/components/ui/tooltip";
+import {
   Wallet,
   Mail,
   AlertCircle,
   CheckCircle2,
   XCircle,
-  User,
+  User as UserIcon,
+  MessageCircle,
 } from "lucide-react";
 import { XLogo } from "@krain/ui/components/icons/XLogo";
 import { redirect } from "next/navigation";
@@ -31,7 +39,7 @@ export default function Profile() {
   const {
     ready,
     authenticated,
-    user,
+    user: privyUser,
     linkEmail,
     connectWallet,
     unlinkEmail,
@@ -39,12 +47,12 @@ export default function Profile() {
     linkTwitter,
     unlinkTwitter,
   } = usePrivy();
+  const { wallets: solanaWallets } = useSolanaWallets();
+  const { user: sessionUser } = useSession();
 
   if (ready && !authenticated) {
     return redirect("/");
   }
-
-  const { wallets: solanaWallets } = useSolanaWallets();
 
   const handleConnectWallet = async () => {
     try {
@@ -90,18 +98,20 @@ export default function Profile() {
     return redirect("/");
   }
 
-  const numAccounts = user?.linkedAccounts?.length || 0;
+  const numAccounts = privyUser?.linkedAccounts?.length || 0;
   const canRemoveAccount = numAccounts > 1;
 
-  const email = user?.email;
-  const wallet = user?.wallet;
-  const twitterSubject = user?.twitter?.subject || null;
+  const email = privyUser?.email;
+  const wallet = privyUser?.wallet;
+  const twitterSubject = privyUser?.twitter?.subject || null;
 
   const totalPoints =
     5000 + // Base points for having an account
     (wallet ? 1000 : 0) + // Additional points for wallet connection
     (twitterSubject ? 2000 : 0) + // Points for Twitter
-    (email ? 3000 : 0); // Points for email
+    (email ? 3000 : 0) + // Points for email
+    ((sessionUser?.hasJoinedTelegramCommunity ?? false) ? 5000 : 0) + // Points for Telegram Community
+    ((sessionUser?.hasJoinedTelegramAnnouncement ?? false) ? 5000 : 0); // Points for Telegram Announcement
 
   return (
     <main className="container mx-auto p-4">
@@ -133,7 +143,7 @@ export default function Profile() {
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x" />
             <div className="flex items-center justify-between relative">
               <div className="flex items-center gap-2 group">
-                <User className="h-5 w-5 text-primary/80 group-hover:text-primary transition-colors group-hover:scale-110 duration-300" />
+                <UserIcon className="h-5 w-5 text-primary/80 group-hover:text-primary transition-colors group-hover:scale-110 duration-300" />
                 <div>
                   <h3 className="font-semibold bg-gradient-to-r from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent">
                     Account
@@ -189,33 +199,49 @@ export default function Profile() {
                 >
                   {wallet ? "+1,000 points" : "+1,000 points available"}
                 </Badge>
-                <Button
-                  variant={wallet ? "destructive" : "default"}
-                  size="sm"
-                  onClick={
-                    wallet
-                      ? () => unlinkWallet(wallet.address)
-                      : handleConnectWallet
-                  }
-                  disabled={wallet && !canRemoveAccount}
-                  className={cn(
-                    "min-w-[100px] justify-center group relative overflow-hidden",
-                    !wallet &&
+                {wallet ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => unlinkWallet(wallet.address)}
+                            disabled={!canRemoveAccount}
+                            className={cn(
+                              "min-w-[100px] justify-center group relative overflow-hidden cursor-pointer",
+                              "disabled:cursor-not-allowed",
+                            )}
+                          >
+                            <div className="flex items-center">
+                              <XCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                              Unlink
+                            </div>
+                          </Button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>At least one account must remain connected</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleConnectWallet}
+                    className={cn(
+                      "min-w-[100px] justify-center group relative overflow-hidden cursor-pointer",
                       "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0",
-                  )}
-                >
-                  {wallet ? (
-                    <>
-                      <XCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                      Unlink
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                    )}
+                  >
+                    <div className="flex items-center">
+                      <MessageCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
                       Connect
-                    </>
-                  )}
-                </Button>
+                    </div>
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -230,9 +256,9 @@ export default function Profile() {
                   </h3>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground/90">
-                      {user?.twitter?.username || "Not connected"}
+                      {privyUser?.twitter?.username || "Not connected"}
                     </p>
-                    {!user?.twitter?.username && (
+                    {!privyUser?.twitter?.username && (
                       <p className="text-xs text-muted-foreground/80">
                         Required for X Engagement Actions
                       </p>
@@ -254,39 +280,49 @@ export default function Profile() {
                 >
                   {twitterSubject ? "+2,000 points" : "+2,000 points available"}
                 </Badge>
-                <Button
-                  variant={
-                    typeof twitterSubject === "string"
-                      ? "destructive"
-                      : "default"
-                  }
-                  size="sm"
-                  onClick={
-                    twitterSubject
-                      ? () => unlinkTwitter(twitterSubject)
-                      : linkTwitter
-                  }
-                  disabled={
-                    typeof twitterSubject === "string" && !canRemoveAccount
-                  }
-                  className={cn(
-                    "min-w-[100px] justify-center group relative overflow-hidden",
-                    !twitterSubject &&
+                {twitterSubject ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => unlinkTwitter(twitterSubject)}
+                            disabled={!canRemoveAccount}
+                            className={cn(
+                              "min-w-[100px] justify-center group relative overflow-hidden cursor-pointer",
+                              "disabled:cursor-not-allowed",
+                            )}
+                          >
+                            <div className="flex items-center">
+                              <XCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                              Unlink
+                            </div>
+                          </Button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>At least one account must remain connected</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={linkTwitter}
+                    className={cn(
+                      "min-w-[100px] justify-center group relative overflow-hidden cursor-pointer",
                       "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0",
-                  )}
-                >
-                  {twitterSubject ? (
-                    <>
-                      <XCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                      Unlink
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                    )}
+                  >
+                    <div className="flex items-center">
+                      <MessageCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
                       Connect
-                    </>
-                  )}
-                </Button>
+                    </div>
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -323,40 +359,160 @@ export default function Profile() {
                 >
                   {email ? "+3,000 points" : "+3,000 points available"}
                 </Badge>
-                <Button
-                  variant={email ? "destructive" : "default"}
-                  size="sm"
-                  onClick={email ? () => unlinkEmail(email.address) : linkEmail}
-                  disabled={email && !canRemoveAccount}
-                  className={cn(
-                    "min-w-[100px] justify-center group relative overflow-hidden",
-                    !email &&
+                {email ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => unlinkEmail(email.address)}
+                            disabled={!canRemoveAccount}
+                            className={cn(
+                              "min-w-[100px] justify-center group relative overflow-hidden cursor-pointer",
+                              "disabled:cursor-not-allowed",
+                            )}
+                          >
+                            <div className="flex items-center">
+                              <XCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                              Unlink
+                            </div>
+                          </Button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>At least one account must remain connected</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={linkEmail}
+                    className={cn(
+                      "min-w-[100px] justify-center group relative overflow-hidden cursor-pointer",
                       "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0",
-                  )}
-                >
-                  {email ? (
-                    <>
-                      <XCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                      Unlink
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                    )}
+                  >
+                    <div className="flex items-center">
+                      <MessageCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
                       Connect
-                    </>
-                  )}
-                </Button>
+                    </div>
+                  </Button>
+                )}
               </div>
             </div>
 
-            {!canRemoveAccount && (
-              <div className="mt-4 flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                <AlertCircle className="h-5 w-5 text-yellow-500 shrink-0" />
-                <p className="text-sm text-yellow-500">
-                  At least one account must remain connected
-                </p>
+            <Separator className="bg-border/50" />
+
+            <div className="flex items-center justify-between relative">
+              <div className="flex items-center gap-2 group">
+                <MessageCircle className="h-5 w-5 text-primary/80 group-hover:text-primary transition-colors group-hover:scale-110 duration-300" />
+                <div>
+                  <h3 className="font-semibold bg-gradient-to-r from-purple-500/90 to-blue-500/90 bg-clip-text text-transparent">
+                    Telegram Channels
+                  </h3>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground/90">
+                      {sessionUser?.telegramUsername || "Not connected"}
+                    </p>
+                    {!sessionUser?.telegramUsername && (
+                      <p className="text-xs text-muted-foreground/80">
+                        Join our Telegram channels and verify with our bot
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
-            )}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant={
+                      (sessionUser?.hasJoinedTelegramCommunity ?? false)
+                        ? "secondary"
+                        : "outline"
+                    }
+                    className={cn(
+                      "whitespace-nowrap",
+                      (sessionUser?.hasJoinedTelegramCommunity ?? false)
+                        ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
+                        : "border border-border/50",
+                    )}
+                  >
+                    {(sessionUser?.hasJoinedTelegramCommunity ?? false)
+                      ? "+5,000 points"
+                      : "+5,000 points available"}
+                  </Badge>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() =>
+                      window.open("https://t.me/kraincommunity", "_blank")
+                    }
+                    className={cn(
+                      "min-w-[100px] justify-center group relative overflow-hidden cursor-pointer",
+                      "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0",
+                    )}
+                  >
+                    {(sessionUser?.hasJoinedTelegramCommunity ?? false) ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                        Joined Community
+                      </>
+                    ) : (
+                      <>
+                        <MessageCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                        Join Community
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant={
+                      (sessionUser?.hasJoinedTelegramAnnouncement ?? false)
+                        ? "secondary"
+                        : "outline"
+                    }
+                    className={cn(
+                      "whitespace-nowrap",
+                      (sessionUser?.hasJoinedTelegramAnnouncement ?? false)
+                        ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
+                        : "border border-border/50",
+                    )}
+                  >
+                    {(sessionUser?.hasJoinedTelegramAnnouncement ?? false)
+                      ? "+5,000 points"
+                      : "+5,000 points available"}
+                  </Badge>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() =>
+                      window.open("https://t.me/krainofficial", "_blank")
+                    }
+                    className={cn(
+                      "min-w-[100px] justify-center group relative overflow-hidden cursor-pointer",
+                      "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0",
+                    )}
+                  >
+                    {(sessionUser?.hasJoinedTelegramAnnouncement ?? false) ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                        Joined Announcements
+                      </>
+                    ) : (
+                      <>
+                        <MessageCircle className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                        Join Announcements
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

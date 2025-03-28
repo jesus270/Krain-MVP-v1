@@ -19,6 +19,7 @@ import { ProfilePointsSection } from "./profile-points-section";
 import { ProfileCompletionMessage } from "./profile-completion-message";
 import { AdditionalPointsMessage } from "./additional-points-message";
 import { cn } from "@krain/ui/lib/utils";
+import { TelegramPointsSection } from "./telegram-points-section";
 
 interface PointsStatusCardProps {
   totalPoints: number;
@@ -31,6 +32,10 @@ interface PointsStatusCardProps {
   referralPoints: number;
   twitterPoints: number;
   emailPoints: number;
+  telegramCommunityPoints: number;
+  telegramAnnouncementPoints: number;
+  hasJoinedTelegramCommunity: boolean;
+  hasJoinedTelegramAnnouncement: boolean;
   locale: string;
   isLoadingReferrals: boolean;
 }
@@ -46,6 +51,10 @@ export function PointsStatusCard({
   referralPoints = 0,
   twitterPoints = 0,
   emailPoints = 0,
+  telegramCommunityPoints = 0,
+  telegramAnnouncementPoints = 0,
+  hasJoinedTelegramCommunity = false,
+  hasJoinedTelegramAnnouncement = false,
   locale,
   isLoadingReferrals,
 }: PointsStatusCardProps) {
@@ -104,6 +113,13 @@ export function PointsStatusCard({
           userEmailAddress={userEmailAddress}
           twitterPoints={twitterPoints}
           emailPoints={emailPoints}
+          locale={locale}
+        />
+        <TelegramPointsSection
+          hasJoinedCommunity={hasJoinedTelegramCommunity}
+          hasJoinedAnnouncements={hasJoinedTelegramAnnouncement}
+          communityPoints={telegramCommunityPoints}
+          announcementPoints={telegramAnnouncementPoints}
           locale={locale}
         />
       </CardContent>

@@ -5,7 +5,7 @@
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState, useCallback } from "react";
 import { Wallet } from "@krain/db";
-import { useLocale } from "@krain/utils";
+import { useLocale } from "@krain/utils/react";
 import { handleSubmitWallet } from "@/actions/wallet";
 import { getReferralCount } from "@/actions/referral";
 import { ConnectWalletCard } from "@/components/dashboard/connect-wallet-card";
@@ -51,6 +51,9 @@ export function Dashboard({
   const userEmailAddress = user?.email?.address ?? undefined;
   const userWalletAddress = user?.wallet?.address ?? undefined;
   const userTwitterUsername = user?.twitter?.username ?? undefined;
+  const hasJoinedTelegramCommunity = user?.hasJoinedTelegramCommunity ?? false;
+  const hasJoinedTelegramAnnouncement =
+    user?.hasJoinedTelegramAnnouncement ?? false;
 
   useEffect(() => {
     log.info("Dashboard component mounted", {
@@ -291,7 +294,9 @@ export function Dashboard({
           (userWalletAddress ? 1000 : 0) + // Points for wallet connection
           referralsCount * 1000 + // Referral points: 1000 per referral
           (userTwitterUsername ? 2000 : 0) + // Twitter points: 2000 base
-          (userEmailAddress ? 3000 : 0) // Email points: 3000
+          (userEmailAddress ? 3000 : 0) + // Email points: 3000
+          (hasJoinedTelegramCommunity ? 5000 : 0) + // Telegram Community points
+          (hasJoinedTelegramAnnouncement ? 5000 : 0) // Telegram Announcement points
         }
         userWalletAddress={userWalletAddress}
         userEmailAddress={userEmailAddress}
@@ -302,6 +307,10 @@ export function Dashboard({
         referralPoints={referralsCount * 1000}
         twitterPoints={2000}
         emailPoints={3000}
+        telegramCommunityPoints={5000}
+        telegramAnnouncementPoints={5000}
+        hasJoinedTelegramCommunity={hasJoinedTelegramCommunity}
+        hasJoinedTelegramAnnouncement={hasJoinedTelegramAnnouncement}
         locale={locale}
         isLoadingReferrals={isLoadingReferrals}
       />
