@@ -212,8 +212,14 @@ export const userTable = pgTable("user", {
   privyCreatedAt: timestamp("privyCreatedAt"),
   isGuest: boolean("isGuest").default(false),
   hasAcceptedTerms: boolean("hasAcceptedTerms").default(false),
-  linkedAccounts: jsonb("linkedAccounts").$type<LinkedAccount[]>(),
   role: varchar("role", { length: 255 }).$type<string>().default("user"),
+  linkedAccounts: jsonb("linkedAccounts").$type<LinkedAccount[]>().default([]),
+  // New columns from CSV
+  emailVerifiedAt: timestamp("emailVerifiedAt"),
+  walletChain: varchar("walletChain", { length: 50 }),
+  walletType: varchar("walletType", { length: 50 }),
+  walletVerifiedAt: timestamp("walletVerifiedAt"),
+  twitterVerifiedAt: timestamp("twitterVerifiedAt"),
 });
 export type User = typeof userTable.$inferSelect;
 

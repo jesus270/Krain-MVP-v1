@@ -1,11 +1,11 @@
 {
-  "extends": "../typescript-config/react-library.json",
+  "extends": "@krain/typescript-config/base.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@krain/utils/*": ["./src/*"]
-    }
+    "outDir": "./dist",
+    "composite": true,
+    "rootDir": "./src",
+    "incremental": true
   },
-  "include": ["src"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]
 }

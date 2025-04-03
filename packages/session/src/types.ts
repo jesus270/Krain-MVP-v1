@@ -65,12 +65,16 @@ export const sessionDataSchema = z.object({
     .object({
       id: z.string(),
       createdAt: z.date(),
-      wallet: z.object({
-        address: z.string(),
-      }),
-      email: z.object({
-        address: z.string(),
-      }),
+      wallet: z
+        .object({
+          address: z.string(),
+        })
+        .optional(),
+      email: z
+        .object({
+          address: z.string(),
+        })
+        .optional(),
       role: z.string().optional(),
     })
     .optional(),

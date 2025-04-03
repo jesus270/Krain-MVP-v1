@@ -6,7 +6,9 @@
   "types": "./index.ts",
   "exports": {
     ".": "./index.ts",
-    "./telegram": "./telegram.ts"
+    "./telegram": "./telegram.ts",
+    "./schema": "./schema.ts",
+    "./privy": "./privy.ts"
   },
   "scripts": {
     "lint": "eslint .",
