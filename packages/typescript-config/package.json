@@ -2,17 +2,17 @@
   "name": "@krain/typescript-config",
   "version": "0.0.0",
   "license": "MIT",
-  "main": "./base.json",
-  "types": "./base.json",
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "build": "mkdir -p dist && cp *.json dist/"
   },
   "files": [
-    "*.json"
+    "base.json",
+    "nextjs.json",
+    "react-library.json",
+    "dist"
   ],
   "exports": {
-    ".": "./base.json",
     "./base.json": "./base.json",
     "./nextjs.json": "./nextjs.json",
     "./react-library.json": "./react-library.json"

@@ -372,6 +372,9 @@ importers:
       '@krain/session':
         specifier: workspace:*
         version: link:../../packages/session
+      '@krain/typescript-config':
+        specifier: 'workspace:'
+        version: link:../../packages/typescript-config
       '@krain/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -415,9 +418,6 @@ importers:
       '@krain/eslint-config':
         specifier: 'workspace:'
         version: link:../../packages/eslint-config
-      '@krain/typescript-config':
-        specifier: 'workspace:'
-        version: link:../../packages/typescript-config
       '@types/node':
         specifier: ^22.13.10
         version: 22.13.10
@@ -467,6 +467,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@krain/typescript-config':
+        specifier: 'workspace:'
+        version: link:../typescript-config
       '@krain/utils':
         specifier: 'workspace:'
         version: link:../utils
@@ -486,9 +489,6 @@ importers:
       '@krain/eslint-config':
         specifier: 'workspace:'
         version: link:../eslint-config
-      '@krain/typescript-config':
-        specifier: 'workspace:'
-        version: link:../typescript-config
       '@types/node':
         specifier: ^22.13.10
         version: 22.13.10
@@ -540,6 +540,9 @@ importers:
       '@krain/db':
         specifier: workspace:*
         version: link:../db
+      '@krain/typescript-config':
+        specifier: 'workspace:'
+        version: link:../typescript-config
       '@krain/utils':
         specifier: workspace:*
         version: link:../utils
@@ -565,9 +568,6 @@ importers:
       '@krain/eslint-config':
         specifier: 'workspace:'
         version: link:../eslint-config
-      '@krain/typescript-config':
-        specifier: 'workspace:'
-        version: link:../typescript-config
       '@types/node':
         specifier: ^22.13.10
         version: 22.13.10
@@ -591,6 +591,9 @@ importers:
       '@krain/session':
         specifier: workspace:*
         version: link:../session
+      '@krain/typescript-config':
+        specifier: 'workspace:'
+        version: link:../typescript-config
       '@krain/utils':
         specifier: 'workspace:'
         version: link:../utils
@@ -751,9 +754,6 @@ importers:
       '@krain/eslint-config':
         specifier: 'workspace:'
         version: link:../eslint-config
-      '@krain/typescript-config':
-        specifier: 'workspace:'
-        version: link:../typescript-config
       '@tailwindcss/postcss':
         specifier: ^4.0.12
         version: 4.0.12
@@ -772,6 +772,9 @@ importers:
 
   packages/utils:
     dependencies:
+      '@krain/typescript-config':
+        specifier: 'workspace:'
+        version: link:../typescript-config
       '@solana/web3.js':
         specifier: ^1.95.8
         version: 1.98.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)
@@ -788,9 +791,6 @@ importers:
       '@krain/eslint-config':
         specifier: 'workspace:'
         version: link:../eslint-config
-      '@krain/typescript-config':
-        specifier: 'workspace:'
-        version: link:../typescript-config
       '@types/react':
         specifier: ^18.2.0
         version: 18.3.20

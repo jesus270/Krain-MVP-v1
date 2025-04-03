@@ -1,5 +1,5 @@
 {
-  "extends": "@krain/typescript-config",
+  "extends": "@krain/typescript-config/base.json",
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {

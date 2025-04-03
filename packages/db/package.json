@@ -23,11 +23,11 @@
     "@neondatabase/serverless": "^0.10.0",
     "drizzle-orm": "^0.40.0",
     "postgresql": "^0.0.1",
-    "tsup": "^8.4.0"
+    "tsup": "^8.4.0",
+    "@krain/typescript-config": "workspace:"
   },
   "devDependencies": {
     "@krain/eslint-config": "workspace:",
-    "@krain/typescript-config": "workspace:",
     "@types/node": "^22.13.10",
     "@types/pg": "^8.10.9",
     "dotenv": "^16.3.1",
