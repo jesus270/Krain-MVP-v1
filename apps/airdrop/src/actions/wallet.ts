@@ -53,6 +53,7 @@ export async function createWallet(input: { address: string; userId: string }) {
     try {
       const user = session.get("user");
       if (!user) throw new Error("No user in session");
+      if (!user.wallet) throw new Error("No wallet associated with user");
 
       // Validate input
       const parsed = walletAddressSchema.parse(input);
@@ -166,6 +167,7 @@ export async function getWallet(input: {
     try {
       const user = session.get("user");
       if (!user) throw new Error("No user in session");
+      if (!user.wallet) throw new Error("No wallet associated with user");
 
       // Validate input
       const parsed = walletAddressSchema.parse(input);
@@ -214,6 +216,7 @@ export async function isValidReferralCode(input: {
   return withAuth(input.userId, async (session) => {
     const user = session.get("user");
     if (!user) throw new Error("No user in session");
+    if (!user.wallet) throw new Error("No wallet associated with user");
 
     if (input.referredWallet.address !== user.wallet.address) {
       throw new Error(
@@ -261,6 +264,7 @@ export async function handleSubmitWallet(input: {
     try {
       const user = session.get("user");
       if (!user) throw new Error("No user in session");
+      if (!user.wallet) throw new Error("No wallet associated with user");
 
       // Verify user can only submit their own wallet
       if (input.walletAddress !== user.wallet.address) {
@@ -385,6 +389,7 @@ export async function updateReferralCode(input: {
     try {
       const user = session.get("user");
       if (!user) throw new Error("No user in session");
+      if (!user.wallet) throw new Error("No wallet associated with user");
 
       log.info("Updating referral code", {
         entity: "WALLET",

@@ -1,11 +1,9 @@
 {
   "extends": "@krain/typescript-config/base.json",
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "outDir": "./dist",
-    "composite": true,
-    "rootDir": ".",
-    "incremental": true
-  },
-  "include": ["./**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+    "rootDir": "."
+  }
 }
