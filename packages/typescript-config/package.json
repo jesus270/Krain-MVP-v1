@@ -7,15 +7,19 @@
     "build": "mkdir -p dist && cp *.json dist/"
   },
   "files": [
-    "base.json",
-    "nextjs.json",
-    "react-library.json",
+    "*.json",
     "dist"
   ],
   "exports": {
-    "./base.json": "./dist/base.json",
-    "./nextjs.json": "./dist/nextjs.json",
-    "./react-library.json": "./dist/react-library.json"
+    "./base.json": {
+      "default": "./base.json"
+    },
+    "./nextjs.json": {
+      "default": "./nextjs.json"
+    },
+    "./react-library.json": {
+      "default": "./react-library.json"
+    }
   },
   "publishConfig": {
     "access": "public"
