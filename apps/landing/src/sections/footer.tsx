@@ -74,7 +74,7 @@ export function Footer() {
                 <br />
                 <span className="whitespace-nowrap">layer fueling the</span>
                 <br />
-                <span className="whitespace-nowrap">AI agent economy</span>
+                <span className="whitespace-nowrap">AI economy</span>
               </p>
             </div>
 

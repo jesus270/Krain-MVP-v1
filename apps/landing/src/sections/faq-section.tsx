@@ -17,19 +17,19 @@ const faqs = [
     id: "QA_1",
     question: "What is KRAIN AI?",
     answer:
-      "The AI agent ecosystem is fragmented, difficult to navigate, and largely inaccessible to those outside of the developer community. Krain AI is building the intelligent infrastructure that enables seamless discovery, trust, and interoperability in the AI agent space. With Krain AI, innovators and businesses can explore, connect, and create AI agents faster than ever—fueling the next wave of AI-driven automation.",
+      "Krain is building the intelligent infrastructure that enables seamless discovery, app deployment and hosting for AI apps. With Krain, innovators and businesses can explore, consume, and host AI apps faster than ever—fueling the next wave of AI-driven automation.",
   },
   {
     id: "QA_2",
-    question: "How does KRAIN utilizes AI?",
+    question: "How does KRAIN utilize AI?",
     answer:
-      "KRAIN leverages advanced AI algorithms to provide intelligent agent discovery, performance metrics analysis, and automated recommendations, enhancing the overall ecosystem efficiency and user experience.",
+      "KRAIN leverages advanced AI algorithms to provide intelligent app discovery, performance metrics analysis, and automated recommendations, enhancing the overall ecosystem efficiency and user experience.",
   },
   {
     id: "QA_3",
     question: "How do I use KRAIN?",
     answer:
-      "You can start using KRAIN by connecting your wallet, exploring the AI agent portal, and utilizing our discovery tools to find the perfect agents for your needs.",
+      "You can start using KRAIN by connecting your wallet, exploring the AI app portal, and utilizing our discovery tools to find the perfect AI app for your needs.",
   },
   {
     id: "QA_4",

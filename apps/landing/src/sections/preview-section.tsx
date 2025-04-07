@@ -9,12 +9,12 @@ export function PreviewSection() {
       <div className="flex flex-col items-center w-full">
         <div className="flex flex-col items-center text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
-            The only AI agent portal
+            The only AI app portal
             <br />
             you'll ever need
           </h2>
           <p className="text-gray-400 text-lg md:text-xl max-w-2xl">
-            Find high performing AI agents based on your exact criteria,
+            Find high performing AI apps based on your exact criteria,
             performance requirements, and community ratings.
           </p>
         </div>

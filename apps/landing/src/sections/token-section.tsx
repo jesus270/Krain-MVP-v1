@@ -4,12 +4,12 @@ import { VideoBackground } from "@/components/video-background";
 
 const tokenFeatures = [
   { iconPath: "/icon-square-star.svg", title: "UNLOCK PREMIUM\nAI FEATURES" },
-  { iconPath: "/icon-square-krain.svg", title: "AGENT HUB PRIMARY\nCURRENCY" },
-  { iconPath: "/icon-square-robot.svg", title: "AGENT HUB\nSUBSCRIPTIONS" },
-  { iconPath: "/icon-square-reward.svg", title: "AGENT PERFORMANCE\nREWARDS" },
+  { iconPath: "/icon-square-krain.svg", title: "AI APP PORTAL\nPRIMARY CURRENCY" },
+  { iconPath: "/icon-square-robot.svg", title: "AI APP PORTAL\nSUBSCRIPTIONS" },
+  { iconPath: "/icon-square-reward.svg", title: "APP PERFORMANCE\nREWARDS" },
   {
     iconPath: "/icon-square-liquid.svg",
-    title: "AGENT TOKEN\nLIQUIDITY PAIRING",
+    title: "AI APP TOKEN\nLIQUIDITY PAIRING",
   },
   { iconPath: "/icon-square-coins.svg", title: "EARN\nSTAKING REWARDS" },
   { iconPath: "/icon-square-vote.svg", title: "PARTICIPATE\nIN GOVERNANCE" },

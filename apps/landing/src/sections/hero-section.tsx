@@ -19,10 +19,10 @@ export function HeroSection() {
       <SocialNav />
       <div className="flex flex-col items-center justify-center flex-1 z-10 px-4 md:px-20 text-center mt-24">
         <h1 className="max-w-4xl text-4xl md:text-6xl font-bold text-white mb-4">
-          The infrastructure layer fueling the <span>AI agent economy</span>
+          The infrastructure layer fueling the <span>AI economy</span>
         </h1>
         <p className="text-gray-400 text-lg md:text-xl mb-8">
-          From discovery to creation, we are accelerating the AI Agent ecosystem
+          From discovery to creation, we are accelerating the AI ecosystem
           with intelligent infrastructure.
         </p>
         {/* <Link href="https://early.krain.ai">
