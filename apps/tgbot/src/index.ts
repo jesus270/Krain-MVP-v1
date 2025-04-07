@@ -239,28 +239,56 @@ bot.on("message", async (ctx) => {
       return;
     }
 
-    const user = await findUserByTelegramId(userId.toString());
-    if (!user) {
-      console.log(
-        `⚠️ User ${userId} not registered in database, skipping message count`,
-      );
-      return;
-    }
+    try {
+      const user = await findUserByTelegramId(userId.toString());
+      if (!user) {
+        console.log(
+          `⚠️ User ${userId} (${username}) not registered in database, skipping message count`,
+        );
+        return;
+      }
 
-    const today = new Date();
-    const dailyCount = await getDailyMessageCount(user.id, today);
+      const today = new Date();
+      const dailyCount = await getDailyMessageCount(user.id, today);
 
-    // Only increment if under daily limit
-    if (dailyCount < 4) {
-      console.log(
-        `💬 Processing community message from ${username} (${dailyCount + 1}/4 today)`,
+      // Only increment if under daily limit
+      if (dailyCount < 4) {
+        console.log(
+          `💬 Processing community message from ${username} (${
+            dailyCount + 1
+          }/4 today)`,
+        );
+        // Use Promise.allSettled to handle potential partial failures
+        const results = await Promise.allSettled([
+          incrementTelegramCommunityMessageCount(user.id),
+          incrementDailyMessageCount(user.id, today),
+        ]);
+
+        // Log any errors from the database increments
+        results.forEach((result, index) => {
+          if (result.status === "rejected") {
+            console.error(
+              `❌ Failed to ${
+                index === 0
+                  ? "increment community message count"
+                  : "increment daily message count"
+              } for user ${username} (${user.id}):`,
+              result.reason,
+            );
+          }
+        });
+      } else {
+        console.log(
+          `⚠️ User ${username} has reached daily message limit (4/4)`,
+        );
+      }
+    } catch (error) {
+      console.error(
+        `❌ Database error processing message for user ${username} (${userId}):`,
+        error,
       );
-      await Promise.all([
-        incrementTelegramCommunityMessageCount(user.id),
-        incrementDailyMessageCount(user.id, today),
-      ]);
-    } else {
-      console.log(`⚠️ User ${username} has reached daily message limit (4/4)`);
+      // Optionally, notify the user or admin, but don't crash the bot.
+      // ctx.reply("Sorry, there was a temporary issue processing your message points. Please try again later.").catch(e => console.error("Failed to send error message to user:", e));
     }
   }
 });
