@@ -8,7 +8,7 @@ import {
   recordTelegramChannelJoin,
   getDailyMessageCount,
   incrementDailyMessageCount,
-} from "@krain/db/telegram";
+} from "@krain/db";
 
 config();
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { getTotalMessagePoints, findUserByPrivyId } from "@krain/db/telegram";
+import { getTotalMessagePoints, findUserByPrivyId } from "@krain/db";
 import { log } from "@krain/utils";
 
 export async function getTelegramMessagePoints({

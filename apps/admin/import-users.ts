@@ -3,7 +3,7 @@ import { rename, readdir } from "fs/promises";
 import { parse } from "csv-parse";
 import path from "path";
 import { db } from "@krain/db";
-import { userTable } from "@krain/db/schema";
+import { userTable } from "@krain/db";
 import { sql } from "drizzle-orm";
 
 const BATCH_SIZE = 100;

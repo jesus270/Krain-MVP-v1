@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@krain/db";
 import { eq } from "drizzle-orm";
-import { userTable, userProfileTable } from "@krain/db/schema";
+import { userTable, userProfileTable } from "@krain/db";
 import { Button } from "@krain/ui/components/ui/button";
 import { cookies } from "next/headers";
 import Link from "next/link";

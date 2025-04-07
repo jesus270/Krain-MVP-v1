@@ -7,7 +7,7 @@ import {
   agentTagTable,
   featuredAgentTable,
   Agent,
-} from "@krain/db/schema";
+} from "@krain/db";
 import { eq, or, asc } from "drizzle-orm";
 
 /**

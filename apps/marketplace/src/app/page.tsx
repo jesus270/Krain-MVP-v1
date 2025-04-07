@@ -17,7 +17,7 @@ import {
   getAllCategories as fetchAllCategories,
   getAllTags as fetchAllTags,
 } from "./actions/agents";
-import { Agent } from "@krain/db/schema";
+import { Agent } from "@krain/db";
 import { AIAgent } from "./types";
 
 function convertToAIAgent(dbAgent: Agent): AIAgent {

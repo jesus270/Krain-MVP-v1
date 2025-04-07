@@ -2,10 +2,9 @@
   "extends": "@krain/typescript-config/base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "composite": true,
     "rootDir": "./src",
-    "incremental": true
+    "jsx": "preserve"
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]
 }

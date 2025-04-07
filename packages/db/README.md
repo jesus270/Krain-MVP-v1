@@ -23,7 +23,7 @@ pnpm add @krain/db
 
 ```typescript
 import { db } from "@krain/db";
-import { airdrop } from "@krain/db/schema";
+import { airdrop } from "@krain/db";
 
 // Query example
 const records = await db.select().from(airdrop);

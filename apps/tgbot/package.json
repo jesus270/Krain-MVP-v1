@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "ts-node src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "lint": "eslint src/**/*.ts",
+    "dev": "npx tsc -w & nodemon -q -r dotenv/config dist/index.js",
+    "build": "npx tsc",
+    "start": "node -r dotenv/config dist/index.js",
+    "lint": "eslint .",
     "clean": "rm -rf dist"
   },
   "keywords": [],

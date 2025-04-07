@@ -2,13 +2,34 @@
   "name": "@krain/db",
   "version": "0.0.0",
   "private": true,
-  "main": "./index.ts",
-  "types": "./index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./index.ts",
-    "./telegram": "./telegram.ts",
-    "./schema": "./schema.ts",
-    "./privy": "./privy.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "import": "./dist/schema.mjs",
+      "require": "./dist/schema.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.mjs",
+      "require": "./dist/client.js"
+    },
+    "./telegram": {
+      "types": "./dist/telegram.d.ts",
+      "import": "./dist/telegram.mjs",
+      "require": "./dist/telegram.js"
+    },
+    "./privy": {
+      "types": "./dist/privy.d.ts",
+      "import": "./dist/privy.mjs",
+      "require": "./dist/privy.js"
+    }
   },
   "scripts": {
     "lint": "eslint .",

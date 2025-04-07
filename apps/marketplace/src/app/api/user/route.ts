@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@krain/db";
-import { userTable, userProfileTable } from "@krain/db/schema";
+import { userTable, userProfileTable } from "@krain/db";
 import { eq } from "drizzle-orm";
 import { log } from "@krain/utils";
 import { getSession, User } from "@krain/session";
