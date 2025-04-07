@@ -176,6 +176,22 @@ export async function GET(request: NextRequest) {
     // Merge database user data with session user data
     const updatedUser = {
       ...user,
+      // Always prefer latest DB data for these fields if available
+      wallet: dbUser.walletAddress
+        ? { address: dbUser.walletAddress }
+        : user.wallet, // Fallback to session wallet if DB has no address
+      email: dbUser.email ? { address: dbUser.email } : user.email, // Fallback to session email
+      // Construct twitter object from dbUser fields if available, otherwise use session's
+      twitter: dbUser.twitterSubject // Use twitterSubject as indicator of linked twitter in DB
+        ? {
+            subject: dbUser.twitterSubject,
+            handle: dbUser.twitterHandle,
+            name: dbUser.twitterName,
+            profilePictureUrl: dbUser.twitterProfilePictureUrl,
+            // Map dbUser.twitterHandle to username for SessionUser consistency
+            username: dbUser.twitterHandle,
+          }
+        : user.twitter,
       telegramUserId: dbUser.telegramUserId || undefined,
       telegramUsername: dbUser.telegramUsername || undefined,
       hasJoinedTelegramCommunity:
