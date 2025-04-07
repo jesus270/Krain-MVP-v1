@@ -6,7 +6,7 @@ import {
   userTable,
   agentTable,
   userProfileTable,
-} from "@krain/db/schema";
+} from "@krain/db";
 import { eq, and, desc } from "drizzle-orm";
 
 /**

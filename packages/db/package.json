@@ -2,8 +2,35 @@
   "name": "@krain/db",
   "version": "0.0.0",
   "private": true,
-  "main": "./index.ts",
-  "types": "./index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "import": "./dist/schema.mjs",
+      "require": "./dist/schema.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.mjs",
+      "require": "./dist/client.js"
+    },
+    "./telegram": {
+      "types": "./dist/telegram.d.ts",
+      "import": "./dist/telegram.mjs",
+      "require": "./dist/telegram.js"
+    },
+    "./privy": {
+      "types": "./dist/privy.d.ts",
+      "import": "./dist/privy.mjs",
+      "require": "./dist/privy.js"
+    }
+  },
   "scripts": {
     "lint": "eslint .",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
@@ -17,11 +44,11 @@
     "@neondatabase/serverless": "^0.10.0",
     "drizzle-orm": "^0.40.0",
     "postgresql": "^0.0.1",
-    "tsup": "^8.4.0"
+    "tsup": "^8.4.0",
+    "@krain/typescript-config": "workspace:"
   },
   "devDependencies": {
     "@krain/eslint-config": "workspace:",
-    "@krain/typescript-config": "workspace:",
     "@types/node": "^22.13.10",
     "@types/pg": "^8.10.9",
     "dotenv": "^16.3.1",

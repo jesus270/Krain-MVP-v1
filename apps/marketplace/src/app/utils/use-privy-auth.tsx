@@ -3,16 +3,41 @@
 import { useState, useEffect, useCallback } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { handlePrivyAuth } from "@krain/session";
+import { log } from "@krain/utils";
+
+interface SessionUser {
+  id: string;
+  createdAt: Date;
+  wallet?: {
+    address: string;
+  };
+  email?: {
+    address: string;
+  };
+  linkedAccounts?: string[];
+  role?: string;
+  username?: string | null;
+}
+
+interface UsePrivyAuthOptions {
+  maxRetries?: number;
+  retryDelay?: number;
+}
 
 /**
  * Hook for handling Privy authentication and syncing with our database
  * Use this in your app's authentication flow
  */
-export function usePrivyAuth() {
-  const { user, authenticated, ready, login, logout } = usePrivy();
+export function usePrivyAuth({
+  maxRetries = 3,
+  retryDelay = 2000,
+}: UsePrivyAuthOptions = {}) {
+  const { user: privyUser, authenticated, ready, login, logout } = usePrivy();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [dbUser, setDbUser] = useState<any>(null);
+  const [dbUser, setDbUser] = useState<SessionUser | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [sessionValidated, setSessionValidated] = useState(false);
 
   // Add a timeout handler for wallet connections
   useEffect(() => {
@@ -51,198 +76,206 @@ export function usePrivyAuth() {
   }, [ready, authenticated]);
 
   // Call the auth callback API to set the user_id cookie
-  const callAuthCallback = useCallback(async (userData: any) => {
+  const validateSession = useCallback(async () => {
+    if (!privyUser?.id || retryCount >= maxRetries) return;
+
     try {
-      console.log("Calling auth callback with user data:", userData);
+      setIsLoading(true);
+      log.info("Starting session validation", {
+        entity: "CLIENT",
+        operation: "validate_session_start",
+        userId: privyUser.id,
+      });
 
       const response = await fetch("/api/auth/callback", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ user: userData }),
+        body: JSON.stringify(privyUser),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Auth callback failed response:", {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText,
-        });
         throw new Error(
-          `Auth callback failed: ${response.status} - ${errorText}`,
+          `Session validation failed with status: ${response.status}, message: ${errorText}`,
         );
       }
 
-      const data = await response.json();
-      console.log("Auth callback successful:", data);
-      return data;
-    } catch (err) {
-      console.error("Error calling auth callback:", err);
-      throw err;
-    }
-  }, []);
+      // Clone the response before reading to avoid consuming the stream
+      const responseClone = response.clone();
 
-  // Directly fetch user data from the API
-  const fetchUserData = useCallback(async () => {
-    try {
-      console.log("Fetching user data from API");
-      const response = await fetch("/api/user");
+      // Log the raw response for debugging
+      const rawText = await responseClone.text();
+      log.info("Session raw response", {
+        entity: "CLIENT",
+        operation: "validate_session_raw_response",
+        rawText,
+      });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Failed to fetch user data:", {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText,
+      // Try to parse the JSON response
+      let data;
+      try {
+        data = JSON.parse(rawText);
+        log.info("Session response data", {
+          entity: "CLIENT",
+          operation: "validate_session_response",
+          data,
         });
-        return null;
+      } catch (err) {
+        throw new Error(`Failed to parse response: ${rawText}`);
       }
 
-      const data = await response.json();
-      console.log("Fetched user data successfully:", data);
-      return data.user;
-    } catch (err) {
-      console.error("Error fetching user data:", err);
-      return null;
-    }
-  }, []);
+      // Explicitly handle success value (convert empty object to success: true)
+      if (Object.keys(data).length === 0) {
+        data = { success: true };
+      }
 
-  // Sync the Privy user with our database when they authenticate
-  const syncUser = useCallback(async () => {
-    if (!user || !authenticated) return;
+      // Check explicitly for success flag
+      if (!data || data.success !== true) {
+        throw new Error(
+          `Session validation response indicated failure: ${JSON.stringify(data)}`,
+        );
+      }
 
-    try {
-      setIsLoading(true);
-      setError(null);
+      // After session validation, fetch latest user data
+      const userResponse = await fetch("/api/user", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": privyUser.id,
+        },
+        credentials: "include", // This ensures cookies are sent with the request
+      });
 
-      console.log("Starting user sync process for:", user.id);
-
-      // Format wallet information if available
-      const wallet = user?.wallet?.address
-        ? {
-            address: user.wallet.address,
-            chainId:
-              "chainId" in user.wallet ? String(user.wallet.chainId) : "1",
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        if (userData.user) {
+          // Make sure createdAt is always a Date object for IntercomProvider
+          if (
+            userData.user.createdAt &&
+            !(userData.user.createdAt instanceof Date)
+          ) {
+            userData.user.createdAt = new Date(userData.user.createdAt);
           }
-        : undefined;
-
-      // Convert Privy user to the format expected by our handler
-      const privyUserData = {
-        id: user.id,
-        email: user.email?.address,
-        wallet: wallet,
-        linkedAccounts: user.linkedAccounts || [],
-      };
-
-      console.log("Prepared privyUserData:", privyUserData);
-
-      // First, call the auth callback to set the user_id cookie
-      try {
-        await callAuthCallback({
-          id: user.id,
-          email: user.email?.address,
-        });
-        console.log("Auth callback completed successfully");
-      } catch (callbackError) {
-        console.error("Auth callback failed:", callbackError);
-        setError("Failed to establish session. Please try again.");
-        setIsLoading(false);
-        return;
-      }
-
-      // Try to fetch the user data directly first - this should work if the user already exists
-      const userData = await fetchUserData();
-      if (userData) {
-        console.log("Successfully fetched existing user data:", userData);
-        setDbUser(userData);
-        setIsLoading(false);
-        return;
-      }
-
-      // If no existing user, attempt to sync with our database using handlePrivyAuth
-      try {
-        console.log(
-          "No existing user found. Calling handlePrivyAuth with:",
-          privyUserData,
-        );
-        const authUser = await handlePrivyAuth(privyUserData);
-        console.log("handlePrivyAuth result:", authUser);
-
-        if (authUser) {
-          setDbUser(authUser);
-          console.log("User synced successfully:", authUser);
+          setDbUser(userData.user as SessionUser);
+          setSessionValidated(true);
+          log.info("User data loaded successfully", {
+            entity: "CLIENT",
+            operation: "user_data_load",
+            userId: privyUser.id,
+          });
         } else {
-          console.error("handlePrivyAuth returned null or undefined");
-          setError("Failed to sync user with database");
+          log.warn("User data response missing user object", {
+            entity: "CLIENT",
+            operation: "user_data_load",
+            userId: privyUser.id,
+            response: userData,
+          });
         }
-      } catch (syncError) {
-        console.error("Error in handlePrivyAuth:", syncError);
-        setError("Failed to sync user data");
       }
-    } catch (err) {
-      console.error("Overall sync error:", err);
-      setError(err instanceof Error ? err.message : String(err));
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      log.error(errorMessage, {
+        entity: "CLIENT",
+        operation: "validate_session",
+        userId: privyUser.id,
+        retryCount,
+        errorStack: error instanceof Error ? error.stack : undefined,
+      });
+
+      setRetryCount((prev) => prev + 1);
+
+      if (retryCount < maxRetries - 1) {
+        log.info(
+          `Retrying session validation in ${retryDelay * (retryCount + 1)}ms`,
+          {
+            entity: "CLIENT",
+            operation: "validate_session_retry",
+            userId: privyUser.id,
+            retryCount: retryCount + 1,
+            maxRetries,
+          },
+        );
+
+        setTimeout(() => void validateSession(), retryDelay * (retryCount + 1));
+      } else {
+        setError("Session validation failed after maximum retries");
+        log.error("Max retries reached for session validation", {
+          entity: "CLIENT",
+          operation: "validate_session_max_retries",
+          userId: privyUser.id,
+          retryCount,
+          maxRetries,
+        });
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [user, authenticated, callAuthCallback, fetchUserData]);
+  }, [privyUser, retryCount, maxRetries, retryDelay]);
 
-  // Attempt to load user data when component mounts if user_id cookie exists
+  // Update user state when privyUser changes
   useEffect(() => {
-    const loadUserData = async () => {
-      // Don't attempt to load if we're not authenticated yet
-      if (!authenticated) return;
-
-      console.log("Loading user data");
-      const userData = await fetchUserData();
-      if (userData) {
-        console.log("Found user data on initial load:", userData);
-        setDbUser(userData);
-      }
-    };
-
-    // Only run this effect once when component mounts and when auth status changes
-    loadUserData();
-  }, [authenticated, fetchUserData]);
-
-  // Sync user when they authenticate
-  useEffect(() => {
-    if (ready && authenticated && user && !dbUser) {
-      console.log("User authenticated but no dbUser, syncing...", user.id);
-      syncUser();
-    } else if (ready && !authenticated) {
-      console.log("User not authenticated, clearing dbUser");
-      setDbUser(null);
+    if (privyUser) {
+      setDbUser(
+        (prev) =>
+          ({
+            ...(prev || {}),
+            id: privyUser.id,
+            createdAt: new Date(),
+            wallet: privyUser.wallet,
+            email: privyUser.email,
+            linkedAccounts: privyUser.linkedAccounts
+              ?.filter((account) => account.type === "wallet")
+              .map((account) => ("address" in account ? account.address : ""))
+              .filter(Boolean),
+          }) as SessionUser,
+      );
     }
-  }, [ready, authenticated, user, dbUser, syncUser]);
+  }, [privyUser]);
+
+  // Validate session when authenticated
+  useEffect(() => {
+    if (
+      ready &&
+      authenticated &&
+      privyUser?.id &&
+      !sessionValidated &&
+      !isLoading
+    ) {
+      void validateSession();
+    }
+  }, [
+    ready,
+    authenticated,
+    privyUser?.id,
+    sessionValidated,
+    isLoading,
+    validateSession,
+  ]);
 
   // Handle logout
   const handleLogout = useCallback(async () => {
     try {
       await logout();
       setDbUser(null);
+      setSessionValidated(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
   }, [logout]);
 
   return {
-    // Privy state
-    user,
+    user: dbUser,
+    privyUser,
     authenticated,
     ready,
-
-    // Database state
-    dbUser,
     isLoading,
     error,
-
-    // Actions
+    sessionValidated,
     login,
     logout: handleLogout,
-    syncUser,
-    refreshUser: fetchUserData,
+    validateSession,
   };
 }

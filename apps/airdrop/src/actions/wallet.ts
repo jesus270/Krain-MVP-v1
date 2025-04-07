@@ -54,11 +54,45 @@ export async function createWallet(input: { address: string; userId: string }) {
       const user = session.get("user");
       if (!user) throw new Error("No user in session");
 
+      // If user doesn't have a wallet yet, update the session
+      if (!user.wallet) {
+        log.info(
+          "User doesn't have a wallet in session yet, updating session in createWallet",
+          {
+            entity: "WALLET",
+            operation: "update_session_wallet_create",
+            userId: input.userId,
+            walletAddress: input.address,
+          },
+        );
+
+        // Update the user object in the session with the wallet
+        const updatedUser = {
+          ...user,
+          wallet: {
+            address: input.address,
+          },
+        };
+
+        // Set the updated user back to the session
+        session.set("user", updatedUser);
+        await session.save();
+
+        // Now get the updated user from the session
+        const refreshedUser = session.get("user");
+        if (!refreshedUser?.wallet) {
+          throw new Error("Failed to update user wallet in session");
+        }
+      }
+
+      // Retrieve the latest user data, which should now include wallet
+      const updatedUser = session.get("user");
+
       // Validate input
       const parsed = walletAddressSchema.parse(input);
 
       // Verify user can only create wallet for their own address
-      if (parsed.address !== user.wallet.address) {
+      if (parsed.address !== updatedUser?.wallet?.address) {
         throw new AppError(
           "Unauthorized: You can only create a wallet for your own address",
           ErrorCodes.UNAUTHORIZED,
@@ -69,7 +103,7 @@ export async function createWallet(input: { address: string; userId: string }) {
       log.info("Creating new wallet", {
         operation: "create_wallet",
         entity: "WALLET",
-        user,
+        user: updatedUser,
         walletAddress: parsed.address,
       });
 
@@ -93,7 +127,7 @@ export async function createWallet(input: { address: string; userId: string }) {
       log.info("Wallet created successfully", {
         operation: "create_wallet",
         entity: "WALLET",
-        user,
+        user: updatedUser,
         walletAddress: parsed.address,
         referralCode: wallet?.[0]?.referralCode,
       });
@@ -167,11 +201,45 @@ export async function getWallet(input: {
       const user = session.get("user");
       if (!user) throw new Error("No user in session");
 
+      // If user doesn't have a wallet yet, update the session
+      if (!user.wallet) {
+        log.info(
+          "User doesn't have a wallet in session yet, updating session in getWallet",
+          {
+            entity: "WALLET",
+            operation: "update_session_wallet_get",
+            userId: input.userId,
+            walletAddress: input.address,
+          },
+        );
+
+        // Update the user object in the session with the wallet
+        const updatedUser = {
+          ...user,
+          wallet: {
+            address: input.address,
+          },
+        };
+
+        // Set the updated user back to the session
+        session.set("user", updatedUser);
+        await session.save();
+
+        // Now get the updated user from the session
+        const refreshedUser = session.get("user");
+        if (!refreshedUser?.wallet) {
+          throw new Error("Failed to update user wallet in session");
+        }
+      }
+
+      // Retrieve the latest user data, which should now include wallet
+      const updatedUser = session.get("user");
+
       // Validate input
       const parsed = walletAddressSchema.parse(input);
 
       // Verify user can only access their own wallet
-      if (parsed.address !== user.wallet.address) {
+      if (parsed.address !== updatedUser?.wallet?.address) {
         throw new Error("Unauthorized: You can only access your own wallet");
       }
 
@@ -214,6 +282,7 @@ export async function isValidReferralCode(input: {
   return withAuth(input.userId, async (session) => {
     const user = session.get("user");
     if (!user) throw new Error("No user in session");
+    if (!user.wallet) throw new Error("No wallet associated with user");
 
     if (input.referredWallet.address !== user.wallet.address) {
       throw new Error(
@@ -257,123 +326,202 @@ export async function handleSubmitWallet(input: {
   referredByCode?: string;
   userId: string;
 }) {
-  return withAuth(input.userId, async (session) => {
-    try {
-      const user = session.get("user");
-      if (!user) throw new Error("No user in session");
+  try {
+    // First, validate the session by making a fetch request to the API
+    // This ensures that the session is established properly
+    const validateResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/user`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": input.userId,
+        },
+      },
+    );
 
-      // Verify user can only submit their own wallet
-      if (input.walletAddress !== user.wallet.address) {
-        throw new AppError(
-          "Unauthorized: You can only submit your own wallet",
-          ErrorCodes.UNAUTHORIZED,
-          401,
-        );
-      }
-
-      // Parse input
-      const parsedReferredByCode = input.referredByCode
-        ? referredBySchema.parse({
-            referredByCode: input.referredByCode,
-          })
-        : undefined;
-
-      const parsedWalletAddress = walletAddressSchema.parse({
-        address: input.walletAddress,
+    if (!validateResponse.ok) {
+      const errorText = await validateResponse.text();
+      log.error("Failed to validate session before wallet submission", {
+        entity: "WALLET",
+        operation: "pre_validate_session",
+        status: validateResponse.status,
+        error: errorText,
       });
+      throw new Error("Session validation failed before wallet submission");
+    }
 
-      // Get existing wallet
-      const existingWallet = await getWallet({
-        address: parsedWalletAddress.address,
-        userId: input.userId,
-      });
+    // Now proceed with the actual withAuth call
+    return withAuth(input.userId, async (session) => {
+      try {
+        const user = session.get("user");
+        if (!user) throw new Error("No user in session");
 
-      // if wallet doesn't exist, create it
-      if (!existingWallet) {
-        const newWallet = await createWallet({
+        // If user doesn't have a wallet yet, update the session
+        if (!user.wallet) {
+          log.info(
+            "User doesn't have a wallet in session yet, updating session",
+            {
+              entity: "WALLET",
+              operation: "update_session_wallet",
+              userId: input.userId,
+              walletAddress: input.walletAddress,
+            },
+          );
+
+          // Update the user object in the session with the wallet
+          const updatedUser = {
+            ...user,
+            wallet: {
+              address: input.walletAddress,
+            },
+          };
+
+          // Set the updated user back to the session
+          session.set("user", updatedUser);
+          await session.save();
+
+          // Now get the updated user from the session
+          const refreshedUser = session.get("user");
+          if (!refreshedUser?.wallet) {
+            throw new Error("Failed to update user wallet in session");
+          }
+        }
+
+        // Retrieve the latest user data, which should now include wallet
+        const updatedUser = session.get("user");
+
+        // Verify user can only submit their own wallet
+        if (input.walletAddress !== updatedUser?.wallet?.address) {
+          throw new AppError(
+            "Unauthorized: You can only submit your own wallet",
+            ErrorCodes.UNAUTHORIZED,
+            401,
+          );
+        }
+
+        // Parse input
+        const parsedReferredByCode = input.referredByCode
+          ? referredBySchema.parse({
+              referredByCode: input.referredByCode,
+            })
+          : undefined;
+
+        const parsedWalletAddress = walletAddressSchema.parse({
+          address: input.walletAddress,
+        });
+
+        // Get existing wallet
+        const existingWallet = await getWallet({
           address: parsedWalletAddress.address,
           userId: input.userId,
         });
-        if (!newWallet) {
-          throw new Error("Failed to create wallet");
-        }
 
-        // if referral code is provided, create referral
-        if (parsedReferredByCode?.referredByCode) {
-          const referralWallet = await getWalletByReferralCode({
-            referralCode: parsedReferredByCode.referredByCode,
+        // if wallet doesn't exist, create it
+        if (!existingWallet) {
+          const newWallet = await createWallet({
+            address: parsedWalletAddress.address,
             userId: input.userId,
           });
-
-          if (!referralWallet) {
-            throw new Error("Referral code wallet not found");
+          if (!newWallet) {
+            throw new Error("Failed to create wallet");
           }
 
-          await isValidReferralCode({
-            referredByCode: parsedReferredByCode.referredByCode,
-            referredWallet: newWallet as WalletWithReferredBy,
-            userId: input.userId,
-          });
-          await createReferral({
-            referredByCode: parsedReferredByCode.referredByCode,
-            referredWalletAddress: newWallet.address,
-            userId: input.userId,
-          });
-        }
+          // if referral code is provided, create referral
+          if (parsedReferredByCode?.referredByCode) {
+            const referralWallet = await getWalletByReferralCode({
+              referralCode: parsedReferredByCode.referredByCode,
+              userId: input.userId,
+            });
 
-        return newWallet;
-      } else {
-        if (
-          parsedReferredByCode?.referredByCode &&
-          !existingWallet.referredBy
-        ) {
-          const referralWallet = await getWalletByReferralCode({
-            referralCode: parsedReferredByCode.referredByCode,
-            userId: input.userId,
-          });
+            if (!referralWallet) {
+              throw new Error("Referral code wallet not found");
+            }
 
-          if (!referralWallet) {
-            throw new Error("Referral code wallet not found");
+            await isValidReferralCode({
+              referredByCode: parsedReferredByCode.referredByCode,
+              referredWallet: newWallet as WalletWithReferredBy,
+              userId: input.userId,
+            });
+            await createReferral({
+              referredByCode: parsedReferredByCode.referredByCode,
+              referredWalletAddress: newWallet.address,
+              userId: input.userId,
+            });
           }
 
-          await isValidReferralCode({
-            referredByCode: parsedReferredByCode.referredByCode,
-            referredWallet: existingWallet as WalletWithReferredBy,
-            userId: input.userId,
-          });
-          await createReferral({
-            referredByCode: parsedReferredByCode.referredByCode,
-            referredWalletAddress: existingWallet.address,
-            userId: input.userId,
-          });
-        } else if (
-          parsedReferredByCode?.referredByCode &&
-          existingWallet.referredBy
-        ) {
-          throw new Error("Wallet already has a referral code");
-        }
-        return existingWallet;
-      }
-    } catch (error) {
-      const currentUser = await getCurrentUser(input.userId);
-      log.error(error, {
-        entity: "WALLET",
-        operation: "submit_wallet",
-        currentUser,
-        input,
-      });
+          return newWallet;
+        } else {
+          if (
+            parsedReferredByCode?.referredByCode &&
+            !existingWallet.referredBy
+          ) {
+            const referralWallet = await getWalletByReferralCode({
+              referralCode: parsedReferredByCode.referredByCode,
+              userId: input.userId,
+            });
 
-      if (error instanceof z.ZodError) {
+            if (!referralWallet) {
+              throw new Error("Referral code wallet not found");
+            }
+
+            await isValidReferralCode({
+              referredByCode: parsedReferredByCode.referredByCode,
+              referredWallet: existingWallet as WalletWithReferredBy,
+              userId: input.userId,
+            });
+            await createReferral({
+              referredByCode: parsedReferredByCode.referredByCode,
+              referredWalletAddress: existingWallet.address,
+              userId: input.userId,
+            });
+          } else if (
+            parsedReferredByCode?.referredByCode &&
+            existingWallet.referredBy
+          ) {
+            throw new Error("Wallet already has a referral code");
+          }
+          return existingWallet;
+        }
+      } catch (error) {
+        const currentUser = await getCurrentUser(input.userId);
+        log.error(error, {
+          entity: "WALLET",
+          operation: "submit_wallet",
+          currentUser,
+          input,
+        });
+
+        if (error instanceof z.ZodError) {
+          throw new Error(
+            "Invalid wallet address. Must be a valid Solana or Ethereum address.",
+          );
+        }
+
         throw new Error(
-          "Invalid wallet address. Must be a valid Solana or Ethereum address.",
+          `Failed to submit wallet: ${error instanceof Error ? error.message : String(error)}`,
         );
       }
+    });
+  } catch (error) {
+    const currentUser = await getCurrentUser(input.userId);
+    log.error(error, {
+      entity: "WALLET",
+      operation: "submit_wallet",
+      currentUser,
+      input,
+    });
 
+    if (error instanceof z.ZodError) {
       throw new Error(
-        `Failed to submit wallet: ${error instanceof Error ? error.message : String(error)}`,
+        "Invalid wallet address. Must be a valid Solana or Ethereum address.",
       );
     }
-  });
+
+    throw new Error(
+      `Failed to submit wallet: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 }
 
 export async function updateReferralCode(input: {
@@ -385,6 +533,7 @@ export async function updateReferralCode(input: {
     try {
       const user = session.get("user");
       if (!user) throw new Error("No user in session");
+      if (!user.wallet) throw new Error("No wallet associated with user");
 
       log.info("Updating referral code", {
         entity: "WALLET",

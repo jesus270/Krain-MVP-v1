@@ -15,6 +15,9 @@ const PROTECTED_PATHS = ["/api/wallet", "/api/referral", "/"];
 // Public paths that don't require authentication
 const PUBLIC_PATHS = ["/api/auth", "/terms", "/api/auth/callback", "/blocked"];
 
+// Special auth endpoints that require userid in the header instead of cookie
+const HEADER_AUTH_PATHS = ["/api/user"];
+
 // Security headers
 const securityHeaders = {
   "X-DNS-Prefetch-Control": "on",
@@ -124,6 +127,24 @@ export async function middleware(request: NextRequest) {
       response.headers.set(key, value);
     });
 
+    // Check if this is a special header auth endpoint
+    if (HEADER_AUTH_PATHS.some((path) => pathname.startsWith(path))) {
+      // Get user ID from header
+      const userIdHeader =
+        request.headers.get("x-user-id") || request.headers.get("X-User-Id");
+
+      if (!userIdHeader) {
+        return NextResponse.json(
+          { error: "User ID required in header" },
+          { status: 400 },
+        );
+      }
+
+      // Add user ID to headers for downstream use
+      response.headers.set("x-user-id", userIdHeader);
+      return response;
+    }
+
     // Allow public paths without authentication
     if (PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
       return response;
@@ -183,7 +204,8 @@ export async function middleware(request: NextRequest) {
       response.headers.set("x-user-id", userId);
     }
 
-    return response;
+    // Not a protected route, continue with CORS headers
+    return NextResponse.next();
   } catch (error) {
     log.error(error, {
       entity: "MIDDLEWARE",
@@ -197,6 +219,15 @@ export async function middleware(request: NextRequest) {
   }
 }
 
+// Configure a catch-all matcher, but exclude static assets
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!_next/static|_next/image|favicon.ico).*)",
+  ],
 };

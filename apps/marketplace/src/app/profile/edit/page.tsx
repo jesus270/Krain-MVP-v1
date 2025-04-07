@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { ProfileEditForm } from "../components/profile-edit-form";
 import { db } from "@krain/db";
-import { userTable } from "@krain/db/schema";
+import { userTable } from "@krain/db";
 import { eq } from "drizzle-orm";
 
 export const metadata: Metadata = {

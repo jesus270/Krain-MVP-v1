@@ -48,10 +48,10 @@ export function ProfilePointsSection({
               </span>
             </div>
             <Badge
-              variant={twitterPoints ? "secondary" : "outline"}
+              variant={userTwitterUsername ? "secondary" : "outline"}
               className={cn(
                 "text-center relative overflow-hidden transition-colors",
-                twitterPoints
+                userTwitterUsername
                   ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
                   : "border border-border/50",
               )}
@@ -100,10 +100,10 @@ export function ProfilePointsSection({
               </span>
             </div>
             <Badge
-              variant={emailPoints ? "secondary" : "outline"}
+              variant={userEmailAddress ? "secondary" : "outline"}
               className={cn(
                 "text-center relative overflow-hidden transition-colors",
-                emailPoints
+                userEmailAddress
                   ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
                   : "border border-border/50",
               )}
@@ -132,7 +132,7 @@ export function ProfilePointsSection({
                   key="email-alert"
                 />
                 <p className="text-xs text-muted-foreground/90 group-hover:text-muted-foreground transition-colors">
-                  Connect email to earn 1,000 points
+                  Connect email to earn 3,000 points
                 </p>
               </div>
             )}

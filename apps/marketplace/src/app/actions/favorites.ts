@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@krain/db";
-import { favoriteAgentTable, userTable } from "@krain/db/schema";
+import { favoriteAgentTable, userTable } from "@krain/db";
 import { eq, and } from "drizzle-orm";
 
 /**

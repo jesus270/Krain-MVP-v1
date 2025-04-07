@@ -5,9 +5,10 @@
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState, useCallback } from "react";
 import { Wallet } from "@krain/db";
-import { useLocale } from "@krain/utils";
+import { useLocale } from "@krain/utils/react";
 import { handleSubmitWallet } from "@/actions/wallet";
 import { getReferralCount } from "@/actions/referral";
+import { getTelegramMessagePoints } from "@/actions/telegram";
 import { ConnectWalletCard } from "@/components/dashboard/connect-wallet-card";
 import { PointsStatusCard } from "@/components/dashboard/points-status-card";
 import { ReferralProgramCard } from "@/components/dashboard/referral-program-card";
@@ -22,6 +23,12 @@ import {
 import { Button } from "@krain/ui/components/ui/button";
 import { log } from "@krain/utils";
 import { useSession } from "@/lib/use-session";
+import { ProfileCompletionMessage } from "@/components/dashboard/profile-completion-message";
+
+const POINTS_FOR_WALLET_CONNECTION = 1000;
+const POINTS_FOR_ACCOUNT_CREATION = 5000;
+const POINTS_FOR_TWITTER = 2000;
+const POINTS_FOR_EMAIL = 3000;
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2 seconds
@@ -35,6 +42,16 @@ function isNetworkError(error: unknown): boolean {
   );
 }
 
+// Check for infinite recursion or stack overflow errors
+function isStackOverflowError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    (error.message.toLowerCase().includes("maximum call stack") ||
+      error.message.toLowerCase().includes("stack size exceeded") ||
+      error.message.toLowerCase().includes("recursion"))
+  );
+}
+
 export function Dashboard({
   referredByCode,
 }: {
@@ -43,14 +60,19 @@ export function Dashboard({
   const { user, ready, authenticated, sessionValidated } = useSession();
   const [wallet, setWallet] = useState<Wallet | undefined>(undefined);
   const [referralsCount, setReferralsCount] = useState<number>(0);
+  const [telegramMessagePoints, setTelegramMessagePoints] = useState<number>(0);
   const [isLoadingWallet, setIsLoadingWallet] = useState(true);
   const [isLoadingReferrals, setIsLoadingReferrals] = useState(true);
+  const [isLoadingMessagePoints, setIsLoadingMessagePoints] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
   const locale = useLocale();
 
   const userEmailAddress = user?.email?.address ?? undefined;
   const userWalletAddress = user?.wallet?.address ?? undefined;
   const userTwitterUsername = user?.twitter?.username ?? undefined;
+  const hasJoinedTelegramCommunity = user?.hasJoinedTelegramCommunity ?? false;
+  const hasJoinedTelegramAnnouncement =
+    user?.hasJoinedTelegramAnnouncement ?? false;
 
   useEffect(() => {
     log.info("Dashboard component mounted", {
@@ -89,8 +111,6 @@ export function Dashboard({
         sessionValidated,
         timestamp: new Date().toISOString(),
       });
-      setIsLoadingWallet(false);
-      setIsLoadingReferrals(false);
       return;
     }
 
@@ -105,8 +125,6 @@ export function Dashboard({
           timestamp: new Date().toISOString(),
         });
 
-        setIsLoadingWallet(true);
-        setIsLoadingReferrals(true);
         setError(undefined);
 
         // Add validation check for wallet address
@@ -121,6 +139,7 @@ export function Dashboard({
           setError(error);
           setIsLoadingWallet(false);
           setIsLoadingReferrals(false);
+          setIsLoadingMessagePoints(false);
           return;
         }
 
@@ -135,6 +154,23 @@ export function Dashboard({
             timestamp: new Date().toISOString(),
           });
 
+          // First, make an API call to validate session
+          const validateResponse = await fetch("/api/user", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "X-User-Id": user?.id || "",
+            },
+            credentials: "include",
+          });
+
+          if (!validateResponse.ok) {
+            throw new Error(
+              "Session validation failed. Please refresh and try again.",
+            );
+          }
+
+          // Now attempt the wallet submission
           const wallet = await handleSubmitWallet({
             walletAddress: userWalletAddress,
             referredByCode,
@@ -191,6 +227,41 @@ export function Dashboard({
                 }
               }
             }
+
+            // Fetch telegram message points
+            try {
+              log.info("Fetching telegram message points", {
+                entity: "CLIENT",
+                operation: "dashboard_fetch_message_points",
+                userId: user?.id,
+                timestamp: new Date().toISOString(),
+              });
+
+              const points = await getTelegramMessagePoints({
+                userId: user?.id ?? "",
+              });
+
+              if (isDataMounted) {
+                log.info("Message points loaded successfully", {
+                  entity: "CLIENT",
+                  operation: "dashboard_message_points_loaded",
+                  points,
+                  timestamp: new Date().toISOString(),
+                });
+                setTelegramMessagePoints(points);
+              }
+            } catch (error) {
+              const errorMsg =
+                error instanceof Error ? error.message : String(error);
+              log.error("Failed to load message points", {
+                entity: "CLIENT",
+                operation: "dashboard_load_message_points",
+                error: errorMsg,
+                stack: error instanceof Error ? error.stack : undefined,
+                timestamp: new Date().toISOString(),
+              });
+              // Don't set error state for message points failure
+            }
           }
         } catch (error) {
           const errorMsg =
@@ -204,7 +275,22 @@ export function Dashboard({
           });
 
           if (isDataMounted) {
-            setError(`${errorMsg}. Please try again.`);
+            // Special handling for stack overflow error (likely EVMToSol bridging issue)
+            if (isStackOverflowError(error)) {
+              log.error("EVM to Solana bridging error detected", {
+                entity: "CLIENT",
+                operation: "evm_sol_bridging_error",
+                error: errorMsg,
+                stack: error instanceof Error ? error.stack : undefined,
+                timestamp: new Date().toISOString(),
+              });
+
+              setError(
+                "There was an issue with wallet connection. Please refresh and try again with a different wallet.",
+              );
+            } else {
+              setError(`${errorMsg}. Please try again.`);
+            }
 
             // Retry after delay if it's a network error
             if (isNetworkError(error)) {
@@ -234,6 +320,7 @@ export function Dashboard({
         if (isDataMounted) {
           setIsLoadingWallet(false);
           setIsLoadingReferrals(false);
+          setIsLoadingMessagePoints(false);
         }
       }
     };
@@ -284,27 +371,34 @@ export function Dashboard({
 
   // Show wallet status
   return (
-    <div className="space-y-8">
-      <PointsStatusCard
-        totalPoints={
-          5000 + // Base points for having an account
-          (userWalletAddress ? 1000 : 0) + // Points for wallet connection
-          referralsCount * 1000 + // Referral points: 1000 per referral
-          (userTwitterUsername ? 2000 : 0) + // Twitter points: 2000 base
-          (userEmailAddress ? 3000 : 0) // Email points: 3000
-        }
-        userWalletAddress={userWalletAddress}
-        userEmailAddress={userEmailAddress}
-        userTwitterUsername={userTwitterUsername}
-        referralsCount={referralsCount}
-        walletConnectionPoints={1000}
-        accountCreationPoints={5000}
-        referralPoints={referralsCount * 1000}
-        twitterPoints={2000}
-        emailPoints={3000}
-        locale={locale}
-        isLoadingReferrals={isLoadingReferrals}
-      />
+    <div className="space-y-8 p-4">
+      <div className="space-y-4">
+        <PointsStatusCard
+          userEmailAddress={userEmailAddress}
+          userTwitterUsername={userTwitterUsername}
+          userWalletAddress={userWalletAddress}
+          walletConnectionPoints={
+            userWalletAddress ? POINTS_FOR_WALLET_CONNECTION : 0
+          }
+          accountCreationPoints={user ? POINTS_FOR_ACCOUNT_CREATION : 0}
+          twitterPoints={userTwitterUsername ? POINTS_FOR_TWITTER : 0}
+          emailPoints={userEmailAddress ? POINTS_FOR_EMAIL : 0}
+          referralsCount={referralsCount}
+          hasJoinedTelegramCommunity={hasJoinedTelegramCommunity}
+          hasJoinedTelegramAnnouncement={hasJoinedTelegramAnnouncement}
+          messagePoints={telegramMessagePoints}
+          isLoadingReferrals={isLoadingReferrals}
+          isLoadingMessagePoints={isLoadingMessagePoints}
+        />
+        {/* <ProfileCompletionMessage
+          show={
+            !userEmailAddress ||
+            !userTwitterUsername ||
+            !hasJoinedTelegramCommunity ||
+            !hasJoinedTelegramAnnouncement
+          }
+        /> */}
+      </div>
       <ReferralProgramCard
         referralsCount={referralsCount}
         referralUrl={

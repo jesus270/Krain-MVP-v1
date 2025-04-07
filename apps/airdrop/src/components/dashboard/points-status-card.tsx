@@ -19,36 +19,67 @@ import { ProfilePointsSection } from "./profile-points-section";
 import { ProfileCompletionMessage } from "./profile-completion-message";
 import { AdditionalPointsMessage } from "./additional-points-message";
 import { cn } from "@krain/ui/lib/utils";
+import { TelegramPointsSection } from "./telegram-points-section";
+import { Skeleton } from "@krain/ui/components/ui/skeleton";
+import { Separator } from "@krain/ui/components/ui/separator";
+import { Users, MessageCircle, Trophy } from "lucide-react";
+import { TelegramLogo } from "@krain/ui/components/icons/logo-telegram";
 
-interface PointsStatusCardProps {
-  totalPoints: number;
-  userWalletAddress: string | undefined;
-  userEmailAddress: string | undefined;
-  userTwitterUsername: string | undefined;
+const POINTS_PER_REFERRAL = 250;
+const POINTS_PER_TELEGRAM_COMMUNITY = 5000;
+const POINTS_PER_TELEGRAM_ANNOUNCEMENT = 5000;
+
+export interface PointsStatusCardProps {
   referralsCount: number;
-  walletConnectionPoints: number;
-  accountCreationPoints: number;
-  referralPoints: number;
-  twitterPoints: number;
-  emailPoints: number;
-  locale: string;
+  hasJoinedTelegramCommunity: boolean;
+  hasJoinedTelegramAnnouncement: boolean;
+  messagePoints: number;
   isLoadingReferrals: boolean;
+  isLoadingMessagePoints: boolean;
+  userEmailAddress?: string;
+  userTwitterUsername?: string;
+  userWalletAddress?: string;
+  locale?: string;
+  walletConnectionPoints?: number;
+  accountCreationPoints?: number;
+  twitterPoints?: number;
+  emailPoints?: number;
 }
 
 export function PointsStatusCard({
-  totalPoints = 0,
-  userWalletAddress,
+  referralsCount,
+  hasJoinedTelegramCommunity,
+  hasJoinedTelegramAnnouncement,
+  messagePoints,
+  isLoadingReferrals,
+  isLoadingMessagePoints,
   userEmailAddress,
   userTwitterUsername,
-  referralsCount = 0,
+  userWalletAddress,
+  locale = "en",
   walletConnectionPoints = 0,
   accountCreationPoints = 0,
-  referralPoints = 0,
   twitterPoints = 0,
   emailPoints = 0,
-  locale,
-  isLoadingReferrals,
 }: PointsStatusCardProps) {
+  // Calculate points
+  const referralPoints = referralsCount * POINTS_PER_REFERRAL;
+  const communityPoints = hasJoinedTelegramCommunity
+    ? POINTS_PER_TELEGRAM_COMMUNITY
+    : 0;
+  const announcementPoints = hasJoinedTelegramAnnouncement
+    ? POINTS_PER_TELEGRAM_ANNOUNCEMENT
+    : 0;
+  const totalPoints =
+    walletConnectionPoints +
+    accountCreationPoints +
+    referralPoints +
+    communityPoints +
+    announcementPoints +
+    messagePoints +
+    twitterPoints +
+    emailPoints;
+
   return (
     <Card className="border-2 max-w-2xl mx-auto relative overflow-hidden backdrop-blur-sm bg-background/95 border-border/50">
       <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x" />
@@ -74,7 +105,7 @@ export function PointsStatusCard({
           >
             {isLoadingReferrals
               ? "Loading..."
-              : `${formatNumber(totalPoints, locale)} Points`}
+              : `${formatNumber(totalPoints, "en")} Points`}
           </Badge>
         </div>
         <CardDescription>
@@ -105,6 +136,15 @@ export function PointsStatusCard({
           twitterPoints={twitterPoints}
           emailPoints={emailPoints}
           locale={locale}
+        />
+        <TelegramPointsSection
+          hasJoinedCommunity={hasJoinedTelegramCommunity}
+          hasJoinedAnnouncements={hasJoinedTelegramAnnouncement}
+          communityPoints={communityPoints}
+          announcementPoints={announcementPoints}
+          messagePoints={messagePoints}
+          locale={locale}
+          isLoadingMessagePoints={isLoadingMessagePoints}
         />
       </CardContent>
       {userWalletAddress && (

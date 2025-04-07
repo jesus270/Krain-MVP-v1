@@ -68,6 +68,14 @@ export class Session {
   }
 
   get<T extends keyof SessionData>(key: T): SessionData[T] | undefined {
+    if (key === "user") {
+      // Ensure createdAt is always a Date object if it exists
+      const user = this.data.user;
+      if (user && user.createdAt && !(user.createdAt instanceof Date)) {
+        user.createdAt = new Date(user.createdAt);
+      }
+      return user as any;
+    }
     return this.data[key];
   }
 
@@ -165,15 +173,30 @@ export class Session {
     this.isModified = true;
   }
 
-  setFingerprint(userAgent: string, ip: string): void {
-    this.set("fingerprint", { userAgent, ip });
+  setFingerprint(userAgent: string, ipAddress: string): void {
+    this.data.fingerprint = {
+      userAgent,
+      ipAddress,
+    };
     this.isModified = true;
   }
 
-  verifyFingerprint(userAgent: string, ip: string): boolean {
-    const fingerprint = this.get("fingerprint");
+  verifyFingerprint(userAgent: string, ipAddress: string): boolean {
+    const fingerprint = this.data.fingerprint;
     if (!fingerprint) return false;
-    return fingerprint.userAgent === userAgent && fingerprint.ip === ip;
+
+    // If we have a userAgent but it doesn't match, this might be a session hijacking attempt
+    if (fingerprint.userAgent && fingerprint.userAgent !== userAgent) {
+      return false;
+    }
+
+    // If we have an IP but it doesn't match, this might be a session hijacking attempt
+    // We could make this more forgiving by only comparing the first few octets
+    if (fingerprint.ipAddress && fingerprint.ipAddress !== ipAddress) {
+      return false;
+    }
+
+    return true;
   }
 
   verifyCsrfToken(token: string): boolean {

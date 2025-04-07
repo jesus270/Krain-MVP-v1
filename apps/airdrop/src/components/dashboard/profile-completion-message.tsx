@@ -22,7 +22,8 @@ export function ProfileCompletionMessage({
         >
           Profile
         </Link>{" "}
-        to be eligible for more points!
+        to earn more points by connecting your email, X account, and joining our
+        Telegram channels!
       </p>
     </div>
   );

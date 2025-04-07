@@ -1,53 +1,116 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getSession } from "@krain/session";
+import { log } from "@krain/utils";
 
-export default async function middleware(request: NextRequest) {
-  // Get user ID from cookie
-  const userId = request.cookies.get("user_id")?.value;
+// Protected paths that require authentication
+const PROTECTED_PATHS = ["/api/user", "/api/listings"];
 
-  // Debug cookies
-  console.log("[Middleware] All cookies:", request.cookies.getAll());
-  console.log("[Middleware] Auth status - userId:", userId);
+// Public paths that don't require authentication
+const PUBLIC_PATHS = ["/api/auth", "/", "/about", "/api/auth/callback"];
 
-  // If user is not logged in, allow the request to proceed
-  // We'll let the authentication system handle redirects for protected pages
-  if (!userId) {
-    return NextResponse.next();
-  }
+// Security headers
+const securityHeaders = {
+  "X-DNS-Prefetch-Control": "on",
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+  "X-Frame-Options": "SAMEORIGIN",
+  "X-Content-Type-Options": "nosniff",
+  "X-XSS-Protection": "1; mode=block",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy":
+    "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+};
 
-  // Check if the request is already for the profile edit page or authentication-related paths
-  // We don't want to create an infinite redirect loop
-  const bypathPaths = [
-    "/profile/edit",
-    "/api/auth",
-    "/api/me",
-    "/api/session",
-    "/login",
-    "/auth",
-  ];
+export async function middleware(request: NextRequest) {
+  try {
+    // Create a response that can be modified
+    const response = NextResponse.next();
+    const pathname = request.nextUrl.pathname;
 
-  if (bypathPaths.some((path) => request.nextUrl.pathname.startsWith(path))) {
-    return NextResponse.next();
-  }
+    // Add security headers to all responses
+    Object.entries(securityHeaders).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
 
-  // Get username from cookie if available
-  // We'll add a separate cookie for the username to avoid DB queries in middleware
-  const username = request.cookies.get("username")?.value;
-
-  // If no username cookie exists, redirect to profile edit
-  if (!username) {
-    console.log(
-      "[Middleware] No username found in cookies, redirecting to profile edit",
+    // Check if the path is public
+    const isPublicPath = PUBLIC_PATHS.some(
+      (path) => pathname.startsWith(path) || pathname === path,
     );
-    return NextResponse.redirect(new URL("/profile/edit", request.url));
-  }
+    if (isPublicPath) {
+      return response;
+    }
 
-  return NextResponse.next();
+    // Check if the path is protected
+    const isProtectedPath = PROTECTED_PATHS.some(
+      (path) => pathname.startsWith(path) || pathname === path,
+    );
+
+    if (isProtectedPath) {
+      const userId =
+        request.cookies.get("user_id")?.value ||
+        request.headers.get("x-user-id");
+      if (!userId) {
+        // For API routes, return JSON error
+        if (pathname.startsWith("/api/")) {
+          return NextResponse.json(
+            { error: "Authentication required" },
+            { status: 401 },
+          );
+        }
+        // For pages, redirect to the homepage
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+
+      // Get session and verify
+      const session = await getSession(userId);
+
+      if (!session?.get("isLoggedIn")) {
+        log.info("Session not logged in or invalid", {
+          entity: "MIDDLEWARE",
+          operation: "auth_check",
+          userId,
+          path: pathname,
+        });
+
+        // For API routes, return JSON error
+        if (pathname.startsWith("/api/")) {
+          return NextResponse.json(
+            { error: "Authentication required" },
+            { status: 401 },
+          );
+        }
+
+        // For pages, clear the invalid cookie and return to home page
+        const redirectResponse = NextResponse.redirect(
+          new URL("/", request.url),
+        );
+        redirectResponse.cookies.delete("user_id");
+        return redirectResponse;
+      }
+
+      // Add user ID to headers for downstream use
+      response.headers.set("x-user-id", userId);
+    }
+
+    return response;
+  } catch (error) {
+    log.error("Error in middleware", {
+      entity: "MIDDLEWARE",
+      operation: "process_request",
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      path: request.nextUrl.pathname,
+    });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
 }
 
-// Configure middleware to run on specific paths
 export const config = {
   matcher: [
-    // Apply to all routes except static files, api routes that don't need sessions, etc.
-    "/((?!_next/static|_next/image|favicon.ico|images|api/public).*)",
+    "/api/:path*",
+    "/((?!_next/static|_next/image|favicon.ico|logo.svg).*)",
   ],
 };

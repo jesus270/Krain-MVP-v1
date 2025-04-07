@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { db } from "@krain/db";
 import { eq } from "drizzle-orm";
-import { userTable } from "@krain/db/schema";
+import { userTable } from "@krain/db";
 
 export async function GET() {
   try {

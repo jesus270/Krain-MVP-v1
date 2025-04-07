@@ -1,23 +1,38 @@
 {
   "name": "@krain/utils",
   "version": "0.0.1",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.mjs",
+      "require": "./dist/react.js"
+    }
+  },
   "scripts": {
+    "build": "tsup",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
   "dependencies": {
     "@solana/web3.js": "^1.95.8",
     "clsx": "^2.0.0",
-    "tailwind-merge": "^3.0.2"
+    "tailwind-merge": "^3.0.2",
+    "react": "^18.2.0",
+    "@krain/typescript-config": "workspace:"
   },
   "peerDependencies": {
-    "react": "catalog:"
+    "react": "^18.2.0"
   },
   "devDependencies": {
     "@krain/eslint-config": "workspace:",
-    "@krain/typescript-config": "workspace:",
-    "@types/react": "catalog:",
-    "react": "catalog:"
+    "@types/react": "^18.2.0",
+    "typescript": "^5.0.0",
+    "tsup": "^8.4.0"
   }
 }

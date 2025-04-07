@@ -31,4 +31,12 @@ export { RateLimiter } from "./rate-limit";
 export { handleAuthCallback } from "./routes/callback";
 
 // Auth handler for Privy
+// Legacy client-side handler (deprecated, use handlePrivyAuthServer instead)
 export { handlePrivyAuth, type PrivyUserData } from "./auth-handler";
+// Primary server-side auth handler
+export { handlePrivyAuthServer } from "./server-auth-handler-fixed";
+// Export handlePrivyAuthServer also as createOrUpdateUser for backward compatibility
+export { handlePrivyAuthServer as createOrUpdateUser } from "./server-auth-handler-fixed";
+
+// Re-export server-side utilities
+export * as server from "./server";

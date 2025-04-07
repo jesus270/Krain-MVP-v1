@@ -15,7 +15,7 @@ interface ProvidersProps {
  * Authentication status component that shows when a user is being synced
  */
 function AuthStatus() {
-  const { isLoading, error, dbUser } = usePrivyAuth();
+  const { isLoading, error, user } = usePrivyAuth();
 
   if (isLoading) {
     return (
@@ -33,7 +33,7 @@ function AuthStatus() {
     );
   }
 
-  if (dbUser) {
+  if (user) {
     return null; // Don't show anything when successfully synced
   }
 

@@ -3,16 +3,41 @@
 import { useState, useEffect, useCallback } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { handlePrivyAuth } from "@krain/session";
+import type { WalletWithMetadata } from "@privy-io/react-auth";
+import { log } from "@krain/utils";
+
+interface SessionUser {
+  id: string;
+  createdAt: Date;
+  wallet?: {
+    address: string;
+  };
+  email?: {
+    address: string;
+  };
+  linkedAccounts?: string[];
+  role?: string;
+}
+
+interface UsePrivyAuthOptions {
+  maxRetries?: number;
+  retryDelay?: number;
+}
 
 /**
  * Hook for handling Privy authentication and syncing with our database
  * Use this in your app's authentication flow
  */
-export function usePrivyAuth() {
-  const { user, authenticated, ready, login, logout } = usePrivy();
+export function usePrivyAuth({
+  maxRetries = 3,
+  retryDelay = 2000,
+}: UsePrivyAuthOptions = {}) {
+  const { user: privyUser, authenticated, ready, login, logout } = usePrivy();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [dbUser, setDbUser] = useState<any>(null);
+  const [dbUser, setDbUser] = useState<SessionUser | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [sessionValidated, setSessionValidated] = useState(false);
 
   // Add a timeout handler for wallet connections
   useEffect(() => {
@@ -50,73 +75,201 @@ export function usePrivyAuth() {
     return () => {};
   }, [ready, authenticated]);
 
-  // Sync the Privy user with our database when they authenticate
-  const syncUser = useCallback(async () => {
-    if (!user || !authenticated) return;
+  // Validate the session with retry logic
+  const validateSession = useCallback(async () => {
+    if (!privyUser?.id || retryCount >= maxRetries) return;
 
     try {
       setIsLoading(true);
-      setError(null);
+      log.info("Starting session validation", {
+        entity: "CLIENT",
+        operation: "validate_session_start",
+        userId: privyUser.id,
+      });
 
       // Convert Privy user to the format expected by our handler
       const privyUserData = {
-        id: user.id,
-        created_at: user.createdAt
-          ? new Date(user.createdAt).getTime()
+        id: privyUser.id,
+        email: privyUser.email?.address,
+        wallet: privyUser.wallet
+          ? {
+              address: privyUser.wallet.address,
+            }
+          : undefined,
+        linkedAccounts: privyUser.linkedAccounts
+          ?.filter(
+            (account): account is WalletWithMetadata =>
+              account.type === "wallet",
+          )
+          .map((wallet) => wallet.address),
+        createdAt: privyUser.createdAt
+          ? new Date(privyUser.createdAt).getTime()
           : Date.now(),
-        is_guest: user.isGuest || false,
-        linked_accounts: user.linkedAccounts || [],
-        has_accepted_terms: true, // Assuming Privy handles terms acceptance
+        isGuest: privyUser.isGuest || false,
+        hasAcceptedTerms: true,
       };
 
-      // Call our server action to sync the user
-      const authUser = await handlePrivyAuth(privyUserData);
+      // First call auth callback to establish session
+      const response = await fetch("/api/auth/callback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(privyUserData),
+      });
 
-      if (authUser) {
-        setDbUser(authUser);
-      } else {
-        setError("Failed to sync user with database");
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Session validation failed with status: ${response.status}, message: ${errorText}`,
+        );
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+
+      // After session validation, fetch latest user data
+      const userResponse = await fetch("/api/user", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": privyUser.id,
+        },
+        credentials: "include", // This ensures cookies are sent with the request
+      });
+
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        if (userData.user) {
+          // Make sure createdAt is always a Date object for IntercomProvider
+          if (
+            userData.user.createdAt &&
+            !(userData.user.createdAt instanceof Date)
+          ) {
+            userData.user.createdAt = new Date(userData.user.createdAt);
+          }
+          setDbUser(userData.user as SessionUser);
+          setSessionValidated(true);
+          log.info("User data loaded successfully", {
+            entity: "CLIENT",
+            operation: "user_data_load",
+            userId: privyUser.id,
+          });
+        } else {
+          log.warn("User data response missing user object", {
+            entity: "CLIENT",
+            operation: "user_data_load",
+            userId: privyUser.id,
+            response: userData,
+          });
+        }
+      } else {
+        throw new Error(
+          `User data fetch failed with status: ${userResponse.status}`,
+        );
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      log.error(errorMessage, {
+        entity: "CLIENT",
+        operation: "validate_session",
+        userId: privyUser.id,
+        retryCount,
+        errorStack: error instanceof Error ? error.stack : undefined,
+      });
+
+      setRetryCount((prev) => prev + 1);
+
+      if (retryCount < maxRetries - 1) {
+        log.info(
+          `Retrying session validation in ${retryDelay * (retryCount + 1)}ms`,
+          {
+            entity: "CLIENT",
+            operation: "validate_session_retry",
+            userId: privyUser.id,
+            retryCount: retryCount + 1,
+            maxRetries,
+          },
+        );
+
+        setTimeout(() => void validateSession(), retryDelay * (retryCount + 1));
+      } else {
+        setError("Session validation failed after maximum retries");
+        log.error("Max retries reached for session validation", {
+          entity: "CLIENT",
+          operation: "validate_session_max_retries",
+          userId: privyUser.id,
+          retryCount,
+          maxRetries,
+        });
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [user, authenticated]);
+  }, [privyUser, retryCount, maxRetries, retryDelay]);
 
-  // Sync user when they authenticate
+  // Update user state when privyUser changes
   useEffect(() => {
-    if (ready && authenticated && user) {
-      syncUser();
-    } else if (ready && !authenticated) {
-      setDbUser(null);
+    if (privyUser) {
+      setDbUser(
+        (prev) =>
+          ({
+            ...(prev || {}),
+            id: privyUser.id,
+            createdAt: new Date(),
+            wallet: privyUser.wallet,
+            email: privyUser.email,
+            linkedAccounts: privyUser.linkedAccounts
+              ?.filter(
+                (account): account is WalletWithMetadata =>
+                  account.type === "wallet",
+              )
+              .map((wallet) => wallet.address),
+          }) as SessionUser,
+      );
     }
-  }, [ready, authenticated, user, syncUser]);
+  }, [privyUser]);
+
+  // Validate session when authenticated but not yet validated
+  useEffect(() => {
+    if (
+      ready &&
+      authenticated &&
+      privyUser?.id &&
+      !sessionValidated &&
+      !isLoading
+    ) {
+      void validateSession();
+    }
+  }, [
+    ready,
+    authenticated,
+    privyUser?.id,
+    sessionValidated,
+    isLoading,
+    validateSession,
+  ]);
 
   // Handle logout
   const handleLogout = useCallback(async () => {
     try {
       await logout();
       setDbUser(null);
+      setSessionValidated(false);
+      setRetryCount(0);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
   }, [logout]);
 
   return {
-    // Privy state
-    user,
+    user: dbUser,
+    privyUser,
     authenticated,
     ready,
-
-    // Database state
-    dbUser,
     isLoading,
     error,
-
-    // Actions
+    sessionValidated,
     login,
     logout: handleLogout,
-    syncUser,
+    validateSession,
   };
 }

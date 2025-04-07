@@ -1,131 +1,93 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRedisClient } from "../redis";
-import { RateLimiter } from "../rate-limit";
-import { Session } from "../session";
+import { handlePrivyAuthServer } from "../server-auth-handler-fixed";
 import { log } from "@krain/utils";
-import { defaultSessionConfig } from "../config";
 
 export async function handleAuthCallback(request: NextRequest) {
   try {
-    // Get Redis client and setup rate limiter
-    const redis = await getRedisClient();
-    const rateLimiter = new RateLimiter(redis);
+    const privyData = await request.json();
 
-    // Apply rate limiting
-    const clientIp = await rateLimiter.getClientIp(request.headers);
-    const rateLimitResult = await rateLimiter.checkRateLimit(clientIp, "auth");
-
-    if (!rateLimitResult.success) {
+    if (!privyData.id) {
       return NextResponse.json(
-        { error: "Too many requests" },
-        {
-          status: 429,
-          headers: {
-            "X-RateLimit-Limit": rateLimitResult.limit.toString(),
-            "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
-            "X-RateLimit-Reset": rateLimitResult.reset.toString(),
-          },
-        },
-      );
-    }
-
-    log.info("Processing auth callback", {
-      entity: "API-auth/callback",
-      operation: "auth_callback",
-    });
-
-    // Validate request content type
-    const contentType = request.headers.get("content-type");
-    if (!contentType?.includes("application/json")) {
-      return NextResponse.json(
-        { error: "Invalid content type" },
+        { error: "Invalid user data", success: false },
         { status: 400 },
       );
     }
 
-    const data = await request.json();
+    let result = null;
+    let error = null;
 
-    // Validate user ID
-    if (!data.user?.id) {
-      log.error("Missing user ID", {
-        entity: "API-auth/callback",
-        operation: "auth_callback",
-        status: "error",
-      });
-      return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
-    }
-
-    // Create user session
-    const { user } = data;
-
+    // Try to handle Privy auth and create/update user in database
     try {
-      // Get Redis client
-      const redis = await getRedisClient();
+      result = await handlePrivyAuthServer(privyData);
 
-      // Create session
-      const session = await Session.create({
-        userId: user.id,
-        data: {
-          user,
-          isLoggedIn: true,
-        },
-        redis,
-        options: defaultSessionConfig,
-      });
-      await session.save();
-
-      // Generate CSRF token
-      const csrfToken = await session.generateCsrfToken();
-      await session.save();
-
-      const response = NextResponse.json({
+      log.info("Auth callback completed", {
+        operation: "handle_auth_callback_complete",
+        entity: "AUTH",
+        userId: privyData.id,
         success: true,
-        userId: user.id,
-        csrfToken,
       });
-
-      // Add user ID to headers
-      response.headers.set("x-user-id", user.id);
-
-      // Set user ID cookie
-      response.cookies.set("user_id", user.id, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
+    } catch (authError) {
+      error = authError;
+      log.error("Error in handlePrivyAuthServer", {
+        operation: "handle_auth_server_error",
+        entity: "AUTH",
+        userId: privyData.id,
+        error:
+          authError instanceof Error ? authError.message : String(authError),
+        stack: authError instanceof Error ? authError.stack : undefined,
       });
-
-      log.info("Session created successfully", {
-        entity: "API-auth/callback",
-        operation: "auth_callback",
-        userId: user.id,
-        timestamp: new Date().toISOString(),
-      });
-
-      return response;
-    } catch (sessionError) {
-      log.error("Session creation failed", {
-        entity: "API-auth/callback",
-        operation: "auth_callback",
-        error: sessionError,
-        userId: user.id,
-      });
-
-      return NextResponse.json(
-        { error: "Failed to create session" },
-        { status: 500 },
-      );
+      // We'll still create a response with the cookie but return an error status
     }
+
+    // Always create a response with the cookie
+    const status = error ? 500 : 200;
+    const response = NextResponse.json(
+      { success: !error },
+      {
+        status,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, max-age=0",
+        },
+      },
+    );
+
+    // Always set the user_id cookie for client-side access
+    response.cookies.set({
+      name: "user_id",
+      value: privyData.id,
+      httpOnly: false,
+      path: "/",
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    log.info("Auth callback completed with cookie set", {
+      operation: "handle_callback_success",
+      entity: "AUTH",
+      userId: privyData.id,
+      success: !error,
+    });
+
+    return response;
   } catch (error) {
-    log.error("Auth callback failed", {
-      entity: "API-auth/callback",
-      operation: "auth_callback",
-      error,
+    log.error("Fatal error in auth callback", {
+      operation: "handle_callback_error",
+      entity: "AUTH",
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
     });
 
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { error: "Failed to handle auth callback", success: false },
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, max-age=0",
+        },
+      },
     );
   }
 }

@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { db } from "@krain/db";
 import { eq } from "drizzle-orm";
-import { userTable, userProfileTable } from "@krain/db/schema";
+import { userTable, userProfileTable } from "@krain/db";
 import { cookies } from "next/headers";
 
 // Form validation schema (same as client-side)

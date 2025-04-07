@@ -10,6 +10,8 @@ import {
   real,
   jsonb,
   boolean,
+  date,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { generateReferralCode } from "@krain/utils";
 import { relations } from "drizzle-orm";
@@ -189,12 +191,37 @@ export const userTable = pgTable("user", {
     length: 1024,
   }),
   twitterSubject: varchar("twitterSubject", { length: 255 }),
+  telegramUserId: varchar("telegramUserId", { length: 255 }).unique(),
+  telegramUsername: varchar("telegramUsername", { length: 255 }),
+  hasJoinedTelegramCommunity: boolean("hasJoinedTelegramCommunity").default(
+    false,
+  ),
+  hasJoinedTelegramAnnouncement: boolean(
+    "hasJoinedTelegramAnnouncement",
+  ).default(false),
+  telegramCommunityMessageCount: integer(
+    "telegramCommunityMessageCount",
+  ).default(0),
+  hasJoinedCommunityChannel: boolean("hasJoinedCommunityChannel").default(
+    false,
+  ),
+  hasJoinedAnnouncementChannel: boolean("hasJoinedAnnouncementChannel").default(
+    false,
+  ),
+  communityMessageCount: integer("communityMessageCount").default(0),
+  announcementCommentCount: integer("announcementCommentCount").default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   privyCreatedAt: timestamp("privyCreatedAt"),
   isGuest: boolean("isGuest").default(false),
   hasAcceptedTerms: boolean("hasAcceptedTerms").default(false),
-  linkedAccounts: jsonb("linkedAccounts").$type<LinkedAccount[]>(),
   role: varchar("role", { length: 255 }).$type<string>().default("user"),
+  linkedAccounts: jsonb("linkedAccounts").$type<LinkedAccount[]>().default([]),
+  // New columns from CSV
+  emailVerifiedAt: timestamp("emailVerifiedAt"),
+  walletChain: varchar("walletChain", { length: 50 }),
+  walletType: varchar("walletType", { length: 50 }),
+  walletVerifiedAt: timestamp("walletVerifiedAt"),
+  twitterVerifiedAt: timestamp("twitterVerifiedAt"),
 });
 export type User = typeof userTable.$inferSelect;
 
@@ -397,5 +424,23 @@ export const featuredAgentRelations = relations(
       references: [agentTable.id],
       relationName: "featured_agent",
     }),
+  }),
+);
+
+export const telegramDailyMessageCountTable = pgTable(
+  "telegramDailyMessageCount",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("userId")
+      .references(() => userTable.id)
+      .notNull(),
+    date: date("date").notNull(),
+    messageCount: integer("messageCount").notNull().default(0),
+  },
+  (table) => ({
+    unq: uniqueIndex("unq_telegramDailyMessageCount_userId_date").on(
+      table.userId,
+      table.date,
+    ),
   }),
 );

@@ -30,7 +30,6 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.0",
     "@krain/eslint-config": "workspace:",
-    "@krain/typescript-config": "workspace:",
     "@types/node": "^22.13.10",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",

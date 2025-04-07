@@ -5,20 +5,28 @@ export const createSessionConfig = (secret?: string): SessionOptions => {
   if (typeof window !== "undefined") {
     // Return a safe placeholder for client side
     return {
-      password: "client-side-placeholder",
+      secret: "client-side-placeholder",
     };
   }
 
-  // Server-side code
+  const sessionSecret =
+    secret ||
+    process.env.SESSION_SECRET ||
+    (process.env.NODE_ENV === "development"
+      ? "complex_password_at_least_32_characters_long_dev_only"
+      : (() => {
+          throw new Error("SESSION_SECRET must be set in production");
+        })());
+
+  // Server-side configuration
   return {
-    password:
-      secret ||
-      process.env.SESSION_SECRET ||
-      (process.env.NODE_ENV === "development"
-        ? "complex_password_at_least_32_characters_long_dev_only"
-        : (() => {
-            throw new Error("SESSION_SECRET must be set in production");
-          })()),
+    secret: sessionSecret,
+    name: "session",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    cookiePath: "/",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    httpOnly: true,
   };
 };
 

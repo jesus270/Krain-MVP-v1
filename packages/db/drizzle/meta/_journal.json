@@ -64,6 +64,20 @@
       "when": 1741979168527,
       "tag": "0008_previous_nightcrawler",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1743034349705,
+      "tag": "0009_curvy_scream",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1743549684158,
+      "tag": "0010_watery_mysterio",
+      "breakpoints": true
     }
   ]
 }

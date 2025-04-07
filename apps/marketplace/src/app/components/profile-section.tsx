@@ -20,8 +20,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export function ProfileSection() {
-  const { authenticated, user, login, logout, dbUser, refreshUser } =
-    usePrivyAuth();
+  const { authenticated, user, login, logout } = usePrivyAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const router = useRouter();
 
@@ -88,39 +87,22 @@ export function ProfileSection() {
     return "User";
   };
 
-  // Debug logging to check why dbUser is null
+  // Debug logging to check why user is null
   console.log("User auth state:", {
     authenticated,
     userId: user?.id,
-    dbUser,
+    user,
   });
 
   const goToProfile = async () => {
-    // If dbUser is null, try to refresh it first
-    if (!dbUser) {
-      console.log("dbUser is null, attempting to refresh");
-      const refreshedUser = await refreshUser();
-      if (refreshedUser) {
-        console.log("Successfully refreshed user data:", refreshedUser);
-        if (refreshedUser.username) {
-          router.push(`/profile/${refreshedUser.username}`);
-          return;
-        }
-      } else {
-        console.log("Failed to refresh user data, redirecting to edit");
-        router.push("/profile/edit");
-        return;
-      }
-    }
-
-    // Use dbUser if it exists after refresh attempt
-    const username = dbUser?.username;
+    // Simplify logic: check for username in the available user object
+    const username = user?.username;
 
     if (username) {
       router.push(`/profile/${username}`);
     } else {
-      // If dbUser or username is missing, redirect to edit profile
-      console.log("No username found, redirecting to profile edit");
+      // If user data or username is missing, redirect to edit profile
+      console.log("User data or username missing, redirecting to profile edit");
       router.push("/profile/edit");
     }
   };

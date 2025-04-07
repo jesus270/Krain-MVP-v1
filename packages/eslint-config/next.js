@@ -7,7 +7,6 @@ module.exports = {
   extends: [
     "eslint:recommended",
     require.resolve("@vercel/style-guide/eslint/next"),
-    "turbo",
     "plugin:@typescript-eslint/recommended",
   ],
   parser: "@typescript-eslint/parser",
