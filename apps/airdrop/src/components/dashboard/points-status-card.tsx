@@ -25,7 +25,7 @@ import { Separator } from "@krain/ui/components/ui/separator";
 import { Users, MessageCircle, Trophy } from "lucide-react";
 import { TelegramLogo } from "@krain/ui/components/icons/logo-telegram";
 
-const POINTS_PER_REFERRAL = 250;
+const POINTS_PER_REFERRAL = 1000;
 const POINTS_PER_TELEGRAM_COMMUNITY = 5000;
 const POINTS_PER_TELEGRAM_ANNOUNCEMENT = 5000;
 
