@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { usePrivyAuth } from "../utils/use-privy-auth";
 
 export function UsernameCheck() {
-  const { authenticated, user, dbUser } = usePrivyAuth();
+  const { authenticated, user } = usePrivyAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [isChecking, setIsChecking] = useState(true);

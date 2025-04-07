@@ -9,6 +9,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./server": {
+      "types": "./src/server/index.ts",
+      "default": "./src/server/index.ts"
+    },
     "./types-only": {
       "types": "./src/types-only.ts",
       "default": "./src/types-only.ts"

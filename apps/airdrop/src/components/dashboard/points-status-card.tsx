@@ -20,44 +20,59 @@ import { ProfileCompletionMessage } from "./profile-completion-message";
 import { AdditionalPointsMessage } from "./additional-points-message";
 import { cn } from "@krain/ui/lib/utils";
 import { TelegramPointsSection } from "./telegram-points-section";
+import { Skeleton } from "@krain/ui/components/ui/skeleton";
+import { Separator } from "@krain/ui/components/ui/separator";
+import { Users, MessageCircle, Trophy } from "lucide-react";
+import { TelegramLogo } from "@krain/ui/components/icons/logo-telegram";
 
-interface PointsStatusCardProps {
-  totalPoints: number;
-  userWalletAddress: string | undefined;
-  userEmailAddress: string | undefined;
-  userTwitterUsername: string | undefined;
+export interface PointsStatusCardProps {
   referralsCount: number;
-  walletConnectionPoints: number;
-  accountCreationPoints: number;
-  referralPoints: number;
-  twitterPoints: number;
-  emailPoints: number;
-  telegramCommunityPoints: number;
-  telegramAnnouncementPoints: number;
   hasJoinedTelegramCommunity: boolean;
   hasJoinedTelegramAnnouncement: boolean;
-  locale: string;
+  messagePoints: number;
   isLoadingReferrals: boolean;
+  isLoadingMessagePoints: boolean;
+  userEmailAddress?: string;
+  userTwitterUsername?: string;
+  userWalletAddress?: string;
+  locale?: string;
+  walletConnectionPoints?: number;
+  accountCreationPoints?: number;
+  twitterPoints?: number;
+  emailPoints?: number;
 }
 
+const POINTS_PER_REFERRAL = 250;
+const POINTS_PER_TELEGRAM_COMMUNITY = 5000;
+const POINTS_PER_TELEGRAM_ANNOUNCEMENT = 5000;
+
 export function PointsStatusCard({
-  totalPoints = 0,
-  userWalletAddress,
+  referralsCount,
+  hasJoinedTelegramCommunity,
+  hasJoinedTelegramAnnouncement,
+  messagePoints,
+  isLoadingReferrals,
+  isLoadingMessagePoints,
   userEmailAddress,
   userTwitterUsername,
-  referralsCount = 0,
+  userWalletAddress,
+  locale = "en",
   walletConnectionPoints = 0,
   accountCreationPoints = 0,
-  referralPoints = 0,
   twitterPoints = 0,
   emailPoints = 0,
-  telegramCommunityPoints = 0,
-  telegramAnnouncementPoints = 0,
-  hasJoinedTelegramCommunity = false,
-  hasJoinedTelegramAnnouncement = false,
-  locale,
-  isLoadingReferrals,
 }: PointsStatusCardProps) {
+  // Calculate points
+  const referralPoints = referralsCount * POINTS_PER_REFERRAL;
+  const communityPoints = hasJoinedTelegramCommunity
+    ? POINTS_PER_TELEGRAM_COMMUNITY
+    : 0;
+  const announcementPoints = hasJoinedTelegramAnnouncement
+    ? POINTS_PER_TELEGRAM_ANNOUNCEMENT
+    : 0;
+  const totalPoints =
+    referralPoints + communityPoints + announcementPoints + messagePoints;
+
   return (
     <Card className="border-2 max-w-2xl mx-auto relative overflow-hidden backdrop-blur-sm bg-background/95 border-border/50">
       <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-purple-500/5 animate-gradient-x" />
@@ -83,7 +98,7 @@ export function PointsStatusCard({
           >
             {isLoadingReferrals
               ? "Loading..."
-              : `${formatNumber(totalPoints, locale)} Points`}
+              : `${formatNumber(totalPoints, "en")} Points`}
           </Badge>
         </div>
         <CardDescription>
@@ -118,10 +133,31 @@ export function PointsStatusCard({
         <TelegramPointsSection
           hasJoinedCommunity={hasJoinedTelegramCommunity}
           hasJoinedAnnouncements={hasJoinedTelegramAnnouncement}
-          communityPoints={telegramCommunityPoints}
-          announcementPoints={telegramAnnouncementPoints}
+          communityPoints={communityPoints}
+          announcementPoints={announcementPoints}
+          messagePoints={messagePoints}
           locale={locale}
         />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <MessageCircle className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">Message Points</p>
+              <p className="text-xs text-muted-foreground">
+                Earn 250 points per message (max 1000 points daily)
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            {isLoadingMessagePoints ? (
+              <Skeleton className="h-6 w-16" />
+            ) : (
+              <p className="text-sm font-medium">{messagePoints} points</p>
+            )}
+          </div>
+        </div>
       </CardContent>
       {userWalletAddress && (
         <CardFooter className="relative">

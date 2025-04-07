@@ -10,6 +10,8 @@ import {
   real,
   jsonb,
   boolean,
+  date,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { generateReferralCode } from "@krain/utils";
 import { relations } from "drizzle-orm";
@@ -422,5 +424,23 @@ export const featuredAgentRelations = relations(
       references: [agentTable.id],
       relationName: "featured_agent",
     }),
+  }),
+);
+
+export const telegramDailyMessageCountTable = pgTable(
+  "telegramDailyMessageCount",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("userId")
+      .references(() => userTable.id)
+      .notNull(),
+    date: date("date").notNull(),
+    messageCount: integer("messageCount").notNull().default(0),
+  },
+  (table) => ({
+    unq: uniqueIndex("unq_telegramDailyMessageCount_userId_date").on(
+      table.userId,
+      table.date,
+    ),
   }),
 );

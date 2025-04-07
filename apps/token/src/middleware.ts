@@ -4,7 +4,7 @@ import { getSession } from "@krain/session";
 import { log } from "@krain/utils";
 
 // Protected paths that require authentication
-const PROTECTED_PATHS = ["/api/user", "/api/listings"];
+const PROTECTED_PATHS = ["/api/user", "/api/tokens"];
 
 // Public paths that don't require authentication
 const PUBLIC_PATHS = ["/api/auth", "/", "/about", "/api/auth/callback"];
@@ -107,10 +107,3 @@ export async function middleware(request: NextRequest) {
     );
   }
 }
-
-export const config = {
-  matcher: [
-    "/api/:path*",
-    "/((?!_next/static|_next/image|favicon.ico|logo.svg).*)",
-  ],
-};

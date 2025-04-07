@@ -11,6 +11,7 @@ interface TelegramPointsSectionProps {
   hasJoinedAnnouncements: boolean;
   communityPoints: number;
   announcementPoints: number;
+  messagePoints: number;
   locale: string;
 }
 
@@ -19,6 +20,7 @@ export function TelegramPointsSection({
   hasJoinedAnnouncements,
   communityPoints,
   announcementPoints,
+  messagePoints,
   locale,
 }: TelegramPointsSectionProps) {
   return (
@@ -49,22 +51,33 @@ export function TelegramPointsSection({
                   : "border border-border/50",
               )}
             >
-              {formatNumber(communityPoints, locale)} pts
+              {formatNumber(communityPoints + messagePoints, locale)} pts
             </Badge>
           </div>
-          <div className="flex items-center gap-2 mt-2 relative z-10">
+          <div className="flex flex-col gap-2 mt-2 relative z-10">
             {hasJoinedCommunity ? (
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500 group-hover:scale-110 transition-transform" />
-                <p className="text-xs text-muted-foreground/90 group-hover:text-muted-foreground transition-colors">
-                  Community channel joined
-                </p>
-              </div>
+              <>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500 group-hover:scale-110 transition-transform" />
+                  <p className="text-xs text-muted-foreground/90 group-hover:text-muted-foreground transition-colors">
+                    Community channel joined (+5,000 pts)
+                  </p>
+                </div>
+                {messagePoints > 0 && (
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-500 group-hover:scale-110 transition-transform" />
+                    <p className="text-xs text-muted-foreground/90 group-hover:text-muted-foreground transition-colors">
+                      {formatNumber(messagePoints / 250, locale)} messages sent
+                      (+{formatNumber(messagePoints, locale)} pts)
+                    </p>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 text-yellow-500 animate-pulse" />
                 <p className="text-xs text-muted-foreground/90 group-hover:text-muted-foreground transition-colors">
-                  Join community to earn 5,000 points
+                  Join community to earn 5,000 points + 250 pts per message
                 </p>
               </div>
             )}

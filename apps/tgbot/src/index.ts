@@ -6,6 +6,8 @@ import {
   updateUserTelegramInfo,
   incrementTelegramCommunityMessageCount,
   recordTelegramChannelJoin,
+  getDailyMessageCount,
+  incrementDailyMessageCount,
 } from "@krain/db/telegram";
 
 config();
@@ -75,177 +77,191 @@ bot.start((ctx: Context) => {
   );
 });
 
-bot.on("text", async (ctx) => {
-  const userId = ctx.from?.id;
-  const username = ctx.from?.username;
-  const text = ctx.message.text.trim();
-
-  console.log(`📩 Received message from ${username} (${userId}): ${text}`);
-
-  if (!userId || !username) {
-    console.log("❌ Missing user ID or username, ignoring message");
-    return ctx.reply(
-      "❌ Something went wrong. Please send your wallet address to try again.\n\nUse your:\n- Ethereum/Base L2 address (start with 0x) OR\n- Solana address",
-    );
-  }
-
-  // Only accept wallet addresses via DM
-  if (ctx.chat.type !== "private") {
-    console.log(`❌ Message not in DM (type: ${ctx.chat.type}), ignoring`);
-    return ctx.reply(
-      "❌ Please send your wallet address in a direct message to the bot.\n\nUse your:\n- Ethereum/Base L2 address (start with 0x) OR\n- Solana address",
-    );
-  }
-
-  let walletType: "base" | "solana" | null = null;
-
-  console.log(`🔍 Validating wallet address: ${text}`);
-  if (isEthWallet(text)) {
-    console.log(`✓ Valid Base/ETH wallet detected`);
-    walletType = "base";
-  } else if (isSolWallet(text)) {
-    console.log(`✓ Valid Solana wallet detected`);
-    walletType = "solana";
-  } else {
-    console.log(`❌ Invalid wallet format: ${text}`);
-    const returnStr = `❌ Invalid wallet address.\n\nPlease send your wallet address in the correct format:\n- 0x... Base L2 / Ethereum\n- 32–44 char Solana address\n\nUserID: ${userId}`;
-    return ctx.reply(returnStr);
-  }
-
-  // Find user by wallet address
-  console.log(`🔍 Looking up user with wallet: ${text}`);
-  const user = await findUserByWallet(text);
-  if (!user) {
-    console.log(`❌ No user found with wallet: ${text}`);
-    return ctx.reply(
-      "❌ This wallet address is not registered for the airdrop. Please sign up at https://airdrop.krain.ai first, then send your wallet address here again.",
-    );
-  }
-
-  // Check channel memberships
-  let hasJoinedAnyChannel = false;
-  let channelsJoined: string[] = [];
-
-  if (process.env.COMMUNITY_GROUP_ID) {
-    console.log(`🔍 Checking community group membership for ${username}...`);
-    const isCommunityMember = await isUserInChat(
-      ctx,
-      userId,
-      process.env.COMMUNITY_GROUP_ID,
-    );
-    if (isCommunityMember) {
-      console.log(`✅ User ${username} is member of community group`);
-      hasJoinedAnyChannel = true;
-      channelsJoined.push("Community");
-      await recordTelegramChannelJoin(user.id, "community");
-    } else {
-      console.log(`ℹ️ User ${username} has not joined community group`);
-    }
-  }
-
-  if (process.env.ANNOUNCEMENT_GROUP_ID) {
-    console.log(`🔍 Checking announcement group membership for ${username}...`);
-    const isAnnouncementMember = await isUserInChat(
-      ctx,
-      userId,
-      process.env.ANNOUNCEMENT_GROUP_ID,
-    );
-    if (isAnnouncementMember) {
-      console.log(`✅ User ${username} is member of announcement group`);
-      hasJoinedAnyChannel = true;
-      channelsJoined.push("Announcement");
-      await recordTelegramChannelJoin(user.id, "announcement");
-    } else {
-      console.log(`ℹ️ User ${username} has not joined announcement group`);
-    }
-  }
-
-  if (!hasJoinedAnyChannel) {
-    console.log(`❌ User ${username} has not joined any required channels`);
-    return ctx.reply(
-      "❌ Please join at least one of our channels:\n- Community Channel\n- Announcement Channel\n\nAfter joining, send your wallet address again to complete registration.",
-    );
-  }
-
-  // Update user's Telegram info
-  console.log(`💾 Updating Telegram info for user ${username}`);
-  try {
-    await updateUserTelegramInfo(user.id, userId.toString(), username);
-  } catch (error: unknown) {
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      "constraint" in error &&
-      error.code === "23505" &&
-      error.constraint === "user_telegramUserId_unique"
-    ) {
-      console.log(`⚠️ Telegram ID ${userId} already linked to another wallet`);
-      return ctx.reply(
-        "❌ This Telegram account is already linked to a different wallet address. " +
-          "Please contact support if you need to update your wallet address.",
-      );
-    }
-    // Handle other errors
-    console.error("❌ Failed to update Telegram info:", error);
-    return ctx.reply(
-      "❌ An error occurred while updating your information. Please try again later.",
-    );
-  }
-
-  // Store wallet info in memory for stats tracking
-  console.log(`💾 Storing wallet data for ${username}...`);
-  users[userId] = { username, wallet: text, type: walletType };
-
-  // Send success message
-  const successMessage = `✅ Successfully registered!\nWallet: ${text}\nType: ${walletType.toUpperCase()}\nChannels joined: ${channelsJoined.join(
-    ", ",
-  )}`;
-  console.log(`✅ Registration complete for ${username}`);
-  ctx.reply(successMessage);
-});
-
-// --- Group Message Tracker ---
+// Message handler
 bot.on("message", async (ctx) => {
-  const chatId = ctx.chat?.id;
-  const title =
-    "type" in (ctx.chat || {}) && ctx.chat.type !== "private"
-      ? ctx.chat.title
-      : undefined;
-  const userId = ctx.from?.id;
-  const username = ctx.from?.username;
-
-  if (!chatId || !userId || !title) {
+  if (!ctx.message || !ctx.from?.id || !ctx.chat?.id || !ctx.from.username) {
     console.log("❌ Missing required message data, ignoring");
     return;
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-  console.log(`📝 Processing message from ${username} in ${title}`);
+  const userId = ctx.from.id;
+  const username = ctx.from.username;
+  const chatId = ctx.chat.id.toString();
+  const chatType = ctx.chat.type;
 
-  // Initialize stats for memory tracking
-  if (!stats[userId]) {
-    console.log(`📊 Initializing stats for user ${username}`);
-    stats[userId] = {};
-  }
-  if (!stats[userId][today]) {
-    console.log(`📊 Initializing daily stats for user ${username}`);
-    stats[userId][today] = { messages: 0, comments: 0 };
+  console.log(
+    `📩 Received message from ${username} (${userId}) in ${chatType}`,
+  );
+
+  // Handle wallet registration in DMs
+  if (chatType === "private" && "text" in ctx.message) {
+    const text = ctx.message.text.trim();
+
+    // Check if user is already registered
+    const existingTelegramUser = await findUserByTelegramId(userId.toString());
+    if (existingTelegramUser) {
+      console.log(`❌ Telegram ID ${userId} already registered`);
+      return ctx.reply(
+        "❌ This Telegram account is already registered. If you need to update your wallet address, please contact support.",
+      );
+    }
+
+    // Process wallet registration
+    let walletType: "base" | "solana" | null = null;
+
+    console.log(`🔍 Validating wallet address: ${text}`);
+    if (isEthWallet(text)) {
+      console.log(`✓ Valid Base/ETH wallet detected`);
+      walletType = "base";
+    } else if (isSolWallet(text)) {
+      console.log(`✓ Valid Solana wallet detected`);
+      walletType = "solana";
+    } else {
+      console.log(`❌ Invalid wallet format: ${text}`);
+      const returnStr = `❌ Invalid wallet address.\n\nPlease send your wallet address in the correct format:\n- 0x... Base L2 / Ethereum\n- 32–44 char Solana address\n\nUserID: ${userId}`;
+      return ctx.reply(returnStr);
+    }
+
+    // Find user by wallet address
+    console.log(`🔍 Looking up user with wallet: ${text}`);
+    const user = await findUserByWallet(text);
+    if (!user) {
+      console.log(`❌ No user found with wallet: ${text}`);
+      return ctx.reply(
+        "❌ This wallet address is not registered for the airdrop. Please sign up at https://airdrop.krain.ai first, then send your wallet address here again.",
+      );
+    }
+
+    // Check channel memberships
+    let hasJoinedAnyChannel = false;
+    let channelsJoined: string[] = [];
+
+    if (process.env.COMMUNITY_GROUP_ID) {
+      console.log(`🔍 Checking community group membership for ${username}...`);
+      const isCommunityMember = await isUserInChat(
+        ctx,
+        userId,
+        process.env.COMMUNITY_GROUP_ID,
+      );
+      if (isCommunityMember) {
+        console.log(`✅ User ${username} is member of community group`);
+        hasJoinedAnyChannel = true;
+        channelsJoined.push("Community");
+        await recordTelegramChannelJoin(user.id, "community");
+      } else {
+        console.log(`ℹ️ User ${username} has not joined community group`);
+      }
+    }
+
+    if (process.env.ANNOUNCEMENT_GROUP_ID) {
+      console.log(
+        `🔍 Checking announcement group membership for ${username}...`,
+      );
+      const isAnnouncementMember = await isUserInChat(
+        ctx,
+        userId,
+        process.env.ANNOUNCEMENT_GROUP_ID,
+      );
+      if (isAnnouncementMember) {
+        console.log(`✅ User ${username} is member of announcement group`);
+        hasJoinedAnyChannel = true;
+        channelsJoined.push("Announcement");
+        await recordTelegramChannelJoin(user.id, "announcement");
+      } else {
+        console.log(`ℹ️ User ${username} has not joined announcement group`);
+      }
+    }
+
+    if (!hasJoinedAnyChannel) {
+      console.log(`❌ User ${username} has not joined any required channels`);
+      return ctx.reply(
+        "❌ Please join at least one of our channels:\n- Community Channel\n- Announcement Channel\n\nAfter joining, send your wallet address again to complete registration.",
+      );
+    }
+
+    // Update user's Telegram info
+    console.log(`💾 Updating Telegram info for user ${username}`);
+    try {
+      await updateUserTelegramInfo(user.id, userId.toString(), username);
+    } catch (error: unknown) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        "constraint" in error &&
+        error.code === "23505" &&
+        error.constraint === "user_telegramUserId_unique"
+      ) {
+        console.log(
+          `⚠️ Telegram ID ${userId} already linked to another wallet`,
+        );
+        return ctx.reply(
+          "❌ This Telegram account is already linked to a different wallet address. " +
+            "Please contact support if you need to update your wallet address.",
+        );
+      }
+      // Handle other errors
+      console.error("❌ Failed to update Telegram info:", error);
+      return ctx.reply(
+        "❌ An error occurred while updating your information. Please try again later.",
+      );
+    }
+
+    // Store wallet info in memory for stats tracking
+    console.log(`💾 Storing wallet data for ${username}...`);
+    users[userId] = { username, wallet: text, type: walletType };
+
+    // Send success message
+    const successMessage = `✅ Successfully registered!\nWallet: ${text}\nType: ${walletType.toUpperCase()}\nChannels joined: ${channelsJoined.join(
+      ", ",
+    )}`;
+    console.log(`✅ Registration complete for ${username}`);
+    ctx.reply(successMessage);
   }
 
-  // Find user in database
-  console.log(`🔍 Looking up user ${username} in database...`);
-  const user = await findUserByTelegramId(userId.toString());
-  if (!user) {
-    console.log(`⚠️ ${username || userId} not registered in database`);
-    return;
-  }
+  // Handle message counting in community channel
+  if (chatId === process.env.COMMUNITY_GROUP_ID) {
+    console.log(`🎯 Message in community channel from ${username}`);
 
-  if (chatId.toString() === process.env.COMMUNITY_GROUP_ID) {
-    stats[userId][today].messages += 1;
-    console.log(
-      `💬 [${title}] ${username}: ${stats[userId][today].messages} msgs today`,
-    );
+    // Check if message has text and is long enough first
+    if (!("text" in ctx.message)) {
+      console.log(
+        `⚠️ Message from ${username} is not a text message, skipping count`,
+      );
+      return;
+    }
+
+    const messageLength = ctx.message.text.trim().length;
+    if (messageLength < 5) {
+      console.log(
+        `⚠️ Message from ${username} is too short (${messageLength} chars), minimum 5 chars required`,
+      );
+      return;
+    }
+
+    const user = await findUserByTelegramId(userId.toString());
+    if (!user) {
+      console.log(
+        `⚠️ User ${userId} not registered in database, skipping message count`,
+      );
+      return;
+    }
+
+    const today = new Date();
+    const dailyCount = await getDailyMessageCount(user.id, today);
+
+    // Only increment if under daily limit
+    if (dailyCount < 4) {
+      console.log(
+        `💬 Processing community message from ${username} (${dailyCount + 1}/4 today)`,
+      );
+      await Promise.all([
+        incrementTelegramCommunityMessageCount(user.id),
+        incrementDailyMessageCount(user.id, today),
+      ]);
+    } else {
+      console.log(`⚠️ User ${username} has reached daily message limit (4/4)`);
+    }
   }
 });
 
@@ -280,24 +296,6 @@ process.once("SIGINT", () => {
 process.once("SIGTERM", () => {
   console.log("📴 Received SIGTERM signal, stopping bot...");
   bot.stop("SIGTERM");
-});
-
-// Message handler
-bot.on("message", async (ctx) => {
-  if (!ctx.message || !("text" in ctx.message)) return;
-
-  const userId = ctx.from.id.toString();
-  const user = await findUserByTelegramId(userId);
-  if (!user) {
-    console.log(`User ${userId} not found in database`);
-    return;
-  }
-
-  // Only track messages in the community channel
-  if (ctx.chat.id.toString() === process.env.TELEGRAM_COMMUNITY_CHANNEL_ID) {
-    console.log(`Incrementing message count for user ${userId}`);
-    await incrementTelegramCommunityMessageCount(user.id);
-  }
 });
 
 // Channel join handler

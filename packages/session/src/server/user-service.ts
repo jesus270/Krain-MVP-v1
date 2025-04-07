@@ -1,13 +1,16 @@
+"use server";
+
 import { db } from "@krain/db";
 import {
   userTable,
   userProfileTable,
   privyWalletTable,
   type User,
+  type LinkedAccount,
 } from "@krain/db";
 import { eq } from "drizzle-orm";
 import { log } from "@krain/utils";
-import { PrivyUserData } from "./auth-handler";
+import type { PrivyUserData } from "../auth-handler";
 
 export async function createOrUpdateUser(
   privyData: PrivyUserData,
@@ -21,6 +24,14 @@ export async function createOrUpdateUser(
       },
     });
 
+    // Convert string[] to LinkedAccount[]
+    const linkedAccounts: LinkedAccount[] = (
+      privyData.linkedAccounts || []
+    ).map((account: string) => ({
+      type: "wallet",
+      address: account,
+    }));
+
     if (existingUser) {
       // Update existing user with any new information
       const [updatedUser] = await db
@@ -28,8 +39,7 @@ export async function createOrUpdateUser(
         .set({
           email: privyData.email,
           walletAddress: privyData.wallet?.address,
-          linkedAccounts: privyData.linkedAccounts,
-          // Update other fields as needed
+          linkedAccounts,
         })
         .where(eq(userTable.privyId, privyData.id))
         .returning();
@@ -54,7 +64,7 @@ export async function createOrUpdateUser(
         privyId: privyData.id,
         email: privyData.email,
         walletAddress: privyData.wallet?.address,
-        linkedAccounts: privyData.linkedAccounts,
+        linkedAccounts,
         isGuest: false,
         hasAcceptedTerms: false,
       })
@@ -75,7 +85,7 @@ export async function createOrUpdateUser(
         .insert(privyWalletTable)
         .values({
           address: privyData.wallet.address,
-          chainType: "solana", // Update based on actual chain type
+          chainType: "solana",
           verifiedAt: new Date(),
         })
         .onConflictDoUpdate({

@@ -1,9 +1,27 @@
 import { z } from "zod";
 
+// Session configuration
 export interface SessionOptions {
-  password: string;
+  name?: string;
+  secret: string;
+  maxAge?: number;
+  cookiePath?: string;
+  domain?: string;
+  secure?: boolean;
+  sameSite?: "lax" | "strict" | "none";
+  httpOnly?: boolean;
 }
 
+// Default duration to keep session alive after last activity
+export const SESSION_ACTIVITY_TIMEOUT = 1000 * 60 * 60 * 24 * 7; // 7 days
+
+// Max login attempts before temporary block
+export const MAX_LOGIN_ATTEMPTS = 5;
+
+// Duration of login block after too many attempts
+export const LOGIN_BLOCK_DURATION = 1000 * 60 * 15; // 15 minutes
+
+// User data structure stored in session
 export interface User {
   id: string;
   createdAt: Date;
@@ -13,7 +31,16 @@ export interface User {
   email?: {
     address: string;
   };
+  linkedAccounts?: string[];
   role?: string;
+  // Optional fields used in specific apps
+  twitter?: {
+    subject: string;
+    handle?: string | null;
+    name?: string | null;
+    profilePictureUrl?: string | null;
+    username?: string | null;
+  };
   telegramUserId?: string;
   telegramUsername?: string;
   hasJoinedTelegramCommunity?: boolean;
@@ -23,24 +50,6 @@ export interface User {
   hasJoinedAnnouncementChannel?: boolean;
   communityMessageCount?: number;
   announcementCommentCount?: number;
-  // Privy-specific properties
-  linkedAccounts?: any[];
-  twitter?: {
-    subject: string;
-    handle?: string;
-    name?: string;
-    profilePictureUrl?: string;
-    username?: string;
-  };
-  // Additional Privy properties
-  ready?: boolean;
-  authenticated?: boolean;
-  linkEmail?: () => Promise<void>;
-  connectWallet?: () => Promise<void>;
-  unlinkEmail?: (address: string) => Promise<void>;
-  unlinkWallet?: (address: string) => Promise<void>;
-  linkTwitter?: () => Promise<void>;
-  unlinkTwitter?: (subject: string) => Promise<void>;
 }
 
 export interface Session {
@@ -50,14 +59,26 @@ export interface Session {
   lastActivity: number;
 }
 
-export const SESSION_ACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
-export const MAX_LOGIN_ATTEMPTS = 5;
-export const LOGIN_BLOCK_DURATION = 15 * 60 * 1000; // 15 minutes
+export interface Fingerprint {
+  userAgent?: string;
+  ipAddress?: string;
+}
 
-export const fingerprintSchema = z.object({
-  userAgent: z.string(),
-  ip: z.string(),
+const fingerprintSchema = z.object({
+  userAgent: z.string().optional(),
+  ipAddress: z.string().optional(),
 });
+
+export type SessionData = {
+  isLoggedIn?: boolean;
+  user?: User;
+  csrfToken?: string;
+  fingerprint?: Fingerprint;
+  lastActivity?: number;
+  loginAttempts?: number;
+  lastUpdated?: number;
+  lastRotated?: number;
+};
 
 export const sessionDataSchema = z.object({
   isLoggedIn: z.boolean().optional(),
@@ -76,6 +97,26 @@ export const sessionDataSchema = z.object({
         })
         .optional(),
       role: z.string().optional(),
+      linkedAccounts: z.array(z.string()).optional(),
+      // Additional optional fields
+      twitter: z
+        .object({
+          subject: z.string(),
+          handle: z.string().nullable().optional(),
+          name: z.string().nullable().optional(),
+          profilePictureUrl: z.string().nullable().optional(),
+          username: z.string().nullable().optional(),
+        })
+        .optional(),
+      telegramUserId: z.string().optional(),
+      telegramUsername: z.string().optional(),
+      hasJoinedTelegramCommunity: z.boolean().optional(),
+      hasJoinedTelegramAnnouncement: z.boolean().optional(),
+      telegramCommunityMessageCount: z.number().optional(),
+      hasJoinedCommunityChannel: z.boolean().optional(),
+      hasJoinedAnnouncementChannel: z.boolean().optional(),
+      communityMessageCount: z.number().optional(),
+      announcementCommentCount: z.number().optional(),
     })
     .optional(),
   csrfToken: z.string().optional(),
@@ -85,5 +126,3 @@ export const sessionDataSchema = z.object({
   lastUpdated: z.number().optional(),
   lastRotated: z.number().optional(),
 });
-
-export type SessionData = z.infer<typeof sessionDataSchema>;

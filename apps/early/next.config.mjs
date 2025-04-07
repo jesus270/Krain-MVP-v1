@@ -10,7 +10,6 @@ const nextConfig = {
     },
     optimizePackageImports: ["@krain/ui", "@krain/utils", "@krain/db"],
   },
-  optimizeFonts: false,
   poweredByHeader: false,
   env: {
     KV_REST_API_URL: process.env.KV_REST_API_URL,

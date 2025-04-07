@@ -51,7 +51,7 @@ export default function Layout({
           privyAppId: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
           loadingTitle: "Welcome to the $KRAIN Airdrop",
           loadingDescription: "Please wait while we validate your session...",
-          validateSession: false,
+          validateSession: true,
         }}
         intercomAppId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID}
       >
