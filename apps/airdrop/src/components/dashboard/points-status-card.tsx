@@ -25,6 +25,10 @@ import { Separator } from "@krain/ui/components/ui/separator";
 import { Users, MessageCircle, Trophy } from "lucide-react";
 import { TelegramLogo } from "@krain/ui/components/icons/logo-telegram";
 
+const POINTS_PER_REFERRAL = 250;
+const POINTS_PER_TELEGRAM_COMMUNITY = 5000;
+const POINTS_PER_TELEGRAM_ANNOUNCEMENT = 5000;
+
 export interface PointsStatusCardProps {
   referralsCount: number;
   hasJoinedTelegramCommunity: boolean;
@@ -41,10 +45,6 @@ export interface PointsStatusCardProps {
   twitterPoints?: number;
   emailPoints?: number;
 }
-
-const POINTS_PER_REFERRAL = 250;
-const POINTS_PER_TELEGRAM_COMMUNITY = 5000;
-const POINTS_PER_TELEGRAM_ANNOUNCEMENT = 5000;
 
 export function PointsStatusCard({
   referralsCount,
@@ -71,7 +71,14 @@ export function PointsStatusCard({
     ? POINTS_PER_TELEGRAM_ANNOUNCEMENT
     : 0;
   const totalPoints =
-    referralPoints + communityPoints + announcementPoints + messagePoints;
+    walletConnectionPoints +
+    accountCreationPoints +
+    referralPoints +
+    communityPoints +
+    announcementPoints +
+    messagePoints +
+    twitterPoints +
+    emailPoints;
 
   return (
     <Card className="border-2 max-w-2xl mx-auto relative overflow-hidden backdrop-blur-sm bg-background/95 border-border/50">
@@ -137,27 +144,8 @@ export function PointsStatusCard({
           announcementPoints={announcementPoints}
           messagePoints={messagePoints}
           locale={locale}
+          isLoadingMessagePoints={isLoadingMessagePoints}
         />
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <MessageCircle className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">Message Points</p>
-              <p className="text-xs text-muted-foreground">
-                Earn 250 points per message (max 1000 points daily)
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            {isLoadingMessagePoints ? (
-              <Skeleton className="h-6 w-16" />
-            ) : (
-              <p className="text-sm font-medium">{messagePoints} points</p>
-            )}
-          </div>
-        </div>
       </CardContent>
       {userWalletAddress && (
         <CardFooter className="relative">

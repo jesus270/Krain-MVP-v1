@@ -25,6 +25,11 @@ import { log } from "@krain/utils";
 import { useSession } from "@/lib/use-session";
 import { ProfileCompletionMessage } from "@/components/dashboard/profile-completion-message";
 
+const POINTS_FOR_WALLET_CONNECTION = 1000;
+const POINTS_FOR_ACCOUNT_CREATION = 5000;
+const POINTS_FOR_TWITTER = 2000;
+const POINTS_FOR_EMAIL = 3000;
+
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 2000; // 2 seconds
 
@@ -106,9 +111,6 @@ export function Dashboard({
         sessionValidated,
         timestamp: new Date().toISOString(),
       });
-      setIsLoadingWallet(false);
-      setIsLoadingReferrals(false);
-      setIsLoadingMessagePoints(false);
       return;
     }
 
@@ -123,9 +125,6 @@ export function Dashboard({
           timestamp: new Date().toISOString(),
         });
 
-        setIsLoadingWallet(true);
-        setIsLoadingReferrals(true);
-        setIsLoadingMessagePoints(true);
         setError(undefined);
 
         // Add validation check for wallet address
@@ -372,9 +371,18 @@ export function Dashboard({
 
   // Show wallet status
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-4">
       <div className="space-y-4">
         <PointsStatusCard
+          userEmailAddress={userEmailAddress}
+          userTwitterUsername={userTwitterUsername}
+          userWalletAddress={userWalletAddress}
+          walletConnectionPoints={
+            userWalletAddress ? POINTS_FOR_WALLET_CONNECTION : 0
+          }
+          accountCreationPoints={user ? POINTS_FOR_ACCOUNT_CREATION : 0}
+          twitterPoints={userTwitterUsername ? POINTS_FOR_TWITTER : 0}
+          emailPoints={userEmailAddress ? POINTS_FOR_EMAIL : 0}
           referralsCount={referralsCount}
           hasJoinedTelegramCommunity={hasJoinedTelegramCommunity}
           hasJoinedTelegramAnnouncement={hasJoinedTelegramAnnouncement}

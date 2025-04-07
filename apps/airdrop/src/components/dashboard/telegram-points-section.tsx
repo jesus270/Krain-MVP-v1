@@ -13,6 +13,7 @@ interface TelegramPointsSectionProps {
   announcementPoints: number;
   messagePoints: number;
   locale: string;
+  isLoadingMessagePoints: boolean;
 }
 
 export function TelegramPointsSection({
@@ -22,6 +23,7 @@ export function TelegramPointsSection({
   announcementPoints,
   messagePoints,
   locale,
+  isLoadingMessagePoints,
 }: TelegramPointsSectionProps) {
   return (
     <div className="space-y-4">
@@ -63,12 +65,26 @@ export function TelegramPointsSection({
                     Community channel joined (+5,000 pts)
                   </p>
                 </div>
-                {messagePoints > 0 && (
+                {isLoadingMessagePoints ? (
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-yellow-500 animate-pulse" />
+                    <p className="text-xs text-muted-foreground/90 group-hover:text-muted-foreground transition-colors">
+                      Loading message points...
+                    </p>
+                  </div>
+                ) : messagePoints > 0 ? (
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-green-500 group-hover:scale-110 transition-transform" />
                     <p className="text-xs text-muted-foreground/90 group-hover:text-muted-foreground transition-colors">
                       {formatNumber(messagePoints / 250, locale)} messages sent
                       (+{formatNumber(messagePoints, locale)} pts)
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-yellow-500 animate-pulse" />
+                    <p className="text-xs text-muted-foreground/90 group-hover:text-muted-foreground transition-colors">
+                      Send messages in the community channel to earn points.
                     </p>
                   </div>
                 )}
