@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@krain/ui/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@krain/ui/components/ui/sidebar";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivyAuth } from "@krain/ui/hooks/index";
 import { NavLoginButton } from "./nav-login-button";
 import { capitalize } from "@krain/utils";
 import { useRouter } from "next/navigation";
@@ -21,7 +21,7 @@ import { log } from "@krain/utils";
 import { cn } from "@krain/ui/lib/utils";
 
 export function NavUser() {
-  const { ready, authenticated, user, logout } = usePrivy();
+  const { ready, authenticated, user, logout } = usePrivyAuth();
   const { isMobile } = useSidebar();
   const router = useRouter();
 

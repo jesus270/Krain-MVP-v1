@@ -1,7 +1,7 @@
 "use client";
 
 import { log } from "@krain/utils";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivyAuth } from "@krain/ui/hooks/index";
 import { Avatar, AvatarFallback } from "@krain/ui/components/ui/avatar";
 import { Button } from "@krain/ui/components/ui/button";
 import {
@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@krain/ui/lib/utils";
 
 export function HeaderLoginButton() {
-  const { ready, authenticated, login, logout, user } = usePrivy();
+  const { ready, authenticated, login, logout, user } = usePrivyAuth();
   const router = useRouter();
   const disableLogin = !ready || (ready && authenticated);
   const { isMobile } = useSidebar();

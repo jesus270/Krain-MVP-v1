@@ -22,7 +22,7 @@ import {
 } from "@krain/ui/components/ui/card";
 import { Button } from "@krain/ui/components/ui/button";
 import { log } from "@krain/utils";
-import { useSession } from "@/lib/use-session";
+import { useSession } from "@krain/session";
 import { ProfileCompletionMessage } from "@/components/dashboard/profile-completion-message";
 
 const POINTS_FOR_WALLET_CONNECTION = 1000;
@@ -57,7 +57,15 @@ export function Dashboard({
 }: {
   referredByCode: string | undefined;
 }) {
-  const { user, ready, authenticated, sessionValidated } = useSession();
+  const {
+    user,
+    ready,
+    authenticated,
+    sessionValidated,
+    isValidatingSession,
+    error: sessionError,
+  } = useSession();
+  const { login, linkEmail } = usePrivy();
   const [wallet, setWallet] = useState<Wallet | undefined>(undefined);
   const [referralsCount, setReferralsCount] = useState<number>(0);
   const [telegramMessagePoints, setTelegramMessagePoints] = useState<number>(0);
@@ -78,9 +86,10 @@ export function Dashboard({
     log.info("Dashboard component mounted", {
       entity: "CLIENT",
       operation: "dashboard_mount",
-      ready,
-      authenticated,
+      privyReady: ready,
+      privyAuthenticated: authenticated,
       sessionValidated,
+      isValidatingSession,
       hasUser: !!user,
       userId: user?.id,
       userWalletAddress,
@@ -91,116 +100,138 @@ export function Dashboard({
     ready,
     authenticated,
     sessionValidated,
+    isValidatingSession,
     user,
     userWalletAddress,
     referredByCode,
   ]);
 
-  // Modified data loading effect
   useEffect(() => {
     let isDataMounted = true;
     let retryTimeout: ReturnType<typeof setTimeout> | undefined;
 
-    // Early return if not ready or session not validated
-    if (!authenticated || !ready || !sessionValidated) {
-      log.info("Dashboard not ready for data loading", {
+    if (!sessionValidated || !user?.id || !userWalletAddress) {
+      if (
+        authenticated &&
+        ready &&
+        !sessionValidated &&
+        !isValidatingSession &&
+        !sessionError
+      ) {
+        log.info("Dashboard waiting for session validation", {
         entity: "CLIENT",
-        operation: "dashboard_data_loading",
+          operation: "dashboard_awaiting_session",
         authenticated,
         ready,
         sessionValidated,
-        timestamp: new Date().toISOString(),
-      });
+          isValidatingSession,
+          sessionError,
+        });
+        setIsLoadingWallet(true);
+        setIsLoadingReferrals(true);
+        setIsLoadingMessagePoints(true);
+        setError(undefined);
+      } else if (sessionError) {
+        log.error("Session validation failed, cannot load dashboard data", {
+          entity: "CLIENT",
+          operation: "dashboard_session_error",
+          sessionError,
+        });
+        setError(`Session Error: ${sessionError}. Please refresh.`);
+        setIsLoadingWallet(false);
+        setIsLoadingReferrals(false);
+        setIsLoadingMessagePoints(false);
+      } else if (!authenticated || !ready) {
+        log.info("Dashboard not authenticated or ready, clearing state", {
+          entity: "CLIENT",
+          operation: "dashboard_not_authenticated",
+          authenticated,
+          ready,
+        });
+        setWallet(undefined);
+        setReferralsCount(0);
+        setTelegramMessagePoints(0);
+        setIsLoadingWallet(true);
+        setIsLoadingReferrals(true);
+        setIsLoadingMessagePoints(true);
+        setError(undefined);
+      } else if (sessionValidated && (!user?.id || !userWalletAddress)) {
+        log.warn(
+          "Session validated but user ID or wallet missing, cannot load data",
+          {
+            entity: "CLIENT",
+            operation: "dashboard_missing_user_data",
+            userId: user?.id,
+            userWalletAddress,
+          },
+        );
+        setError(
+          "User data incomplete. Please ensure your wallet is connected properly.",
+        );
+        setIsLoadingWallet(false);
+        setIsLoadingReferrals(false);
+        setIsLoadingMessagePoints(false);
+      }
       return;
     }
 
+    setIsLoadingWallet(true);
+    setIsLoadingReferrals(true);
+    setIsLoadingMessagePoints(true);
+    setError(undefined);
+
     const loadData = async () => {
       try {
-        log.info("Starting data load", {
+        log.info("Starting dashboard data load (session validated)", {
           entity: "CLIENT",
-          operation: "dashboard_load_data",
+          operation: "dashboard_load_data_start",
           userWalletAddress,
-          userId: user?.id,
+          userId: user.id,
           referredByCode,
           timestamp: new Date().toISOString(),
         });
 
-        setError(undefined);
-
-        // Add validation check for wallet address
-        if (!userWalletAddress) {
-          const error = "Invalid wallet address. Please reconnect your wallet.";
-          log.error(error, {
-            entity: "CLIENT",
-            operation: "dashboard_load_data",
-            error,
-            timestamp: new Date().toISOString(),
-          });
-          setError(error);
-          setIsLoadingWallet(false);
-          setIsLoadingReferrals(false);
-          setIsLoadingMessagePoints(false);
-          return;
-        }
-
         try {
-          // Submit wallet
-          log.info("Submitting wallet", {
+          log.info("Submitting wallet/user info", {
             entity: "CLIENT",
             operation: "dashboard_submit_wallet",
             userWalletAddress,
-            userId: user?.id,
+            userId: user.id,
             referredByCode,
             timestamp: new Date().toISOString(),
           });
 
-          // First, make an API call to validate session
-          const validateResponse = await fetch("/api/user", {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "X-User-Id": user?.id || "",
-            },
-            credentials: "include",
-          });
-
-          if (!validateResponse.ok) {
-            throw new Error(
-              "Session validation failed. Please refresh and try again.",
-            );
-          }
-
-          // Now attempt the wallet submission
-          const wallet = await handleSubmitWallet({
+          const submittedWallet = await handleSubmitWallet({
             walletAddress: userWalletAddress,
             referredByCode,
-            userId: user?.id ?? "",
+            userId: user.id,
           });
 
-          if (isDataMounted && wallet) {
-            log.info("Wallet loaded successfully", {
+          if (isDataMounted && submittedWallet) {
+            log.info("Wallet info submitted/confirmed successfully", {
               entity: "CLIENT",
-              operation: "dashboard_wallet_loaded",
+              operation: "dashboard_wallet_submitted",
               walletAddress: userWalletAddress,
-              referralCode: wallet.referralCode,
+              referralCode: submittedWallet.referralCode,
               timestamp: new Date().toISOString(),
             });
-            setWallet(wallet);
+            setWallet(submittedWallet);
             setIsLoadingWallet(false);
 
-            // Only fetch referrals if we have a wallet and referral code
-            if (wallet.referralCode) {
+            if (submittedWallet.referralCode) {
+              setIsLoadingReferrals(true);
               try {
                 log.info("Fetching referral count", {
                   entity: "CLIENT",
                   operation: "dashboard_fetch_referrals",
-                  referralCode: wallet.referralCode,
+                  referralCode: submittedWallet.referralCode,
+                  userId: user.id,
                   timestamp: new Date().toISOString(),
                 });
 
                 const count = await getReferralCount({
-                  referralCode: wallet.referralCode,
-                  userId: user?.id ?? "",
+                  referralCode: submittedWallet.referralCode,
+                  userId: user.id,
                 });
 
                 if (isDataMounted) {
@@ -212,33 +243,42 @@ export function Dashboard({
                   });
                   setReferralsCount(count);
                 }
-              } catch (error) {
+              } catch (referralError) {
                 const errorMsg =
-                  error instanceof Error ? error.message : String(error);
+                  referralError instanceof Error
+                    ? referralError.message
+                    : String(referralError);
                 log.error("Failed to load referrals", {
                   entity: "CLIENT",
-                  operation: "dashboard_load_referrals",
+                  operation: "dashboard_load_referrals_error",
                   error: errorMsg,
-                  stack: error instanceof Error ? error.stack : undefined,
+                  stack:
+                    referralError instanceof Error
+                      ? referralError.stack
+                      : undefined,
                   timestamp: new Date().toISOString(),
                 });
                 if (isDataMounted) {
-                  setError("Failed to load referrals. Please try again.");
+                  setError("Failed to load referral count.");
                 }
+              } finally {
+                if (isDataMounted) setIsLoadingReferrals(false);
               }
+            } else {
+              if (isDataMounted) setIsLoadingReferrals(false);
             }
 
-            // Fetch telegram message points
+            setIsLoadingMessagePoints(true);
             try {
               log.info("Fetching telegram message points", {
                 entity: "CLIENT",
                 operation: "dashboard_fetch_message_points",
-                userId: user?.id,
+                userId: user.id,
                 timestamp: new Date().toISOString(),
               });
 
               const points = await getTelegramMessagePoints({
-                userId: user?.id ?? "",
+                userId: user.id,
               });
 
               if (isDataMounted) {
@@ -250,78 +290,113 @@ export function Dashboard({
                 });
                 setTelegramMessagePoints(points);
               }
-            } catch (error) {
+            } catch (pointsError) {
               const errorMsg =
-                error instanceof Error ? error.message : String(error);
+                pointsError instanceof Error
+                  ? pointsError.message
+                  : String(pointsError);
               log.error("Failed to load message points", {
                 entity: "CLIENT",
-                operation: "dashboard_load_message_points",
+                operation: "dashboard_load_message_points_error",
                 error: errorMsg,
-                stack: error instanceof Error ? error.stack : undefined,
+                stack:
+                  pointsError instanceof Error ? pointsError.stack : undefined,
                 timestamp: new Date().toISOString(),
               });
-              // Don't set error state for message points failure
+              if (isDataMounted) {
+                // Decide if this error should be shown to the user
+                // setError("Failed to load message points.");
+              }
+            } finally {
+              if (isDataMounted) setIsLoadingMessagePoints(false);
+            }
+          } else if (isDataMounted) {
+            log.warn("handleSubmitWallet returned no wallet data", {
+              entity: "CLIENT",
+              operation: "dashboard_wallet_submit_nodata",
+              userId: user.id,
+            });
+            setIsLoadingWallet(false);
+            setIsLoadingReferrals(false);
+            setIsLoadingMessagePoints(false);
+            setIsLoadingMessagePoints(true);
+            try {
+              const points = await getTelegramMessagePoints({
+                userId: user.id,
+              });
+              if (isDataMounted) setTelegramMessagePoints(points);
+            } catch (e) {
+              log.error("Failed loading points after empty wallet submit", {
+                operation:
+                  "dashboard_load_points_after_empty_wallet_submit_error",
+                error: e,
+              });
+            } finally {
+              if (isDataMounted) setIsLoadingMessagePoints(false);
             }
           }
-        } catch (error) {
+        } catch (walletSubmitError) {
           const errorMsg =
-            error instanceof Error ? error.message : String(error);
-          log.error("Failed to load wallet", {
+            walletSubmitError instanceof Error
+              ? walletSubmitError.message
+              : String(walletSubmitError);
+          log.error("Failed to submit wallet info", {
             entity: "CLIENT",
-            operation: "dashboard_load_wallet",
+            operation: "dashboard_submit_wallet_error",
             error: errorMsg,
-            stack: error instanceof Error ? error.stack : undefined,
+            stack:
+              walletSubmitError instanceof Error
+                ? walletSubmitError.stack
+                : undefined,
             timestamp: new Date().toISOString(),
           });
-
           if (isDataMounted) {
-            // Special handling for stack overflow error (likely EVMToSol bridging issue)
-            if (isStackOverflowError(error)) {
-              log.error("EVM to Solana bridging error detected", {
-                entity: "CLIENT",
-                operation: "evm_sol_bridging_error",
-                error: errorMsg,
-                stack: error instanceof Error ? error.stack : undefined,
-                timestamp: new Date().toISOString(),
-              });
-
+            if (isStackOverflowError(walletSubmitError)) {
               setError(
-                "There was an issue with wallet connection. Please refresh and try again with a different wallet.",
+                "Wallet connection issue (bridging). Please refresh/try different wallet.",
               );
             } else {
-              setError(`${errorMsg}. Please try again.`);
+              setError(`Error confirming wallet: ${errorMsg}.`);
             }
+            setIsLoadingWallet(false);
+            setIsLoadingReferrals(false);
+            setIsLoadingMessagePoints(false);
 
-            // Retry after delay if it's a network error
-            if (isNetworkError(error)) {
-              log.info("Scheduling retry for wallet load", {
-                operation: "dashboard_load_wallet",
+            if (isNetworkError(walletSubmitError)) {
+              log.info(
+                "Scheduling retry for dashboard data load due to network error",
+                {
+                  operation: "dashboard_load_data_retry",
                 entity: "CLIENT",
-                status: "retry",
-                timestamp: new Date().toISOString(),
-              });
+                },
+              );
               retryTimeout = setTimeout(loadData, RETRY_DELAY);
             }
           }
         }
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        log.error("Failed to load dashboard data", {
+        log.error("Unexpected error loading dashboard data", {
           entity: "CLIENT",
-          operation: "dashboard_load_data",
+          operation: "dashboard_load_data_unexpected_error",
           error: errorMsg,
           stack: error instanceof Error ? error.stack : undefined,
           timestamp: new Date().toISOString(),
         });
         if (isDataMounted) {
-          setError("Failed to load data. Please try again.");
-        }
-      } finally {
-        if (isDataMounted) {
+          setError("An unexpected error occurred. Please try again.");
           setIsLoadingWallet(false);
           setIsLoadingReferrals(false);
           setIsLoadingMessagePoints(false);
         }
+      } finally {
+        // Ensure loading states are eventually set to false if component is still mounted
+        // This might be redundant if all paths set them, but acts as a safeguard
+        // if (isDataMounted) {
+        //   setIsLoadingWallet(false);
+        //   setIsLoadingReferrals(false);
+        //   setIsLoadingMessagePoints(false);
+        // }
       }
     };
 
@@ -332,28 +407,86 @@ export function Dashboard({
       if (retryTimeout) {
         clearTimeout(retryTimeout);
       }
+      log.info("Dashboard data loading effect cleanup", {
+        entity: "CLIENT",
+        operation: "dashboard_load_cleanup",
+      });
     };
   }, [
+    sessionValidated,
+    user?.id,
+    userWalletAddress,
+    referredByCode,
     authenticated,
     ready,
-    sessionValidated,
-    userWalletAddress,
-    user?.id,
-    referredByCode,
+    isValidatingSession,
+    sessionError,
   ]);
 
-  // Show connect wallet card if not authenticated or not ready
   if (!authenticated || !ready) {
+    log.info("Rendering ConnectWalletCard (not authenticated or ready)", {
+      operation: "render_connect_wallet_unauthenticated",
+      authenticated,
+      ready,
+    });
     return <ConnectWalletCard />;
   }
 
-  // Show connect wallet card if no wallet address
-  if (!userWalletAddress) {
+  if (authenticated && !userWalletAddress) {
+    log.info(
+      "Rendering ConnectWalletCard (authenticated but no wallet address)",
+      {
+        operation: "render_connect_wallet_no_address",
+        authenticated,
+        userWalletAddress,
+      },
+    );
     return <ConnectWalletCard />;
   }
 
-  // Show error state
+  if (isValidatingSession) {
+    log.info("Rendering Loading State (isValidatingSession)", {
+      operation: "render_loading_validating_session",
+    });
+    return (
+      <Card className="max-w-2xl mx-auto animate-pulse">
+        <CardHeader>
+          <CardTitle>Loading Dashboard...</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Verifying your session...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (sessionError) {
+    log.error("Rendering Session Error State", {
+      operation: "render_session_error",
+      sessionError,
+    });
+    return (
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>Session Error</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-destructive">
+            {sessionError}. Please try refreshing the page.
+          </p>
+        </CardContent>
+        <CardFooter>
+          <Button onClick={() => window.location.reload()}>Refresh</Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
   if (error) {
+    log.error("Rendering Component Error State", {
+      operation: "render_component_error",
+      error,
+    });
     return (
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
@@ -369,7 +502,43 @@ export function Dashboard({
     );
   }
 
-  // Show wallet status
+  if (
+    sessionValidated &&
+    (isLoadingWallet || isLoadingReferrals || isLoadingMessagePoints)
+  ) {
+    log.info("Rendering Loading State (session validated, data loading)", {
+      operation: "render_loading_data_fetch",
+      isLoadingWallet,
+      isLoadingReferrals,
+      isLoadingMessagePoints,
+    });
+    return (
+      <Card className="max-w-2xl mx-auto animate-pulse">
+        <CardHeader>
+          <CardTitle>Loading Points...</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Fetching your airdrop details...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!sessionValidated) {
+    log.warn(
+      "Rendering null (session not validated, but no error/loading state?)",
+      { operation: "render_null_unexpected_state" },
+    );
+    return null;
+  }
+
+  log.info("Rendering Main Dashboard Content", {
+    operation: "render_dashboard_content",
+    userId: user?.id,
+    wallet: userWalletAddress,
+    referralsCount,
+    telegramMessagePoints,
+  });
   return (
     <div className="space-y-8 p-4">
       <div className="space-y-4">
@@ -390,14 +559,6 @@ export function Dashboard({
           isLoadingReferrals={isLoadingReferrals}
           isLoadingMessagePoints={isLoadingMessagePoints}
         />
-        {/* <ProfileCompletionMessage
-          show={
-            !userEmailAddress ||
-            !userTwitterUsername ||
-            !hasJoinedTelegramCommunity ||
-            !hasJoinedTelegramAnnouncement
-          }
-        /> */}
       </div>
       <ReferralProgramCard
         referralsCount={referralsCount}

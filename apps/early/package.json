@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "@krain/db": "workspace:",
-    "@krain/session": "workspace:",
+    "@krain/session": "workspace:*",
     "@krain/typescript-config": "workspace:",
-    "@krain/ui": "workspace:",
+    "@krain/ui": "workspace:*",
     "@krain/utils": "workspace:",
     "@tailwindcss/postcss": "^4.0.12",
     "@upstash/redis": "^1.28.3",

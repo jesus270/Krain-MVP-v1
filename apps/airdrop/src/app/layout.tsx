@@ -10,11 +10,11 @@ import Header from "@/components/header";
 import { ErrorBoundary } from "@/components/error-boundary";
 
 import { usePathname } from "next/navigation";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivyAuth } from "@krain/ui/hooks/index";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { authenticated } = usePrivy();
+  const { authenticated } = usePrivyAuth();
 
   if (pathname === "/blocked") return <>{children}</>;
 

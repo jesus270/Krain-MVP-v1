@@ -6,9 +6,17 @@
         "name": "next"
       }
     ],
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"],
+      "@krain/db/*": ["../../packages/db/src/*"],
+      "@krain/db": ["../../packages/db/src/index.ts"],
+      "@krain/session/*": ["../../packages/session/src/*"],
+      "@krain/session": ["../../packages/session/src/index.ts"],
+      "@krain/ui/*": ["../../packages/ui/src/*"],
+      "@krain/ui": ["../../packages/ui/src/index.ts"],
+      "@krain/utils/*": ["../../packages/utils/src/*"],
+      "@krain/utils": ["../../packages/utils/src/index.ts"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

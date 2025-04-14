@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { usePrivyAuth } from "../utils/use-privy-auth";
+import { usePrivyAuth } from "@krain/ui";
+import UsernameDialog from "./username-dialog";
 
 export function UsernameCheck() {
   const { authenticated, user } = usePrivyAuth();

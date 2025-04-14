@@ -1,10 +1,10 @@
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivyAuth } from "@krain/ui/hooks/index";
 import { Button } from "@krain/ui/components/ui/button";
 import { LogIn } from "lucide-react";
 import { cn } from "@krain/ui/lib/utils";
 
 export function NavLoginButton() {
-  const { ready, authenticated, login } = usePrivy();
+  const { ready, authenticated, login } = usePrivyAuth();
 
   // Disable login when Privy is not ready or the user is already authenticated
   const disableLogin = !ready || authenticated;

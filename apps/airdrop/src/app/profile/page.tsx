@@ -1,8 +1,7 @@
 "use client";
 
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivyAuth } from "@krain/ui/hooks/index";
 import { useSolanaWallets } from "@privy-io/react-auth";
-import { useSession } from "@/lib/use-session";
 import {
   Card,
   CardContent,
@@ -39,16 +38,15 @@ export default function Profile() {
   const {
     ready,
     authenticated,
-    user: privyUser,
+    user,
     linkEmail,
     connectWallet,
     unlinkEmail,
     unlinkWallet,
     linkTwitter,
     unlinkTwitter,
-  } = usePrivy();
+  } = usePrivyAuth();
   const { wallets: solanaWallets } = useSolanaWallets();
-  const { user: sessionUser } = useSession();
 
   if (ready && !authenticated) {
     return redirect("/");
@@ -60,7 +58,11 @@ export default function Profile() {
         walletList: ["phantom", "detected_solana_wallets"],
       });
       if (solanaWallets[0]) {
-        await solanaWallets[0].loginOrLink();
+        log.info("Solana wallet detected post-connection", {
+          entity: "CLIENT",
+          operation: "connect_wallet_solana_check",
+          walletAddress: solanaWallets[0].address,
+        });
       }
       toast.success("Wallet connected successfully");
     } catch (error) {
@@ -73,7 +75,7 @@ export default function Profile() {
     }
   };
 
-  if (!ready) {
+  if (!ready || !user) {
     return (
       <main className="container mx-auto py-8 px-4">
         <Card className="w-full max-w-2xl mx-auto border-2 backdrop-blur-xs bg-background/95 border-border/50">
@@ -98,20 +100,21 @@ export default function Profile() {
     return redirect("/");
   }
 
-  const numAccounts = privyUser?.linkedAccounts?.length || 0;
+  const numAccounts = user?.linkedAccounts?.length || 0;
   const canRemoveAccount = numAccounts > 1;
 
-  const email = privyUser?.email;
-  const wallet = privyUser?.wallet;
-  const twitterSubject = privyUser?.twitter?.subject || null;
+  const email = user?.email;
+  const wallet = user?.wallet;
+  const twitterSubject = user?.twitter?.subject || null;
+  const twitterUsername = user?.twitter?.username || null;
 
   const totalPoints =
     5000 + // Base points for having an account
     (wallet ? 1000 : 0) + // Additional points for wallet connection
-    (twitterSubject ? 2000 : 0) + // Points for Twitter
+    (twitterUsername ? 2000 : 0) + // Points for Twitter
     (email ? 3000 : 0) + // Points for email
-    ((sessionUser?.hasJoinedTelegramCommunity ?? false) ? 5000 : 0) + // Points for Telegram Community
-    ((sessionUser?.hasJoinedTelegramAnnouncement ?? false) ? 5000 : 0); // Points for Telegram Announcement
+    ((user?.hasJoinedTelegramCommunity ?? false) ? 5000 : 0) + // Points for Telegram Community
+    ((user?.hasJoinedTelegramAnnouncement ?? false) ? 5000 : 0); // Points for Telegram Announcement
 
   return (
     <main className="container mx-auto p-4">
@@ -207,7 +210,9 @@ export default function Profile() {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => unlinkWallet(wallet.address)}
+                            onClick={() =>
+                              wallet?.address && unlinkWallet(wallet.address)
+                            }
                             disabled={!canRemoveAccount}
                             className={cn(
                               "min-w-[100px] justify-center group relative overflow-hidden cursor-pointer",
@@ -256,9 +261,9 @@ export default function Profile() {
                   </h3>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground/90">
-                      {privyUser?.twitter?.username || "Not connected"}
+                      {twitterUsername || "Not connected"}
                     </p>
-                    {!privyUser?.twitter?.username && (
+                    {!twitterUsername && (
                       <p className="text-xs text-muted-foreground/80">
                         Required for X Engagement Actions
                       </p>
@@ -268,19 +273,19 @@ export default function Profile() {
               </div>
               <div className="flex items-center gap-2">
                 <Badge
-                  variant={
-                    typeof twitterSubject === "string" ? "secondary" : "outline"
-                  }
+                  variant={twitterUsername ? "secondary" : "outline"}
                   className={cn(
                     "whitespace-nowrap",
-                    typeof twitterSubject === "string"
+                    twitterUsername
                       ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
                       : "border border-border/50",
                   )}
                 >
-                  {twitterSubject ? "+2,000 points" : "+2,000 points available"}
+                  {twitterUsername
+                    ? "+2,000 points"
+                    : "+2,000 points available"}
                 </Badge>
-                {twitterSubject ? (
+                {twitterUsername ? (
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -288,7 +293,9 @@ export default function Profile() {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => unlinkTwitter(twitterSubject)}
+                            onClick={() =>
+                              twitterSubject && unlinkTwitter(twitterSubject)
+                            }
                             disabled={!canRemoveAccount}
                             className={cn(
                               "min-w-[100px] justify-center group relative overflow-hidden cursor-pointer",
@@ -367,7 +374,9 @@ export default function Profile() {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => unlinkEmail(email.address)}
+                            onClick={() =>
+                              email?.address && unlinkEmail(email.address)
+                            }
                             disabled={!canRemoveAccount}
                             className={cn(
                               "min-w-[100px] justify-center group relative overflow-hidden cursor-pointer",
@@ -416,9 +425,9 @@ export default function Profile() {
                   </h3>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground/90">
-                      {sessionUser?.telegramUsername || "Not connected"}
+                      {user?.telegramUsername || "Not connected"}
                     </p>
-                    {!sessionUser?.telegramUsername && (
+                    {!user?.telegramUsername && (
                       <p className="text-xs text-muted-foreground/80">
                         Join our Telegram channels and verify with our bot
                       </p>
@@ -430,18 +439,18 @@ export default function Profile() {
                 <div className="flex items-center gap-2">
                   <Badge
                     variant={
-                      (sessionUser?.hasJoinedTelegramCommunity ?? false)
+                      (user?.hasJoinedTelegramCommunity ?? false)
                         ? "secondary"
                         : "outline"
                     }
                     className={cn(
                       "whitespace-nowrap",
-                      (sessionUser?.hasJoinedTelegramCommunity ?? false)
+                      (user?.hasJoinedTelegramCommunity ?? false)
                         ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
                         : "border border-border/50",
                     )}
                   >
-                    {(sessionUser?.hasJoinedTelegramCommunity ?? false)
+                    {(user?.hasJoinedTelegramCommunity ?? false)
                       ? "+5,000 points"
                       : "+5,000 points available"}
                   </Badge>
@@ -456,7 +465,7 @@ export default function Profile() {
                       "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0",
                     )}
                   >
-                    {(sessionUser?.hasJoinedTelegramCommunity ?? false) ? (
+                    {(user?.hasJoinedTelegramCommunity ?? false) ? (
                       <>
                         <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 group-hover:scale-110 transition-transform duration-300" />
                         Joined Community
@@ -472,18 +481,18 @@ export default function Profile() {
                 <div className="flex items-center gap-2">
                   <Badge
                     variant={
-                      (sessionUser?.hasJoinedTelegramAnnouncement ?? false)
+                      (user?.hasJoinedTelegramAnnouncement ?? false)
                         ? "secondary"
                         : "outline"
                     }
                     className={cn(
                       "whitespace-nowrap",
-                      (sessionUser?.hasJoinedTelegramAnnouncement ?? false)
+                      (user?.hasJoinedTelegramAnnouncement ?? false)
                         ? "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0"
                         : "border border-border/50",
                     )}
                   >
-                    {(sessionUser?.hasJoinedTelegramAnnouncement ?? false)
+                    {(user?.hasJoinedTelegramAnnouncement ?? false)
                       ? "+5,000 points"
                       : "+5,000 points available"}
                   </Badge>
@@ -498,7 +507,7 @@ export default function Profile() {
                       "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0",
                     )}
                   >
-                    {(sessionUser?.hasJoinedTelegramAnnouncement ?? false) ? (
+                    {(user?.hasJoinedTelegramAnnouncement ?? false) ? (
                       <>
                         <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 group-hover:scale-110 transition-transform duration-300" />
                         Joined Announcements

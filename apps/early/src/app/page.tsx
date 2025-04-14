@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+// Import Privy hooks needed for actions like login, linkEmail
 import { usePrivy } from "@privy-io/react-auth";
+// Import the shared session hook
+import { useSession } from "@krain/session";
 import { Button } from "@krain/ui/components/ui/button";
 import {
   Card,
@@ -14,136 +17,249 @@ import { signupForEarlyAccess, checkEarlyAccessSignup } from "./actions";
 import { toast } from "sonner";
 import { cn } from "@krain/ui/lib/utils";
 
-// Key for storing refresh state in sessionStorage
-const REFRESH_KEY = "krain_session_refreshed";
+// Key for storing refresh state in sessionStorage (can be removed if not needed)
+// const REFRESH_KEY = "krain_session_refreshed";
 
 export default function HomePage() {
-  const { user, authenticated, login, ready, linkEmail } = usePrivy();
+  // Use the shared session hook for authentication state
+  const {
+    user, // Combined user object (Privy + DB)
+    ready, // Privy ready state
+    authenticated, // Privy authenticated state
+    sessionValidated, // Backend session validity
+    isValidatingSession, // Loading state for session validation
+    error: sessionError, // Session validation error
+  } = useSession();
+
+  // Use Privy hook directly ONLY for actions not covered by useSession (login, linkEmail)
+  const { login, linkEmail } = usePrivy();
+
+  // State specific to this page
   const [isSignedUp, setIsSignedUp] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasCheckedSignup, setHasCheckedSignup] = useState(false);
+  // REMOVED isLoadingSignupCheck state
+  // const [isLoadingSignupCheck, setIsLoadingSignupCheck] = useState(false);
 
-  const updateSession = useCallback(async () => {
-    try {
-      const response = await fetch("/api/auth/callback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user }),
-      });
+  // isLoading combines session validation state
+  // We might need a separate loading for the signup action itself
+  const [isPerformingAction, setIsPerformingAction] = useState(false);
+  const isLoading = !ready || isValidatingSession || isPerformingAction;
 
-      if (!response.ok) {
-        throw new Error("Failed to update session");
-      }
-    } catch (error) {
-      console.error("Error updating session:", error);
-      toast.error("Failed to update session. Please try logging in again.");
-    }
-  }, [user]);
-
-  const checkSignupStatus = useCallback(async () => {
-    if (!user?.id || !user.email?.address || hasCheckedSignup) return;
-
-    setIsLoading(true);
-    try {
-      const result = await checkEarlyAccessSignup({ userId: user.id });
-      setIsSignedUp(result.isSignedUp);
-      setHasCheckedSignup(true);
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes("Email is required")
-      ) {
-        toast.error("Unable to verify email. Please try logging in again.");
-      }
-      console.error("Error checking signup status:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user?.id, user?.email?.address, hasCheckedSignup]);
-
+  // Handler to initiate signup process
   const handleSignup = async () => {
-    if (!user) {
+    // 1. Check if authenticated (useSession handles Privy auth state)
+    if (!authenticated || !user) {
+      // If not authenticated, trigger Privy login
       login();
       return;
     }
 
+    // 2. Check if email is linked (useSession user object has email)
     if (!user.email?.address) {
+      // If email is missing, trigger Privy email linking
       linkEmail();
       return;
     }
 
-    setIsLoading(true);
+    // 3. Call the signup server action
+    setIsPerformingAction(true); // Indicate signup action is in progress
     try {
-      // First update the session with the latest user data
-      await updateSession();
-
-      // Then attempt the signup
+      // Pass the user ID from the session hook
       const result = await signupForEarlyAccess({ userId: user.id });
       if (result.status === "success") {
-        setIsSignedUp(true);
-        toast.success(result.message);
-      }
-    } catch (error) {
-      console.error("Error signing up:", error);
-      if (error instanceof Error) {
-        if (error.message.includes("Already signed up")) {
-          setIsSignedUp(true);
-          toast.success("You're already signed up for early access!");
-        } else if (error.message.includes("Email is required")) {
-          toast.error("Unable to verify email. Please try logging in again.");
+        setIsSignedUp(true); // Update local state on success
+        toast.success(result.message || "Signup successful!");
+      } else {
+        // Handle specific errors returned from the action
+        if (result.message?.includes("Already signed up")) {
+          setIsSignedUp(true); // Correct state if already signed up
+          toast.info(result.message); // Use info toast
         } else {
-          toast.error("Failed to sign up for early access. Please try again.");
+          toast.error(result.message || "Signup failed. Please try again.");
         }
       }
+    } catch (error) {
+      console.error("Error calling signupForEarlyAccess action:", error);
+      // Handle unexpected errors during the action call
+      if (error instanceof Error) {
+        // Provide more specific feedback if possible
+        if (error.message.includes("Already signed up")) {
+          setIsSignedUp(true); // Sync state
+          toast.info("You are already signed up!");
+        } else {
+          toast.error(`Signup failed: ${error.message}. Please try again.`);
+        }
+      } else {
+        toast.error("An unexpected error occurred during signup.");
+      }
     } finally {
-      setIsLoading(false);
+      setIsPerformingAction(false); // Signup action finished
     }
   };
 
-  // Check signup status when ready
+  // Effect to check signup status once session is validated
   useEffect(() => {
-    if (ready && authenticated && user?.email?.address) {
-      void checkSignupStatus();
+    let isMounted = true;
+    // Only run check if session is validated, we have a user ID,
+    // and we haven't confirmed signup status yet.
+    // The check action itself will prevent duplicate runs if called rapidly.
+    if (sessionValidated && user?.id && !isSignedUp) {
+      console.log(
+        "Session validated, checking early access signup status for user:",
+        user.id,
+      );
+      // No separate loading state needed here, rely on main isLoading
+      // setIsLoadingSignupCheck(true);
+
+      const checkStatus = async () => {
+        try {
+          const result = await checkEarlyAccessSignup({ userId: user.id });
+          console.log("checkEarlyAccessSignup result:", result);
+          if (isMounted) {
+            if (result.isSignedUp) {
+              setIsSignedUp(true);
+            } else {
+              setIsSignedUp(false);
+            }
+          }
+        } catch (error) {
+          console.error("Error checking signup status:", error);
+          if (isMounted) {
+            setIsSignedUp(false); // Assume not signed up if check fails
+          }
+        } // No finally block needed to reset loading state
+      };
+
+      void checkStatus();
     }
-  }, [ready, authenticated, user?.email?.address, checkSignupStatus]);
 
-  // Handle email linking success
-  useEffect(() => {
-    if (user?.email?.address && !hasCheckedSignup) {
-      // Update session when email is linked
-      void updateSession().then(() => {
-        void checkSignupStatus();
-      });
-    }
-  }, [
-    user?.email?.address,
-    hasCheckedSignup,
-    checkSignupStatus,
-    updateSession,
-  ]);
-
-  // Handle session errors gracefully
-  useEffect(() => {
-    const handleError = (event: ErrorEvent) => {
-      // If it's a session error but we're already signed up, ignore it
-      if (isSignedUp && event.error?.toString().includes("session")) {
-        event.preventDefault();
-        return;
-      }
-    };
-
-    window.addEventListener("error", handleError);
-    return () => window.removeEventListener("error", handleError);
-  }, [isSignedUp]);
-
-  // Clear refresh flag when component unmounts
-  useEffect(() => {
     return () => {
-      sessionStorage.removeItem(REFRESH_KEY);
+      isMounted = false;
     };
-  }, []);
+    // Rerun only when session/user changes
+  }, [sessionValidated, user?.id, isSignedUp]); // Add isSignedUp back temporarily to re-check if needed
+
+  // ----- REMOVED OLD EFFECTS -----
+  // - Polling effect removed (useSession handles session readiness)
+  // - Initial loading effect removed (useSession provides ready state)
+  // - Session error handling might be handled within useSession or globally
+  // - Refresh key logic removed (can be added back if specific refresh scenarios needed)
+
+  // Render logic based on session state and signup status
+  const renderContent = () => {
+    // Simplified loading checks
+    if (!ready || isValidatingSession) {
+      // Combine initial ready and session validation
+      return <p className="text-xl sm:text-2xl">Verifying session...</p>;
+    }
+    // REMOVED isLoadingSignupCheck check
+
+    // Error state
+    if (sessionError) {
+      return (
+        <p className="text-xl sm:text-2xl text-red-500">
+          Session Error: {sessionError}. Please refresh.
+        </p>
+      );
+    }
+
+    // Not authenticated
+    if (!authenticated) {
+      return (
+        <p className="text-xl sm:text-2xl">
+          Sign in with your wallet or email to get early access to KRAIN's
+          revolutionary AI Agent Hub & AI Agent Builder.
+        </p>
+      );
+    }
+
+    // Authenticated, session validated, but missing email
+    if (authenticated && sessionValidated && !user?.email?.address) {
+      return (
+        <p className="text-xl sm:text-2xl text-amber-500">
+          Please connect your email to sign up for early access.
+        </p>
+      );
+    }
+
+    // Authenticated, session validated, email present
+    if (authenticated && sessionValidated && user?.email?.address) {
+      if (isSignedUp) {
+        return (
+          <p className="text-xl sm:text-2xl text-green-500">
+            Thanks for signing up! We'll notify you when early access is
+            available.
+          </p>
+        );
+      } else {
+        // Ready to sign up
+        return (
+          <p className="text-xl sm:text-2xl">
+            Ready to sign up for early access!
+          </p>
+        );
+      }
+    }
+
+    // Fallback / Unexpected state - should be less likely now
+    console.warn("Reached unexpected render state", {
+      ready,
+      authenticated,
+      sessionValidated,
+      userExists: !!user,
+      isSignedUp,
+      isLoading, // Use combined isLoading
+      sessionError,
+    });
+    return (
+      <p className="text-xl sm:text-2xl text-gray-500">
+        Loading user status...
+      </p>
+    );
+  };
+
+  const renderButton = () => {
+    // Use combined isLoading for disabling buttons
+    const disableButtons = isLoading || isPerformingAction;
+
+    if (!ready) return null;
+
+    if (!authenticated) {
+      return (
+        <Button size="lg" onClick={login} disabled={disableButtons}>
+          Sign In
+        </Button>
+      );
+    }
+
+    if (authenticated && sessionValidated) {
+      if (!user?.email?.address) {
+        return (
+          <Button
+            size="lg"
+            onClick={linkEmail}
+            disabled={disableButtons || !user}
+          >
+            Connect Email
+          </Button>
+        );
+      } else if (!isSignedUp) {
+        return (
+          <Button size="lg" onClick={handleSignup} disabled={disableButtons}>
+            Sign Up for Early Access
+          </Button>
+        );
+      }
+    }
+
+    // If still loading session (isValidatingSession is true, covered by isLoading)
+    // or already signed up, show no button
+    if (isLoading || (authenticated && sessionValidated && isSignedUp)) {
+      return null;
+    }
+
+    // Fallback: Shouldn't be reachable if logic above is correct
+    return null;
+  };
 
   return (
     <main className="flex-grow flex flex-col items-center justify-center p-4 text-center">
@@ -153,45 +269,9 @@ export default function HomePage() {
             <h1>KRAiN Early Access Signup</h1>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          {isSignedUp ? (
-            <p className="text-xl sm:text-2xl max-w-2xl text-green-500">
-              Thanks for signing up! We'll notify you when early access is
-              available.
-            </p>
-          ) : !user ? (
-            <p className="text-xl sm:text-2xl max-w-2xl">
-              Sign in with your wallet or email to get early access to KRAIN's
-              revolutionary AI Agent Hub & AI Agent Builder.
-            </p>
-          ) : !user.email?.address ? (
-            <p className="text-xl sm:text-2xl max-w-2xl text-amber-500">
-              Please connect your email to sign up for early access.
-            </p>
-          ) : !hasCheckedSignup ? (
-            <p className="text-xl sm:text-2xl max-w-2xl">
-              Checking signup status...
-            </p>
-          ) : (
-            <p className="text-xl sm:text-2xl max-w-2xl">
-              Ready to sign up for early access!
-            </p>
-          )}
-        </CardContent>
+        <CardContent>{renderContent()}</CardContent>
         <CardFooter className="flex justify-center">
-          {!authenticated ? (
-            <Button size="lg" onClick={login} disabled={isLoading}>
-              Sign In
-            </Button>
-          ) : !user || !user.email?.address ? (
-            <Button size="lg" onClick={linkEmail} disabled={isLoading}>
-              Connect Email
-            </Button>
-          ) : !isSignedUp && hasCheckedSignup ? (
-            <Button size="lg" onClick={handleSignup} disabled={isLoading}>
-              Sign Up for Early Access
-            </Button>
-          ) : null}
+          {renderButton()}
         </CardFooter>
       </Card>
     </main>
