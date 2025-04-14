@@ -1,42 +1,38 @@
-// Core types and utilities
-export type { SessionOptions, User, Session as SessionType } from "./types";
+// Type re-exports (safe for server/client)
+export type {
+  SessionOptions,
+  User,
+  SessionData,
+  Session as SessionType,
+} from "./types";
+export type { Redis } from "@upstash/redis";
+
+// Core session management
+export { Session } from "./session";
+export type { User as SessionUser } from "./types"; // Corrected: Use export type
 export {
   getSession,
   getCurrentUser,
   setUserSession,
   clearUserSession,
-  withAuth,
 } from "./server";
-export { createSessionConfig, defaultSessionConfig } from "./config";
 
-// Redis utilities
-export { getRedisClient } from "./redis";
-export type { Redis } from "@upstash/redis";
+// Client-side hook
+export { useSession } from "./use-session";
 
-// Core session class
-export { Session } from "./session";
+// Client-side Auth handler (needed by @krain/ui)
+// Assuming handlePrivyAuth is defined in ./auth-handler.ts
+export { handlePrivyAuth } from "./auth-handler";
 
-// Protection middleware
-export {
-  withRateLimit,
-  getRateLimitHeaders,
-  withServerActionProtection,
-  validateOrigin,
-} from "./middleware";
-
-// Rate limiting
+// Rate limiting utilities (optional export)
 export { RateLimiter } from "./rate-limit";
 
-// Callback handler
-export { handleAuthCallback } from "./routes/callback";
+// Middleware helpers
+export {
+  validateOrigin,
+  withServerActionProtection,
+  withRateLimit,
+  getRateLimitHeaders, // Correctly export from here
+} from "./middleware";
 
-// Auth handler for Privy
-// Legacy client-side handler (deprecated, use handlePrivyAuthServer instead)
-export { handlePrivyAuth, type PrivyUserData } from "./auth-handler";
-// Primary server-side auth handler
-export { handlePrivyAuthServer } from "./server-auth-handler-fixed";
-// Export handlePrivyAuthServer also as createOrUpdateUser for backward compatibility
-export { handlePrivyAuthServer as createOrUpdateUser } from "./server-auth-handler-fixed";
-
-// Re-export server-side utilities
-export * as server from "./server";
+// DO NOT export any server functions/classes/configs from here.

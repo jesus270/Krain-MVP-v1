@@ -3,7 +3,7 @@ import {
   getRedisClient,
   withRateLimit,
   clearUserSession,
-} from "@krain/session";
+} from "@krain/session/server";
 import { log } from "@krain/utils";
 
 export const runtime = "nodejs";

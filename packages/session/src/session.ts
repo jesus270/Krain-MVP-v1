@@ -38,12 +38,38 @@ export class Session {
     redis: Redis;
     options: SessionOptions;
   }): Promise<Session> {
-    const sessionData: SessionData = {
+    log.info("Session.create: Start", {
+      operation: "session_create_start",
+      entity: "SESSION",
+      userId,
+    });
+    const store = new RedisSessionStore(redis, options);
+    const sessionData = sessionDataSchema.parse({
       ...data,
-      isLoggedIn: true,
-    };
+      lastActivity: Date.now(),
+      loginAttempts: 0,
+      loginBlockedUntil: null,
+      // Ensure csrfToken and fingerprint are initialized if needed, or handle defaults
+      csrfToken: data.csrfToken || undefined, // Example: Ensure optional fields have defaults or are handled
+      fingerprint: data.fingerprint || undefined,
+    });
+    log.info("Session.create: Parsed data", {
+      operation: "session_create_parsed",
+      entity: "SESSION",
+      userId,
+    });
+    await store.set(userId, sessionData);
+    log.info("Session.create: Store set complete", {
+      operation: "session_create_store_set",
+      entity: "SESSION",
+      userId,
+    });
     const session = new Session(userId, sessionData, redis, options);
-    await session.save();
+    log.info("Session.create: Finished", {
+      operation: "session_create_finish",
+      entity: "SESSION",
+      userId,
+    });
     return session;
   }
 
@@ -85,12 +111,48 @@ export class Session {
   }
 
   async save(): Promise<void> {
-    if (!this.isModified) return;
-
-    const now = Date.now();
-    this.set("lastUpdated", now);
-    await this.store.set(this.userId, this.data);
-    this.isModified = false;
+    if (!this.isModified) {
+      log.info("Session.save: No modifications, skipping save", {
+        operation: "session_save_skip",
+        entity: "SESSION",
+        userId: this.userId,
+      });
+      return;
+    }
+    log.info("Session.save: Start (isModified=true)", {
+      operation: "session_save_start",
+      entity: "SESSION",
+      userId: this.userId,
+    });
+    try {
+      this.set("lastActivity", Date.now());
+      log.info("Session.save: lastActivity updated", {
+        operation: "session_save_activity_set",
+        entity: "SESSION",
+        userId: this.userId,
+      });
+      await this.store.set(this.userId, this.data); // Calls RedisSessionStore.set
+      log.info("Session.save: store.set completed", {
+        operation: "session_save_store_set_called",
+        entity: "SESSION",
+        userId: this.userId,
+      });
+      this.isModified = false;
+      log.info("Session.save: Finished successfully", {
+        operation: "session_save_finish_success",
+        entity: "SESSION",
+        userId: this.userId,
+      });
+    } catch (error) {
+      log.error("Session.save: Error during save process", {
+        operation: "session_save_error",
+        entity: "SESSION",
+        userId: this.userId,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      throw error; // Rethrow the error
+    }
   }
 
   async generateCsrfToken(): Promise<string> {

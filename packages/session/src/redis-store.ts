@@ -78,28 +78,75 @@ export class RedisSessionStore {
   }
 
   async set(userId: string, data: SessionData | null): Promise<void> {
+    log.info("RedisStore.set: Called", {
+      operation: "redis_store_set_start",
+      entity: "REDIS",
+      userId,
+    });
+    let stringifiedData: string | null = null;
     try {
       if (data === null) {
-        await this.delete(userId);
-      } else {
-        await this.withTimeout(
-          this.redis.set(this.getKey(userId), JSON.stringify(data)),
-          "set_session",
-        );
-        log.info("Session stored", {
-          operation: "set_session",
+        log.info("RedisStore.set: Data is null, deleting key", {
+          operation: "redis_store_set_delete",
           entity: "REDIS",
           userId,
         });
+        await this.delete(userId);
+        return; // Exit early if deleting
       }
-    } catch (error) {
-      log.error("Failed to set session", {
-        operation: "set_session",
+
+      // Attempt to stringify
+      try {
+        stringifiedData = JSON.stringify(data);
+        log.info("RedisStore.set: Data stringified successfully", {
+          operation: "redis_store_set_stringify_ok",
+          entity: "REDIS",
+          userId,
+          dataSize: stringifiedData.length,
+        });
+      } catch (stringifyError) {
+        log.error("RedisStore.set: JSON.stringify failed", {
+          operation: "redis_store_set_stringify_error",
+          entity: "REDIS",
+          userId,
+          error:
+            stringifyError instanceof Error
+              ? stringifyError.message
+              : String(stringifyError),
+          // Avoid logging raw data object here as it caused the error
+        });
+        throw stringifyError; // Rethrow stringify error
+      }
+
+      // Attempt Redis set command
+      log.info("RedisStore.set: Attempting redis.set command", {
+        operation: "redis_store_set_redis_attempt",
         entity: "REDIS",
         userId,
+      });
+      await this.withTimeout(
+        this.redis.set(this.getKey(userId), stringifiedData), // Use stringified data
+        "set_session",
+      );
+      log.info(
+        "RedisStore.set: redis.set command successful (Session stored)",
+        {
+          operation: "redis_store_set_redis_ok", // Changed operation code
+          entity: "REDIS",
+          userId,
+        },
+      );
+    } catch (error) {
+      // Catch errors from delete, stringify rethrow, or redis.set
+      log.error("RedisStore.set: Failed operation", {
+        operation: "redis_store_set_error", // General error for the set operation
+        entity: "REDIS",
+        userId,
+        errorSource:
+          stringifiedData === null ? "stringify" : "redis.set/delete",
         error: error instanceof Error ? error.message : String(error),
       });
-      throw error;
+      throw error; // Rethrow the underlying error
     }
   }
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { usePrivyAuth } from "../utils/use-privy-auth";
+import React from "react";
+import { usePrivyAuth } from "@krain/ui";
 import {
   Avatar,
   AvatarFallback,
@@ -15,9 +16,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@krain/ui/components/ui/dropdown-menu";
-import { User } from "lucide-react";
+import { User, Copy, Edit } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@krain/ui/components/ui/skeleton";
+import UsernameDialog from "./username-dialog"; // Assuming this path is correct
 
 export function ProfileSection() {
   const { authenticated, user, login, logout } = usePrivyAuth();
@@ -46,7 +49,6 @@ export function ProfileSection() {
   if (!authenticated) {
     return (
       <GradientButton
-        size="sm"
         onClick={handleLogin}
         disabled={isLoggingIn}
         className="rounded-full"
@@ -96,7 +98,8 @@ export function ProfileSection() {
 
   const goToProfile = async () => {
     // Simplify logic: check for username in the available user object
-    const username = user?.username;
+    // Check for telegramUsername instead of a non-existent top-level username
+    const username = user?.telegramUsername;
 
     if (username) {
       router.push(`/profile/${username}`);

@@ -1,13 +1,14 @@
-import { NextResponse, NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { geolocation } from "@vercel/functions";
-import { defaultSessionConfig } from "@krain/session";
+import { defaultSessionConfig } from "@krain/session/server";
 import { log } from "@krain/utils";
 import {
   Session,
   getSession,
   RateLimiter,
   getRedisClient,
-} from "@krain/session";
+} from "@krain/session/server";
 
 // Protected paths that require authentication
 const PROTECTED_PATHS = ["/api/wallet", "/api/referral", "/"];

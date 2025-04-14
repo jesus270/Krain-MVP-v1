@@ -3,13 +3,12 @@ import { db } from "@krain/db";
 import { userTable, userProfileTable, privyWalletTable } from "@krain/db";
 import { eq } from "drizzle-orm";
 import { log } from "@krain/utils";
-import type { PrivyUserData } from "@krain/session";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
-    const privyData: PrivyUserData = await request.json();
+    const privyData: any = await request.json();
 
     // First check if user exists
     const existingUser = await db.query.userTable.findFirst({
@@ -19,11 +18,13 @@ export async function POST(request: Request) {
       },
     });
 
-    // Convert string[] to LinkedAccount[]
-    const linkedAccounts = (privyData.linkedAccounts || []).map((account) => ({
-      type: "wallet" as const,
-      address: account,
-    }));
+    // Convert string[] to LinkedAccount[] - Explicitly type 'account'
+    const linkedAccounts = (privyData.linkedAccounts || []).map(
+      (account: string) => ({
+        type: "wallet" as const,
+        address: account,
+      }),
+    );
 
     if (existingUser) {
       // Update existing user

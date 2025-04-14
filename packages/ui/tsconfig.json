@@ -1,11 +1,8 @@
 {
   "extends": "../typescript-config/react-library.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@krain/ui/*": ["./src/*"]
-    }
+    "baseUrl": "."
   },
-  "include": ["src", "../utils/src/logger.ts"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }

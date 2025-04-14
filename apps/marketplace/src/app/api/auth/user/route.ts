@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createOrUpdateUser } from "@krain/session";
+import { createOrUpdateUser } from "@krain/session/server";
 import { log } from "@krain/utils";
 
 export async function POST(request: Request) {
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid user data" }, { status: 400 });
     }
 
-    const user = await createOrUpdateUser(privyData);
+    const user: any = await createOrUpdateUser(privyData);
 
     return NextResponse.json({ user });
   } catch (error) {

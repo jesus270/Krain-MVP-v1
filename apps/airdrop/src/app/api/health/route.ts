@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withRateLimit } from "@krain/session";
+import { withRateLimit } from "@krain/session/server";
 
 export const runtime = "nodejs";
 

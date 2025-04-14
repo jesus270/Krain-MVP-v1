@@ -1,6 +1,6 @@
 "use client";
 
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivyAuth } from "@krain/ui/hooks/index";
 import { Dashboard } from "./dashboard";
 import { ConnectWalletCard } from "@/components/dashboard/connect-wallet-card";
 import { log } from "@krain/utils";
@@ -13,7 +13,7 @@ interface HomePageClientProps {
 }
 
 export function HomePageClient({ params }: HomePageClientProps) {
-  const { ready, authenticated } = usePrivy();
+  const { ready, authenticated } = usePrivyAuth();
   const referredByCode = params.referredByCode?.[0];
 
   useEffect(() => {

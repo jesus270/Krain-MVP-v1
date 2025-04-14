@@ -1,7 +1,7 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-import { handleAuthCallback } from "@krain/session";
+import { handleAuthCallback } from "@krain/session/server";
 import { log } from "@krain/utils";
 
 export async function POST(request: NextRequest) {

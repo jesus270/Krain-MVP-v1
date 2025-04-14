@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { eq, count } from "drizzle-orm";
 import { db, referralTable } from "@krain/db";
-import { withAuth, withServerActionProtection } from "@krain/session";
+import { withAuth, withServerActionProtection } from "@krain/session/server";
 import { referralSchema, referralCodeSchema } from "../lib/validations";
 import { revalidatePath } from "next/cache";
 import { log } from "@krain/utils";

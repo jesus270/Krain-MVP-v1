@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { handlePrivyAuthServer } from "../server-auth-handler-fixed";
+import { handlePrivyAuthServer } from "../server-auth-handler";
 import { log } from "@krain/utils";
 
 export async function handleAuthCallback(request: NextRequest) {
@@ -39,38 +39,87 @@ export async function handleAuthCallback(request: NextRequest) {
       // We'll still create a response with the cookie but return an error status
     }
 
-    // Always create a response with the cookie
+    // Restore original logic using NextResponse
     const status = error ? 500 : 200;
-    const response = NextResponse.json(
-      { success: !error },
-      {
-        status,
-        headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-store, max-age=0",
+    let response: NextResponse;
+    try {
+      response = NextResponse.json(
+        { success: !error },
+        {
+          status,
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-store, max-age=0",
+          },
         },
-      },
-    );
+      );
+      log.info("Created NextResponse object", {
+        operation: "handle_callback_created_response",
+        status,
+      });
+    } catch (responseError) {
+      log.error("Fatal error creating NextResponse", {
+        operation: "handle_callback_response_error",
+        entity: "AUTH",
+        userId: privyData.id,
+        error:
+          responseError instanceof Error
+            ? responseError.message
+            : String(responseError),
+      });
+      // If creating the response itself fails, return a basic 500
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Failed to construct response",
+        }),
+        { status: 500 },
+      );
+    }
 
-    // Always set the user_id cookie for client-side access
-    response.cookies.set({
-      name: "user_id",
-      value: privyData.id,
-      httpOnly: false,
-      path: "/",
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+    // If handlePrivyAuthServer succeeded, try setting the cookie
+    if (!error) {
+      try {
+        response.cookies.set({
+          name: "user_id",
+          value: privyData.id,
+          httpOnly: false,
+          path: "/",
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+        });
+        log.info("Auth callback completed and cookie set successfully", {
+          operation: "handle_callback_success_cookie_set",
+          entity: "AUTH",
+          userId: privyData.id,
+        });
+      } catch (cookieError) {
+        log.error("Failed to set user_id cookie", {
+          operation: "handle_callback_cookie_error",
+          entity: "AUTH",
+          userId: privyData.id,
+          error:
+            cookieError instanceof Error
+              ? cookieError.message
+              : String(cookieError),
+          stack: cookieError instanceof Error ? cookieError.stack : undefined,
+        });
+        // Attempt to proceed even if cookie setting fails, but the response status is already 200
+      }
+    } else {
+      log.info("Auth callback returning error response (status 500)", {
+        operation: "handle_callback_error_return",
+        entity: "AUTH",
+        userId: privyData.id,
+      });
+    }
+
+    log.info("Returning final response from handleAuthCallback", {
+      operation: "handle_callback_returning",
+      status: response.status,
     });
-
-    log.info("Auth callback completed with cookie set", {
-      operation: "handle_callback_success",
-      entity: "AUTH",
-      userId: privyData.id,
-      success: !error,
-    });
-
-    return response;
+    return response; // Return the constructed (and potentially cookie-modified) NextResponse
   } catch (error) {
     log.error("Fatal error in auth callback", {
       operation: "handle_callback_error",

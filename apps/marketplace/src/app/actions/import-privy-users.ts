@@ -10,7 +10,7 @@ import {
   TwitterOAuthLinkedAccount,
 } from "@krain/db";
 import { headers } from "next/headers";
-import { withAuth, withServerActionProtection } from "@krain/session";
+import { withAuth, withServerActionProtection } from "@krain/session/server";
 import { eq } from "drizzle-orm";
 import { fetchPrivyUserById, fetchAllPrivyUsers } from "./privy-api";
 

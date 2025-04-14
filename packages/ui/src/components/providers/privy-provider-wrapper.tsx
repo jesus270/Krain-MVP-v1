@@ -18,7 +18,7 @@ interface PrivyProviderWrapperProps {
 }
 
 const solanaConnectors = toSolanaWalletConnectors({
-  shouldAutoConnect: true,
+  shouldAutoConnect: false,
 });
 
 function SessionRevalidator({ children }: { children: React.ReactNode }) {

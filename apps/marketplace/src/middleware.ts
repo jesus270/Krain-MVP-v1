@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getSession } from "@krain/session";
+import { getSession } from "@krain/session/server";
 import { log } from "@krain/utils";
 
 // Protected paths that require authentication

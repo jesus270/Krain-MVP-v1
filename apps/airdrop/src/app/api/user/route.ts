@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, userTable } from "@krain/db";
-import { eq } from "drizzle-orm";
 import { log } from "@krain/utils";
-import { getSession, getRedisClient } from "@krain/session";
+import { getSession } from "@krain/session/server";
+import { getMergedUserForClient } from "@krain/session/server/user-service";
 
 export const runtime = "nodejs";
 
@@ -13,6 +12,7 @@ export async function GET(request: NextRequest) {
     log.info("User API request headers", {
       operation: "get_user",
       entity: "API",
+      app: "airdrop",
       headers: Object.fromEntries(headerEntries),
     });
 
@@ -24,205 +24,67 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "User ID required" }, { status: 400 });
     }
 
-    log.info("Getting user session", {
+    log.info("Getting user data for airdrop app", {
       operation: "get_user",
       entity: "API",
+      app: "airdrop",
       userId,
     });
 
+    // 1. Get the session
     const session = await getSession(userId);
 
-    // If no session exists, we should check if user exists in DB anyway
-    // This helps with situations where a session might not be fully established
-    const dbUser = await db.query.userTable.findFirst({
-      where: eq(userTable.privyId, userId),
-    });
+    // 2. Extract user data from session (if exists)
+    const userFromSession = session ? session.get("user") : null;
 
-    if (!dbUser) {
+    // 3. Call the shared function to get merged user data
+    const mergedUser = await getMergedUserForClient(userId, userFromSession);
+
+    if (!mergedUser) {
+      log.error("Failed to get merged user data for airdrop app", {
+        operation: "get_user",
+        entity: "API",
+        app: "airdrop",
+        userId,
+      });
       return NextResponse.json(
-        { error: "User not found in database", userId },
+        { error: "Failed to retrieve user data" },
         { status: 404 },
       );
     }
 
-    // If we have a DB user but no session, we'll construct a minimal user object
-    if (!session) {
-      log.warn("No session found but user exists in DB", {
-        operation: "get_user",
-        entity: "API",
-        userId,
-        dbUserId: dbUser.id,
-      });
+    // 4. Optionally update the session if the merged user differs significantly
+    //    or if session creation was implicitly handled by getSession middleware
+    // if (session && shouldUpdateSession(userFromSession, mergedUser)) {
+    //   session.set("user", mergedUser);
+    //   session.set("isLoggedIn", true);
+    //   await session.save();
+    // }
 
-      // Create a new session for this user
-      const redisClient = await getRedisClient();
-      const sessionUser = {
-        id: userId,
-        createdAt: dbUser.createdAt,
-        wallet: dbUser.walletAddress
-          ? { address: dbUser.walletAddress }
-          : undefined,
-        email: dbUser.email ? { address: dbUser.email } : undefined,
-        linkedAccounts: dbUser.linkedAccounts
-          ? dbUser.linkedAccounts
-              .map((account) => {
-                // Keep existing string accounts (though schema suggests this shouldn't happen)
-                if (typeof account === "string") return account;
-                // Check if the account object has an address property and it's truthy
-                if (account && "address" in account && account.address) {
-                  return account.address;
-                }
-                // Return null for accounts without a usable address
-                return null;
-              })
-              // Filter out the null values, leaving only valid string addresses
-              .filter((acc): acc is string => acc !== null)
-          : [],
-        telegramUserId: dbUser.telegramUserId || undefined,
-        telegramUsername: dbUser.telegramUsername || undefined,
-        hasJoinedTelegramCommunity:
-          dbUser.hasJoinedTelegramCommunity || undefined,
-        hasJoinedTelegramAnnouncement:
-          dbUser.hasJoinedTelegramAnnouncement || undefined,
-        telegramCommunityMessageCount:
-          dbUser.telegramCommunityMessageCount || undefined,
-        role: "user",
-      };
-
-      try {
-        // Import the Session class and config
-        const { Session } = await import("@krain/session");
-        const { defaultSessionConfig } = await import("@krain/session");
-
-        // Create a new session with isLoggedIn flag set to true
-        const newSession = await Session.create({
-          userId,
-          data: {
-            user: sessionUser,
-            isLoggedIn: true,
-          },
-          redis: redisClient,
-          options: defaultSessionConfig,
-        });
-
-        await newSession.save();
-
-        log.info("Created new session for existing user", {
-          operation: "create_session",
-          entity: "API",
-          userId,
-        });
-      } catch (sessionError) {
-        log.error("Failed to create session", {
-          operation: "create_session",
-          entity: "API",
-          userId,
-          error:
-            sessionError instanceof Error
-              ? sessionError.message
-              : String(sessionError),
-        });
-      }
-
-      // Return the user data immediately, even if session creation failed
-      return NextResponse.json({ user: sessionUser });
-    }
-
-    const user = session.get("user");
-    if (!user) {
-      log.warn("Session exists but no user in session", {
-        operation: "get_user",
-        entity: "API",
-        userId,
-        sessionData: "Session has no user data",
-      });
-
-      // Again, return minimal user data from DB
-      const minimalUser = {
-        id: userId,
-        createdAt: dbUser.createdAt,
-        wallet: dbUser.walletAddress
-          ? { address: dbUser.walletAddress }
-          : undefined,
-        email: dbUser.email ? { address: dbUser.email } : undefined,
-        linkedAccounts: dbUser.linkedAccounts
-          ? dbUser.linkedAccounts
-              .map((account) => {
-                // Keep existing string accounts (though schema suggests this shouldn't happen)
-                if (typeof account === "string") return account;
-                // Check if the account object has an address property and it's truthy
-                if (account && "address" in account && account.address) {
-                  return account.address;
-                }
-                // Return null for accounts without a usable address
-                return null;
-              })
-              // Filter out the null values, leaving only valid string addresses
-              .filter((acc): acc is string => acc !== null)
-          : [],
-        telegramUserId: dbUser.telegramUserId || undefined,
-        telegramUsername: dbUser.telegramUsername || undefined,
-        hasJoinedTelegramCommunity:
-          dbUser.hasJoinedTelegramCommunity || undefined,
-        hasJoinedTelegramAnnouncement:
-          dbUser.hasJoinedTelegramAnnouncement || undefined,
-        telegramCommunityMessageCount:
-          dbUser.telegramCommunityMessageCount || undefined,
-      };
-
-      return NextResponse.json({ user: minimalUser });
-    }
-
-    // Merge database user data with session user data
-    const updatedUser = {
-      ...user,
-      // Always prefer latest DB data for these fields if available
-      wallet: dbUser.walletAddress
-        ? { address: dbUser.walletAddress }
-        : user.wallet, // Fallback to session wallet if DB has no address
-      email: dbUser.email ? { address: dbUser.email } : user.email, // Fallback to session email
-      // Construct twitter object from dbUser fields if available, otherwise use session's
-      twitter: dbUser.twitterSubject // Use twitterSubject as indicator of linked twitter in DB
-        ? {
-            subject: dbUser.twitterSubject,
-            handle: dbUser.twitterHandle,
-            name: dbUser.twitterName,
-            profilePictureUrl: dbUser.twitterProfilePictureUrl,
-            // Map dbUser.twitterHandle to username for SessionUser consistency
-            username: dbUser.twitterHandle,
-          }
-        : user.twitter,
-      telegramUserId: dbUser.telegramUserId || undefined,
-      telegramUsername: dbUser.telegramUsername || undefined,
-      hasJoinedTelegramCommunity:
-        dbUser.hasJoinedTelegramCommunity || undefined,
-      hasJoinedTelegramAnnouncement:
-        dbUser.hasJoinedTelegramAnnouncement || undefined,
-      telegramCommunityMessageCount:
-        dbUser.telegramCommunityMessageCount || undefined,
-    };
-
-    // Update session with latest user data
-    session.set("user", updatedUser);
-    await session.save();
-
-    log.info("Updated user session with latest data", {
-      operation: "update_user_session",
+    log.info("Successfully retrieved user data for airdrop app", {
+      operation: "get_user_success",
       entity: "API",
-      userId: user.id,
-      user: updatedUser,
+      app: "airdrop",
+      userId,
     });
 
-    return NextResponse.json({ user: updatedUser });
+    return NextResponse.json({ user: mergedUser });
   } catch (error) {
-    log.error("Failed to update user session", {
-      operation: "update_user_session",
+    // Ensure privyId type matches expected string | undefined for logging
+    const privyId: string | undefined =
+      request.headers.get("x-user-id") ||
+      request.headers.get("X-User-Id") ||
+      undefined;
+    log.error("Failed to get user data for airdrop app", {
+      operation: "get_user_error",
       entity: "API",
+      app: "airdrop",
+      userId: privyId,
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
     });
     return NextResponse.json(
-      { error: "Failed to update user session" },
+      { error: "Failed to retrieve user data" },
       { status: 500 },
     );
   }

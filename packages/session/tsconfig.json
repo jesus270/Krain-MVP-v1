@@ -1,9 +1,12 @@
 {
-  "extends": "../typescript-config/base.json",
+  "extends": "@krain/typescript-config/react-library.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": ".",
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "declarationMap": false
   },
-  "include": ["src"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist"]
 }

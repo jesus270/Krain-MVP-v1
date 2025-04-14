@@ -21,5 +21,10 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "pnpm": {
+    "overrides": {
+      "@privy-io/server-auth": "1.19.0"
+    }
+  }
 }

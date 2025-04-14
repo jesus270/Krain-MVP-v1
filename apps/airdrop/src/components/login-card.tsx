@@ -1,4 +1,4 @@
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivyAuth } from "@krain/ui/hooks/index";
 import {
   Card,
   CardContent,
@@ -8,7 +8,7 @@ import {
 import { Button } from "@krain/ui/components/ui/button";
 
 export const LoginCard = () => {
-  const { login } = usePrivy();
+  const { login } = usePrivyAuth();
   return (
     <Card>
       <CardHeader>

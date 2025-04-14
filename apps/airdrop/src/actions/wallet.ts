@@ -7,8 +7,9 @@ import {
   getRedisClient,
   getCurrentUser,
   withServerActionProtection,
-} from "@krain/session";
-import { defaultSessionConfig as sessionOptions } from "@krain/session";
+  defaultSessionConfig as sessionOptions,
+  type Session as SessionType,
+} from "@krain/session/server";
 import { eq } from "drizzle-orm";
 import {
   generateReferralCode,
@@ -49,7 +50,7 @@ export async function createWallet(input: { address: string; userId: string }) {
   if (protectionResponse)
     throw new AppError(ErrorCodes.UNAUTHORIZED, "Unauthorized request");
 
-  return withAuth(input.userId, async (session) => {
+  return withAuth(input.userId, async (session: SessionType) => {
     try {
       const user = session.get("user");
       if (!user) throw new Error("No user in session");
@@ -159,7 +160,7 @@ export async function getWalletByReferralCode(input: {
   referralCode: string;
   userId: string;
 }) {
-  return withAuth(input.userId, async (session) => {
+  return withAuth(input.userId, async (session: SessionType) => {
     try {
       const parsed = referralCodeSchema.parse(input);
 
@@ -196,7 +197,7 @@ export async function getWallet(input: {
   address: string;
   userId: string;
 }): Promise<WalletWithReferredBy | undefined> {
-  return withAuth(input.userId, async (session) => {
+  return withAuth(input.userId, async (session: SessionType) => {
     try {
       const user = session.get("user");
       if (!user) throw new Error("No user in session");
@@ -279,7 +280,7 @@ export async function isValidReferralCode(input: {
   referredWallet: WalletWithReferredBy;
   userId: string;
 }) {
-  return withAuth(input.userId, async (session) => {
+  return withAuth(input.userId, async (session: SessionType) => {
     const user = session.get("user");
     if (!user) throw new Error("No user in session");
     if (!user.wallet) throw new Error("No wallet associated with user");
@@ -352,7 +353,7 @@ export async function handleSubmitWallet(input: {
     }
 
     // Now proceed with the actual withAuth call
-    return withAuth(input.userId, async (session) => {
+    return withAuth(input.userId, async (session: SessionType) => {
       try {
         const user = session.get("user");
         if (!user) throw new Error("No user in session");

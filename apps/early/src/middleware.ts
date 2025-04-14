@@ -1,5 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
-import { withServerActionProtection, withRateLimit } from "@krain/session";
+// Import server functions from the server entry point
+import {
+  withServerActionProtection,
+  withRateLimit,
+} from "@krain/session/server";
 import { log } from "@krain/utils";
 import { geolocation } from "@vercel/functions";
 
