@@ -543,6 +543,9 @@ importers:
       '@krain/db':
         specifier: workspace:*
         version: link:../db
+      '@krain/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       '@krain/utils':
         specifier: workspace:*
         version: link:../utils
@@ -577,9 +580,6 @@ importers:
       '@krain/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@krain/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
       '@types/node':
         specifier: ^20.12.12
         version: 20.17.30
