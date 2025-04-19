@@ -7,3 +7,7 @@ export * from "./roadmap-section";
 export * from "./faq-section";
 export * from "./community-section";
 export * from "./social-section";
+export * from "./founders-key-section";
+export * from "./founders-key-faq-section";
+export * from "./mint-schedule-section";
+export * from "./footer";

@@ -5,11 +5,13 @@ import { Button } from "@krain/ui/components/ui/button";
 import { GradientButton } from "./gradient-button";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { SocialNav } from "./social-nav";
 
 export function Nav() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,15 +31,23 @@ export function Nav() {
   };
 
   const navItems = [
-    { label: "Features", id: "features" },
-    { label: "$KRAIN", id: "token" },
-    { label: "Roadmap", id: "roadmap" },
-    { label: "FAQs", id: "faq" },
-    { label: "Community", id: "community" },
+    { label: "Features", id: "features", type: "scroll" },
+    { label: "$KRAIN", id: "token", type: "scroll" },
+    { label: "Roadmap", id: "roadmap", type: "scroll" },
+    { label: "FAQs", id: "faq", type: "scroll" },
+    { label: "Community", id: "community", type: "scroll" },
+    { label: "Founders Key", id: "/founders-key", type: "link" },
+    {
+      label: "Early Access",
+      id: "https://early.krain.ai",
+      type: "external-link",
+    },
   ];
 
+  type NavItem = (typeof navItems)[number]; // Define NavItem type
+
   return (
-    <nav className="fixed top-0 w-screen z-50">
+    <nav className="fixed top-10 w-screen z-50">
       {/* Backdrop for nav */}
       <div
         className={`absolute inset-0 transition-all duration-500 ${
@@ -64,25 +74,52 @@ export function Nav() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
-            {navItems.map((item) => (
-              <Button
-                key={item.id}
-                variant="ghost"
-                className={`text-white hover:text-white relative transition-all duration-300 ${
-                  isScrolled
-                    ? "hover:bg-white/5"
-                    : "hover:bg-white/10 hover:backdrop-blur-sm"
-                } before:absolute before:inset-0 before:bg-white/5 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300 before:rounded-md before:shadow-[0_0_15px_rgba(255,255,255,0.3)] before:-z-10`}
-                onClick={() => scrollToSection(item.id)}
-              >
-                {item.label}
-              </Button>
-            ))}
+            {navItems.map((item: NavItem) => {
+              const buttonClasses = `text-white hover:text-white relative transition-all duration-300 ${
+                isScrolled
+                  ? "hover:bg-white/5"
+                  : "hover:bg-white/10 hover:backdrop-blur-sm"
+              } before:absolute before:inset-0 before:bg-white/5 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300 before:rounded-md before:shadow-[0_0_15px_rgba(255,255,255,0.3)] before:-z-10`;
+
+              if (item.type === "scroll") {
+                return pathname === "/" ? (
+                  <Button
+                    key={item.id}
+                    variant="ghost"
+                    className={buttonClasses}
+                    onClick={() => scrollToSection(item.id)}
+                  >
+                    {item.label}
+                  </Button>
+                ) : (
+                  <Link key={item.id} href={`/#${item.id}`}>
+                    <Button variant="ghost" className={buttonClasses}>
+                      {item.label}
+                    </Button>
+                  </Link>
+                );
+              } else {
+                // item.type === "link" or "external-link"
+                const isExternal = item.type === "external-link";
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.id}
+                    target={isExternal ? "_blank" : undefined}
+                    rel={isExternal ? "noopener noreferrer" : undefined}
+                  >
+                    <Button variant="ghost" className={buttonClasses}>
+                      {item.label}
+                    </Button>
+                  </Link>
+                );
+              }
+            })}
           </div>
 
           {/* Desktop CTA */}
           <div className="hidden lg:block shrink-0">
-            <Link href="https://early.krain.ai">
+            <Link href="https://airdrop.krain.ai">
               <GradientButton>Enter app</GradientButton>
             </Link>
           </div>
@@ -207,16 +244,45 @@ export function Nav() {
 
           {/* Content */}
           <div className="relative z-10 flex flex-col p-4 gap-2">
-            {navItems.map((item) => (
-              <Button
-                key={item.id}
-                variant="ghost"
-                className="text-white hover:text-white w-full justify-start"
-                onClick={() => scrollToSection(item.id)}
-              >
-                {item.label}
-              </Button>
-            ))}
+            {navItems.map((item: NavItem) => {
+              const buttonClasses =
+                "text-white hover:text-white w-full justify-start";
+
+              if (item.type === "scroll") {
+                return pathname === "/" ? (
+                  <Button
+                    key={item.id}
+                    variant="ghost"
+                    className={buttonClasses}
+                    onClick={() => scrollToSection(item.id)}
+                  >
+                    {item.label}
+                  </Button>
+                ) : (
+                  <Link key={item.id} href={`/#${item.id}`} className="w-full">
+                    <Button variant="ghost" className={buttonClasses}>
+                      {item.label}
+                    </Button>
+                  </Link>
+                );
+              } else {
+                // item.type === "link" or "external-link"
+                const isExternal = item.type === "external-link";
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.id}
+                    target={isExternal ? "_blank" : undefined}
+                    rel={isExternal ? "noopener noreferrer" : undefined}
+                    className="w-full"
+                  >
+                    <Button variant="ghost" className={buttonClasses}>
+                      {item.label}
+                    </Button>
+                  </Link>
+                );
+              }
+            })}
             <SocialNav className="!flex !flex-row !static !translate-y-0 nav-social" />
           </div>
         </div>
