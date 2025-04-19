@@ -1,5 +1,5 @@
 {
-  "extends": "@krain/typescript-config/react-library.json",
+  "extends": "@krain/typescript-config/dist/react-library.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": ".",
