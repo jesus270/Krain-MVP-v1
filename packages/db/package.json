@@ -42,7 +42,7 @@
   "dependencies": {
     "@krain/utils": "workspace:",
     "@neondatabase/serverless": "^0.10.0",
-    "drizzle-orm": "^0.40.0",
+    "drizzle-orm": "catalog:",
     "postgresql": "^0.0.1",
     "tsup": "^8.4.0",
     "@krain/typescript-config": "workspace:"

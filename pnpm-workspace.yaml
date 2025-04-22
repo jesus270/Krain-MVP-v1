@@ -16,3 +16,4 @@ catalog:
   eslint-config-next: "^15"
   "@eslint/eslintrc": "^3"
   lucide-react: "^0.479.0"
+  drizzle-orm: "^0.42.0"

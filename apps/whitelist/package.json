@@ -1,0 +1,36 @@
+{
+  "name": "whitelist",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@krain/db": "workspace:*",
+    "@krain/session": "workspace:*",
+    "@krain/ui": "workspace:*",
+    "@krain/utils": "workspace:*",
+    "@privy-io/react-auth": "^2.1.13",
+    "drizzle-orm": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "sonner": "^1.5.3",
+    "zod": "^3.22.4",
+    "@krain/typescript-config": "workspace:*"
+  },
+  "devDependencies": {
+    "@krain/eslint-config": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "autoprefixer": "^10.4.20",
+    "eslint": "catalog:",
+    "postcss": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  }
+}
