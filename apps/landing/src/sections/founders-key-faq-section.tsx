@@ -19,13 +19,13 @@ const faqs = [
     id: "Q1",
     question: "What is the KRAIN Founders Key?",
     answer:
-      "The KRAIN Founders Key is a limited edition NFT on the Base blockchain that unlocks exclusive utility, benefits, and rewards across the KRAIN ecosystem. It serves as your VIP key to unlock future benefits.",
+      "The KRAIN Founders Key is a limited edition NFT on the Base blockchain that unlocks exclusive utility, benefits, and rewards across the KRAIN ecosystem. Also, it serves as your VIP key to unlock future benefits.",
   },
   {
     id: "Q2",
     question: "How many Founders Keys are available?",
     answer:
-      "Only 1,500 Keys will be sold, making this a rare asset with high long-term potential in the KRAIN ecosystem.",
+      "Only 1,500 Keys will be sold, making this a rare asset with high long-term potential in the KRAIN ecosystem. Also, there are a small number of keys (about 200) that will be minted for marketing and promotional purposes.",
   },
   {
     id: "Q3",
@@ -37,7 +37,7 @@ const faqs = [
     id: "Q4",
     question: "What do I get with a Founders Key?",
     answer:
-      "Every Key includes: </br>∙ $450 worth of $KRAIN tokens at the TGE price (56,250 tokens)</br>∙ 25% APY staking rewards, starting immediately</br>∙ 2x airdrop multiplier and access to a 15% reserved airdrop pool</br>∙ Whitelabel AI Hosting License (valued at $1200/year)</br>∙ A tradable NFT asset on OpenSea and ArenaVS (Base)</br>∙ A Founders Key Holder role in the KRAIN Ecosystem</br>∙ Access to future benefits and drops",
+      "Every Key includes: \n∙ $450 worth of $KRAIN tokens at the TGE price (56,250 tokens)\n∙ 25% APY staking rewards, starting immediately</br>∙ 2x airdrop multiplier and access to a 15% reserved airdrop pool</br>∙ Whitelabel AI Hosting License (valued at $1200/year)</br>∙ A tradable NFT asset on OpenSea and ArenaVS (Base)</br>∙ A Founders Key Holder role in the KRAIN Ecosystem</br>∙ Access to future benefits and drops",
   },
   {
     id: "Q5",

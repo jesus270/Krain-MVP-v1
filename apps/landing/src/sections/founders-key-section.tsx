@@ -81,8 +81,9 @@ export function FoundersKeySection() {
                 Price
               </p>
               <p className="text-xl sm:text-2xl font-semibold xl:text-3xl">
-                Whitelist Sale Price: $150 each (in ETH) Public Sale Price: $200
-                each, $150 for 5+ (in ETH)
+                Whitelist Sale Price: $150 each (in ETH)
+                <br />
+                Public Sale Price: $200 each, $150 for 5+ (in ETH)
               </p>
             </div>
 
