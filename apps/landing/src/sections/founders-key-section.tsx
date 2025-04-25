@@ -9,7 +9,7 @@ const benefits = [
   "2X (Double) Your $KRAIN Airdrop Distribution",
   "Share in Dedicated 15% of $KRAIN Airdrop Pool",
   "Whitelabel Hosting License, $1200/yr Value",
-  "Tradeable Digital Asset on ArenaVS and Open Sea",
+  "Tradeable Digital Asset on ArenaVS and OpenSea",
   "Additional Future Benefits",
 ];
 
@@ -73,7 +73,7 @@ export function FoundersKeySection() {
             {/* Description */}
             <p className="text-sm sm:text-base text-gray-300 text-left mb-4 max-w-lg xl:text-lg xl:max-w-xl">
               Unlock $2,000+ in Value. $KRAIN, Staking, Airdrops, Hosting, and
-              More—All with One Key.
+              More—All with One Key. Only 1500 Keys Available.
             </p>
 
             {/* Price */}
