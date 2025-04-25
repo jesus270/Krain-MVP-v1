@@ -72,18 +72,19 @@ export function FoundersKeySection() {
 
             {/* Description */}
             <p className="text-sm sm:text-base text-gray-300 text-left mb-4 max-w-lg xl:text-lg xl:max-w-xl">
-              Your VIP key that unlocks over $2,000 USD in benefits.
+              Unlock $2,000+ in Value. $KRAIN, Staking, Airdrops, Hosting, and
+              More—All with One Key.
             </p>
 
             {/* Price */}
             <div className="mb-4 text-left">
               <p className="text-xs sm:text-sm text-gray-400 xl:text-base">
-                Price
+                Price (will be converted to ETH at the time of sale)
               </p>
               <p className="text-xl sm:text-2xl font-semibold xl:text-3xl">
-                Whitelist Sale Price: $150 each (in ETH)
+                Whitelist: $150 each
                 <br />
-                Public Sale Price: $200 each, $150 for 5+ (in ETH)
+                Public: $200 each, $150 for 5+
               </p>
             </div>
 

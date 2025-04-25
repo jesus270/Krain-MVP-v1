@@ -37,7 +37,7 @@ const faqs = [
     id: "Q4",
     question: "What do I get with a Founders Key?",
     answer:
-      "Every Key includes: \n∙ $450 worth of $KRAIN tokens at the TGE price (56,250 tokens)\n∙ 25% APY staking rewards, starting immediately</br>∙ 2x airdrop multiplier and access to a 15% reserved airdrop pool</br>∙ Whitelabel AI Hosting License (valued at $1200/year)</br>∙ A tradable NFT asset on OpenSea and ArenaVS (Base)</br>∙ A Founders Key Holder role in the KRAIN Ecosystem</br>∙ Access to future benefits and drops",
+      "Every Key includes: ∙ $450 worth of $KRAIN tokens at the TGE price (56,250 tokens) ∙ 25% APY staking rewards, starting immediately ∙ 2x airdrop multiplier and access to a 15% reserved airdrop pool ∙ Whitelabel AI Hosting License (valued at $1200/year) ∙ A tradable NFT asset on OpenSea and ArenaVS (Base) ∙ A Founders Key Holder role in the KRAIN Ecosystem ∙ Access to future benefits and drops",
   },
   {
     id: "Q5",
@@ -172,6 +172,10 @@ export function FoundersKeyFaqSection() {
             </a>{" "}
             on X or click the support bubble in the bottom right corner of our
             websites.
+            <br />
+            <br />
+            Note: TGE is planned for 3rd Quarter 2025 and we’re actively in
+            conversations with leading Tier 1 exchanges.
           </p>
         </div>
         <Accordion type="single" collapsible className="space-y-0 w-full">
