@@ -17,31 +17,75 @@ import { MessagesSquareIcon } from "lucide-react";
 const faqs = [
   {
     id: "Q1",
-    question: "What is the Founders Key?",
+    question: "What is the KRAIN Founders Key?",
     answer:
-      "The Krain Founders Key is a digital key offered during a special campaign, providing holders with exclusive benefits like $KRAIN token allocation, boosted staking rewards, increased airdrop points, and lifetime Krain app advantages.",
+      "The KRAIN Founders Key is a limited edition NFT on the Base blockchain that unlocks exclusive utility, benefits, and rewards across the KRAIN ecosystem. It serves as your VIP key to unlock future benefits.",
   },
   {
     id: "Q2",
-    question: "What benefits do I get from owning a Founders Key?",
+    question: "How many Founders Keys are available?",
     answer:
-      "Owning a Founders Key grants you: 3x token allocation ($300 worth of $KRAIN at TGE price), boosted staking rewards (25% APY), 2x airdrop point distribution, and lifetime Krain app benefits.",
+      "Only 1,500 Keys will be sold, making this a rare asset with high long-term potential in the KRAIN ecosystem.",
   },
   {
     id: "Q3",
-    question: "How much does the Founders Key cost?",
+    question: "How much does a Founders Key cost?",
     answer:
-      "The Founders Keys will be sold in batches of 1,000, starting at $100 each (payable in ETH).",
+      "Whitelist Sale: $150 each - Public Sale: $200 each, or $150 each when buying 5 or more",
   },
   {
     id: "Q4",
-    question: "Is the Founders Key tradeable?",
-    answer: "Yes, the Founders Keys are tradeable.",
+    question: "What do I get with a Founders Key?",
+    answer:
+      "Every Key includes: </br>∙ $450 worth of $KRAIN tokens at the TGE price (56,250 tokens)</br>∙ 25% APY staking rewards, starting immediately</br>∙ 2x airdrop multiplier and access to a 15% reserved airdrop pool</br>∙ Whitelabel AI Hosting License (valued at $1200/year)</br>∙ A tradable NFT asset on OpenSea and ArenaVS (Base)</br>∙ A Founders Key Holder role in the KRAIN Ecosystem</br>∙ Access to future benefits and drops",
   },
   {
     id: "Q5",
-    question: "When will the mint go live?",
-    answer: "The Founders Key sale date is May 6th.",
+    question: "How do the $KRAIN token benefits work?",
+    answer:
+      "Tokens will be distributed after a 1 month cliff from the TGE date over a 12 month period of time. You will be able to claim these tokens each month as they unlock.",
+  },
+  {
+    id: "Q6",
+    question: "How does the staking reward work?",
+    answer:
+      "Founders Key holders get 25% APY on their $KRAIN tokens, starting from the day of the sale.",
+  },
+  {
+    id: "Q7",
+    question: "What’s the benefit of the 2x airdrop and 15% pool?",
+    answer:
+      "Key holders receive double the airdrop points they earn and share of a dedicated 15% of the total airdrop pool, reserved only for Founders Key owners. That means significantly higher $KRAIN allocations.",
+  },
+  {
+    id: "Q8",
+    question: "What is the Whitelabel Hosting License?",
+    answer:
+      "Each Key includes a license to run your own AI app hosting company using KRAIN’s infrastructure — normally priced at $1200 per year. This gives you the ability to build your own business with recurring revenue.",
+  },
+  {
+    id: "Q9",
+    question: "Is the Founders Key an NFT? Can I trade it?",
+    answer:
+      "Yes, the Key is a fully tradeable digital asset on the Base blockchain (on OpenSea and ArenaVS), and it can be sold or transferred freely after the sale concludes.",
+  },
+  {
+    id: "Q10",
+    question: "When does the sale take place?",
+    answer:
+      "Whitelist Sale: May 6th at 4PM UTC</br>Public Sale: May 6th at 5PM UTC",
+  },
+  {
+    id: "Q11",
+    question: "Will there be future benefits for Founders Key holders?",
+    answer:
+      "Yes, we plan to add additional benefits for Founders Key holders in the future.",
+  },
+  {
+    id: "Q12",
+    question: "Where can I mint the Founders Key?",
+    answer:
+      "Minting will be available on the <a href='https://https://arenavs.com/marketplace' target='_blank' rel='noopener noreferrer'>Arena VS Marketplace</a>. Ensure you are on the correct site and watch for official announcements.",
   },
 ];
 
@@ -118,8 +162,16 @@ export function FoundersKeyFaqSection() {
           </h2>
           <p className="text-sm sm:text-base text-gray-300">
             If you can't find an answer that you're looking for, contact us via
-            DM on X or click the support bubble in the bottom right corner of
-            our websites.
+            DM{" "}
+            <a
+              href="https://x.com/krain_ai"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              @krain_ai
+            </a>{" "}
+            on X or click the support bubble in the bottom right corner of our
+            websites.
           </p>
         </div>
         <Accordion type="single" collapsible className="space-y-0 w-full">

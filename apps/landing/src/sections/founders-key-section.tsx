@@ -4,10 +4,13 @@ import { HammerIcon } from "lucide-react";
 
 // Define benefits based on the mockup
 const benefits = [
-  "3X = $450 USD of $KRAIN Tokens",
+  "3X → $450 USD of $KRAIN Tokens",
   "25% APY $KRAIN Staking Rewards Starting Now",
-  "Double (2x) Your $KRAIN Airdrop Distribution",
-  "Tradeable Founders Key Digital Asset on ArenaVS and Open Sea",
+  "2X (Double) Your $KRAIN Airdrop Distribution",
+  "Share in Dedicated 15% of $KRAIN Airdrop Pool",
+  "Whitelabel Hosting License, $1200/yr Value",
+  "Tradeable Digital Asset on ArenaVS and Open Sea",
+  "Additional Future Benefits",
 ];
 
 export function FoundersKeySection() {
@@ -69,9 +72,7 @@ export function FoundersKeySection() {
 
             {/* Description */}
             <p className="text-sm sm:text-base text-gray-300 text-left mb-4 max-w-lg xl:text-lg xl:max-w-xl">
-              The KRAIN Founders Key is a digital asset that represents
-              ownership of $300 USD worth of $KRAIN tokens and other amazing
-              benefits.
+              Your VIP key that unlocks over $2,000 USD in benefits.
             </p>
 
             {/* Price */}
@@ -80,15 +81,13 @@ export function FoundersKeySection() {
                 Price
               </p>
               <p className="text-xl sm:text-2xl font-semibold xl:text-3xl">
-                0.0617 ETH (~$100 USD)
+                Whitelist Sale Price: $150 each (in ETH) Public Sale Price: $200
+                each, $150 for 5+ (in ETH)
               </p>
             </div>
 
             {/* Waves Info */}
-            <p className="text-xs sm:text-sm text-gray-400 text-left mb-6 xl:text-base">
-              Sold in waves of 1,000 NFTs with the price rising by $10 in each
-              wave.
-            </p>
+            <p className="text-xs sm:text-sm text-gray-400 text-left mb-6 xl:text-base"></p>
 
             {/* Benefits List */}
             <ul className="space-y-3 mb-8 w-full">
