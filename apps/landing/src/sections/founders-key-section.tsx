@@ -4,7 +4,7 @@ import { HammerIcon } from "lucide-react";
 
 // Define benefits based on the mockup
 const benefits = [
-  "3X = $300 USD worth of $KRAIN Tokens at TGE Price (37,500 tokens)",
+  "3X = $450 USD of $KRAIN Tokens",
   "25% APY $KRAIN Staking Rewards Starting Now",
   "Double (2x) Your $KRAIN Airdrop Distribution",
   "Tradeable Founders Key Digital Asset on ArenaVS and Open Sea",
