@@ -9,6 +9,7 @@ import {
   LOGIN_BLOCK_DURATION,
 } from "./types";
 import { log } from "@krain/utils";
+import * as z from "zod";
 
 export class Session {
   private store: RedisSessionStore;
@@ -23,7 +24,7 @@ export class Session {
     private options: SessionOptions,
   ) {
     this.userId = userId;
-    this.data = data;
+    this.data = { ...data };
     this.store = new RedisSessionStore(redis, options);
   }
 
@@ -43,21 +44,35 @@ export class Session {
       entity: "SESSION",
       userId,
     });
+
+    // Input data should already be validated before being passed here
     const store = new RedisSessionStore(redis, options);
-    const sessionData = sessionDataSchema.parse({
+    // Construct the data to be saved, ensuring defaults are set
+    const sessionData: SessionData = {
       ...data,
-      lastActivity: Date.now(),
-      loginAttempts: 0,
-      loginBlockedUntil: null,
-      // Ensure csrfToken and fingerprint are initialized if needed, or handle defaults
-      csrfToken: data.csrfToken || undefined, // Example: Ensure optional fields have defaults or are handled
+      lastActivity: Date.now(), // Always update/set lastActivity on creation
+      loginAttempts: data.loginAttempts || 0, // Ensure defaults
+      loginBlockedUntil: data.loginBlockedUntil || null,
+      // Ensure other necessary fields have defaults if applicable
+      isLoggedIn: data.isLoggedIn !== undefined ? data.isLoggedIn : true,
+      csrfToken: data.csrfToken || undefined,
       fingerprint: data.fingerprint || undefined,
-    });
-    log.info("Session.create: Parsed data", {
-      operation: "session_create_parsed",
+    };
+
+    // Log the data being sent to store.set
+    log.info("Session.create: Data prepared for store.set", {
+      operation: "session_create_data_for_store",
       entity: "SESSION",
       userId,
+      dataForStore: JSON.stringify(sessionData, null, 2),
+      userForStore: sessionData.user
+        ? JSON.stringify(sessionData.user)
+        : "undefined",
+      emailForStore: sessionData.user?.email
+        ? JSON.stringify(sessionData.user.email)
+        : "undefined",
     });
+
     await store.set(userId, sessionData);
     log.info("Session.create: Store set complete", {
       operation: "session_create_store_set",
@@ -82,6 +97,13 @@ export class Session {
     const data = await store.get(userId);
     if (!data) return null;
 
+    log.info("Session.get: Data received from store (Zod-parsed)", {
+      operation: "session_get_store_data",
+      entity: "SESSION",
+      userId,
+      receivedData: JSON.stringify(data, null, 2),
+    });
+
     return new Session(userId, data, redis, options);
   }
 
@@ -90,18 +112,20 @@ export class Session {
   }
 
   getData(): SessionData {
+    // Ensure a shallow copy is returned to prevent direct modification of internal state
     return { ...this.data };
   }
 
   get<T extends keyof SessionData>(key: T): SessionData[T] | undefined {
-    if (key === "user") {
-      // Ensure createdAt is always a Date object if it exists
-      const user = this.data.user;
-      if (user && user.createdAt && !(user.createdAt instanceof Date)) {
-        user.createdAt = new Date(user.createdAt);
-      }
-      return user as any;
-    }
+    // Log the state of this.data right before returning
+    log.info("Session instance get: Data state before returning value", {
+      operation: "session_instance_get_before_return",
+      entity: "SESSION",
+      userId: this.userId,
+      requestedKey: key,
+      currentThisData: JSON.stringify(this.data), // Log the whole data object
+    });
+
     return this.data[key];
   }
 
@@ -205,6 +229,7 @@ export class Session {
       return false;
     }
 
+    // Restore activity update
     this.set("lastActivity", Date.now());
     this.isModified = true;
     return true;

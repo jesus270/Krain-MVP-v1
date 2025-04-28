@@ -431,6 +431,42 @@ export function useSession({
     }
   }, [privyUser, authenticated, ready]);
 
+  const refreshSession = useCallback(() => {
+    if (ready && authenticated && privyUser?.id) {
+      log.info("Manual session refresh triggered.", {
+        entity: "CLIENT",
+        operation: "manual_refresh_trigger",
+        userId: privyUser.id,
+      });
+      // Reset retry count for manual refresh? Optional.
+      // setRetryCount(0);
+      // Ensure we don't stack validation calls if one is already running
+      if (!isValidatingSession) {
+        void validateSession(0);
+      } else {
+        log.warn("Manual refresh skipped: validation already in progress.", {
+          entity: "CLIENT",
+          operation: "manual_refresh_skipped_in_progress",
+          userId: privyUser.id,
+        });
+      }
+    } else {
+      log.warn("Manual session refresh skipped: conditions not met.", {
+        entity: "CLIENT",
+        operation: "manual_refresh_skipped_conditions",
+        ready,
+        authenticated,
+        hasId: !!privyUser?.id,
+      });
+    }
+  }, [
+    ready,
+    authenticated,
+    privyUser?.id,
+    validateSession,
+    isValidatingSession,
+  ]);
+
   return {
     ready,
     authenticated,
@@ -438,6 +474,7 @@ export function useSession({
     isValidatingSession,
     sessionValidated,
     error,
+    refreshSession, // Expose the refresh function
   };
 }
 

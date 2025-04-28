@@ -4,15 +4,22 @@ import { db, whitelistSignupTable } from "@krain/db";
 import { eq, and } from "drizzle-orm";
 import { headers } from "next/headers";
 import {
-  withAuth,
   withServerActionProtection,
   getSession,
+  Session,
 } from "@krain/session/server";
 import { log } from "@krain/utils";
+import type { WhitelistSignupResult, User } from "@krain/session/types";
 
-export async function signupForWhitelist(input: { userId: string }) {
+export async function signupForWhitelist(input: {
+  userId: string;
+}): Promise<WhitelistSignupResult> {
+  log.info("signupForWhitelist: Action started", {
+    operation: "signup_for_whitelist",
+    userId: input.userId,
+  });
+
   try {
-    // Validate origin and apply rate limiting
     const protectionResponse = await withServerActionProtection(
       { headers: headers() },
       "default",
@@ -24,110 +31,161 @@ export async function signupForWhitelist(input: { userId: string }) {
       );
     }
 
-    // Call withAuth directly
-    return withAuth(input.userId, async (session) => {
-      const user = session.get("user");
-      // Log the user object retrieved from the session
-      log.info("User object from session in whitelist signup action", {
-        operation: "whitelist_signup_get_user_from_session",
-        entity: "ACTION",
+    log.info("signupForWhitelist: Manual session retrieval", {
+      operation: "signup_for_whitelist_manual_session_retrieval",
+      userId: input.userId,
+    });
+    const session: Session | null = await getSession(input.userId);
+
+    if (!session) {
+      log.warn("signupForWhitelist failed: No session", {
+        operation: "signup_for_whitelist_failed_no_session",
         userId: input.userId,
-        retrievedUser: user,
       });
+      throw new Error("Authentication required: Session not found");
+    }
 
-      if (!user) throw new Error("No user in session");
+    const isActive = await session.checkActivity();
+    if (!isActive) {
+      log.warn("signupForWhitelist failed: Session inactive", {
+        operation: "signup_for_whitelist_failed_session_inactive",
+        userId: input.userId,
+      });
+      throw new Error("Authentication required: Session expired");
+    }
 
-      // Check if email is present
-      if (!user.email?.address) {
-        log.error("Email address check failed in whitelist signup action", {
-          operation: "whitelist_signup_email_check_failed",
-          entity: "ACTION",
-          userId: input.userId,
-          userEmail: user.email, // Log the email part specifically
-        });
-        throw new Error("Email address is required for whitelist signup");
-      }
+    if (!session.get("isLoggedIn")) {
+      log.warn("signupForWhitelist: Session missing isLoggedIn flag", {
+        operation: "signup_for_whitelist_session_missing_isLoggedIn_flag",
+        userId: input.userId,
+      });
+      session.set("isLoggedIn", true);
+      await session.save();
+    }
 
-      // Try to get wallet from session user
-      let walletAddress = null;
+    const user: User | undefined = session.get("user");
+    log.info("User object from session", {
+      operation: "signup_for_whitelist_get_user_from_session",
+      userId: input.userId,
+      retrievedUser: user,
+    });
 
-      // Check if wallet is directly in user object
-      if (user.wallet?.address) {
-        walletAddress = user.wallet.address;
-        log.info("Found wallet address from user.wallet", {
-          operation: "whitelist_signup_user_wallet",
-          entity: "ACTION",
+    if (!user) throw new Error("No user in session after checks");
+
+    const emailAddress = user.email?.address;
+    if (!emailAddress) {
+      log.error("Email address check failed: Extracted address is falsy.", {
+        operation: "signup_for_whitelist_email_check_failed",
+        userId: input.userId,
+        userEmailObject: user.email,
+        extractedAddress: emailAddress,
+      });
+      throw new Error("Email address is required for whitelist signup");
+    }
+
+    let walletAddress = null;
+    if (user.wallet?.address) {
+      walletAddress = user.wallet.address;
+      log.info("Found wallet address from user.wallet", {
+        operation: "signup_for_whitelist_user_wallet",
+        userId: input.userId,
+        walletAddress,
+      });
+    } else if (user.linkedAccounts && user.linkedAccounts.length > 0) {
+      log.info("Attempting to find wallet in linkedAccounts", {
+        operation: "signup_for_whitelist_check_linked_accounts",
+        userId: input.userId,
+        linkedAccounts: user.linkedAccounts,
+      });
+      // Try to find a wallet among the linkedAccounts
+      // First, check if any of the linkedAccounts strings look like wallet addresses (0x...)
+      const walletLinkedAccount = user.linkedAccounts.find(
+        (account) =>
+          typeof account === "string" &&
+          (account.startsWith("0x") || // For Ethereum
+            account.match(
+              /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{32,44}$/,
+            ) || // For Solana
+            account.match(/^[0-9a-zA-Z]{26,35}$/)), // For Bitcoin/general
+      );
+
+      if (walletLinkedAccount) {
+        walletAddress = walletLinkedAccount;
+        log.info("Found wallet address from linkedAccounts string", {
+          operation: "signup_for_whitelist_linked_account_string",
           userId: input.userId,
           walletAddress,
         });
       }
-      // Check if wallet is in session linkedAccounts
-      else if (user.linkedAccounts?.length > 0) {
-        // Try to find a wallet among the linkedAccounts
-        // First, check if any of the linkedAccounts strings look like wallet addresses (0x...)
-        const walletLinkedAccount = user.linkedAccounts.find(
-          (account) =>
-            typeof account === "string" &&
-            (account.startsWith("0x") || // For Ethereum
-              account.match(
-                /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{32,44}$/,
-              ) || // For Solana
-              account.match(/^[0-9a-zA-Z]{26,35}$/)), // For Bitcoin/general
-        );
+    }
 
-        if (walletLinkedAccount) {
-          walletAddress = walletLinkedAccount;
-          log.info("Found wallet address from linkedAccounts string", {
-            operation: "whitelist_signup_linked_account_string",
-            entity: "ACTION",
-            userId: input.userId,
-            walletAddress,
-          });
-        }
-      }
-
-      // Check if we found a wallet address
-      if (!walletAddress) {
-        log.error("Wallet address check failed in whitelist signup action", {
-          operation: "whitelist_signup_wallet_check_failed",
-          entity: "ACTION",
-          userId: input.userId,
-        });
-        throw new Error(
-          "Wallet address is required for whitelist signup. Please reconnect your wallet and try again.",
-        );
-      }
-
-      // Check if user already signed up
-      const existingSignup = await db
-        .select()
-        .from(whitelistSignupTable)
-        .where(
-          and(
-            eq(whitelistSignupTable.email, user.email.address),
-            eq(whitelistSignupTable.walletAddress, walletAddress),
-          ),
-        )
-        .limit(1);
-
-      if (existingSignup.length > 0) {
-        return {
-          status: "already_signed_up",
-          message: "Already signed up for whitelist",
-        };
-      }
-
-      // Create new signup
-      await db.insert(whitelistSignupTable).values({
-        email: user.email.address,
-        walletAddress: walletAddress,
+    if (!walletAddress) {
+      log.error("Wallet address check failed in whitelist signup action", {
+        operation: "signup_for_whitelist_wallet_check_failed",
+        userId: input.userId,
+        userWallet: user.wallet,
+        userLinkedAccounts: user.linkedAccounts,
       });
+      throw new Error(
+        "Wallet address is required for whitelist signup. Please reconnect your wallet and try again.",
+      );
+    }
 
-      return {
-        status: "success",
-        message: "Successfully signed up for whitelist",
-      };
+    log.info("Proceeding with wallet address", {
+      operation: "signup_for_whitelist_wallet_ok",
+      userId: input.userId,
+      walletAddress,
     });
+
+    const existingSignup = await db
+      .select()
+      .from(whitelistSignupTable)
+      .where(
+        and(
+          eq(whitelistSignupTable.email, emailAddress),
+          eq(whitelistSignupTable.walletAddress, walletAddress),
+        ),
+      )
+      .limit(1);
+    log.info("Database check result", {
+      operation: "signup_for_whitelist_db_check_result",
+      userId: input.userId,
+      result: existingSignup.length > 0,
+    });
+
+    if (existingSignup.length > 0) {
+      const returnPayload: WhitelistSignupResult = {
+        status: "already_signed_up",
+        message: "Already signed up for whitelist",
+      };
+      log.info("Returning already signed up", {
+        operation: "signup_for_whitelist_return_already_signed_up",
+        userId: input.userId,
+        payload: returnPayload,
+      });
+      return returnPayload;
+    }
+
+    log.info("Attempting to insert new signup into database", {
+      operation: "signup_for_whitelist_db_insert_start",
+      userId: input.userId,
+    });
+    await db.insert(whitelistSignupTable).values({
+      email: emailAddress,
+      walletAddress: walletAddress,
+    });
+    log.info("Database insert successful", {
+      operation: "signup_for_whitelist_db_insert_success",
+      userId: input.userId,
+    });
+
+    const successPayload: WhitelistSignupResult = { success: true };
+    log.info("Returning simple success object", {
+      operation: "signup_for_whitelist_return_success_obj",
+      userId: input.userId,
+      payload: successPayload,
+    });
+    return successPayload;
   } catch (error) {
     log.error("Error in signupForWhitelist", {
       entity: "ACTION",
@@ -136,15 +194,21 @@ export async function signupForWhitelist(input: { userId: string }) {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
     });
+    // Keep the original error returning logic
     if (
       error instanceof Error &&
       error.message.includes("Authentication required")
     ) {
-      throw new Error(
-        "Authentication failed. Please ensure you are logged in.",
-      );
+      return {
+        status: "error",
+        message: "Authentication failed. Please ensure you are logged in.",
+      };
     }
-    throw new Error("Failed to sign up for whitelist. Please try again.");
+    return {
+      status: "error",
+      message:
+        error instanceof Error ? error.message : "An unknown error occurred.",
+    };
   }
 }
 
@@ -152,8 +216,11 @@ export async function checkWhitelistSignup(input: { userId: string }): Promise<{
   sessionReady: boolean;
   isSignedUp: boolean;
 }> {
+  log.info("checkWhitelistSignup: Action started", {
+    operation: "check_whitelist_signup",
+    userId: input.userId,
+  });
   try {
-    // Validate origin and apply rate limiting
     const protectionResponse = await withServerActionProtection(
       { headers: headers() },
       "default",
@@ -165,68 +232,70 @@ export async function checkWhitelistSignup(input: { userId: string }): Promise<{
       );
     }
 
-    // Attempt to get the session
     const session = await getSession(input.userId);
-
-    // If session doesn't exist yet, return specific status
     if (!session) {
       log.info("checkWhitelistSignup: Session not ready yet", {
-        userId: input.userId,
         operation: "check_whitelist_signup",
-        entity: "ACTION",
+        userId: input.userId,
       });
       return { sessionReady: false, isSignedUp: false };
     }
 
-    // Session exists, proceed with logic inside withAuth
-    return withAuth(input.userId, async (session) => {
-      const user = session.get("user");
+    const user = session.get("user");
 
-      // This check should ideally not be needed if getSession succeeded, but belt-and-suspenders
-      if (!user) {
-        log.warn(
-          "checkWhitelistSignup: User missing in session despite session presence",
-          {
-            userId: input.userId,
-            operation: "check_whitelist_signup",
-            entity: "ACTION",
-          },
-        );
-        // Treat as not ready / not signed up if user data is missing
-        return { sessionReady: true, isSignedUp: false };
-      }
+    if (!user?.email?.address) {
+      // No email, cannot be signed up
+      return { sessionReady: true, isSignedUp: false };
+    }
 
-      // If email is missing, they can't be signed up yet
-      if (!user.email) {
-        return { sessionReady: true, isSignedUp: false };
-      }
-
-      // Get wallet address from linkedAccounts or user.walletAddress
-      const walletAccount = user.linkedAccounts?.find(
-        (acc: any) => acc.type === "wallet",
+    let walletAddress = null;
+    if (user.wallet?.address) {
+      walletAddress = user.wallet.address;
+    } else if (user.linkedAccounts && user.linkedAccounts.length > 0) {
+      log.info("Attempting to find wallet in linkedAccounts", {
+        operation: "check_whitelist_signup_check_linked_accounts",
+        userId: input.userId,
+        linkedAccounts: user.linkedAccounts,
+      });
+      // Try to find a wallet among the linkedAccounts
+      // First, check if any of the linkedAccounts strings look like wallet addresses (0x...)
+      const walletLinkedAccount = user.linkedAccounts.find(
+        (account) =>
+          typeof account === "string" &&
+          (account.startsWith("0x") || // For Ethereum
+            account.match(
+              /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{32,44}$/,
+            ) || // For Solana
+            account.match(/^[0-9a-zA-Z]{26,35}$/)), // For Bitcoin/general
       );
-      const walletAddress = walletAccount
-        ? (walletAccount as any).address
-        : (user as any).walletAddress;
 
-      if (!walletAddress) {
-        return { sessionReady: true, isSignedUp: false };
+      if (walletLinkedAccount) {
+        walletAddress = walletLinkedAccount;
+        log.info("Found wallet address from linkedAccounts string", {
+          operation: "check_whitelist_signup_linked_account_string",
+          userId: input.userId,
+          walletAddress,
+        });
       }
+    }
 
-      // Check if user already signed up in DB
-      const existingSignup = await db
-        .select()
-        .from(whitelistSignupTable)
-        .where(
-          and(
-            eq(whitelistSignupTable.email, user.email.address),
-            eq(whitelistSignupTable.walletAddress, walletAddress),
-          ),
-        )
-        .limit(1);
+    if (!walletAddress) {
+      // No wallet, cannot be signed up (shouldn't happen if email exists?)
+      return { sessionReady: true, isSignedUp: false };
+    }
 
-      return { sessionReady: true, isSignedUp: existingSignup.length > 0 };
-    });
+    const existingSignup = await db
+      .select()
+      .from(whitelistSignupTable)
+      .where(
+        and(
+          eq(whitelistSignupTable.email, user.email.address),
+          eq(whitelistSignupTable.walletAddress, walletAddress),
+        ),
+      )
+      .limit(1);
+
+    return { sessionReady: true, isSignedUp: existingSignup.length > 0 };
   } catch (error) {
     log.error("Error in checkWhitelistSignup", {
       entity: "ACTION",
@@ -235,7 +304,7 @@ export async function checkWhitelistSignup(input: { userId: string }): Promise<{
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
     });
-    // Return false values to prevent breaking client side
+    // Return default non-ready/non-signed-up state on error
     return { sessionReady: false, isSignedUp: false };
   }
 }

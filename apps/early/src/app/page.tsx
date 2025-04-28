@@ -16,6 +16,7 @@ import {
 import { signupForEarlyAccess, checkEarlyAccessSignup } from "./actions";
 import { toast } from "sonner";
 import { cn } from "@krain/ui/lib/utils";
+import { log } from "@krain/utils";
 
 // Key for storing refresh state in sessionStorage (can be removed if not needed)
 // const REFRESH_KEY = "krain_session_refreshed";
@@ -29,6 +30,7 @@ export default function HomePage() {
     sessionValidated, // Backend session validity
     isValidatingSession, // Loading state for session validation
     error: sessionError, // Session validation error
+    refreshSession, // <-- Get refreshSession from the hook
   } = useSession();
 
   // Use Privy hook directly ONLY for actions not covered by useSession (login, linkEmail)
@@ -44,55 +46,75 @@ export default function HomePage() {
   const [isPerformingAction, setIsPerformingAction] = useState(false);
   const isLoading = !ready || isValidatingSession || isPerformingAction;
 
-  // Handler to initiate signup process
-  const handleSignup = async () => {
-    // 1. Check if authenticated (useSession handles Privy auth state)
-    if (!authenticated || !user) {
-      // If not authenticated, trigger Privy login
-      login();
-      return;
-    }
-
-    // 2. Check if email is linked (useSession user object has email)
-    if (!user.email?.address) {
-      // If email is missing, trigger Privy email linking
-      linkEmail();
-      return;
-    }
-
-    // 3. Call the signup server action
-    setIsPerformingAction(true); // Indicate signup action is in progress
+  // Separate handler for linking email
+  const triggerLinkEmailAndRefresh = async () => {
+    setIsPerformingAction(true);
     try {
-      // Pass the user ID from the session hook
+      log.info("Triggering linkEmail and refresh", {
+        entity: "CLIENT",
+        operation: "trigger_link_email",
+      });
+      await linkEmail();
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      toast.info("Verifying email connection...");
+      if (refreshSession) {
+        refreshSession();
+      }
+    } catch (e) {
+      console.error("Error linking email", e);
+      toast.error("Failed to link email.");
+    } finally {
+      setIsPerformingAction(false);
+    }
+  };
+
+  // Simplified handleSignup - only performs the action
+  const handleSignup = async () => {
+    log.info("handleSignup: Invoked", {
+      entity: "CLIENT",
+      operation: "handle_signup_start",
+    });
+    // Re-verify based on current state just before action call
+    if (!sessionValidated || !user?.email?.address) {
+      toast.error(
+        "Cannot sign up yet. Please ensure email is connected and session is valid.",
+      );
+      return;
+    }
+
+    setIsPerformingAction(true);
+    try {
+      log.info("handleSignup: Calling server action", {
+        entity: "CLIENT",
+        operation: "handle_signup_call_action",
+        userId: user.id,
+      });
       const result = await signupForEarlyAccess({ userId: user.id });
+
+      log.info("handleSignup: Server action result received", {
+        entity: "CLIENT",
+        operation: "handle_signup_action_result",
+        result,
+      });
+
       if (result.status === "success") {
-        setIsSignedUp(true); // Update local state on success
+        setIsSignedUp(true);
         toast.success(result.message || "Signup successful!");
+      } else if (result.status === "already_signed_up") {
+        setIsSignedUp(true);
+        toast.info(result.message || "Already signed up!");
       } else {
-        // Handle specific errors returned from the action
-        if (result.message?.includes("Already signed up")) {
-          setIsSignedUp(true); // Correct state if already signed up
-          toast.info(result.message); // Use info toast
-        } else {
-          toast.error(result.message || "Signup failed. Please try again.");
-        }
+        toast.error(result.message || "Signup failed. Please try again.");
       }
     } catch (error) {
       console.error("Error calling signupForEarlyAccess action:", error);
-      // Handle unexpected errors during the action call
-      if (error instanceof Error) {
-        // Provide more specific feedback if possible
-        if (error.message.includes("Already signed up")) {
-          setIsSignedUp(true); // Sync state
-          toast.info("You are already signed up!");
-        } else {
-          toast.error(`Signup failed: ${error.message}. Please try again.`);
-        }
-      } else {
-        toast.error("An unexpected error occurred during signup.");
-      }
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "An unexpected network error occurred during signup.",
+      );
     } finally {
-      setIsPerformingAction(false); // Signup action finished
+      setIsPerformingAction(false);
     }
   };
 
@@ -218,7 +240,6 @@ export default function HomePage() {
   };
 
   const renderButton = () => {
-    // Use combined isLoading for disabling buttons
     const disableButtons = isLoading || isPerformingAction;
 
     if (!ready) return null;
@@ -231,12 +252,28 @@ export default function HomePage() {
       );
     }
 
-    if (authenticated && sessionValidated) {
+    if (isValidatingSession) {
+      return (
+        <Button size="lg" disabled={true}>
+          Verifying Session...
+        </Button>
+      );
+    }
+
+    if (!sessionValidated && !isValidatingSession) {
+      return (
+        <Button size="lg" onClick={refreshSession} disabled={disableButtons}>
+          {sessionError ? "Retry Validation" : "Check Status"}
+        </Button>
+      );
+    }
+
+    if (sessionValidated) {
       if (!user?.email?.address) {
         return (
           <Button
             size="lg"
-            onClick={linkEmail}
+            onClick={triggerLinkEmailAndRefresh} // Use specific handler
             disabled={disableButtons || !user}
           >
             Connect Email
@@ -245,20 +282,21 @@ export default function HomePage() {
       } else if (!isSignedUp) {
         return (
           <Button size="lg" onClick={handleSignup} disabled={disableButtons}>
-            Sign Up for Early Access
+            {isPerformingAction ? "Signing Up..." : "Sign Up for Early Access"}
           </Button>
         );
       }
     }
 
-    // If still loading session (isValidatingSession is true, covered by isLoading)
-    // or already signed up, show no button
-    if (isLoading || (authenticated && sessionValidated && isSignedUp)) {
+    if (isSignedUp) {
       return null;
     }
 
-    // Fallback: Shouldn't be reachable if logic above is correct
-    return null;
+    return (
+      <Button size="lg" disabled={true}>
+        {sessionError ? `Error: ${sessionError}` : "Loading..."}
+      </Button>
+    );
   };
 
   return (

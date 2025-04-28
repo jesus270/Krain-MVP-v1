@@ -14,6 +14,7 @@ import {
 import { signupForWhitelist, checkWhitelistSignup } from "./actions";
 import { toast } from "sonner";
 import { cn } from "@krain/ui/lib/utils";
+import type { WhitelistSignupResult } from "@krain/session/types";
 
 export default function HomePage() {
   // Use the shared session hook for authentication state
@@ -24,6 +25,7 @@ export default function HomePage() {
     sessionValidated,
     isValidatingSession,
     error: sessionError,
+    refreshSession,
   } = useSession();
 
   // Use Privy hook directly for login and link wallet/email actions
@@ -32,160 +34,205 @@ export default function HomePage() {
   // State specific to this page
   const [isSignedUp, setIsSignedUp] = useState(false);
   const [isPerformingAction, setIsPerformingAction] = useState(false);
-  const isLoading = !ready || isValidatingSession || isPerformingAction;
 
   // Better wallet detection function
   const hasConnectedWallet = useCallback(() => {
-    // Check session user first
-    if (
-      user?.linkedAccounts?.some((acc: any) => acc.type === "wallet") ||
-      (user as any)?.walletAddress
-    ) {
+    // Check session user first (more reliable after validation)
+    if (user?.wallet?.address) return true;
+    // Fallback check on privyUser - less reliable for current session state
+    if (privyUser?.wallet?.address) return true;
+    // Check linkedAccounts in both
+    if (user?.linkedAccounts?.some((acc: string) => acc.startsWith("0x")))
       return true;
-    }
-
-    // Also check Privy's user object directly
-    if (
-      privyUser?.wallet?.address ||
-      privyUser?.linkedAccounts?.some((acc: any) => acc.type === "wallet")
-    ) {
+    if (privyUser?.linkedAccounts?.some((acc: any) => acc.type === "wallet"))
       return true;
-    }
-
     return false;
   }, [user, privyUser]);
 
   // Effect to log wallet information when user changes
   useEffect(() => {
-    if (authenticated && user) {
-      console.log("User wallet info:", {
-        sessionUserWallet: (user as any)?.walletAddress,
-        hasLinkedWallet: user?.linkedAccounts?.some(
-          (acc: any) => acc.type === "wallet",
-        ),
-        privyUserWallet: privyUser?.wallet?.address,
-        hasPrivyLinkedWallet: privyUser?.linkedAccounts?.some(
-          (acc: any) => acc.type === "wallet",
-        ),
-        hasWallet: hasConnectedWallet(),
+    if (ready && authenticated && user) {
+      console.log("User/Session State:", {
+        privyReady: ready,
+        privyAuthenticated: authenticated,
+        sessionValidated,
+        isValidatingSession,
+        sessionUser: user, // Log the user object from useSession
+        privyUser, // Log the user object from usePrivy for comparison
       });
     }
-  }, [authenticated, user, privyUser, hasConnectedWallet]);
+  }, [
+    ready,
+    authenticated,
+    user,
+    privyUser,
+    sessionValidated,
+    isValidatingSession,
+  ]);
 
-  // Handler to initiate signup process
-  const handleSignup = async () => {
-    // 1. Check if authenticated
-    if (!authenticated || !user) {
-      login();
-      return;
-    }
-
-    // 2. Check if email is linked
-    if (!user.email?.address) {
-      linkEmail();
-      return;
-    }
-
-    // 3. Check if wallet is linked
-    if (!hasConnectedWallet()) {
-      linkWallet();
-      return;
-    }
-
-    // 4. Synchronize the wallet from Privy to the session if needed
-    if (privyUser?.wallet?.address && !user.wallet?.address) {
-      console.log("Synchronizing wallet from Privy to session before signup", {
-        privyWallet: privyUser.wallet.address,
-        sessionWallet: user.wallet?.address,
-      });
-
-      // Force a session validation to update the wallet
-      toast.info("Updating wallet information...");
-
-      try {
-        // Wait for a moment for session to update
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Check if wallet is now in session
-        const response = await fetch("/api/user", { method: "GET" });
-        if (!response.ok) {
-          throw new Error("Failed to refresh user data");
-        }
-      } catch (error) {
-        console.error("Error synchronizing wallet:", error);
-        toast.error("Failed to synchronize wallet data. Please try again.");
-        return;
+  // Define handlers that call Privy and then explicitly refresh the session
+  const triggerLinkEmailAndRefresh = async () => {
+    setIsPerformingAction(true); // Use isPerformingAction to disable button during link+refresh
+    try {
+      await linkEmail();
+      // Wait a brief moment for Privy state to potentially update locally
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      toast.info("Verifying email connection...");
+      if (refreshSession) {
+        refreshSession(); // Trigger the validation flow in useSession
       }
+    } catch (e) {
+      console.error("Error linking email", e);
+      toast.error("Failed to link email.");
+    } finally {
+      // Let useSession handle disabling via isValidatingSession
+      setIsPerformingAction(false);
+      // Keep button disabled until validation finishes
     }
+  };
 
-    // 5. Call the signup server action
+  const triggerLinkWalletAndRefresh = async () => {
     setIsPerformingAction(true);
     try {
-      const result = await signupForWhitelist({ userId: user.id });
-      if (result.status === "success") {
-        setIsSignedUp(true);
-        toast.success(result.message || "Signup successful!");
-      } else {
-        // Handle specific errors
-        if (result.message?.includes("Already signed up")) {
+      await linkWallet();
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      toast.info("Verifying wallet connection...");
+      if (refreshSession) {
+        refreshSession();
+      }
+    } catch (e) {
+      console.error("Error linking wallet", e);
+      toast.error("Failed to link wallet.");
+    } finally {
+      setIsPerformingAction(false);
+    }
+  };
+
+  // Simplified handleSignup - checks are now handled by button logic
+  const handleSignup = async () => {
+    // ---> ADD THIS LOG <---
+    console.log("handleSignup function invoked!");
+
+    // Re-verify based on the current session state
+    if (!sessionValidated || !user?.email?.address || !hasConnectedWallet()) {
+      toast.error(
+        "Session not ready or missing required info. Please wait or try reconnecting/refreshing.",
+      );
+      return;
+    }
+
+    setIsPerformingAction(true);
+    try {
+      console.log(
+        "[" + new Date().toISOString() + "] Calling signupForWhitelist...",
+      );
+
+      // Type the result explicitly
+      const result: WhitelistSignupResult = await signupForWhitelist({
+        userId: user.id,
+      });
+
+      console.log(
+        "[" +
+          new Date().toISOString() +
+          "] Await signupForWhitelist completed. Result:",
+        result,
+      );
+      console.log("Signup action result:", result);
+
+      // Check the result status by narrowing the type
+      setIsPerformingAction(false); // Set loading false regardless of outcome now
+
+      if (result && "status" in result) {
+        // Type is narrowed to { status: "already_signed_up" | "error", message: string }
+        if (result.status === "already_signed_up") {
+          console.log("Setting isSignedUp to true (already signed up)");
           setIsSignedUp(true);
-          toast.info(result.message);
+          toast.info(result.message || "You are already signed up!");
         } else {
+          // Handles the { status: "error", message: "..." } case
+          console.log(`Signup action returned error: ${result.message}`);
           toast.error(result.message || "Signup failed. Please try again.");
         }
+      } else if (result && "success" in result && result.success === true) {
+        // Type is narrowed to { success: true }
+        console.log("Setting isSignedUp to true (success case)");
+        setIsSignedUp(true);
+        toast.success("Signup successful!");
+      } else {
+        // Handle unexpected result format
+        console.log(
+          `Handling unexpected result format: ${JSON.stringify(result)}`,
+        );
+        toast.error("Received unexpected result from server.");
       }
     } catch (error) {
-      console.error("Error calling signupForWhitelist action:", error);
+      // This catch block might now be less likely to hit if the action returns structured errors,
+      // but keep it for network errors or unexpected issues.
+      console.error(
+        "[" + new Date().toISOString() + "] Error caught in handleSignup:",
+        error,
+      );
+      console.log("Setting isPerformingAction to false (error case)");
+      setIsPerformingAction(false);
       if (error instanceof Error) {
-        if (error.message.includes("Already signed up")) {
-          setIsSignedUp(true);
-          toast.info("You are already signed up!");
-        } else {
-          toast.error(`Signup failed: ${error.message}. Please try again.`);
-        }
+        toast.error(`Signup failed: ${error.message}. Please try again.`);
       } else {
         toast.error("An unexpected error occurred during signup.");
       }
     } finally {
-      setIsPerformingAction(false);
+      console.log("Executing finally block for handleSignup");
+      // Double ensure it's false, though should be set in try/catch now
+      if (isPerformingAction) {
+        // Avoid unnecessary state set if already false
+        console.log("Setting isPerformingAction to false (finally block)");
+        setIsPerformingAction(false);
+      }
     }
   };
 
   // Effect to check signup status once session is validated
   useEffect(() => {
     let isMounted = true;
-    if (sessionValidated && user?.id && !isSignedUp) {
-      console.log(
-        "Session validated, checking whitelist signup status for user:",
-        user.id,
-      );
 
-      const checkStatus = async () => {
-        try {
-          const result = await checkWhitelistSignup({ userId: user.id });
-          console.log("checkWhitelistSignup result:", result);
-          if (isMounted) {
-            if (result.isSignedUp) {
-              setIsSignedUp(true);
-            } else {
-              setIsSignedUp(false);
-            }
-          }
-        } catch (error) {
-          console.error("Error checking signup status:", error);
-          if (isMounted) {
-            setIsSignedUp(false);
+    // Check signup status whenever user is authenticated and session is validated
+    const checkSignupStatus = async () => {
+      if (!sessionValidated || !user?.id) return;
+
+      console.log("Checking whitelist signup status for user:", user.id);
+
+      try {
+        const result = await checkWhitelistSignup({ userId: user.id });
+        console.log("checkWhitelistSignup result:", result);
+
+        if (isMounted && result.sessionReady) {
+          setIsSignedUp(result.isSignedUp);
+
+          // Show toast notification if already signed up
+          if (result.isSignedUp) {
+            toast.success("You're already on the KRAIN whitelist!", {
+              id: "whitelist-status",
+              duration: 3000,
+            });
           }
         }
-      };
+      } catch (error) {
+        console.error("Error checking signup status:", error);
+        if (isMounted) {
+          setIsSignedUp(false);
+        }
+      }
+    };
 
-      void checkStatus();
+    // Run the check immediately if conditions are met
+    if (authenticated && sessionValidated && user?.id) {
+      void checkSignupStatus();
     }
 
     return () => {
       isMounted = false;
     };
-  }, [sessionValidated, user?.id, isSignedUp]);
+  }, [authenticated, sessionValidated, user?.id]); // Dependencies include authenticated state to re-run when auth changes
 
   // Render logic based on session state and signup status
   const renderContent = () => {
@@ -252,10 +299,12 @@ export default function HomePage() {
     );
   };
 
+  // Updated renderButton logic - Rely on useSession state directly
   const renderButton = () => {
-    const disableButtons = isLoading || isPerformingAction;
+    // Disable buttons if Privy isn't ready, session is validating, or an action is performing
+    const disableButtons = !ready || isValidatingSession || isPerformingAction;
 
-    if (!ready) return null;
+    if (!ready) return null; // Don't render if Privy isn't ready
 
     if (!authenticated) {
       return (
@@ -265,12 +314,33 @@ export default function HomePage() {
       );
     }
 
-    if (authenticated && sessionValidated) {
+    // Show validating status
+    if (isValidatingSession) {
+      return (
+        <Button size="lg" disabled={true}>
+          Verifying Session...
+        </Button>
+      );
+    }
+
+    // After validation attempt, check results based on `sessionValidated` and `user` state
+    if (!sessionValidated && !isValidatingSession) {
+      // If not validated and not currently validating, likely an error occurred or initial state
+      return (
+        <Button size="lg" onClick={refreshSession} disabled={disableButtons}>
+          {sessionError ? "Retry Validation" : "Check Status"}
+        </Button>
+      );
+    }
+
+    // If validated, proceed with checks
+    if (sessionValidated) {
+      // 1. Check Email
       if (!user?.email?.address) {
         return (
           <Button
             size="lg"
-            onClick={linkEmail}
+            onClick={triggerLinkEmailAndRefresh} // Use new handler
             disabled={disableButtons || !user}
           >
             Connect Email
@@ -278,11 +348,12 @@ export default function HomePage() {
         );
       }
 
+      // 2. Check Wallet
       if (!hasConnectedWallet()) {
         return (
           <Button
             size="lg"
-            onClick={linkWallet}
+            onClick={triggerLinkWalletAndRefresh} // Use new handler
             disabled={disableButtons || !user}
           >
             Connect Wallet
@@ -290,25 +361,40 @@ export default function HomePage() {
         );
       }
 
+      // 3. Show Signup button
       if (!isSignedUp) {
+        // ---> ADD THIS LOG <---
+        console.log("Rendering 'Sign Up' button state:", {
+          disableButtons, // Log the actual value being passed
+          isSignedUp,
+          sessionValidated,
+          isValidatingSession,
+          isPerformingAction,
+        });
         return (
           <Button size="lg" onClick={handleSignup} disabled={disableButtons}>
-            Sign Up for Whitelist
+            {isPerformingAction ? "Signing Up..." : "Sign Up for Whitelist"}
           </Button>
         );
       }
     }
 
-    if (isLoading || (authenticated && sessionValidated && isSignedUp)) {
+    // If signed up, render nothing
+    if (isSignedUp) {
       return null;
     }
 
-    return null;
+    // Fallback case (e.g., error state not handled above)
+    return (
+      <Button size="lg" disabled={true}>
+        {sessionError ? `Error: ${sessionError}` : "Loading..."}
+      </Button>
+    );
   };
 
   return (
     <main className="flex-grow flex flex-col items-center justify-center p-4 text-center">
-      <Card className={cn("w-full max-w-lg", isLoading && "animate-pulse")}>
+      <Card className={cn("w-full max-w-lg")}>
         <CardHeader>
           <CardTitle className="text-2xl sm:text-4xl">
             <h1>KRAIN Whitelist Signup</h1>

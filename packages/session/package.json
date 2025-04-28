@@ -26,17 +26,19 @@
   },
   "dependencies": {
     "@krain/db": "workspace:*",
+    "@krain/typescript-config": "workspace:*",
     "@krain/utils": "workspace:*",
     "@privy-io/react-auth": "^2.6.2",
-    "react": "catalog:",
     "@privy-io/server-auth": "^1.19.0",
+    "@types/lodash.clonedeep": "^4.5.9",
     "@upstash/ratelimit": "^2.0.5",
     "@upstash/redis": "^1.28.3",
     "iron-session": "^8.0.1",
+    "lodash.clonedeep": "^4.5.0",
     "next": "catalog:",
+    "react": "catalog:",
     "server-only": "^0.0.1",
-    "zod": "^3.22.4",
-    "@krain/typescript-config": "workspace:*"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@krain/eslint-config": "workspace:*",

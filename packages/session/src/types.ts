@@ -76,6 +76,7 @@ export type SessionData = {
   fingerprint?: Fingerprint;
   lastActivity?: number;
   loginAttempts?: number;
+  loginBlockedUntil?: number | null;
   lastUpdated?: number;
   lastRotated?: number;
 };
@@ -85,7 +86,7 @@ export const sessionDataSchema = z.object({
   user: z
     .object({
       id: z.string(),
-      createdAt: z.date(),
+      createdAt: z.coerce.date(),
       wallet: z
         .object({
           address: z.string(),
@@ -123,6 +124,7 @@ export const sessionDataSchema = z.object({
   fingerprint: fingerprintSchema.optional(),
   lastActivity: z.number().optional(),
   loginAttempts: z.number().optional(),
+  loginBlockedUntil: z.number().nullable().optional(),
   lastUpdated: z.number().optional(),
   lastRotated: z.number().optional(),
 });
@@ -158,3 +160,9 @@ export interface SessionUser {
   role?: string;
   // Add any other fields consistently needed by clients
 }
+
+// ---> ADD TYPE HERE <---
+export type WhitelistSignupResult =
+  | { success: true }
+  | { status: "already_signed_up"; message: string }
+  | { status: "error"; message: string };
