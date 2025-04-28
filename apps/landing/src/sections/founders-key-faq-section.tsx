@@ -73,7 +73,7 @@ const faqs = [
     id: "Q10",
     question: "When does the sale take place?",
     answer:
-      "Whitelist Sale: May 6th at 4PM UTC</br>Public Sale: May 6th at 5PM UTC",
+      "Whitelist Sale: May 6th at 2PM UTC</br>Public Sale: May 6th at 6PM UTC",
   },
   {
     id: "Q11",

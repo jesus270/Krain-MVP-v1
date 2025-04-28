@@ -73,13 +73,13 @@ export function FoundersKeySection() {
             {/* Description */}
             <p className="text-sm sm:text-base text-gray-300 text-left mb-4 max-w-lg xl:text-lg xl:max-w-xl">
               Unlock $2,000+ in Value. $KRAIN, Staking, Airdrops, Hosting, and
-              More—All with One Key. Only 1500 Keys Available.
+              More—All with One Key. Only 1500 available.
             </p>
 
             {/* Price */}
             <div className="mb-4 text-left">
               <p className="text-xs sm:text-sm text-gray-400 xl:text-base">
-                Price (will be converted to ETH at the time of sale)
+                Price (converted to ETH at sale)
               </p>
               <p className="text-xl sm:text-2xl font-semibold xl:text-3xl">
                 Whitelist: $150 each
