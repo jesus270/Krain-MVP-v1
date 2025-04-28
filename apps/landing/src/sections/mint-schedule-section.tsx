@@ -6,13 +6,13 @@ const scheduleItems = [
     date: "MAY 6th",
     time: "2PM UTC",
     title: "Whitelist Sale",
-    description: "1st hour of sale, Whitelist Participants Only",
+    description: "1st 4 hours of the sale, Whitelist Participants Only",
   },
   {
     date: "MAY 6th",
     time: "6PM UTC",
     title: "Public Sale",
-    description: "Open to the public",
+    description: "Open to the Public",
   },
 ];
 
