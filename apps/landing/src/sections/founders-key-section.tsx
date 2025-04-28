@@ -138,14 +138,14 @@ export function FoundersKeySection() {
                   />
                 </Button>
               </Link>
-              <p className="text-sm sm:text-base text-gray-300 mb-8">
-                The sale will take place on the{" "}
-                <Link href="https://arenavs.com/marketplace" target="_blank">
-                  Arena VS Marketplace
-                </Link>
-                .
-              </p>
             </div>
+            <p className="text-sm sm:text-base text-gray-300 mb-8">
+              The sale will take place on the{" "}
+              <Link href="https://arenavs.com/marketplace" target="_blank">
+                Arena VS Marketplace
+              </Link>
+              .
+            </p>
           </div>
         </div>
       </div>
