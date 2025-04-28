@@ -1,5 +1,6 @@
 import { TagChip } from "@/components/tag-chip";
 import { CalendarIcon } from "lucide-react";
+import Link from "next/link";
 
 const scheduleItems = [
   {
@@ -29,6 +30,13 @@ export function MintScheduleSection() {
         <h2 className="text-3xl sm:text-4xl font-bold mb-3">Mint Schedule</h2>
         <p className="text-sm sm:text-base text-gray-300 mb-8">
           KRAIN Founders Key mint goes live on MAY 6th at 2PM UTC.
+        </p>
+        <p className="text-sm sm:text-base text-gray-300 mb-8">
+          The sale will take place on the{" "}
+          <Link href="https://arenavs.com/marketplace" target="_blank">
+            Arena VS Marketplace
+          </Link>
+          .
         </p>
 
         <div className="space-y-6">

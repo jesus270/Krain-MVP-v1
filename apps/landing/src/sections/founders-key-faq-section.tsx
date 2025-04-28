@@ -53,7 +53,7 @@ const faqs = [
   },
   {
     id: "Q7",
-    question: "What’s the benefit of the 2x airdrop and 15% pool?",
+    question: "What's the benefit of the 2x airdrop and 15% pool?",
     answer:
       "Key holders receive double the airdrop points they earn and share of a dedicated 15% of the total airdrop pool, reserved only for Founders Key owners. That means significantly higher $KRAIN allocations.",
   },
@@ -61,7 +61,7 @@ const faqs = [
     id: "Q8",
     question: "What is the Whitelabel Hosting License?",
     answer:
-      "Each Key includes a license to run your own AI app hosting company using KRAIN’s infrastructure — normally priced at $1200 per year. This gives you the ability to build your own business with recurring revenue.",
+      "Each Key includes a license to run your own AI app hosting company using KRAIN's infrastructure — normally priced at $1200 per year. This gives you the ability to build your own business with recurring revenue.",
   },
   {
     id: "Q9",
@@ -85,7 +85,7 @@ const faqs = [
     id: "Q12",
     question: "Where can I mint the Founders Key?",
     answer:
-      "Minting will be available on the <a href='https://https://arenavs.com/marketplace' target='_blank' rel='noopener noreferrer'>Arena VS Marketplace</a>. Ensure you are on the correct site and watch for official announcements.",
+      "Minting will be available on the <a href='https://arenavs.com/marketplace' target='_blank' rel='noopener noreferrer'>Arena VS Marketplace</a>. Ensure you are on the correct site and watch for official announcements.",
   },
 ];
 
@@ -163,18 +163,18 @@ export function FoundersKeyFaqSection() {
           <p className="text-sm sm:text-base text-gray-300">
             If you can't find an answer that you're looking for, contact us via
             DM{" "}
-            <a
+            <Link
               href="https://x.com/krain_ai"
               target="_blank"
               rel="noopener noreferrer"
             >
               @krain_ai
-            </a>{" "}
-            on X or click the support bubble in the bottom right corner of our
-            websites.
+            </Link>{" "}
+            on X or click the support bubble in the bottom right corner of the
+            whitelist signup page.
             <br />
             <br />
-            Note: TGE is planned for 3rd Quarter 2025 and we’re actively in
+            Note: TGE is planned for 3rd Quarter 2025 and we're actively in
             conversations with leading Tier 1 exchanges.
           </p>
         </div>

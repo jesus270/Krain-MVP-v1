@@ -1,5 +1,6 @@
 import { Button } from "@krain/ui/components/ui/button";
 import { GradientButton } from "@krain/ui/components/ui/gradient-button";
+import Link from "next/link";
 import { HammerIcon } from "lucide-react";
 
 // Define benefits based on the mockup
@@ -109,12 +110,17 @@ export function FoundersKeySection() {
 
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 w-full">
-              <GradientButton
-                className="rounded-full p-6 cursor-pointer w-full sm:w-auto"
-                // variant="secondary"
+              <Link
+                href="https://whitelist.krain.ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto"
               >
-                <div className="font-medium">Join Whitelist</div>
-              </GradientButton>
+                <GradientButton className="rounded-full p-6 cursor-pointer w-full sm:w-auto">
+                  <div className="font-medium">Join Whitelist</div>
+                </GradientButton>
+              </Link>
+              {/*
               <Button
                 variant="outline"
                 className="w-full rounded-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white p-6 cursor-pointer flex items-center gap-2"
@@ -126,6 +132,14 @@ export function FoundersKeySection() {
                   className="w-8 h-8 sm:w-10 sm:h-10 xl:w-12 xl:h-12"
                 />
               </Button>
+              */}
+              <p className="text-sm sm:text-base text-gray-300 mb-8">
+                The sale will take place on the{" "}
+                <Link href="https://arenavs.com/marketplace" target="_blank">
+                  Arena VS Marketplace
+                </Link>
+                .
+              </p>
             </div>
           </div>
         </div>
