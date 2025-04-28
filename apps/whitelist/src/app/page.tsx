@@ -195,17 +195,42 @@ export default function HomePage() {
   useEffect(() => {
     let isMounted = true;
 
-    // Check signup status whenever user is authenticated and session is validated
+    // Check signup status whenever user is authenticated, session is validated,
+    // AND email/wallet details are confirmed available in the client state.
     const checkSignupStatus = async () => {
-      if (!sessionValidated || !user?.id) return;
+      // ---> MODIFIED CONDITION: Check user, email, and wallet exist client-side first
+      if (
+        !sessionValidated ||
+        !user?.id ||
+        !user?.email?.address ||
+        !hasConnectedWallet()
+      ) {
+        console.log(
+          "Deferring signup check: session/user details not ready yet.",
+          {
+            sessionValidated,
+            userId: user?.id,
+            userEmail: user?.email?.address,
+            hasWallet: hasConnectedWallet(),
+          },
+        );
+        return; // Exit early if prerequisites aren't met
+      }
 
       console.log("Checking whitelist signup status for user:", user.id);
 
+      // ---> ADD isPerformingAction logic around the check <---
+      setIsPerformingAction(true); // Indicate a check is in progress
+
       try {
+        // Pass the validated email and wallet to the action if needed,
+        // though the action currently re-fetches from session.
+        // Keeping it simple by just passing userId for now.
         const result = await checkWhitelistSignup({ userId: user.id });
         console.log("checkWhitelistSignup result:", result);
 
         if (isMounted && result.sessionReady) {
+          // Check sessionReady from action too
           setIsSignedUp(result.isSignedUp);
 
           // Show toast notification if already signed up
@@ -215,24 +240,43 @@ export default function HomePage() {
               duration: 3000,
             });
           }
+        } else if (isMounted && !result.sessionReady) {
+          // If action says session isn't ready, maybe wait and retry?
+          // For now, just log it. Could implement a retry mechanism here.
+          console.warn(
+            "checkWhitelistSignup indicated server session not ready.",
+          );
+          // Optionally reset isSignedUp? Or leave it as is until next check?
+          // setIsSignedUp(false); // Resetting might cause flicker
         }
       } catch (error) {
         console.error("Error checking signup status:", error);
         if (isMounted) {
-          setIsSignedUp(false);
+          // Don't assume false on error, could be temporary network issue
+          // setIsSignedUp(false);
+        }
+      } finally {
+        if (isMounted) {
+          setIsPerformingAction(false); // Ensure loading state is cleared
         }
       }
     };
 
-    // Run the check immediately if conditions are met
-    if (authenticated && sessionValidated && user?.id) {
-      void checkSignupStatus();
-    }
+    // Run the check (now with stricter conditions)
+    void checkSignupStatus();
 
     return () => {
       isMounted = false;
     };
-  }, [authenticated, sessionValidated, user?.id]); // Dependencies include authenticated state to re-run when auth changes
+    // ---> MODIFIED DEPENDENCIES: Add user object details and hasConnectedWallet result <---
+  }, [
+    authenticated,
+    sessionValidated,
+    user?.id,
+    user?.email?.address,
+    hasConnectedWallet,
+    refreshSession,
+  ]); // Added dependencies
 
   // Render logic based on session state and signup status
   const renderContent = () => {
