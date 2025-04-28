@@ -3,16 +3,16 @@ import { CalendarIcon } from "lucide-react";
 
 const scheduleItems = [
   {
-    date: "MAY 5",
-    time: "4PM UTC",
+    date: "MAY 6th",
+    time: "2PM UTC",
     title: "Whitelist Sale",
-    description: "1st hour of sale",
+    description: "1st 4 hours of the sale, Whitelist Participants Only",
   },
   {
-    date: "MAY 6",
-    time: "5PM UTC",
-    title: "Private Period",
-    description: "Open to the public",
+    date: "MAY 6th",
+    time: "6PM UTC",
+    title: "Public Sale",
+    description: "Open to the Public",
   },
 ];
 
@@ -28,7 +28,7 @@ export function MintScheduleSection() {
 
         <h2 className="text-3xl sm:text-4xl font-bold mb-3">Mint Schedule</h2>
         <p className="text-sm sm:text-base text-gray-300 mb-8">
-          KRAIN Founders Key mint goes live on MAY 6 at 4PM UTC.
+          KRAIN Founders Key mint goes live on MAY 6th at 2PM UTC.
         </p>
 
         <div className="space-y-6">
