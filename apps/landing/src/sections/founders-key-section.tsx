@@ -128,7 +128,7 @@ export function FoundersKeySection() {
               >
                 <Button
                   variant="outline"
-                  className="w-full rounded-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white p-6 cursor-pointer flex items-center gap-2"
+                  className="w-full rounded-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white px-8 py-6 cursor-pointer flex items-center gap-2"
                 >
                   <span className="">Get Your Referral Code </span>
                   <img
