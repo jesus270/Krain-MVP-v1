@@ -171,7 +171,14 @@ export function FoundersKeyFaqSection() {
               @krain_ai
             </Link>{" "}
             on X or click the support bubble in the bottom right corner of the
-            whitelist signup page.
+            <Link
+              href="https://whitelist.krain.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              whitelist
+            </Link>{" "}
+            signup page.
             <br />
             <br />
             Note: TGE is planned for 3rd Quarter 2025 and we're actively in

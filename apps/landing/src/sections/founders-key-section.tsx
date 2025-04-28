@@ -120,19 +120,24 @@ export function FoundersKeySection() {
                   <div className="font-medium">Join Whitelist</div>
                 </GradientButton>
               </Link>
-              {/*
-              <Button
-                variant="outline"
-                className="w-full rounded-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white p-6 cursor-pointer flex items-center gap-2"
+              <Link
+                href="https://krain.arenavs.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto"
               >
-                <span className="">View on </span>
-                <img
-                  src="/logo-arenavs.svg"
-                  alt="Arena"
-                  className="w-8 h-8 sm:w-10 sm:h-10 xl:w-12 xl:h-12"
-                />
-              </Button>
-              */}
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white p-6 cursor-pointer flex items-center gap-2"
+                >
+                  <span className="">Get Your Referral Code </span>
+                  <img
+                    src="/logo-arenavs.svg"
+                    alt="Arena"
+                    className="w-8 h-8 sm:w-10 sm:h-10 xl:w-12 xl:h-12"
+                  />
+                </Button>
+              </Link>
               <p className="text-sm sm:text-base text-gray-300 mb-8">
                 The sale will take place on the{" "}
                 <Link href="https://arenavs.com/marketplace" target="_blank">
