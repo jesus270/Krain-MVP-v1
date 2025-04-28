@@ -48,7 +48,7 @@ const faqs = [
     question: "Where can I learn more about KRAIN?",
     answer: (
       <>
-        You can learn more about Krain by using our systems, reading out white
+        You can learn more about Krain by using our systems, reading our white
         paper, and participating in our community. Join our{" "}
         <Link
           className="font-bold text-blue-500 hover:text-blue-400 underline"

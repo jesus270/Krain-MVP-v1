@@ -1,6 +1,7 @@
 import { Redis } from "@upstash/redis";
-import { SessionData, SessionOptions } from "./types";
+import { SessionData, SessionOptions, sessionDataSchema } from "./types";
 import { log } from "@krain/utils";
+import { ZodError } from "zod";
 
 const OPERATION_TIMEOUT = 5000; // 5 seconds
 
@@ -36,30 +37,63 @@ export class RedisSessionStore {
   }
 
   async get(userId: string): Promise<SessionData | null> {
+    const redisKey = this.getKey(userId);
     try {
       const data = await this.withTimeout(
-        this.redis.get<string>(this.getKey(userId)),
+        this.redis.get<string>(redisKey),
         "get_session",
       );
 
       if (data) {
-        log.info("Session retrieved", {
-          operation: "get_session",
+        log.info("RedisStore.get: Retrieved raw data from Redis", {
+          operation: "redis_store_get_raw",
           entity: "REDIS",
           userId,
+          redisKey,
+          rawData: data,
         });
 
         try {
-          return JSON.parse(data);
-        } catch (parseError) {
-          log.error("Failed to parse session data", {
-            operation: "get_session",
+          const jsonData = JSON.parse(data);
+          log.info("RedisStore.get: JSON parsed data successfully", {
+            operation: "redis_store_get_json_parsed",
+            entity: "REDIS",
+            userId,
+            // Avoid logging potentially large/sensitive data here unless needed for debug
+          });
+
+          try {
+            const validatedData = sessionDataSchema.parse(jsonData);
+            log.info("RedisStore.get: Zod parsed data successfully", {
+              operation: "redis_store_get_zod_parsed",
+              entity: "REDIS",
+              userId,
+            });
+            return validatedData;
+          } catch (zodError) {
+            log.error("RedisStore.get: Failed to parse session data with Zod", {
+              operation: "redis_store_get_zod_error",
+              entity: "REDIS",
+              userId,
+              error:
+                zodError instanceof Error ? zodError.message : String(zodError),
+              issues:
+                zodError instanceof ZodError ? zodError.issues : undefined,
+              jsonDataString: data, // Log the raw string that failed Zod parse
+            });
+            // Decide if we should return null or throw. Returning null might be safer.
+            return null;
+          }
+        } catch (jsonParseError) {
+          log.error("RedisStore.get: Failed to JSON.parse session data", {
+            operation: "redis_store_get_json_error",
             entity: "REDIS",
             userId,
             error:
-              parseError instanceof Error
-                ? parseError.message
-                : String(parseError),
+              jsonParseError instanceof Error
+                ? jsonParseError.message
+                : String(jsonParseError),
+            rawData: data, // Log the raw string that failed JSON parse
           });
           return null;
         }
@@ -84,6 +118,7 @@ export class RedisSessionStore {
       userId,
     });
     let stringifiedData: string | null = null;
+    const redisKey = this.getKey(userId);
     try {
       if (data === null) {
         log.info("RedisStore.set: Data is null, deleting key", {
@@ -123,9 +158,10 @@ export class RedisSessionStore {
         operation: "redis_store_set_redis_attempt",
         entity: "REDIS",
         userId,
+        redisKey,
       });
       await this.withTimeout(
-        this.redis.set(this.getKey(userId), stringifiedData), // Use stringified data
+        this.redis.set(redisKey, stringifiedData),
         "set_session",
       );
       log.info(
@@ -134,6 +170,9 @@ export class RedisSessionStore {
           operation: "redis_store_set_redis_ok", // Changed operation code
           entity: "REDIS",
           userId,
+          redisKey,
+          dataBeingSet: stringifiedData,
+          userBeingSet: data?.user ? JSON.stringify(data.user) : "undefined",
         },
       );
     } catch (error) {

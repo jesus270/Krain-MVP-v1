@@ -3,10 +3,36 @@ import { handlePrivyAuthServer } from "../server-auth-handler";
 import { log } from "@krain/utils";
 
 export async function handleAuthCallback(request: NextRequest) {
+  let rawBodyText: string | null = null;
   try {
+    // Clone the request to read the body safely
+    const clonedRequest = request.clone();
+    rawBodyText = await clonedRequest.text();
+
+    // Log the raw text body first
+    log.info("Raw request body in /api/auth/callback", {
+      operation: "handle_auth_callback_raw_body",
+      entity: "AUTH",
+      rawBody: rawBodyText,
+    });
+
+    // Now parse the JSON from the original request
     const privyData = await request.json();
 
+    // Log the received data
+    log.info("Received data in /api/auth/callback", {
+      operation: "handle_auth_callback_received_data",
+      entity: "AUTH",
+      // Ensure logging complex objects doesn't truncate important fields
+      receivedBody: JSON.stringify(privyData, null, 2), // Log the stringified body
+    });
+
     if (!privyData.id) {
+      log.warn("Invalid privyData received in callback: missing id", {
+        operation: "handle_auth_callback_invalid_data",
+        entity: "AUTH",
+        receivedBody: JSON.stringify(privyData, null, 2),
+      });
       return NextResponse.json(
         { error: "Invalid user data", success: false },
         { status: 400 },
@@ -35,6 +61,7 @@ export async function handleAuthCallback(request: NextRequest) {
         error:
           authError instanceof Error ? authError.message : String(authError),
         stack: authError instanceof Error ? authError.stack : undefined,
+        rawRequestBody: rawBodyText, // Add raw body to fatal error log
       });
       // We'll still create a response with the cookie but return an error status
     }
@@ -126,6 +153,7 @@ export async function handleAuthCallback(request: NextRequest) {
       entity: "AUTH",
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
+      rawRequestBody: rawBodyText, // Add raw body to fatal error log
     });
 
     return NextResponse.json(

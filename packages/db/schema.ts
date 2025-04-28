@@ -444,3 +444,23 @@ export const telegramDailyMessageCountTable = pgTable(
     ),
   }),
 );
+
+export const whitelistSignupTable = pgTable(
+  "whitelistSignup",
+  {
+    id: serial("id").primaryKey(),
+    email: varchar("email", { length: 255 }).notNull(),
+    walletAddress: varchar("walletAddress", { length: 255 }).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_whitelistSignup_email").on(table.email),
+    index("idx_whitelistSignup_walletAddress").on(table.walletAddress),
+    index("idx_whitelistSignup_createdAt").on(table.createdAt),
+    unique("unq_whitelistSignup_email_wallet").on(
+      table.email,
+      table.walletAddress,
+    ),
+  ],
+);
+export type WhitelistSignup = typeof whitelistSignupTable.$inferSelect;

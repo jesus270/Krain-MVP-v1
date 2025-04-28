@@ -108,18 +108,19 @@ export async function handlePrivyAuthServer(privyData: PrivyUserData) {
       })
       .filter((id): id is string => id !== null); // Filter out nulls
 
+    // Explicitly check and assign email
+    let userEmail: { address: string } | undefined = undefined;
+    if (privyData.email && privyData.email.address) {
+      userEmail = { address: privyData.email.address };
+    }
+
     const sessionUser: User = {
       id: privyData.id,
       createdAt: getCreatedAtDate(),
-      // Ensure wallet matches { address: string } structure only if address exists
       wallet: privyData.wallet?.address
         ? { address: privyData.wallet.address }
         : undefined,
-      // Ensure email matches { address: string } structure only if address exists
-      email: privyData.email?.address
-        ? { address: privyData.email.address }
-        : undefined,
-      // Use the extracted string identifiers for linkedAccounts
+      email: userEmail,
       linkedAccounts: linkedAccountStrings,
       role: "user", // Default role
       // Initialize optional fields as undefined
@@ -135,11 +136,12 @@ export async function handlePrivyAuthServer(privyData: PrivyUserData) {
       announcementCommentCount: undefined,
     };
 
-    log.info("Constructed sessionUser for setUserSession", {
-      operation: "construct_session_user",
+    log.info("Constructed sessionUser before calling setUserSession", {
+      operation: "handle_auth_server_constructed_user",
       entity: "AUTH",
       userId: privyData.id,
-      constructedUser: sessionUser, // Log the final object being passed
+      // Log the critical parts, especially email
+      constructedUser: JSON.stringify(sessionUser, null, 2),
     });
 
     // --- Database Operations (Try/Catch) ---
