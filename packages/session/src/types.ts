@@ -21,16 +21,21 @@ export const MAX_LOGIN_ATTEMPTS = 5;
 // Duration of login block after too many attempts
 export const LOGIN_BLOCK_DURATION = 1000 * 60 * 15; // 15 minutes
 
+// ---> Define and Export UserWallet and UserEmail types <---
+export interface UserWallet {
+  address: string;
+}
+
+export interface UserEmail {
+  address: string;
+}
+
 // User data structure stored in session
 export interface User {
   id: string;
   createdAt: Date;
-  wallet?: {
-    address: string;
-  };
-  email?: {
-    address: string;
-  };
+  wallet?: UserWallet; // Use the defined type
+  email?: UserEmail; // Use the defined type
   linkedAccounts?: string[];
   role?: string;
   // Optional fields used in specific apps
@@ -163,6 +168,6 @@ export interface SessionUser {
 
 // ---> ADD TYPE HERE <---
 export type WhitelistSignupResult =
-  | { success: true }
+  | { success: true; email: string; walletAddress: string }
   | { status: "already_signed_up"; message: string }
   | { status: "error"; message: string };

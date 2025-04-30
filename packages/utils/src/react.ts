@@ -1,1 +1,2 @@
-export { useMediaQuery, useLocale } from "./hooks";
+export * from "./hooks";
+export { isValidEthereumAddress } from "./ethereum-client";
