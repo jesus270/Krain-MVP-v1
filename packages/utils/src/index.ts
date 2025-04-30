@@ -1,5 +1,5 @@
 export { isValidSolanaAddress } from "./solana";
-export { isValidEthereumAddress } from "./ethereum";
+export { isValidEthereumAddress } from "./ethereum-client";
 export { generateReferralCode } from "./referral";
 export { capitalize, capitalizeEachWord } from "./string";
 export { formatNumber } from "./format";

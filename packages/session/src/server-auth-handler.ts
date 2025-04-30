@@ -4,7 +4,7 @@ import { log } from "@krain/utils";
 import { db, userTable, userProfileTable, privyWalletTable } from "@krain/db";
 import { eq } from "drizzle-orm";
 import { setUserSession } from "./server";
-import { User } from "./types";
+import { User, UserEmail, UserWallet } from "./types";
 import { User as DbUser } from "@krain/db"; // Use DbUser type if needed
 
 // More detailed PrivyUserData interface based on potential Privy data
@@ -79,19 +79,44 @@ export async function handlePrivyAuthServer(privyData: PrivyUserData) {
       },
     });
 
+    // --- Fetch Existing DB User FIRST ---
+    let existingDbUser: DbUser | null = null;
+    try {
+      existingDbUser =
+        (await db.query.userTable.findFirst({
+          where: eq(userTable.privyId, privyData.id),
+          // Optionally include profile if needed for sessionUser
+          // with: { profile: true },
+        })) ?? null; // Ensure null if not found
+    } catch (dbFetchError) {
+      log.error("Failed to fetch existing user from DB", {
+        operation: "handle_auth_server_db_fetch_error",
+        entity: "AUTH",
+        userId: privyData.id,
+        error:
+          dbFetchError instanceof Error
+            ? dbFetchError.message
+            : String(dbFetchError),
+      });
+      // Continue even if fetch fails, maybe it's a new user
+    }
+
     // --- Construct sessionUser matching the 'User' type from types.ts ---
 
     // Helper to safely convert Privy createdAt to Date
     const getCreatedAtDate = (): Date => {
+      // Prioritize DB createdAt if available
+      if (existingDbUser?.createdAt) return existingDbUser.createdAt;
+      // Fallback to Privy data
       if (!privyData.createdAt) return new Date();
       if (typeof privyData.createdAt === "number")
         return new Date(privyData.createdAt);
       if (typeof privyData.createdAt === "string")
         return new Date(privyData.createdAt);
-      return new Date(); // Fallback
+      return new Date(); // Final fallback
     };
 
-    // Extract linked account identifiers (addresses for wallets/email, number for phone, subject for oauth)
+    // Extract linked account identifiers from Privy data
     const linkedAccountStrings: string[] = (privyData.linkedAccounts || [])
       .map((account) => {
         if (account.type === "wallet" || account.type === "email") {
@@ -106,24 +131,41 @@ export async function handlePrivyAuthServer(privyData: PrivyUserData) {
         }
         return null; // Ignore unknown/unhandled types
       })
-      .filter((id): id is string => id !== null); // Filter out nulls
+      .filter((id): id is string => id !== null);
 
-    // Explicitly check and assign email
-    let userEmail: { address: string } | undefined = undefined;
-    if (privyData.email && privyData.email.address) {
-      userEmail = { address: privyData.email.address };
+    // Determine Email: Prioritize Privy data, fallback to DB
+    let finalUserEmail: UserEmail | undefined = undefined;
+    if (
+      privyData.email &&
+      typeof privyData.email === "object" &&
+      privyData.email.address
+    ) {
+      finalUserEmail = { address: privyData.email.address };
+    } else if (typeof privyData.email === "string") {
+      finalUserEmail = { address: privyData.email };
+    } else if (existingDbUser?.email) {
+      // Fallback to DB email
+      finalUserEmail = { address: existingDbUser.email };
     }
 
+    // Determine Wallet: Prioritize Privy data, fallback to DB
+    let finalUserWallet: UserWallet | undefined = undefined;
+    if (privyData.wallet?.address) {
+      finalUserWallet = { address: privyData.wallet.address };
+    } else if (existingDbUser?.walletAddress) {
+      // Fallback to DB wallet
+      finalUserWallet = { address: existingDbUser.walletAddress };
+    }
+
+    // Construct the final sessionUser by merging
     const sessionUser: User = {
       id: privyData.id,
       createdAt: getCreatedAtDate(),
-      wallet: privyData.wallet?.address
-        ? { address: privyData.wallet.address }
-        : undefined,
-      email: userEmail,
-      linkedAccounts: linkedAccountStrings,
-      role: "user", // Default role
-      // Initialize optional fields as undefined
+      wallet: finalUserWallet, // Use merged wallet
+      email: finalUserEmail, // Use merged email
+      linkedAccounts: linkedAccountStrings, // Use linked accounts from Privy
+      role: existingDbUser?.role || "user", // Use DB role or default
+      // Optional fields - ideally fetch from DB if needed, or leave undefined
       twitter: undefined,
       telegramUserId: undefined,
       telegramUsername: undefined,
@@ -136,86 +178,65 @@ export async function handlePrivyAuthServer(privyData: PrivyUserData) {
       announcementCommentCount: undefined,
     };
 
-    log.info("Constructed sessionUser before calling setUserSession", {
-      operation: "handle_auth_server_constructed_user",
+    log.info("Constructed sessionUser (after DB check/merge)", {
+      operation: "handle_auth_server_constructed_user_merged",
       entity: "AUTH",
       userId: privyData.id,
-      // Log the critical parts, especially email
       constructedUser: JSON.stringify(sessionUser, null, 2),
     });
 
     // --- Database Operations (Try/Catch) ---
-    let dbUser: DbUser | null = null; // Use DbUser type from @krain/db
+    let dbUser: DbUser | null = existingDbUser; // Start with fetched user
     try {
-      // First check if user exists in DB
-      const existingUser = await db.query.userTable.findFirst({
-        where: eq(userTable.privyId, privyData.id),
-        with: {
-          profile: true,
-        },
-      });
-
       // Convert Privy linkedAccounts to the format expected by DB schema
-      // (Assuming DbUser linkedAccounts expects an array of objects)
       const dbLinkedAccounts = (privyData.linkedAccounts || []).map(
         (account) => ({
           type: account.type,
           address:
             (account as any).address ||
             (account as any).number ||
-            (account as any).subject, // Adapt based on DB schema needs
-          // Add other fields if your DB schema stores them
+            (account as any).subject,
         }),
       );
 
-      if (existingUser) {
+      // Use the merged email/wallet for DB operations
+      const emailForDb = finalUserEmail?.address;
+      const walletForDb = finalUserWallet?.address;
+
+      if (dbUser) {
+        // If existing user was found earlier
         // Update existing user
         const [updatedUserResult] = await db
           .update(userTable)
           .set({
-            // Update fields based on latest Privy data
-            email: privyData.email?.address, // Use email address directly
-            walletAddress: privyData.wallet?.address,
-            linkedAccounts: dbLinkedAccounts, // Use the mapped array of objects
-            // Potentially update other fields like lastLoginAt etc.
+            email: emailForDb,
+            walletAddress: walletForDb,
+            linkedAccounts: dbLinkedAccounts,
           })
           .where(eq(userTable.privyId, privyData.id))
           .returning();
-        // Assign to dbUser only if a result was returned
-        dbUser = updatedUserResult ?? null;
-        if (dbUser) {
-          log.info("Updated user in database", {
-            operation: "db_update_user",
-            entity: "DB",
-            userId: privyData.id,
-          });
-        } else {
-          log.warn("DB update seemed successful but returned no user data", {
-            operation: "db_update_user_no_return",
-            entity: "DB",
-            userId: privyData.id,
-          });
-        }
+        dbUser = updatedUserResult ?? dbUser; // Keep existing if update returns nothing
+        log.info("Updated user in database", {
+          operation: "db_update_user",
+          entity: "DB",
+          userId: privyData.id,
+        });
       } else {
-        // Create new user
+        // Create new user (if fetch failed or user was truly new)
         const [newUserResult] = await db
           .insert(userTable)
           .values({
             privyId: privyData.id,
-            email: privyData.email?.address,
-            walletAddress: privyData.wallet?.address,
+            email: emailForDb,
+            walletAddress: walletForDb,
             linkedAccounts: dbLinkedAccounts,
-            isGuest: false, // Default values
+            isGuest: false,
             hasAcceptedTerms: false,
-            createdAt: getCreatedAtDate(), // Set createdAt on insert
+            createdAt: getCreatedAtDate(),
           })
           .returning();
-
-        // Assign to dbUser only if a result was returned
         dbUser = newUserResult ?? null;
-
         if (!dbUser) {
-          // Log the failure but don't throw, as session creation should proceed
           log.error(
             "Failed to create user in database (insert returned no data)",
             {
@@ -231,11 +252,9 @@ export async function handlePrivyAuthServer(privyData: PrivyUserData) {
             userId: privyData.id,
             newDbId: dbUser.id,
           });
-          // Create profile only if user creation was successful
+          // Create profile
           try {
-            await db.insert(userProfileTable).values({
-              userId: dbUser.id,
-            });
+            await db.insert(userProfileTable).values({ userId: dbUser.id });
             log.info("Created user profile in database", {
               operation: "db_create_profile",
               entity: "DB",
@@ -243,7 +262,7 @@ export async function handlePrivyAuthServer(privyData: PrivyUserData) {
               newDbId: dbUser.id,
             });
           } catch (profileError) {
-            log.error("Failed to create user profile after user insert", {
+            log.error("Failed to create user profile", {
               operation: "db_create_profile_failed",
               entity: "DB",
               userId: privyData.id,
@@ -252,34 +271,31 @@ export async function handlePrivyAuthServer(privyData: PrivyUserData) {
                   ? profileError.message
                   : String(profileError),
             });
-            // Do not rethrow, allow session creation
           }
         }
       }
 
-      // Create/Update wallet record if exists
-      if (privyData.wallet?.address) {
+      // Upsert wallet record using the merged wallet address
+      if (walletForDb) {
         await db
           .insert(privyWalletTable)
           .values({
-            address: privyData.wallet.address,
-            // Add chainType etc. if available from privyData.wallet
-            chainType: privyData.wallet.chainType || "unknown",
-            verifiedAt: new Date(), // Or use verifiedAt from Privy if available
+            address: walletForDb,
+            chainType: privyData.wallet?.chainType || "unknown",
+            verifiedAt: new Date(),
           })
           .onConflictDoUpdate({
             target: [privyWalletTable.address],
             set: {
               verifiedAt: new Date(),
-              // Update other fields if needed
-              chainType: privyData.wallet.chainType || "unknown",
+              chainType: privyData.wallet?.chainType || "unknown",
             },
           });
         log.info("Upserted wallet in database", {
           operation: "db_upsert_wallet",
           entity: "DB",
           userId: privyData.id,
-          wallet: privyData.wallet.address,
+          wallet: walletForDb,
         });
       }
     } catch (dbError) {
@@ -294,7 +310,7 @@ export async function handlePrivyAuthServer(privyData: PrivyUserData) {
       // Don't rethrow - allow session creation to proceed
     }
 
-    // Set the user session directly using the correctly formatted sessionUser
+    // Set the user session using the merged sessionUser
     log.info("Attempting to set user session", {
       operation: "set_user_session_attempt",
       entity: "AUTH",
