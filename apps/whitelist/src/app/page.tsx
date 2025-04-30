@@ -427,6 +427,58 @@ export default function HomePage() {
     }
   };
 
+  // ---> Handler to attempt updating the whitelist with a currently connected valid ETH wallet <---
+  const handleAttemptUpdateWallet = async () => {
+    if (!user?.id) {
+      toast.error("User session not found. Please refresh.");
+      return;
+    }
+
+    // Find the currently connected valid ETH address from the session
+    const validEthAddress = findValidEthAddress(user);
+
+    if (!validEthAddress) {
+      toast.error(
+        "No valid Ethereum wallet connected. Please connect one first.",
+      );
+      // Optionally trigger linkWallet again?
+      // triggerLinkWalletAndRefresh();
+      return;
+    }
+
+    console.log(
+      `Attempting to update whitelist for user ${user.id} with address ${validEthAddress}`,
+    );
+    setIsPerformingAction(true);
+    try {
+      const result = await updateWhitelistWallet({
+        userId: user.id,
+        newWalletAddress: validEthAddress,
+      });
+
+      if (result.success) {
+        toast.success("Whitelist wallet address updated successfully!");
+        // Immediately update state to reflect the change
+        setWhitelistInfo({
+          isSignedUp: true,
+          address: validEthAddress,
+          isValid: true, // We know it's valid because we just checked
+        });
+      } else {
+        toast.error(
+          result.message || "Failed to update whitelist wallet address.",
+        );
+      }
+    } catch (error) {
+      console.error("Error calling updateWhitelistWallet action:", error);
+      toast.error(
+        "An unexpected error occurred while updating the whitelist wallet.",
+      );
+    } finally {
+      setIsPerformingAction(false);
+    }
+  };
+
   // --- Status Display Logic ---
   const renderStatusDisplay = () => {
     const userIdAbbreviated = user?.id ? abbreviateAddress(user.id) : "N/A";
@@ -686,11 +738,10 @@ export default function HomePage() {
           return (
             <Button
               size="lg"
-              onClick={triggerLinkWalletAndRefresh} // Should prompt to link/switch wallet
+              onClick={handleAttemptUpdateWallet}
               disabled={disableAll}
-              variant="outline"
             >
-              Connect Valid Ethereum Wallet
+              Update with Connected ETH Wallet
             </Button>
           );
         }
