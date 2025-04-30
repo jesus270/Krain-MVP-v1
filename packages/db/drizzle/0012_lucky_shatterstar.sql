@@ -1,0 +1,2 @@
+ALTER TABLE "wallet" ADD COLUMN "referralCodeRegenerated" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+CREATE INDEX "idx_wallet_regenerated" ON "wallet" USING btree ("referralCodeRegenerated");

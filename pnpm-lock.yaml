@@ -71,10 +71,19 @@ importers:
       csv-parse:
         specifier: ^5.5.5
         version: 5.6.0
+      csv-writer:
+        specifier: ^1.6.0
+        version: 1.6.0
     devDependencies:
       '@krain/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
+      '@types/node':
+        specifier: ^20.14.10
+        version: 20.17.30
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.5.0
       tsx:
         specifier: ^4.19.3
         version: 4.19.3
@@ -4118,6 +4127,9 @@ packages:
 
   csv-parse@5.6.0:
     resolution: {integrity: sha512-l3nz3euub2QMg5ouu5U09Ew9Wf6/wQ8I++ch1loQ0ljmzhmfZYrH9fflS22i/PQEvsPvxCwxgz5q7UB8K1JO4Q==}
+
+  csv-writer@1.6.0:
+    resolution: {integrity: sha512-NOx7YDFWEsM/fTRAJjRpPp8t+MKRVvniAg9wQlUKx20MFrPs73WLJhFf5iteqrxNYnsy924K3Iroh3yNHeYd2g==}
 
   d3-array@3.2.4:
     resolution: {integrity: sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==}
@@ -11017,6 +11029,8 @@ snapshots:
   csstype@3.1.3: {}
 
   csv-parse@5.6.0: {}
+
+  csv-writer@1.6.0: {}
 
   d3-array@3.2.4:
     dependencies:
