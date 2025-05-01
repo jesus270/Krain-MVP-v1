@@ -65,11 +65,15 @@ export const walletTable = pgTable(
     referralCode: varchar("referralCode", { length: 255 }).$default(() =>
       generateReferralCode(),
     ),
+    referralCodeRegenerated: boolean("referralCodeRegenerated")
+      .default(false)
+      .notNull(),
   },
   (table) => [
     index("idx_wallet_referralCode").on(table.referralCode),
     index("idx_wallet_createdAt").on(table.createdAt),
     index("idx_wallet_code_created").on(table.referralCode, table.createdAt),
+    index("idx_wallet_regenerated").on(table.referralCodeRegenerated),
   ],
 );
 export type Wallet = typeof walletTable.$inferSelect;

@@ -4,7 +4,9 @@
     "outDir": "./dist",
     "baseUrl": "../../",
     "paths": {
-      "@krain/db/*": ["packages/db/*"]
+      "@krain/db/*": ["packages/db/*"],
+      "@krain/utils": ["packages/utils/src/index"],
+      "@krain/utils/*": ["packages/utils/src/*"]
     }
   },
   "include": ["./**/*.ts"],
