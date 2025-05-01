@@ -655,6 +655,9 @@ importers:
       '@upstash/redis':
         specifier: ^1.28.3
         version: 1.34.7
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.42.0(@neondatabase/serverless@0.10.4)(@types/pg@8.11.12)(@vercel/postgres@0.10.0(utf-8-validate@5.0.10))(gel@2.0.2)(pg@8.14.1)
       iron-session:
         specifier: ^8.0.1
         version: 8.0.4

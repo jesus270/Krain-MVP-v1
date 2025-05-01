@@ -19,6 +19,7 @@ export async function signupForWhitelist(input: {
   log.info("signupForWhitelist: Action started", {
     operation: "signup_for_whitelist",
     userId: input.userId,
+    receivedInput: JSON.stringify(input),
   });
 
   try {
@@ -107,6 +108,13 @@ export async function signupForWhitelist(input: {
 
     // Determine Email: Prioritize client-provided, fallback to DB/session
     let emailAddress = input.clientVerifiedEmailAddress;
+    log.info("signupForWhitelist: Initial email check", {
+      operation: "signup_email_check_initial",
+      userId: input.userId,
+      clientProvidedEmail: input.clientVerifiedEmailAddress,
+      derivedEmailAddress: emailAddress,
+    });
+
     if (!emailAddress) {
       log.warn(
         "Client did not provide email, falling back to DB/session check",

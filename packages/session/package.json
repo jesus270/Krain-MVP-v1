@@ -33,6 +33,7 @@
     "@types/lodash.clonedeep": "^4.5.9",
     "@upstash/ratelimit": "^2.0.5",
     "@upstash/redis": "^1.28.3",
+    "drizzle-orm": "catalog:",
     "iron-session": "^8.0.1",
     "lodash.clonedeep": "^4.5.0",
     "next": "catalog:",
