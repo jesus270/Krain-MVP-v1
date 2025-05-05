@@ -11,6 +11,18 @@ import {
 import { log, isValidEthereumAddress } from "@krain/utils";
 import type { WhitelistSignupResult, User } from "@krain/session/types";
 
+export async function signupForWhitelist() {
+  throw new Error("Server actions are disabled");
+}
+
+export async function checkWhitelistSignup() {
+  throw new Error("Server actions are disabled");
+}
+
+export async function updateWhitelistWallet() {
+  throw new Error("Server actions are disabled");
+}
+
 export async function signupForWhitelist(input: {
   userId: string;
   clientVerifiedEthAddress?: string | null;
