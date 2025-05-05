@@ -63,14 +63,16 @@ export function MintScheduleSection() {
         </div>
         {/* Vesting Info Section */}
 
-        <TagChip
-          icon={<HammerIcon className="w-4 h-4 text-[#6237EF]" />}
-          text="Timeline"
-          className="mb-6 self-start"
-        />
+        <div className="mt-12">
+          <TagChip
+            icon={<HammerIcon className="w-4 h-4 text-[#6237EF]" />}
+            text="Vesting"
+            className="mb-6 self-start"
+          />
+        </div>
 
         <h2 className="text-3xl sm:text-4xl font-bold mb-3">Vesting Info</h2>
-        <p className="text-sm sm:text-base text-gray-300 mb-8">
+        <p className="text-sm sm:text-base text-gray-300 mb-3">
           The information below is how the $KRAIN token benefits will be
           distributed.
         </p>
@@ -82,9 +84,10 @@ export function MintScheduleSection() {
                 Cliff Time Period
               </h3>
               <p className="text-sm sm:text-base text-gray-400">
-                $KRAIN tokens will be start to be distributed after a 1 month
-                cliff. The cliff will start at the TGE date. First token
-                distribution will be at the end of the 1st month after the TGE.
+                $KRAIN token distributions will begin following a one-month
+                cliff period, which starts on the Token Generation Event (TGE)
+                date. The first distribution will occur at the end of the first
+                month after the TGE.
               </p>
             </div>
           </div>
@@ -94,10 +97,9 @@ export function MintScheduleSection() {
                 Vesting Time Period
               </h3>
               <p className="text-sm sm:text-base text-gray-400">
-                $KRAIN tokens will be distributed over a 12 month period of
-                time. You will be able to claim these tokens each month as they
-                unlock. 1/12th of the total tokens will be distributed each
-                month.
+                $KRAIN tokens will be distributed over a 12-month vesting
+                schedule, with 1/12th of the total allocation becoming claimable
+                each month as it unlocks.
               </p>
             </div>
           </div>
@@ -107,8 +109,8 @@ export function MintScheduleSection() {
                 Token Distribution Method
               </h3>
               <p className="text-sm sm:text-base text-gray-400">
-                You will login to a token management platform to claim your
-                tokens.
+                Token claims will be managed through a secure token management
+                platform, where you will log in to access and claim your tokens.
               </p>
             </div>
           </div>
