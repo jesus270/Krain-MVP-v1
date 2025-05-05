@@ -1,5 +1,5 @@
 import { TagChip } from "@/components/tag-chip";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, HammerIcon } from "lucide-react";
 import Link from "next/link";
 
 const scheduleItems = [
@@ -60,6 +60,58 @@ export function MintScheduleSection() {
               </div>
             </div>
           ))}
+        </div>
+        {/* Vesting Info Section */}
+
+        <TagChip
+          icon={<HammerIcon className="w-4 h-4 text-[#6237EF]" />}
+          text="Timeline"
+          className="mb-6 self-start"
+        />
+
+        <h2 className="text-3xl sm:text-4xl font-bold mb-3">Vesting Info</h2>
+        <p className="text-sm sm:text-base text-gray-300 mb-8">
+          The information below is how the $KRAIN token benefits will be
+          distributed.
+        </p>
+
+        <div className="space-y-6 mt-10">
+          <div className="flex items-start gap-4">
+            <div className="flex flex-col">
+              <h3 className="text-lg sm:text-xl font-semibold">
+                Cliff Time Period
+              </h3>
+              <p className="text-sm sm:text-base text-gray-400">
+                $KRAIN tokens will be start to be distributed after a 1 month
+                cliff. The cliff will start at the TGE date. First token
+                distribution will be at the end of the 1st month after the TGE.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <div className="flex flex-col">
+              <h3 className="text-lg sm:text-xl font-semibold">
+                Vesting Time Period
+              </h3>
+              <p className="text-sm sm:text-base text-gray-400">
+                $KRAIN tokens will be distributed over a 12 month period of
+                time. You will be able to claim these tokens each month as they
+                unlock. 1/12th of the total tokens will be distributed each
+                month.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <div className="flex flex-col">
+              <h3 className="text-lg sm:text-xl font-semibold">
+                Token Distribution Method
+              </h3>
+              <p className="text-sm sm:text-base text-gray-400">
+                You will login to a token management platform to claim your
+                tokens.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
