@@ -77,7 +77,7 @@ export function MintScheduleSection() {
           distributed.
         </p>
 
-        <div className="space-y-6 mt-10">
+        <div className="space-y-6 mt-5">
           <div className="flex items-start gap-4">
             <div className="flex flex-col">
               <h3 className="text-lg sm:text-xl font-semibold">
