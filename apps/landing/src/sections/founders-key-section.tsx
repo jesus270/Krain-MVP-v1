@@ -110,6 +110,7 @@ export function FoundersKeySection() {
 
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 w-full">
+              {/*
               <Link
                 href="https://whitelist.krain.ai"
                 target="_blank"
@@ -120,6 +121,7 @@ export function FoundersKeySection() {
                   <div className="font-medium">Join Whitelist</div>
                 </GradientButton>
               </Link>
+              */}
               <Link
                 href="https://krain.arenavs.com"
                 target="_blank"
@@ -130,7 +132,7 @@ export function FoundersKeySection() {
                   variant="outline"
                   className="w-full rounded-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white px-8 py-6 cursor-pointer flex items-center gap-2"
                 >
-                  <span className="">Get Your Referral Code </span>
+                  <span className="">Buy Now </span>
                   <img
                     src="/logo-arenavs.svg"
                     alt="Arena"
