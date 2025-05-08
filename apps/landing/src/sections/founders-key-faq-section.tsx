@@ -25,7 +25,7 @@ const faqs = [
     id: "Q2",
     question: "How many Founders Keys are available?",
     answer:
-      "Only 1,500 Keys will be sold, making this a rare asset in the KRAIN ecosystem. Also, there are a small number of keys (about 200) that will be minted for marketing and promotional purposes.",
+      "Only 777 Keys will be sold, making this a rare asset in the KRAIN ecosystem. Also, there are a small number of keys (about 200) that will be minted for marketing and promotional purposes.",
   },
   {
     id: "Q3",

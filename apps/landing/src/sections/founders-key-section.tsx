@@ -74,7 +74,7 @@ export function FoundersKeySection() {
             {/* Description */}
             <p className="text-sm sm:text-base text-gray-300 text-left mb-4 max-w-lg xl:text-lg xl:max-w-xl">
               Unlock $2,000+ in Value. $KRAIN, Staking, Airdrops, Hosting, and
-              More—All with One Key. Only 1500 available.
+              More—All with One Key. Only 777 available.
             </p>
 
             {/* Price */}
@@ -132,7 +132,7 @@ export function FoundersKeySection() {
                   variant="outline"
                   className="w-full rounded-full sm:w-auto border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white px-8 py-6 cursor-pointer flex items-center gap-2"
                 >
-                  <span className="">Buy Now </span>
+                  <span className="">Trade on </span>
                   <img
                     src="/logo-arenavs.svg"
                     alt="Arena"
@@ -141,13 +141,6 @@ export function FoundersKeySection() {
                 </Button>
               </Link>
             </div>
-            <p className="text-sm sm:text-base text-gray-300 mb-8">
-              The sale will take place on the{" "}
-              <Link href="https://arenavs.com/marketplace" target="_blank">
-                Arena VS Marketplace
-              </Link>
-              .
-            </p>
           </div>
         </div>
       </div>
