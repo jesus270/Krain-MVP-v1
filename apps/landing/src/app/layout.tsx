@@ -54,7 +54,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div
-            className="fixed top-0 left-0 right-0 z-[60] h-10 flex items-center justify-center text-white text-sm font-medium px-4"
+            className="fixed top-0 left-0 right-0 z-[60] h-10 flex items-center justify-center text-white text-sm font-medium px-4 hidden"
             style={{
               background: `linear-gradient(120deg, #1FC5D6 0%, #915BF0 50%, rgb(47, 45, 64) 75%)`,
             }}
@@ -68,9 +68,8 @@ export default function RootLayout({
             </Link>
           </div>
           <Nav />
-          <main className="pt-[calc(2.5rem+theme(spacing.24))]">
-            {children}
-          </main>
+          {/* with top banner use "pt-[calc(2.5rem+theme(spacing.24))]" */}
+          <main className="pt-[theme(spacing.24)]">{children}</main>
           <Analytics />
           <SpeedInsights />
         </ThemeProvider>
