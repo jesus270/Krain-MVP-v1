@@ -8,5 +8,5 @@ export default defineConfig((options: Options) => ({
   clean: true,
   dts: true,
   minify: !options.watch,
-  external: ["react", "@solana/web3.js"],
+  external: ["react", "@solana/web3.js", "ethers"],
 }));
