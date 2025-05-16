@@ -69,7 +69,7 @@ export default function RootLayout({
           </div>
           <Nav />
           {/* with top banner use "pt-[calc(2.5rem+theme(spacing.24))]" */}
-          <main className="pt-[theme(spacing.24)]">{children}</main>
+          <main>{children}</main>
           <Analytics />
           <SpeedInsights />
         </ThemeProvider>
