@@ -47,7 +47,7 @@ export function Nav() {
   type NavItem = (typeof navItems)[number]; // Define NavItem type
 
   return (
-    <nav className="fixed top-10 w-screen z-50">
+    <nav className="fixed top-0 w-screen z-50">
       {/* Backdrop for nav */}
       <div
         className={`absolute inset-0 transition-all duration-500 ${
