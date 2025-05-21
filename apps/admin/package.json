@@ -5,7 +5,8 @@
   "scripts": {
     "import": "tsx import-users.ts",
     "top-referrers": "tsx -r dotenv/config top-referrers.ts",
-    "resolve-duplicates": "tsx -r dotenv/config resolve-duplicate-codes.ts"
+    "resolve-duplicates": "tsx -r dotenv/config resolve-duplicate-codes.ts",
+    "regenerate-referral-codes": "tsx -r dotenv/config regenerate-referral-codes.ts"
   },
   "dependencies": {
     "@krain/db": "workspace:*",
