@@ -52,9 +52,9 @@ The Krain monorepo is structured into two main directories:
    - Copy `.env.example` to `.env` in the respective app or package directory.
    - Fill in the required environment variables.
 
-3. **Run all applications:**
+3. **Build workspace packages:**
    ```bash
-   pnpm dev
+   pnpm build
    ```
 
 4. **Run a specific application (e.g., airdrop):**
