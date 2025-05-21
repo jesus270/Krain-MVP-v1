@@ -8,7 +8,14 @@ The Krain monorepo is structured into two main directories:
 
 ### Applications (`apps/`)
 
+- [**Admin**](apps/admin/README.md) - Admin dashboard
 - [**Airdrop**](apps/airdrop/README.md) - Solana airdrop application for token distribution
+- [**Early**](apps/early/README.md) - Early access application
+- [**Landing**](apps/landing/README.md) - Landing page
+- [**Marketplace**](apps/marketplace/README.md) - Marketplace application
+- [**Token**](apps/token/README.md) - Token management application
+- [**Whitelist**](apps/whitelist/README.md) - Whitelist application
+- [**TgBot**](apps/tgbot/README.md) - Telegram Bot
 
 ### Packages (`packages/`)
 
@@ -36,19 +43,23 @@ The Krain monorepo is structured into two main directories:
 
 ## Quick Start
 
-1. Install dependencies:
+1. **Install dependencies:**
    ```bash
    pnpm install
    ```
 
-2. Run all applications:
+2. **Set up environment variables:**
+   - Copy `.env.example` to `.env` in the respective app or package directory.
+   - Fill in the required environment variables.
+
+3. **Run all applications:**
    ```bash
    pnpm dev
    ```
 
-3. Run a specific application:
+4. **Run a specific application (e.g., airdrop):**
    ```bash
-   pnpm dev --filter <app-name>
+   pnpm dev --filter airdrop
    ```
 
 ## Development

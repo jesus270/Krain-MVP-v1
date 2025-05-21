@@ -14,25 +14,25 @@ A Next.js application for managing Solana token airdrops.
 
 ## Getting Started
 
-1. Install dependencies:
+1. **Install dependencies from the root of the monorepo:**
    ```bash
    pnpm install
    ```
 
-2. Set up environment variables:
-   ```bash
-   cp .env.example .env.local
-   ```
-   Then edit `.env.local` with your configuration.
+2. **Set up environment variables:**
+   - Copy `apps/airdrop/.env.example` to `apps/airdrop/.env` (if it exists).
+   - Fill in the required environment variables.
 
-3. Run the development server:
+3. **Run the development server:**
    ```bash
-   pnpm dev
+   pnpm dev --filter airdrop
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) (or the port specified by the app) with your browser to see the result.
 
 ## Environment Variables
+
+Ensure the following environment variables are set in `apps/airdrop/.env`:
 
 - `DATABASE_URL` - Vercel Postgres connection URL
 - `NEXT_PUBLIC_SOLANA_NETWORK` - Solana network to connect to (mainnet-beta, testnet, or devnet)
