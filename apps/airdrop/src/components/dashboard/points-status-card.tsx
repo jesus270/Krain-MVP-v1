@@ -20,7 +20,6 @@ import { ProfileCompletionMessage } from "./profile-completion-message";
 import { AdditionalPointsMessage } from "./additional-points-message";
 import { cn } from "@krain/ui/lib/utils";
 import { TelegramPointsSection } from "./telegram-points-section";
-import { AmbassadorPointsSection } from "./ambassador-points-section";
 import { Skeleton } from "@krain/ui/components/ui/skeleton";
 import { Separator } from "@krain/ui/components/ui/separator";
 import { Users, MessageCircle, Trophy } from "lucide-react";
@@ -153,11 +152,6 @@ export function PointsStatusCard({
           messagePoints={messagePoints}
           locale={locale}
           isLoadingMessagePoints={isLoadingMessagePoints}
-        />
-        <AmbassadorPointsSection
-          isAmbassador={isAmbassador}
-          ambassadorActiveMonths={ambassadorActiveMonths}
-          isLoadingAmbassador={isLoadingAmbassador}
         />
       </CardContent>
       {userWalletAddress && (

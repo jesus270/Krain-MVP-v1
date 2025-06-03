@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Ambassador, User } from "@krain/db";
-import { calculateActiveMonths } from "../lib/libs";
+import { calculateActiveMonths } from "@krain/utils";
 
 interface AmbassadorWithUser extends Ambassador {
   user: User;
@@ -167,7 +167,7 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
                     onChange={(e) =>
                       handleUpdateBadMonths(ambassador.id, parseInt(e.target.value))
                     }
-                    className="w-20 px-2 py-1 border border-gray-300 rounded-md"
+                    className="w-20 px-2 py-1 border border-gray-300 text-gray-500 rounded-md"
                     disabled={isLoading}
                   />
                 </td>

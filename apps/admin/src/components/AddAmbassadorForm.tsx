@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { calculateActiveMonths } from "../lib/libs";
+import { calculateActiveMonths } from "@krain/utils";
 
 interface AddAmbassadorFormProps {
   onAdded?: () => void;

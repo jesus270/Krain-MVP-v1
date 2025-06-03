@@ -1,25 +1,31 @@
 import { NextResponse } from "next/server";
 import { db } from "@krain/db";
-import { ambassadorTable, userTable } from "@krain/db/schema";
+import { ambassadorTable, userTable } from "@krain/db";
 import { eq } from "drizzle-orm";
 import { getSession } from "@krain/session";
-
-export async function GET() {
+import { log } from "@krain/utils";
+export async function GET(request: Request) {
   try {
-    const session = await getSession();
-    if (!session?.user?.walletAddress) {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("Id");
+    if (!userId) {
+      return NextResponse.json({ message: "User ID is required" }, { status: 400 });
     }
+    // const session = await getSession(userId);
+    // const user = session?.get("user");
+    // if (!user?.wallet?.address) {
+    //   return NextResponse.json(
+    //     { message: "Unauthorized" },
+    //     { status: 401 }
+    //   );
+    // }
 
     // Find user by wallet address
-    const user = await db.query.userTable.findFirst({
-      where: eq(userTable.walletAddress, session.user.walletAddress),
+    const dbUser = await db.query.userTable.findFirst({
+      where: eq(userTable.privyId, userId),
     });
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json(
         { message: "User not found" },
         { status: 404 }
@@ -28,7 +34,12 @@ export async function GET() {
 
     // Check if user is an ambassador
     const ambassador = await db.query.ambassadorTable.findFirst({
-      where: eq(ambassadorTable.userId, user.id),
+      where: eq(ambassadorTable.userId, dbUser.id),
+    });
+
+    console.log("ambassador info", {
+      userId: dbUser.id.toString(),
+      ambassador: ambassador?.walletAddress.toString(),
     });
 
     return NextResponse.json({
