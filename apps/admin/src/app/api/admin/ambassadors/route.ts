@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@krain/db";
 import { ambassadorTable, userTable } from "@krain/db";
 import { eq } from "drizzle-orm";
+import { log } from "console";
 
 export async function POST(request: Request) {
   try {
-    const { walletAddress } = await request.json();
+    const { walletAddress, userId, numberOfBadMonths } = await request.json();
 
     if (!walletAddress) {
       return NextResponse.json(
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
 
     // Check if user is already an ambassador
     const existingAmbassador = await db.query.ambassadorTable.findFirst({
-      where: eq(ambassadorTable.userId, user.id),
+      where: eq(ambassadorTable.walletAddress, walletAddress),
     });
 
     if (existingAmbassador) {
@@ -42,9 +43,9 @@ export async function POST(request: Request) {
     const [ambassador] = await db
       .insert(ambassadorTable)
       .values({
-        userId: user.id,
+        userId: userId,
         walletAddress,
-        numberOfBadMonths: 0,
+        numberOfBadMonths: numberOfBadMonths,
       })
       .returning();
 
@@ -73,5 +74,43 @@ export async function GET() {
       { message: "Internal server error" },
       { status: 500 }
     );
+  }
+}
+
+// DELETE /api/admin/ambassadors?id=123
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+  if (!id) {
+    return NextResponse.json({ message: "Ambassador id is required" }, { status: 400 });
+  }
+  try {
+    const deleted = await db.delete(ambassadorTable).where(eq(ambassadorTable.id, Number(id)));
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting ambassador:", error);
+    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+  }
+}
+
+// PATCH /api/admin/ambassadors?id=123
+export async function PATCH(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+  if (!id) {
+    return NextResponse.json({ message: "Ambassador id is required" }, { status: 400 });
+  }
+  try {
+    const { numberOfBadMonths } = await request.json();
+    if (typeof numberOfBadMonths !== "number" || numberOfBadMonths < 0) {
+      return NextResponse.json({ message: "Invalid numberOfBadMonths" }, { status: 400 });
+    }
+    await db.update(ambassadorTable)
+      .set({ numberOfBadMonths })
+      .where(eq(ambassadorTable.id, Number(id)));
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error updating ambassador:", error);
+    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 } 
