@@ -20,6 +20,7 @@ import { ProfileCompletionMessage } from "./profile-completion-message";
 import { AdditionalPointsMessage } from "./additional-points-message";
 import { cn } from "@krain/ui/lib/utils";
 import { TelegramPointsSection } from "./telegram-points-section";
+import { AmbassadorPointsSection } from "./ambassador-points-section";
 import { Skeleton } from "@krain/ui/components/ui/skeleton";
 import { Separator } from "@krain/ui/components/ui/separator";
 import { Users, MessageCircle, Trophy } from "lucide-react";
@@ -28,6 +29,7 @@ import { TelegramLogo } from "@krain/ui/components/icons/logo-telegram";
 const POINTS_PER_REFERRAL = 1000;
 const POINTS_PER_TELEGRAM_COMMUNITY = 5000;
 const POINTS_PER_TELEGRAM_ANNOUNCEMENT = 5000;
+const POINTS_PER_AMBASSADOR_MONTH = 100_000;
 
 export interface PointsStatusCardProps {
   referralsCount: number;
@@ -44,6 +46,9 @@ export interface PointsStatusCardProps {
   accountCreationPoints?: number;
   twitterPoints?: number;
   emailPoints?: number;
+  isAmbassador?: boolean;
+  ambassadorActiveMonths?: number;
+  isLoadingAmbassador?: boolean;
 }
 
 export function PointsStatusCard({
@@ -61,6 +66,9 @@ export function PointsStatusCard({
   accountCreationPoints = 0,
   twitterPoints = 0,
   emailPoints = 0,
+  isAmbassador,
+  ambassadorActiveMonths,
+  isLoadingAmbassador,
 }: PointsStatusCardProps) {
   // Calculate points
   const referralPoints = referralsCount * POINTS_PER_REFERRAL;
@@ -145,6 +153,11 @@ export function PointsStatusCard({
           messagePoints={messagePoints}
           locale={locale}
           isLoadingMessagePoints={isLoadingMessagePoints}
+        />
+        <AmbassadorPointsSection
+          isAmbassador={isAmbassador}
+          ambassadorActiveMonths={ambassadorActiveMonths}
+          isLoadingAmbassador={isLoadingAmbassador}
         />
       </CardContent>
       {userWalletAddress && (
