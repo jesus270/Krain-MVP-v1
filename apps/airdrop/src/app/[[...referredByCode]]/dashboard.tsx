@@ -436,9 +436,7 @@ export function Dashboard({
       if (!user?.id) return;
       setAmbassadorInfo((prev) => ({ ...prev, isLoading: true }));
       try {
-      console.log("-----------------fetching ambassador info-----------------");
-      console.log("user.id", user.id);
-        const res = await fetch(`/api/user/ambassador-info?Id=${user.id}`, { headers: { "x-user-id": user.id } });
+        const res = await fetch(`/api/user/ambassador-info?privyId=${user.id}`, { headers: { "x-user-id": user.id } });
         if (!res.ok) throw new Error("Failed to fetch ambassador info");
         const data = await res.json();
         console.log("ambassador info", data);

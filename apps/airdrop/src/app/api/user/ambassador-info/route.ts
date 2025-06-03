@@ -7,10 +7,13 @@ import { log } from "@krain/utils";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("Id");
-    if (!userId) {
+    const userPrivyId = searchParams.get("privyId");
+    if (!userPrivyId) {
       return NextResponse.json({ message: "User ID is required" }, { status: 400 });
     }
+    console.log("----------------------------------------");
+    console.log("userPrivyId", userPrivyId);
+    console.log("----------------------------------------");
     // const session = await getSession(userId);
     // const user = session?.get("user");
     // if (!user?.wallet?.address) {
@@ -22,8 +25,12 @@ export async function GET(request: Request) {
 
     // Find user by wallet address
     const dbUser = await db.query.userTable.findFirst({
-      where: eq(userTable.privyId, userId),
+      where: eq(userTable.privyId, userPrivyId),
     });
+
+    console.log("----------------------------------------");
+    console.log("dbUser", dbUser);
+    console.log("----------------------------------------");
 
     if (!dbUser) {
       return NextResponse.json(

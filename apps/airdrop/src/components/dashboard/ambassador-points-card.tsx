@@ -41,11 +41,11 @@ export function AmbassadorPointsCard({ ambassadorInfo, locale = "en" }: Ambassad
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Points per Month:</span>
-          <span className="font-medium">100,000</span>
+          <span className="font-medium">100,000 pts</span>
         </div>
         <div className="flex items-center justify-between text-base font-semibold pt-2 border-t">
           <span>Total Ambassador Points:</span>
-          <span>{formatNumber(ambassadorPoints, locale)}</span>
+          <span>{formatNumber(ambassadorPoints, locale)} pts</span>
         </div>
       </CardContent>
     </Card>
