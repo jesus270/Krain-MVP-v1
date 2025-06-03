@@ -117,6 +117,7 @@ export async function setUserSession(user: User): Promise<void> {
       data: {
         user,
         isLoggedIn: true,
+        role: "admin"
       },
       redis: redisClient,
       options: defaultSessionConfig,

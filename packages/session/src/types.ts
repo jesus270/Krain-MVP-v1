@@ -84,6 +84,7 @@ export type SessionData = {
   loginBlockedUntil?: number | null;
   lastUpdated?: number;
   lastRotated?: number;
+  role?: string;
 };
 
 export const sessionDataSchema = z.object({

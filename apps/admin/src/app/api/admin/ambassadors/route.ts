@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@krain/db";
-import { ambassadorTable, userTable } from "@krain/db/schema";
+import { ambassadorTable, userTable } from "@krain/db";
 import { eq } from "drizzle-orm";
 
 export async function POST(request: Request) {

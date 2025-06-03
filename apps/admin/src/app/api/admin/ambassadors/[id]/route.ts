@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@krain/db";
-import { ambassadorTable } from "@krain/db/schema";
+import { ambassadorTable } from "@krain/db";
 import { eq } from "drizzle-orm";
 
 export async function PATCH(
@@ -29,7 +29,6 @@ export async function PATCH(
       .update(ambassadorTable)
       .set({
         numberOfBadMonths,
-        updatedAt: new Date(),
       })
       .where(eq(ambassadorTable.id, id))
       .returning();

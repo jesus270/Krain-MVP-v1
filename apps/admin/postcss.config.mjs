@@ -1,6 +1,1 @@
-export default {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-}; 
+export { default } from "@krain/ui/postcss.config.mjs";
