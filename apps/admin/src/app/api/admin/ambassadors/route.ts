@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@krain/db";
 import { ambassadorTable, userTable } from "@krain/db";
-import { eq } from "drizzle-orm";
+import { eq, and, ilike, sql } from "drizzle-orm";
 
 export async function POST(request: Request) {
   try {
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     const [ambassador] = await db
       .insert(ambassadorTable)
       .values({
-        userId: userId,
+        userId: user.id,
         walletAddress,
         numberOfBadMonths: numberOfBadMonths,
       })
@@ -58,15 +58,45 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const search = searchParams.get("search") || "";
+    const offset = (page - 1) * limit;
+
+    // Build where clause for search
+    let whereClause = undefined;
+    if (search) {
+      whereClause = ilike(ambassadorTable.walletAddress, `%${search}%`);
+    }
+
+    // Get total count for pagination
+    let total = 0;
+    if (whereClause) {
+      const countResult = await db
+        .select({ count: sql`count(*)::int` })
+        .from(ambassadorTable)
+        .where(whereClause);
+      total = Number(countResult[0]?.count) || 0;
+    } else {
+      const countResult = await db
+        .select({ count: sql`count(*)::int` })
+        .from(ambassadorTable);
+      total = Number(countResult[0]?.count) || 0;
+    }
+
+    // Fetch paginated ambassadors with user
     const ambassadors = await db.query.ambassadorTable.findMany({
-      with: {
-        user: true,
-      },
+      where: whereClause,
+      with: { user: true },
+      limit,
+      offset,
+      orderBy: (ambassadorTable.createdAt ? [ambassadorTable.createdAt] : undefined),
     });
 
-    return NextResponse.json(ambassadors);
+    return NextResponse.json({ data: ambassadors, total });
   } catch (error) {
     console.error("Error fetching ambassadors:", error);
     return NextResponse.json(
