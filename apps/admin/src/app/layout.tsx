@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { RootLayout as KrainRootLayout } from "@krain/ui/layouts/root-layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,13 +23,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  if (!process.env.NEXT_PUBLIC_PRIVY_APP_ID) {
+    throw new Error("NEXT_PUBLIC_PRIVY_APP_ID is not set");
+  }
+
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+    <KrainRootLayout
+      authConfig={{
+        privyAppId: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
+        loadingTitle: "Welcome to the Admin Panel",
+        loadingDescription: "Please wait while we validate your session...",
+        validateSession: true,
+      }}
+      intercomAppId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID}
+    >
+      {children}
+    </KrainRootLayout>
   );
 }

@@ -7,7 +7,7 @@ import {
 } from "@krain/session/server";
 
 // Protected paths that require authentication
-const PROTECTED_PATHS = ["/api/wallet", "/api/referral", "/"];
+const PROTECTED_PATHS = ["/api/wallet", "/api/referral"];
 
 // Public paths that don't require authentication
 const PUBLIC_PATHS = ["/api/auth", "/terms", "/api/auth/callback", "/blocked"];
@@ -16,7 +16,7 @@ const PUBLIC_PATHS = ["/api/auth", "/terms", "/api/auth/callback", "/blocked"];
 const HEADER_AUTH_PATHS = ["/api/user"];
 
 // Admin-only paths
-const ADMIN_ONLY_PATHS = ["/api/admin"];
+const ADMIN_ONLY_PATHS = ["/api/admin", "/admin", "/"];
 
 // Security headers
 const securityHeaders = {
@@ -140,6 +140,13 @@ export async function middleware(request: NextRequest) {
       return pathname.startsWith(path);
     });
 
+    log.info("debug log", {
+      operation: "debug_log",
+      isProtectedPath,
+    })
+
+
+
     if (isProtectedPath) {
       const userId = request.cookies.get("user_id")?.value;
 
@@ -177,6 +184,11 @@ export async function middleware(request: NextRequest) {
 
       // ✅ Admin role check
       const userRole = session.get("role");
+      log.info("userRole", { 
+        operation: "authz_check",
+        userRole 
+      });
+    
       const isAdminPath = ADMIN_ONLY_PATHS.some((path) =>
         pathname.startsWith(path),
       );
