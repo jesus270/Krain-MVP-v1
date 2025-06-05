@@ -17,7 +17,6 @@ export function AddAmbassadorForm({ onAdded }: AddAmbassadorFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log(calculateActiveMonths(new Date().toString(), numberOfBadMonths));
     // Validate the bad months
     if (calculateActiveMonths(new Date().toString(), numberOfBadMonths) < 0) {
       setError("Bad months cannot be greater than the total months");
@@ -92,7 +91,7 @@ export function AddAmbassadorForm({ onAdded }: AddAmbassadorFormProps) {
           placeholder="Enter user ID (optional)"
         />
       </div>
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <label
           htmlFor="numberOfBadMonths"
           className="block text-sm font-medium text-gray-700 mb-1"
@@ -108,7 +107,7 @@ export function AddAmbassadorForm({ onAdded }: AddAmbassadorFormProps) {
           className="w-full px-3 py-2 border border-gray-300 text-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           placeholder="0"
         />
-      </div>
+      </div> */}
       {error && (
         <div className="mb-4 text-red-600 text-sm">{error}</div>
       )}

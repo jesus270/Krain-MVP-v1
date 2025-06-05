@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, Fragment } from "react";
 import { Ambassador, User } from "@krain/db";
 import { calculateActiveMonths } from "@krain/utils";
 
@@ -32,6 +32,14 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [totalItems, setTotalItems] = useState(0);
 
+  // Add local state for editing bad months per ambassador
+  const [editingBadMonths, setEditingBadMonths] = useState<Record<number, number>>({});
+  const [savingBadMonths, setSavingBadMonths] = useState<Record<number, boolean>>({});
+
+  // Modal state
+  const [removeModalOpen, setRemoveModalOpen] = useState(false);
+  const [removeAmbassadorId, setRemoveAmbassadorId] = useState<number | null>(null);
+
   const fetchAmbassadors = async () => {
     setIsLoading(true);
     setError(null);
@@ -58,37 +66,28 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, itemsPerPage, debouncedSearch, refreshKey]);
 
-  const handleRemoveAmbassador = async (id: number) => {
-    if (!confirm("Are you sure you want to remove this ambassador?")) {
-      return;
-    }
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`/api/admin/ambassadors?id=${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Failed to remove ambassador");
-      }
-      await fetchAmbassadors();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
+  // Update local editing state when ambassadors change
+  useEffect(() => {
+    const initial: Record<number, number> = {};
+    ambassadors.forEach((amb) => {
+      initial[amb.id] = amb.numberOfBadMonths;
+    });
+    setEditingBadMonths(initial);
+  }, [ambassadors]);
+
+  const handleBadMonthsInput = (id: number, value: number | string) => {
+    const parsed = Number(value);
+    setEditingBadMonths((prev) => ({ ...prev, [id]: isNaN(parsed) ? 0 : parsed }));
   };
 
-  const handleUpdateBadMonths = async (id: number, createdAt: Date, newValue: number) => {
-    // Validate if the active months is negative
+  const handleSaveBadMonths = async (id: number, createdAt: Date) => {
+    const newValue = editingBadMonths[id] ?? 0;
     const activeMonths = calculateActiveMonths(createdAt.toString(), newValue);
     if (activeMonths < 0) {
       setError("Bad months cannot be greater than the total months");
       return;
     }
-
-    setIsLoading(true);
+    setSavingBadMonths((prev) => ({ ...prev, [id]: true }));
     setError(null);
     try {
       const response = await fetch(`/api/admin/ambassadors?id=${id}`, {
@@ -102,12 +101,44 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
         const data = await response.json();
         throw new Error(data.message || "Failed to update ambassador");
       }
+      // await fetchAmbassadors();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setSavingBadMonths((prev) => ({ ...prev, [id]: false }));
+    }
+  };
+
+  const handleRemoveAmbassador = async (id: number) => {
+    setRemoveModalOpen(true);
+    setRemoveAmbassadorId(id);
+  };
+
+  const confirmRemoveAmbassador = async () => {
+    if (!removeAmbassadorId) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/admin/ambassadors?id=${removeAmbassadorId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Failed to remove ambassador");
+      }
       await fetchAmbassadors();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
+      setRemoveModalOpen(false);
+      setRemoveAmbassadorId(null);
     }
+  };
+
+  const cancelRemoveAmbassador = () => {
+    setRemoveModalOpen(false);
+    setRemoveAmbassadorId(null);
   };
 
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
@@ -119,10 +150,33 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
 
   const itemsPerPageOptions = [5, 10, 20];
 
-  if (isLoading) {
-    return <div className="text-center py-8 text-gray-500">Loading...</div>;
-  } else {
-    return (
+  return (
+    <Fragment>
+      {/* Remove Confirmation Modal */}
+      {removeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+            <h3 className="text-lg text-red-500 font-semibold mb-4">Remove Ambassador</h3>
+            <p className="mb-6 text-gray-800">Are you sure you want to remove this ambassador?</p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={cancelRemoveAmbassador}
+                className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-100"
+                disabled={isLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRemoveAmbassador}
+                className="px-4 py-2 rounded border border-red-600 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                disabled={isLoading}
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="overflow-x-auto bg-white rounded-lg shadow p-6 border border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-800">Ambassador List</h2>
@@ -137,13 +191,13 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
         {error && (
           <div className="mb-4 text-red-600 text-sm">{error}</div>
         )}
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-200 relative">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 User
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-lg">
                 Wallet Address
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -157,9 +211,12 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {ambassadors.map((ambassador) => (
-              <tr key={ambassador.id}>
+          {isLoading ? (
+            <div className="text-center text-xl py-8 text-gray-500 absolute top-[80px] left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"><p>Loading...</p></div>
+          ) : (
+            <tbody className="bg-white divide-y divide-gray-200">
+              {ambassadors.map((ambassador) => (
+                <tr key={ambassador.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
                     {ambassador.user?.username || ambassador.user?.email || "N/A"}
@@ -182,15 +239,15 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
                   <input
                     type="number"
                     min="0"
-                    value={ambassador.numberOfBadMonths}
+                    value={editingBadMonths[ambassador.id] ?? ambassador.numberOfBadMonths}
                     onChange={(e) =>
-                      handleUpdateBadMonths(ambassador.id, ambassador.createdAt, parseInt(e.target.value))
+                      handleBadMonthsInput(ambassador.id, e.target.value)
                     }
                     className="w-20 px-2 py-1 border border-gray-300 text-gray-500 rounded-md"
-                    disabled={isLoading}
+                    disabled={isLoading || savingBadMonths[ambassador.id]}
                   />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2 justify-center items-center mt-2">
                   <button
                     onClick={() => handleRemoveAmbassador(ambassador.id)}
                     disabled={isLoading}
@@ -198,13 +255,21 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
                   >
                     Remove
                   </button>
+                  <button
+                    onClick={() => handleSaveBadMonths(ambassador.id, ambassador.createdAt)}
+                    disabled={isLoading || savingBadMonths[ambassador.id] || (editingBadMonths[ambassador.id] === ambassador.numberOfBadMonths)}
+                    className="text-blue-600 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {savingBadMonths[ambassador.id] ? "Saving..." : "Save"}
+                  </button>
                 </td>
               </tr>
             ))}
-          </tbody>
+            </tbody>
+          )}
         </table>
         {/* Pagination Bar */}
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center justify-between mt-10">
           {/* Page navigation (left) */}
           <div className="flex items-center gap-2">
             <button
@@ -242,6 +307,6 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
           </div>
         </div>
       </div>
-    );
-  }
+    </Fragment>
+  );
 } 
