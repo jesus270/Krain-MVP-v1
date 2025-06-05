@@ -212,7 +212,9 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
             </tr>
           </thead>
           {isLoading ? (
-            <div className="text-center text-xl py-8 text-gray-500 absolute top-[80px] left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"><p>Loading...</p></div>
+            <tbody className="bg-white divide-y divide-gray-200">
+              <tr><td colSpan={5} className="text-center text-xl py-8 text-gray-500">Loading...</td></tr>
+            </tbody>
           ) : (
             <tbody className="bg-white divide-y divide-gray-200">
               {ambassadors.map((ambassador) => (
