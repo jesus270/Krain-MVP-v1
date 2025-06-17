@@ -24,7 +24,7 @@
     "./layouts/*": "./src/layouts/*.tsx"
   },
   "scripts": {
-    "build": "npx tsup src/index.ts --format esm,cjs --dts --external react",
+    "build": "tsup src/index.ts --format esm,cjs --dts --external react",
     "lint": "eslint .",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
@@ -33,7 +33,7 @@
     "@intercom/messenger-js-sdk": "^0.0.14",
     "@krain/session": "workspace:*",
     "@krain/utils": "workspace:",
-    "@privy-io/react-auth": "2.6.2",
+    "@privy-io/react-auth": "catalog:",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.6",
     "@radix-ui/react-aspect-ratio": "^1.1.2",
@@ -79,24 +79,24 @@
     "recharts": "^2.15.1",
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.2",
-    "tailwindcss": "^4.0.12",
+    "tailwindcss": "catalog:",
     "tailwindcss-animate": "^1.0.7",
-    "tsup": "^8.4.0",
+    "tsup": "catalog:",
     "vaul": "^1.1.2",
-    "zod": "^3.24.2",
+    "zod": "catalog:",
     "@krain/typescript-config": "workspace:"
   },
   "peerDependencies": {
-    "next": "^15.3.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "@krain/eslint-config": "workspace:",
-    "@tailwindcss/postcss": "^4.0.12",
+    "@tailwindcss/postcss": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "eslint": "^9.22.0",
-    "typescript": "^5.8.2"
+    "eslint": "catalog:",
+    "typescript": "catalog:"
   }
 }

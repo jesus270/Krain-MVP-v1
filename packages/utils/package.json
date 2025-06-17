@@ -33,7 +33,7 @@
   "devDependencies": {
     "@krain/eslint-config": "workspace:",
     "@types/react": "^18.2.0",
-    "typescript": "^5.0.0",
-    "tsup": "^8.4.0"
+    "typescript": "catalog:",
+    "tsup": "catalog:"
   }
 }

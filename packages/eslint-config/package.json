@@ -13,6 +13,6 @@
     "@vercel/style-guide": "^6.0.0",
     "eslint-config-turbo": "2.4.4",
     "eslint-plugin-only-warn": "^1.1.0",
-    "typescript": "^5.8.2"
+    "typescript": "catalog:"
   }
 }
