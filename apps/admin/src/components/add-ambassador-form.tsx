@@ -56,12 +56,12 @@ export function AddAmbassadorForm({ onAdded }: AddAmbassadorFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md w-full bg-white rounded-lg shadow p-6 mb-8 border border-gray-200">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800">Add Ambassador</h2>
+    <form onSubmit={handleSubmit} className="max-w-md w-full bg-card rounded-lg shadow p-6 mb-8 border">
+      <h2 className="text-xl font-semibold mb-4 text-card-foreground">Add Ambassador</h2>
       <div className="mb-4">
         <label
           htmlFor="walletAddress"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-card-foreground mb-1"
         >
           Wallet Address
         </label>
@@ -70,7 +70,7 @@ export function AddAmbassadorForm({ onAdded }: AddAmbassadorFormProps) {
           id="walletAddress"
           value={walletAddress}
           onChange={(e) => setWalletAddress(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 text-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-input bg-background text-foreground rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
           placeholder="Enter wallet address"
           required
         />
@@ -78,7 +78,7 @@ export function AddAmbassadorForm({ onAdded }: AddAmbassadorFormProps) {
       <div className="mb-4">
         <label
           htmlFor="userId"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-card-foreground mb-1"
         >
           User ID (optional)
         </label>
@@ -87,14 +87,14 @@ export function AddAmbassadorForm({ onAdded }: AddAmbassadorFormProps) {
           id="userId"
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 text-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-input bg-background text-foreground rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
           placeholder="Enter user ID (optional)"
         />
       </div>
       {/* <div className="mb-4">
         <label
           htmlFor="numberOfBadMonths"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-card-foreground mb-1"
         >
           Number of Bad Months
         </label>
@@ -104,17 +104,17 @@ export function AddAmbassadorForm({ onAdded }: AddAmbassadorFormProps) {
           min={0}
           value={numberOfBadMonths}
           onChange={(e) => setNumberOfBadMonths(Number(e.target.value))}
-          className="w-full px-3 py-2 border border-gray-300 text-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-input bg-background text-foreground rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
           placeholder="0"
         />
       </div> */}
       {error && (
-        <div className="mb-4 text-red-600 text-sm">{error}</div>
+        <div className="mb-4 text-destructive text-sm">{error}</div>
       )}
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? "Adding..." : "Add Ambassador"}
       </button>

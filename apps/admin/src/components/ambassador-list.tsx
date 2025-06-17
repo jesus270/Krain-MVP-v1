@@ -101,7 +101,7 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
         const data = await response.json();
         throw new Error(data.message || "Failed to update ambassador");
       }
-      // await fetchAmbassadors();
+      await fetchAmbassadors();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -154,21 +154,21 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
     <Fragment>
       {/* Remove Confirmation Modal */}
       {removeModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-            <h3 className="text-lg text-red-500 font-semibold mb-4">Remove Ambassador</h3>
-            <p className="mb-6 text-gray-800">Are you sure you want to remove this ambassador?</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="bg-card rounded-lg shadow-lg p-6 w-full max-w-sm border">
+            <h3 className="text-lg text-destructive font-semibold mb-4">Remove Ambassador</h3>
+            <p className="mb-6 text-card-foreground">Are you sure you want to remove this ambassador?</p>
             <div className="flex justify-end gap-2">
               <button
                 onClick={cancelRemoveAmbassador}
-                className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-100"
+                className="px-4 py-2 rounded border border-border text-foreground hover:bg-accent"
                 disabled={isLoading}
               >
                 Cancel
               </button>
               <button
                 onClick={confirmRemoveAmbassador}
-                className="px-4 py-2 rounded border border-red-600 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                className="px-4 py-2 rounded border border-destructive text-destructive hover:bg-destructive/10 disabled:opacity-50"
                 disabled={isLoading}
               >
                 Remove
@@ -177,60 +177,60 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
           </div>
         </div>
       )}
-      <div className="overflow-x-auto bg-white rounded-lg shadow p-6 border border-gray-200">
+      <div className="overflow-x-auto bg-card rounded-lg shadow p-6 border">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">Ambassador List</h2>
+          <h2 className="text-xl font-semibold text-card-foreground">Ambassador List</h2>
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by wallet address"
-            className="w-64 px-3 py-2 border border-gray-300 text-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-64 px-3 py-2 border border-input bg-background text-foreground rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
           />
         </div>
         {error && (
-          <div className="mb-4 text-red-600 text-sm">{error}</div>
+          <div className="mb-4 text-destructive text-sm">{error}</div>
         )}
-        <table className="min-w-full divide-y divide-gray-200 relative">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-border relative">
+          <thead className="bg-muted">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 User
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-lg">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-lg">
                 Wallet Address
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Active Months
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Bad Months
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
           {isLoading ? (
-            <tbody className="bg-white divide-y divide-gray-200">
-              <tr><td colSpan={5} className="text-center text-xl py-8 text-gray-500">Loading...</td></tr>
+            <tbody className="bg-card divide-y divide-border">
+              <tr><td colSpan={5} className="text-center text-xl py-8 text-muted-foreground">Loading...</td></tr>
             </tbody>
           ) : (
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-card divide-y divide-border">
               {ambassadors.map((ambassador) => (
                 <tr key={ambassador.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
+                  <div className="text-sm font-medium text-card-foreground">
                     {ambassador.user?.username || ambassador.user?.email || "N/A"}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-muted-foreground">
                     {ambassador.walletAddress}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-muted-foreground">
                     {calculateActiveMonths(
                       typeof ambassador.createdAt === 'string' ? ambassador.createdAt : ambassador.createdAt?.toString(),
                       ambassador.numberOfBadMonths
@@ -245,7 +245,7 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
                     onChange={(e) =>
                       handleBadMonthsInput(ambassador.id, e.target.value)
                     }
-                    className="w-20 px-2 py-1 border border-gray-300 text-gray-500 rounded-md"
+                    className="w-20 px-2 py-1 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                     disabled={isLoading || savingBadMonths[ambassador.id]}
                   />
                 </td>
@@ -253,14 +253,14 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
                   <button
                     onClick={() => handleRemoveAmbassador(ambassador.id)}
                     disabled={isLoading}
-                    className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-destructive hover:text-destructive/80 disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
                   >
                     Remove
                   </button>
                   <button
                     onClick={() => handleSaveBadMonths(ambassador.id, ambassador.createdAt)}
                     disabled={isLoading || savingBadMonths[ambassador.id] || (editingBadMonths[ambassador.id] === ambassador.numberOfBadMonths)}
-                    className="text-blue-600 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-green-400 hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
                   >
                     {savingBadMonths[ambassador.id] ? "Saving..." : "Save"}
                   </button>
@@ -277,28 +277,28 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="px-3 py-1 border rounded text-gray-700 disabled:opacity-50"
+              className="px-3 py-1 border border-border rounded text-foreground disabled:opacity-50 hover:bg-accent"
             >
               Previous
             </button>
-            <span className="text-sm text-gray-700">
+            <span className="text-sm text-foreground">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 border rounded text-gray-700 disabled:opacity-50"
+              className="px-3 py-1 border border-border rounded text-foreground disabled:opacity-50 hover:bg-accent"
             >
               Next
             </button>
           </div>
           {/* Items per page (right) */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700">Items per page:</span>
+            <span className="text-sm text-foreground">Items per page:</span>
             <select
               value={itemsPerPage}
               onChange={(e) => setItemsPerPage(Number(e.target.value))}
-              className="px-2 py-1 border rounded text-gray-700"
+              className="px-2 py-1 border border-border rounded text-foreground bg-background"
             >
               {itemsPerPageOptions.map((option) => (
                 <option key={option} value={option}>
