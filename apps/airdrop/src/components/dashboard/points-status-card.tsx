@@ -77,6 +77,9 @@ export function PointsStatusCard({
   const announcementPoints = hasJoinedTelegramAnnouncement
     ? POINTS_PER_TELEGRAM_ANNOUNCEMENT
     : 0;
+  const ambassadorPoints = isAmbassador && ambassadorActiveMonths
+    ? ambassadorActiveMonths * POINTS_PER_AMBASSADOR_MONTH
+    : 0;
   const totalPoints =
     walletConnectionPoints +
     accountCreationPoints +
@@ -85,7 +88,8 @@ export function PointsStatusCard({
     announcementPoints +
     messagePoints +
     twitterPoints +
-    emailPoints;
+    emailPoints +
+    ambassadorPoints;
 
   return (
     <Card className="border-2 max-w-2xl mx-auto relative overflow-hidden backdrop-blur-sm bg-background/95 border-border/50">
