@@ -94,6 +94,11 @@ export default function Home() {
     );
   }
 
+  // Show loading if user is not yet loaded
+  if (!user) {
+    return <div>Loading user data...</div>;
+  }
+
   // Show null if session is not validated and no other state matches
   if (!sessionValidated) {
     log.warn(
@@ -101,11 +106,6 @@ export default function Home() {
       { operation: "render_null_unexpected_state" },
     );
     return null;
-  }
-
-  // Show loading if user is not yet loaded
-  if (!user) {
-    return <div>Loading user data...</div>;
   }
 
   // Not admin
