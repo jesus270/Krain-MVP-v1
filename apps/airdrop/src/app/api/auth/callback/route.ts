@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       entity: "AUTH",
     });
 
-    const result = await handleAuthCallback(request);
+    const result = await handleAuthCallback(request as any);
 
     // Create an explicit response to ensure proper JSON response
     const response = NextResponse.json(

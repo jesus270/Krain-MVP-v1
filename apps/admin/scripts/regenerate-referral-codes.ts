@@ -73,7 +73,7 @@ async function regenerateReferralCodes() {
               );
               totalWalletsFlagReset++;
             } catch (updateError) {
-                console.error(`Wallet ${wallet.address}: Failed to reset flag. Error: ${updateError}`);
+              console.error(`Wallet ${wallet.address}: Failed to reset flag. Error: ${updateError}`);
             }
           } else {
             // Code is valid and flag is already false. Should not happen with the updated WHERE clause logic, but safe to skip.
@@ -94,21 +94,21 @@ async function regenerateReferralCodes() {
             attempts++;
             const candidateCode = generateReferralCode(6);
             try {
-                const existing = await db
+              const existing = await db
                 .select({ address: walletTable.address })
                 .from(walletTable)
                 .where(eq(walletTable.referralCode, candidateCode))
                 .limit(1);
 
-                if (existing.length === 0) {
+              if (existing.length === 0) {
                 newReferralCode = candidateCode;
                 break;
-                }
+              }
             } catch (dbCheckError) {
-                console.error(`Wallet ${wallet.address}: DB error checking uniqueness for code ${candidateCode}. Attempt ${attempts}. Error: ${dbCheckError}`);
+              console.error(`Wallet ${wallet.address}: DB error checking uniqueness for code ${candidateCode}. Attempt ${attempts}. Error: ${dbCheckError}`);
             }
             if (attempts > 1 && attempts % 10 === 0) {
-                console.log(`Wallet ${wallet.address}: Attempt ${attempts} to generate unique code...`);
+              console.log(`Wallet ${wallet.address}: Attempt ${attempts} to generate unique code...`);
             }
           }
 
@@ -126,8 +126,8 @@ async function regenerateReferralCodes() {
               );
               totalWalletsCodeRegenerated++;
             } catch (updateError) {
-                console.error(`Wallet ${wallet.address}: Failed to update with new code ${newReferralCode}. Error: ${updateError}`);
-                totalWalletsFailedToRegenerate++;
+              console.error(`Wallet ${wallet.address}: Failed to update with new code ${newReferralCode}. Error: ${updateError}`);
+              totalWalletsFailedToRegenerate++;
             }
           } else {
             console.error(
@@ -150,7 +150,7 @@ async function regenerateReferralCodes() {
   } finally {
     console.log(`
 --- Final Summary ---`);
-    console.log(`Total batches processed: ${totalBatchesProcessed > 0 ? totalBatchesProcessed -1 : 0}`);
+    console.log(`Total batches processed: ${totalBatchesProcessed > 0 ? totalBatchesProcessed - 1 : 0}`);
     console.log(`Total wallets where flag was reset: ${totalWalletsFlagReset}`);
     console.log(`Total wallets where code was regenerated: ${totalWalletsCodeRegenerated}`);
     console.log(`Total wallets that failed to regenerate: ${totalWalletsFailedToRegenerate}`);

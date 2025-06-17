@@ -2,7 +2,7 @@ import * as dotenv from "dotenv";
 dotenv.config(); // Load .env file - needed if running directly
 
 import { db } from "@krain/db";
-import { walletTable } from "@krain/db/schema";
+import { walletTable } from "@krain/db";
 import { eq, desc, count, sql, gt, asc, ne } from "drizzle-orm";
 
 // Placeholder: Replace with your actual code generation logic from @krain/utils if available
@@ -63,7 +63,13 @@ async function nullifyDuplicateCodes() {
         );
         continue;
       }
-      const keeperWalletAddress = keeperResult[0].address;
+      const keeperWalletAddress = keeperResult[0]?.address;
+      if (!keeperWalletAddress) {
+        console.warn(
+          `    Could not find any wallet for code ${codeToResolve} during keeper selection. Skipping.`,
+          `    This might indicate an inconsistency. Manual check recommended.`,
+        );
+      }
       console.log(`    Keeper wallet address: ${keeperWalletAddress}`);
 
       // Bulk update all *other* wallets with this code to NULL and set the flag

@@ -8,11 +8,11 @@ import { log } from "@krain/utils";
 
 export const runtime = "nodejs";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Apply rate limiting
     const rateLimitResponse = await withRateLimit(request.headers, "auth");
-    if (rateLimitResponse) return rateLimitResponse;
+    if (rateLimitResponse) return rateLimitResponse as any;
 
     log.info("Processing logout request", {
       entity: "API-auth/logout",
