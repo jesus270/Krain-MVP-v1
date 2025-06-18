@@ -25,6 +25,17 @@
   "pnpm": {
     "overrides": {
       "@privy-io/server-auth": "1.19.0"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "@vercel/speed-insights",
+      "bigint-buffer",
+      "bufferutil",
+      "core-js-pure",
+      "esbuild",
+      "postgresql",
+      "sharp",
+      "utf-8-validate"
+    ]
   }
 }

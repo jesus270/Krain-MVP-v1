@@ -11,15 +11,27 @@ export function AddAmbassadorForm({ onAdded }: AddAmbassadorFormProps) {
   const [walletAddress, setWalletAddress] = useState("");
   const [userId, setUserId] = useState("");
   const [numberOfBadMonths, setNumberOfBadMonths] = useState(0);
+  const [createdAt, setCreatedAt] = useState(() => {
+    // Set default to current date in YYYY-MM-DD format
+    const now = new Date();
+    return now.toISOString().split('T')[0];
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate the bad months
-    if (calculateActiveMonths(new Date().toString(), numberOfBadMonths) < 0) {
-      setError("Bad months cannot be greater than the total months");
+    // Create Date object for validation
+    if (!createdAt) {
+      setError("Created date is required");
+      return;
+    }
+    const createdAtDate = new Date(createdAt);
+    
+    // Validate the bad months against the provided createdAt date
+    if (calculateActiveMonths(createdAtDate.toString(), numberOfBadMonths) < 0) {
+      setError("Bad months cannot be greater than the total months since the created date");
       return;
     }
 
@@ -36,6 +48,7 @@ export function AddAmbassadorForm({ onAdded }: AddAmbassadorFormProps) {
           walletAddress,
           userId: userId ? Number(userId) : undefined,
           numberOfBadMonths: Number(numberOfBadMonths),
+          createdAt: createdAtDate.toISOString(),
         }),
       });
 
@@ -47,6 +60,9 @@ export function AddAmbassadorForm({ onAdded }: AddAmbassadorFormProps) {
       setWalletAddress("");
       setUserId("");
       setNumberOfBadMonths(0);
+      // Reset to current date
+      const now = new Date();
+      setCreatedAt(now.toISOString().split('T')[0]);
       if (onAdded) onAdded();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -91,7 +107,23 @@ export function AddAmbassadorForm({ onAdded }: AddAmbassadorFormProps) {
           placeholder="Enter user ID (optional)"
         />
       </div>
-      {/* <div className="mb-4">
+      <div className="mb-4">
+        <label
+          htmlFor="createdAt"
+          className="block text-sm font-medium text-card-foreground mb-1"
+        >
+          Created Date
+        </label>
+        <input
+          type="date"
+          id="createdAt"
+          value={createdAt}
+          onChange={(e) => setCreatedAt(e.target.value)}
+          className="w-full px-3 py-2 border border-input bg-background text-foreground rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
+          required
+        />
+      </div>
+      <div className="mb-4">
         <label
           htmlFor="numberOfBadMonths"
           className="block text-sm font-medium text-card-foreground mb-1"
@@ -107,7 +139,7 @@ export function AddAmbassadorForm({ onAdded }: AddAmbassadorFormProps) {
           className="w-full px-3 py-2 border border-input bg-background text-foreground rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
           placeholder="0"
         />
-      </div> */}
+      </div>
       {error && (
         <div className="mb-4 text-destructive text-sm">{error}</div>
       )}

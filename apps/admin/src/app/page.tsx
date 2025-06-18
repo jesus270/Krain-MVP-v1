@@ -115,7 +115,7 @@ export default function Home() {
 
   // Authenticated and admin
   return (
-    <div className="max-w-5xl mx-auto py-10">
+    <div className="w-full mx-auto py-10 px-4">
       {/* User account button at top right */}
       <div className="flex justify-end mb-4">
         <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-lg shadow border">

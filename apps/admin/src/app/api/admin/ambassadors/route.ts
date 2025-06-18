@@ -5,7 +5,7 @@ import { eq, and, ilike, sql } from "drizzle-orm";
 
 export async function POST(request: Request) {
   try {
-    const { walletAddress, userId, numberOfBadMonths } = await request.json();
+    const { walletAddress, userId, numberOfBadMonths, createdAt } = await request.json();
 
     if (!walletAddress) {
       return NextResponse.json(
@@ -45,6 +45,7 @@ export async function POST(request: Request) {
         userId: user.id,
         walletAddress,
         numberOfBadMonths: numberOfBadMonths,
+        ...(createdAt && { createdAt: new Date(createdAt) }),
       })
       .returning();
 
@@ -130,12 +131,27 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ message: "Ambassador id is required" }, { status: 400 });
   }
   try {
-    const { numberOfBadMonths } = await request.json();
-    if (typeof numberOfBadMonths !== "number" || numberOfBadMonths < 0) {
-      return NextResponse.json({ message: "Invalid numberOfBadMonths" }, { status: 400 });
+    const { numberOfBadMonths, createdAt } = await request.json();
+    
+    const updateData: any = {};
+    
+    if (numberOfBadMonths !== undefined) {
+      if (typeof numberOfBadMonths !== "number" || numberOfBadMonths < 0) {
+        return NextResponse.json({ message: "Invalid numberOfBadMonths" }, { status: 400 });
+      }
+      updateData.numberOfBadMonths = numberOfBadMonths;
     }
+    
+    if (createdAt !== undefined) {
+      updateData.createdAt = new Date(createdAt);
+    }
+    
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ message: "No valid fields to update" }, { status: 400 });
+    }
+    
     await db.update(ambassadorTable)
-      .set({ numberOfBadMonths })
+      .set(updateData)
       .where(eq(ambassadorTable.id, Number(id)));
     return NextResponse.json({ success: true });
   } catch (error) {
