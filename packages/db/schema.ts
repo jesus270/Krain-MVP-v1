@@ -468,3 +468,32 @@ export const whitelistSignupTable = pgTable(
   ],
 );
 export type WhitelistSignup = typeof whitelistSignupTable.$inferSelect;
+
+export const ambassadorTable = pgTable(
+  "ambassador",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("userId")
+      .references(() => userTable.id)
+      .notNull()
+      .unique(),
+    walletAddress: varchar("walletAddress", { length: 255 }).notNull().unique(),
+    numberOfBadMonths: integer("numberOfBadMonths").default(0).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_ambassador_userId").on(table.userId),
+    index("idx_ambassador_walletAddress").on(table.walletAddress),
+    index("idx_ambassador_createdAt").on(table.createdAt),
+  ],
+);
+
+export type Ambassador = typeof ambassadorTable.$inferSelect;
+
+export const ambassadorRelations = relations(ambassadorTable, ({ one }) => ({
+  user: one(userTable, {
+    fields: [ambassadorTable.userId],
+    references: [userTable.id],
+  }),
+}));

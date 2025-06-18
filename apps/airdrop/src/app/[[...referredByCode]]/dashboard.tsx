@@ -13,6 +13,7 @@ import { ConnectWalletCard } from "@/components/dashboard/connect-wallet-card";
 import { PointsStatusCard } from "@/components/dashboard/points-status-card";
 import { ReferralProgramCard } from "@/components/dashboard/referral-program-card";
 import { ReferralCodeConfirmationCard } from "@/components/dashboard/referral-code-confirmation-card";
+import { calculateActiveMonths } from "@krain/utils";
 import {
   Card,
   CardContent,
@@ -24,6 +25,7 @@ import { Button } from "@krain/ui/components/ui/button";
 import { log } from "@krain/utils";
 import { useSession } from "@krain/session";
 import { ProfileCompletionMessage } from "@/components/dashboard/profile-completion-message";
+import { AmbassadorPointsCard } from "@/components/dashboard/ambassador-points-card";
 
 const POINTS_FOR_WALLET_CONNECTION = 1000;
 const POINTS_FOR_ACCOUNT_CREATION = 5000;
@@ -74,6 +76,12 @@ export function Dashboard({
   const [isLoadingMessagePoints, setIsLoadingMessagePoints] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
   const locale = useLocale();
+  const [ambassadorInfo, setAmbassadorInfo] = useState<{
+    isAmbassador: boolean;
+    activeMonths: number;
+    ambassadorPoints: number;
+    isLoading: boolean;
+  }>({ isAmbassador: false, activeMonths: 0, ambassadorPoints: 0, isLoading: true });
 
   const userEmailAddress = user?.email?.address ?? undefined;
   const userWalletAddress = user?.wallet?.address ?? undefined;
@@ -423,6 +431,34 @@ export function Dashboard({
     sessionError,
   ]);
 
+  useEffect(() => {
+    async function fetchAmbassadorInfo() {
+      if (!user?.id) return;
+      setAmbassadorInfo((prev) => ({ ...prev, isLoading: true }));
+      try {
+        const res = await fetch(`/api/user/ambassador-info?privyId=${user.id}`, { headers: { "x-user-id": user.id } });
+        if (!res.ok) throw new Error("Failed to fetch ambassador info");
+        const data = await res.json();
+        console.log("ambassador info", data);
+        
+        if (data.isAmbassador && data.createdAt) {
+          const activeMonths = calculateActiveMonths(data.createdAt, data.numberOfBadMonths);
+          setAmbassadorInfo({
+            isAmbassador: true,
+            activeMonths: activeMonths,
+            ambassadorPoints: activeMonths * 100000,
+            isLoading: false,
+          });
+        } else {
+          setAmbassadorInfo({ isAmbassador: false, activeMonths: 0, ambassadorPoints: 0, isLoading: false });
+        }
+      } catch {
+        setAmbassadorInfo({ isAmbassador: false, activeMonths: 0, ambassadorPoints: 0, isLoading: false });
+      }
+    }
+    if (user?.id) fetchAmbassadorInfo();
+  }, [user?.id]);
+
   if (!authenticated || !ready) {
     log.info("Rendering ConnectWalletCard (not authenticated or ready)", {
       operation: "render_connect_wallet_unauthenticated",
@@ -532,6 +568,17 @@ export function Dashboard({
     return null;
   }
 
+  const totalPoints =
+    (POINTS_FOR_WALLET_CONNECTION) +
+    (POINTS_FOR_ACCOUNT_CREATION) +
+    (referralsCount * 1000) +
+    (hasJoinedTelegramCommunity ? 5000 : 0) +
+    (hasJoinedTelegramAnnouncement ? 5000 : 0) +
+    (telegramMessagePoints ?? 0) +
+    (userTwitterUsername ? POINTS_FOR_TWITTER : 0) +
+    (userEmailAddress ? POINTS_FOR_EMAIL : 0) +
+    (ambassadorInfo.ambassadorPoints ?? 0);
+
   log.info("Rendering Main Dashboard Content", {
     operation: "render_dashboard_content",
     userId: user?.id,
@@ -546,20 +593,26 @@ export function Dashboard({
           userEmailAddress={userEmailAddress}
           userTwitterUsername={userTwitterUsername}
           userWalletAddress={userWalletAddress}
-          walletConnectionPoints={
-            userWalletAddress ? POINTS_FOR_WALLET_CONNECTION : 0
-          }
-          accountCreationPoints={user ? POINTS_FOR_ACCOUNT_CREATION : 0}
-          twitterPoints={userTwitterUsername ? POINTS_FOR_TWITTER : 0}
-          emailPoints={userEmailAddress ? POINTS_FOR_EMAIL : 0}
+          walletConnectionPoints={POINTS_FOR_WALLET_CONNECTION}
+          accountCreationPoints={POINTS_FOR_ACCOUNT_CREATION}
+          twitterPoints={POINTS_FOR_TWITTER}
+          emailPoints={POINTS_FOR_EMAIL}
           referralsCount={referralsCount}
           hasJoinedTelegramCommunity={hasJoinedTelegramCommunity}
           hasJoinedTelegramAnnouncement={hasJoinedTelegramAnnouncement}
           messagePoints={telegramMessagePoints}
           isLoadingReferrals={isLoadingReferrals}
           isLoadingMessagePoints={isLoadingMessagePoints}
+          isAmbassador={ambassadorInfo.isAmbassador}
+          ambassadorActiveMonths={ambassadorInfo.activeMonths}
+          isLoadingAmbassador={ambassadorInfo.isLoading}
         />
       </div>
+
+      {ambassadorInfo.isAmbassador && (
+        <AmbassadorPointsCard ambassadorInfo={{isAmbassador: ambassadorInfo.isAmbassador, activeMonths: ambassadorInfo.activeMonths, ambassadorPoints: ambassadorInfo.ambassadorPoints}} locale={locale} />
+      )}
+
       <ReferralProgramCard
         referralsCount={referralsCount}
         referralUrl={

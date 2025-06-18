@@ -28,6 +28,7 @@ import { TelegramLogo } from "@krain/ui/components/icons/logo-telegram";
 const POINTS_PER_REFERRAL = 1000;
 const POINTS_PER_TELEGRAM_COMMUNITY = 5000;
 const POINTS_PER_TELEGRAM_ANNOUNCEMENT = 5000;
+const POINTS_PER_AMBASSADOR_MONTH = 100_000;
 
 export interface PointsStatusCardProps {
   referralsCount: number;
@@ -44,6 +45,9 @@ export interface PointsStatusCardProps {
   accountCreationPoints?: number;
   twitterPoints?: number;
   emailPoints?: number;
+  isAmbassador?: boolean;
+  ambassadorActiveMonths?: number;
+  isLoadingAmbassador?: boolean;
 }
 
 export function PointsStatusCard({
@@ -61,6 +65,9 @@ export function PointsStatusCard({
   accountCreationPoints = 0,
   twitterPoints = 0,
   emailPoints = 0,
+  isAmbassador,
+  ambassadorActiveMonths,
+  isLoadingAmbassador,
 }: PointsStatusCardProps) {
   // Calculate points
   const referralPoints = referralsCount * POINTS_PER_REFERRAL;
@@ -70,6 +77,9 @@ export function PointsStatusCard({
   const announcementPoints = hasJoinedTelegramAnnouncement
     ? POINTS_PER_TELEGRAM_ANNOUNCEMENT
     : 0;
+  const ambassadorPoints = isAmbassador && ambassadorActiveMonths
+    ? ambassadorActiveMonths * POINTS_PER_AMBASSADOR_MONTH
+    : 0;
   const totalPoints =
     walletConnectionPoints +
     accountCreationPoints +
@@ -78,7 +88,8 @@ export function PointsStatusCard({
     announcementPoints +
     messagePoints +
     twitterPoints +
-    emailPoints;
+    emailPoints +
+    ambassadorPoints;
 
   return (
     <Card className="border-2 max-w-2xl mx-auto relative overflow-hidden backdrop-blur-sm bg-background/95 border-border/50">

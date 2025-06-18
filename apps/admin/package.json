@@ -1,23 +1,41 @@
 {
   "name": "admin",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
     "import": "tsx import-users.ts",
     "top-referrers": "tsx -r dotenv/config top-referrers.ts",
     "resolve-duplicates": "tsx -r dotenv/config resolve-duplicate-codes.ts",
-    "regenerate-referral-codes": "tsx -r dotenv/config regenerate-referral-codes.ts"
+    "regenerate-referral-codes": "tsx -r dotenv/config regenerate-referral-codes.ts",
+    "clean": "rm -rf .turbo .next node_modules dist"
   },
   "dependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "next": "catalog:",
     "@krain/db": "workspace:*",
+    "@krain/ui": "workspace:*",
     "csv-parse": "^5.5.5",
-    "csv-writer": "^1.6.0"
+    "csv-writer": "^1.6.0",
+    "@privy-io/react-auth": "catalog:",
+    "@krain/session": "workspace:*"
   },
   "devDependencies": {
-    "@krain/typescript-config": "workspace:*",
-    "@types/node": "^20.14.10",
-    "dotenv": "^16.4.5",
-    "tsx": "^4.19.3",
-    "typescript": "^5.4.2"
+    "typescript": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@tailwindcss/postcss": "catalog:",
+    "tailwindcss": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-next": "catalog:",
+    "@eslint/eslintrc": "catalog:",
+    "dotenv": "catalog:",
+    "tsx": "catalog:",
+    "@krain/typescript-config": "workspace:*"
   }
 }

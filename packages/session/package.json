@@ -28,26 +28,28 @@
     "@krain/db": "workspace:*",
     "@krain/typescript-config": "workspace:*",
     "@krain/utils": "workspace:*",
-    "@privy-io/react-auth": "^2.6.2",
+    "@privy-io/react-auth": "catalog:",
     "@privy-io/server-auth": "^1.19.0",
     "@types/lodash.clonedeep": "^4.5.9",
     "@upstash/ratelimit": "^2.0.5",
-    "@upstash/redis": "^1.28.3",
+    "@upstash/redis": "catalog:",
     "drizzle-orm": "catalog:",
     "iron-session": "^8.0.1",
     "lodash.clonedeep": "^4.5.0",
-    "next": "catalog:",
     "react": "catalog:",
     "server-only": "^0.0.1",
-    "zod": "^3.22.4"
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "next": "catalog:"
   },
   "devDependencies": {
     "@krain/eslint-config": "workspace:*",
-    "@types/node": "^20.12.12",
-    "@types/react": "catalog:default",
-    "@types/react-dom": "catalog:default",
-    "eslint": "^9.22.0",
-    "tsup": "^8.0.2",
-    "typescript": "^5.4.5"
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "eslint": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:"
   }
 }

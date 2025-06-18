@@ -7,22 +7,22 @@
     "build": "npx tsc",
     "start": "node -r dotenv/config dist/index.js",
     "lint": "eslint .",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist .turbo node_modules"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "dotenv": "^16.4.7",
+    "dotenv": "catalog:",
     "telegraf": "^4.16.3",
     "@krain/db": "workspace:*"
   },
   "devDependencies": {
     "@krain/eslint-config": "*",
     "@krain/typescript-config": "*",
-    "@types/node": "^20.0.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.0.0"
+    "@types/node": "catalog:",
+    "ts-node": "catalog:",
+    "typescript": "catalog:"
   }
 }

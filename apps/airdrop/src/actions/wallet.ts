@@ -327,33 +327,15 @@ export async function handleSubmitWallet(input: {
   referredByCode?: string;
   userId: string;
 }) {
-  try {
-    // First, validate the session by making a fetch request to the API
-    // This ensures that the session is established properly
-    const validateResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/user`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "X-User-Id": input.userId,
-        },
-      },
-    );
+  // Validate origin and apply rate limiting
+  const protectionResponse = await withServerActionProtection(
+    { headers: headers() },
+    "default",
+  );
+  if (protectionResponse)
+    throw new AppError(ErrorCodes.UNAUTHORIZED, "Unauthorized request");
 
-    if (!validateResponse.ok) {
-      const errorText = await validateResponse.text();
-      log.error("Failed to validate session before wallet submission", {
-        entity: "WALLET",
-        operation: "pre_validate_session",
-        status: validateResponse.status,
-        error: errorText,
-      });
-      throw new Error("Session validation failed before wallet submission");
-    }
-
-    // Now proceed with the actual withAuth call
-    return withAuth(input.userId, async (session: SessionType) => {
+  return withAuth(input.userId, async (session: SessionType) => {
       try {
         const user = session.get("user");
         if (!user) throw new Error("No user in session");
@@ -504,25 +486,6 @@ export async function handleSubmitWallet(input: {
         );
       }
     });
-  } catch (error) {
-    const currentUser = await getCurrentUser(input.userId);
-    log.error(error, {
-      entity: "WALLET",
-      operation: "submit_wallet",
-      currentUser,
-      input,
-    });
-
-    if (error instanceof z.ZodError) {
-      throw new Error(
-        "Invalid wallet address. Must be a valid Solana or Ethereum address.",
-      );
-    }
-
-    throw new Error(
-      `Failed to submit wallet: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
 }
 
 export async function updateReferralCode(input: {

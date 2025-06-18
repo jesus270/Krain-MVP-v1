@@ -1,14 +1,35 @@
 {
-  "extends": "@krain/typescript-config/base.json",
+  "extends": "../../packages/typescript-config/nextjs.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "baseUrl": "../../",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
     "paths": {
-      "@krain/db/*": ["packages/db/*"],
-      "@krain/utils": ["packages/utils/src/index"],
-      "@krain/utils/*": ["packages/utils/src/*"]
+      "@/*": ["./src/*"],
+      "@krain/db/*": ["../../packages/db/src/*"],
+      "@krain/db": ["../../packages/db/src/index.ts"],
+      "@krain/session/*": ["../../packages/session/src/*"],
+      "@krain/session": ["../../packages/session/src/index.ts"],
+      "@krain/ui/*": ["../../packages/ui/src/*"],
+      "@krain/ui": ["../../packages/ui/src/index.ts"],
+      "@krain/utils/*": ["../../packages/utils/src/*"],
+      "@krain/utils": ["../../packages/utils/src/index.ts"]
     }
   },
-  "include": ["./**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "next.config.mjs",
+    "postcss.config.mjs",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    ".next/types/**/*.ts",
+    "../../packages/utils/src/logger.ts",
+    "../../packages/ui/src/components/providers/privy-provider-wrapper.tsx"
+  ],
   "exclude": ["node_modules"]
 }

@@ -1,5 +1,5 @@
 import { db } from "@krain/db";
-import { walletTable, referralTable, userTable } from "@krain/db/schema";
+import { walletTable, referralTable, userTable } from "@krain/db";
 import { eq, desc, count, sql, ne, inArray, asc } from "drizzle-orm";
 import { createObjectCsvWriter } from "csv-writer";
 import fs from "fs";
@@ -91,9 +91,9 @@ async function findTopReferrersFilteredWithUser() {
         }
       })
       .filter((result) => result !== null) as {
-      walletAddress: string;
-      referralCount: number;
-    }[];
+        walletAddress: string;
+        referralCount: number;
+      }[];
 
     combinedResults.sort((a, b) => b.referralCount - a.referralCount);
     const top200Intermediate = combinedResults.slice(0, 200);

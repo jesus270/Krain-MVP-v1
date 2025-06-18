@@ -1,0 +1,43 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { RootLayout as KrainRootLayout } from "@krain/ui/layouts/root-layout";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Krain Admin",
+  description: "Krain Admin",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  if (!process.env.NEXT_PUBLIC_PRIVY_APP_ID) {
+    throw new Error("NEXT_PUBLIC_PRIVY_APP_ID is not set");
+  }
+
+  return (
+    <KrainRootLayout
+      authConfig={{
+        privyAppId: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
+        loadingTitle: "Welcome to the Admin Panel",
+        loadingDescription: "Please wait while we validate your session...",
+        validateSession: true,
+      }}
+      intercomAppId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID}
+    >
+      {children}
+    </KrainRootLayout>
+  );
+}
