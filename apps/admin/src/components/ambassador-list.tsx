@@ -96,22 +96,36 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
     setEditingCreatedAt((prev) => ({ ...prev, [id]: value || "" }));
   };
 
-  const handleSaveBadMonths = async (id: number, createdAt: Date) => {
-    const newValue = editingBadMonths[id] ?? 0;
-    const activeMonths = calculateActiveMonths(createdAt.toString(), newValue);
-    if (activeMonths < 0) {
-      setError("Bad months cannot be greater than the total months");
+  const handleSaveAmbassador = async (id: number) => {
+    const newCreatedAtValue = editingCreatedAt[id];
+    const newBadMonthsValue = editingBadMonths[id] ?? 0;
+    
+    if (!newCreatedAtValue) {
+      setError("Created date is required");
       return;
     }
+    
+    const newDate = new Date(newCreatedAtValue);
+    const activeMonths = calculateActiveMonths(newDate.toString(), newBadMonthsValue);
+    if (activeMonths < 0) {
+      setError("Bad months cannot be greater than the total months since the created date");
+      return;
+    }
+    
     setSavingBadMonths((prev) => ({ ...prev, [id]: true }));
+    setSavingCreatedAt((prev) => ({ ...prev, [id]: true }));
     setError(null);
+    
     try {
       const response = await fetch(`/api/admin/ambassadors?id=${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ numberOfBadMonths: newValue }),
+        body: JSON.stringify({ 
+          createdAt: newDate.toISOString(),
+          numberOfBadMonths: newBadMonthsValue 
+        }),
       });
       if (!response.ok) {
         const data = await response.json();
@@ -122,42 +136,6 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setSavingBadMonths((prev) => ({ ...prev, [id]: false }));
-    }
-  };
-
-  const handleSaveCreatedAt = async (id: number) => {
-    const newValue = editingCreatedAt[id];
-    if (!newValue) {
-      setError("Created date is required");
-      return;
-    }
-    
-    const newDate = new Date(newValue);
-    const badMonths = editingBadMonths[id] ?? 0;
-    const activeMonths = calculateActiveMonths(newDate.toString(), badMonths);
-    if (activeMonths < 0) {
-      setError("Bad months cannot be greater than the total months since the created date");
-      return;
-    }
-    
-    setSavingCreatedAt((prev) => ({ ...prev, [id]: true }));
-    setError(null);
-    try {
-      const response = await fetch(`/api/admin/ambassadors?id=${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ createdAt: newDate.toISOString() }),
-      });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Failed to update ambassador");
-      }
-      await fetchAmbassadors();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
       setSavingCreatedAt((prev) => ({ ...prev, [id]: false }));
     }
   };
@@ -244,70 +222,61 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
         {error && (
           <div className="mb-4 text-destructive text-sm">{error}</div>
         )}
-        <table className="min-w-full divide-y divide-border relative border border-border">
+        <table className="min-w-full relative border-2 border-gray-300 dark:border-gray-600" style={{ borderCollapse: 'collapse' }}>
           <thead className="bg-muted">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-r border-border">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border border-gray-300 dark:border-gray-600">
                 User
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-lg border-r border-border">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-lg border border-gray-300 dark:border-gray-600">
                 Wallet Address
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-r border-border">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border border-gray-300 dark:border-gray-600">
                 Created Date
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-r border-border">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border border-gray-300 dark:border-gray-600">
                 Active Months
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border-r border-border">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border border-gray-300 dark:border-gray-600">
                 Bad Months
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider border border-gray-300 dark:border-gray-600">
                 Actions
               </th>
             </tr>
           </thead>
           {isLoading ? (
-            <tbody className="bg-card divide-y divide-border">
-              <tr><td colSpan={6} className="text-center text-xl py-8 text-muted-foreground border-r border-border">Loading...</td></tr>
+            <tbody className="bg-card">
+              <tr><td colSpan={6} className="text-center text-xl py-8 text-muted-foreground border border-gray-300 dark:border-gray-600">Loading...</td></tr>
             </tbody>
           ) : (
-            <tbody className="bg-card divide-y divide-border">
+            <tbody className="bg-card">
               {ambassadors.map((ambassador) => {
                 const ambassadorId = ambassador.id as number;
                 return (
                 <tr key={ambassadorId}>
-                <td className="px-6 py-4 whitespace-nowrap border-r border-border">
+                <td className="px-6 py-4 whitespace-nowrap border border-gray-300 dark:border-gray-600">
                   <div className="text-sm font-medium text-card-foreground">
                     {ambassador.user?.username || ambassador.user?.email || "N/A"}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap border-r border-border">
+                <td className="px-6 py-4 whitespace-nowrap border border-gray-300 dark:border-gray-600">
                   <div className="text-sm text-muted-foreground">
                     {ambassador.walletAddress}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap border-r border-border">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="date"
-                      value={editingCreatedAt[ambassadorId] || ""}
-                      onChange={(e) =>
-                        handleCreatedAtInput(ambassadorId, e.target.value)
-                      }
-                      className="w-32 px-2 py-1 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                      disabled={isLoading || savingCreatedAt[ambassadorId]}
-                    />
-                    <button
-                      onClick={() => handleSaveCreatedAt(ambassadorId)}
-                      disabled={isLoading || savingCreatedAt[ambassadorId] || (editingCreatedAt[ambassadorId] === (new Date(ambassador.createdAt || new Date()).toISOString().split('T')[0] || ""))}
-                      className="text-blue-400 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer text-xs"
-                    >
-                      {savingCreatedAt[ambassadorId] ? "..." : "Save"}
-                    </button>
-                  </div>
+                <td className="px-6 py-4 whitespace-nowrap border border-gray-300 dark:border-gray-600">
+                  <input
+                    type="date"
+                    value={editingCreatedAt[ambassadorId] || ""}
+                    onChange={(e) =>
+                      handleCreatedAtInput(ambassadorId, e.target.value)
+                    }
+                    className="w-32 px-2 py-1 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    disabled={isLoading || savingCreatedAt[ambassadorId]}
+                  />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap border-r border-border">
+                <td className="px-6 py-4 whitespace-nowrap border border-gray-300 dark:border-gray-600">
                   <div className="text-sm text-muted-foreground">
                     {calculateActiveMonths(
                       typeof ambassador.createdAt === 'string' ? ambassador.createdAt : ambassador.createdAt?.toString(),
@@ -315,7 +284,7 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
                     )}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap border-r border-border">
+                <td className="px-6 py-4 whitespace-nowrap border border-gray-300 dark:border-gray-600">
                   <input
                     type="number"
                     min="0"
@@ -327,21 +296,23 @@ export function AmbassadorList({ refreshKey }: AmbassadorListProps) {
                     disabled={isLoading || savingBadMonths[ambassadorId]}
                   />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2 justify-center items-center mt-2">
-                  <button
-                    onClick={() => handleRemoveAmbassador(ambassadorId)}
-                    disabled={isLoading}
-                    className="text-destructive hover:text-destructive/80 disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
-                  >
-                    Remove
-                  </button>
-                  <button
-                    onClick={() => handleSaveBadMonths(ambassadorId, ambassador.createdAt)}
-                    disabled={isLoading || savingBadMonths[ambassadorId] || (editingBadMonths[ambassadorId] === ambassador.numberOfBadMonths)}
-                    className="text-green-400 hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
-                  >
-                    {savingBadMonths[ambassadorId] ? "Saving..." : "Save"}
-                  </button>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium border border-gray-300 dark:border-gray-600">
+                  <div className="flex gap-2 justify-center items-center">
+                    <button
+                      onClick={() => handleRemoveAmbassador(ambassadorId)}
+                      disabled={isLoading}
+                      className="text-destructive hover:text-destructive/80 disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                    <button
+                      onClick={() => handleSaveAmbassador(ambassadorId)}
+                      disabled={isLoading || savingBadMonths[ambassadorId] || savingCreatedAt[ambassadorId] || (editingBadMonths[ambassadorId] === ambassador.numberOfBadMonths && editingCreatedAt[ambassadorId] === (new Date(ambassador.createdAt || new Date()).toISOString().split('T')[0] || ""))}
+                      className="text-green-400 hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
+                    >
+                      {(savingBadMonths[ambassadorId] || savingCreatedAt[ambassadorId]) ? "Saving..." : "Save"}
+                    </button>
+                  </div>
                 </td>
               </tr>
               )})}
