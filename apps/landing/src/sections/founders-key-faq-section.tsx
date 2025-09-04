@@ -172,7 +172,7 @@ export function FoundersKeyFaqSection() {
             </Link>{" "}
             on X or click the support bubble in the bottom right corner of the
             <Link
-              href="https://whitelist.krain.ai"
+              href="/"
               target="_blank"
               rel="noopener noreferrer"
             >

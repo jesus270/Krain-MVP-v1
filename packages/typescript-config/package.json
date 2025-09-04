@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
-    "build": "mkdir -p dist && cp *.json dist/"
+    "clean": "rmdir /s /q .turbo || exit 0 && rmdir /s /q node_modules || exit 0 && rmdir /s /q dist || exit 0",
+    "build": "if not exist dist mkdir dist && copy *.json dist\\"
   },
   "files": [
     "base.json",

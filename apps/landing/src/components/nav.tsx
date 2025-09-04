@@ -39,8 +39,8 @@ export function Nav() {
     { label: "Founders Key", id: "/founders-key", type: "link" },
     {
       label: "Early Access",
-      id: "https://early.krain.ai",
-      type: "external-link",
+      id: "/",
+      type: "scroll",
     },
   ];
 
@@ -119,14 +119,14 @@ export function Nav() {
 
           {/* Desktop CTA */}
           <div className="hidden lg:block shrink-0">
-            <Link href="https://airdrop.krain.ai">
+            <Link href="/">
               <GradientButton>Enter app</GradientButton>
             </Link>
           </div>
 
           {/* Mobile & Tablet Navigation */}
           <div className="flex lg:hidden items-center gap-4 pr-4">
-            <Link href="https://early.krain.ai">
+            <Link href="/">
               <GradientButton className="px-4 py-2.5 text-sm">
                 Enter app
               </GradientButton>

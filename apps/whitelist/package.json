@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "clean": "rm -rf .next && rm -rf node_modules && rm -rf .turbo && rm -rf dist"
+    "clean": "rmdir /s /q .next || exit 0 && rmdir /s /q node_modules || exit 0 && rmdir /s /q .turbo || exit 0 && rmdir /s /q dist || exit 0"
   },
   "dependencies": {
     "@krain/db": "workspace:*",

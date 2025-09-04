@@ -32,13 +32,13 @@ export const socialLinks: SocialLinkType[] = [
   //   sublabel: "@krainofficial",
   //   bgClass: "hover:bg-[linear-gradient(90deg,rgba(19,33,53,0.5),transparent)]",
   // },
-  {
-    href: "https://twitter.com/krain_ai",
-    icon: XLogo,
-    label: "X / Twitter",
-    sublabel: "@KRAIN_AI",
-    bgClass: "hover:bg-[linear-gradient(90deg,rgba(44,38,60,0.5),transparent)]",
-  },
+  // {
+  //   href: "https://twitter.com/krain_ai",
+  //   icon: XLogo,
+  //   label: "X / Twitter",
+  //   sublabel: "@KRAIN_AI",
+  //   bgClass: "hover:bg-[linear-gradient(90deg,rgba(44,38,60,0.5),transparent)]",
+  // },
   // {
   //   href: "#",
   //   icon: MediumLogo,

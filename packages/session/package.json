@@ -21,7 +21,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "clean": "rm -rf dist .turbo node_modules",
+    "clean": "rmdir /s /q dist || exit 0 .turbo || exit 0 node_modules || exit 0",
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {

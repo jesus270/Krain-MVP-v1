@@ -28,7 +28,7 @@ export default function BlockedPage() {
           </p>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <Link href="https://krain.ai" target="_blank">
+          <Link href="/" target="_blank">
             <Button size="lg">Visit Main Website</Button>
           </Link>
         </CardFooter>

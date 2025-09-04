@@ -11,7 +11,7 @@
     "top-referrers": "tsx -r dotenv/config top-referrers.ts",
     "resolve-duplicates": "tsx -r dotenv/config resolve-duplicate-codes.ts",
     "regenerate-referral-codes": "tsx -r dotenv/config regenerate-referral-codes.ts",
-    "clean": "rm -rf .turbo .next node_modules dist"
+    "clean": "rmdir /s /q .turbo || exit 0 .next || exit 0 node_modules || exit 0 dist || exit 0"
   },
   "dependencies": {
     "react": "catalog:",

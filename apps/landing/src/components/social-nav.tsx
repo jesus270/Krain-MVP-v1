@@ -22,7 +22,7 @@ export function SocialNav({ className }: { className?: string }) {
       >
         <TelegramLogo className="w-5 h-5" />
       </a>
-      <a
+      {/* <a
         href="https://twitter.com/krain_ai"
         target="_blank"
         rel="noopener noreferrer"
@@ -32,7 +32,7 @@ export function SocialNav({ className }: { className?: string }) {
         )}
       >
         <XLogo className="w-5 h-5" />
-      </a>
+      </a> */}
       <a
         href="mailto:contact@krain.ai"
         target="_blank"

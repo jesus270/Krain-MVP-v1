@@ -33,7 +33,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "clean": "rmdir /s /q .turbo || exit 0 && rmdir /s /q node_modules || exit 0 && rmdir /s /q dist || exit 0",
     "build": "npx tsup",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
