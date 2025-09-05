@@ -40,6 +40,9 @@ The Krain monorepo is structured into two main directories:
 
 - [Node.js](https://nodejs.org/) (v18 or later)
 - [pnpm](https://pnpm.io/) (v8.9.0 or later)
+   ```bash
+   npm install -g pnpm@latest
+   ```
 
 ## Quick Start
 
@@ -57,9 +60,9 @@ The Krain monorepo is structured into two main directories:
    pnpm build
    ```
 
-4. **Run a specific application (e.g., airdrop):**
+4. **Run a specific application (e.g., landing):**
    ```bash
-   pnpm dev --filter airdrop
+   pnpm dev --filter landing
    ```
 
 ## Development
